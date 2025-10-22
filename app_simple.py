@@ -234,11 +234,11 @@ def add_security_and_cache_headers(response):
 
 # Configuración de email
 EMAIL_USERNAME = os.getenv('EMAIL_USERNAME', 'dra.ramirezr@gmail.com')
-EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD', '')
+EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD', 'nqze lbab meit vprt')  # Valor por defecto para desarrollo
 EMAIL_DESTINATARIO = os.getenv('EMAIL_DESTINATARIO', 'dra.ramirezr@gmail.com')
 
 # Verificar configuración de email
-EMAIL_CONFIGURED = bool(EMAIL_USERNAME and EMAIL_PASSWORD)
+EMAIL_CONFIGURED = bool(EMAIL_USERNAME and EMAIL_PASSWORD and EMAIL_PASSWORD != 'tu_password_aqui')
 
 # Configuración de la base de datos
 if MYSQL_AVAILABLE and os.getenv('RAILWAY_ENVIRONMENT'):
@@ -1146,14 +1146,12 @@ def enviar_email_pdf_pacientes(medico_email, medico_nombre, pdf_buffer, num_paci
 def enviar_email_notificacion(name, email, phone, subject, message):
     """Enviar email de notificación a la doctora"""
     try:
-        # Verificar si hay contraseña configurada
-        if not EMAIL_PASSWORD:
+        # Verificar configuración de email
+        if not EMAIL_CONFIGURED:
             print("\n⚠️  CONFIGURACIÓN DE EMAIL NECESARIA")
             print("=" * 60)
-            print("Para recibir emails, configura Gmail siguiendo estos pasos:")
-            print("1. Lee el archivo: CONFIGURAR_EMAIL_PASO_A_PASO.md")
-            print("2. Genera una contraseña de aplicación en Gmail")
-            print("3. Crea el archivo .env con tu contraseña")
+            print("Para recibir emails, configura las variables de entorno:")
+            print("EMAIL_USERNAME, EMAIL_PASSWORD, EMAIL_DESTINATARIO")
             print("=" * 60)
             print("\nPor ahora, el mensaje se guardó en la base de datos.")
             print("Puedes verlo en: http://localhost:5000/admin")

@@ -1,0 +1,11 @@
+# Configuración de Email Gmail
+EMAIL_USERNAME=dra.ramirezr@gmail.com
+EMAIL_PASSWORD=nqze lbab meit vprt
+EMAIL_DESTINATARIO=dra.ramirezr@gmail.com
+
+# Configuración de Flask
+SECRET_KEY=tu-clave-secreta-muy-larga-y-segura-aqui-cambiar-en-produccion
+FLASK_ENV=development
+
+# Configuración de Base de Datos
+DATABASE_URL=drashirley_simple.db
