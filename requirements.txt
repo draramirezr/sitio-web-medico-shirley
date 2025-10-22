@@ -1,5 +1,5 @@
 # ============================================
-# REQUIREMENTS.TXT OPTIMIZADO PARA RAILWAY
+# REQUIREMENTS.TXT MÍNIMO PARA RAILWAY
 # ============================================
 
 # Core Flask
@@ -24,9 +24,6 @@ Flask-Compress==1.14
 # Producción
 gunicorn==21.2.0
 
-# Optimización
-Pillow==10.1.0
-
 # ============================================
 # NOTAS IMPORTANTES
 # ============================================
@@ -43,5 +40,7 @@ Pillow==10.1.0
 # collections - Incluido con Python por defecto
 # io - Incluido con Python por defecto
 # 
+# Pillow removido temporalmente por problemas de compatibilidad
+# Se puede agregar después si es necesario
+# 
 # Railway instalará automáticamente estas dependencias
-# Si hay problemas, verificar que todas las versiones sean compatibles
