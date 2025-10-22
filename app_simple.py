@@ -366,7 +366,7 @@ def init_db():
     '''))
     
     # Tabla de usuarios para autenticación
-    cursor.execute('''
+    cursor.execute(adapt_sql_for_database('''
         CREATE TABLE IF NOT EXISTS usuarios (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nombre TEXT NOT NULL,
@@ -380,10 +380,10 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             last_login TIMESTAMP
         )
-    ''')
+    '''))
     
     # Tabla de testimonios
-    cursor.execute('''
+    cursor.execute(adapt_sql_for_database('''
         CREATE TABLE IF NOT EXISTS testimonials (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             patient_name TEXT NOT NULL,
@@ -394,10 +394,10 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             display_date DATE
         )
-    ''')
+    '''))
     
     # Tabla de mensajes de contacto
-    cursor.execute('''
+    cursor.execute(adapt_sql_for_database('''
         CREATE TABLE IF NOT EXISTS contact_messages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -408,10 +408,10 @@ def init_db():
             read BOOLEAN DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
-    ''')
+    '''))
     
     # Tabla de citas
-    cursor.execute('''
+    cursor.execute(adapt_sql_for_database('''
         CREATE TABLE IF NOT EXISTS appointments (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             first_name TEXT NOT NULL,
@@ -427,7 +427,7 @@ def init_db():
             status TEXT DEFAULT 'pending',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
-    ''')
+    '''))
     
     # Verificar si la columna medical_insurance existe, si no, agregarla
     try:
@@ -476,7 +476,7 @@ def init_db():
     # ============ TABLAS DE FACTURACIÓN ============
     
     # Tabla de ARS (Administradoras de Riesgos de Salud)
-    cursor.execute('''
+    cursor.execute(adapt_sql_for_database('''
         CREATE TABLE IF NOT EXISTS ars (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nombre_ars TEXT NOT NULL,
@@ -484,10 +484,10 @@ def init_db():
             activo BOOLEAN DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
-    ''')
+    '''))
     
     # Tabla de Médicos
-    cursor.execute('''
+    cursor.execute(adapt_sql_for_database('''
         CREATE TABLE IF NOT EXISTS medicos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nombre TEXT NOT NULL,
@@ -497,7 +497,7 @@ def init_db():
             activo BOOLEAN DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
-    ''')
+    '''))
     
     # Agregar columna email si no existe
     try:
@@ -573,7 +573,7 @@ def init_db():
     ''')
     
     # Tabla de Tipos de Servicios
-    cursor.execute('''
+    cursor.execute(adapt_sql_for_database('''
         CREATE TABLE IF NOT EXISTS tipos_servicios (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             descripcion TEXT NOT NULL,
@@ -581,10 +581,10 @@ def init_db():
             activo BOOLEAN DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
-    ''')
+    '''))
     
     # Tabla de NCF (Números de Comprobante Fiscal)
-    cursor.execute('''
+    cursor.execute(adapt_sql_for_database('''
         CREATE TABLE IF NOT EXISTS ncf (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             tipo TEXT NOT NULL,
@@ -594,10 +594,10 @@ def init_db():
             activo BOOLEAN DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
-    ''')
+    '''))
     
     # Tabla de Pacientes (Maestra)
-    cursor.execute('''
+    cursor.execute(adapt_sql_for_database('''
         CREATE TABLE IF NOT EXISTS pacientes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nss TEXT NOT NULL,
@@ -608,10 +608,10 @@ def init_db():
             FOREIGN KEY (ars_id) REFERENCES ars(id),
             UNIQUE(nss, ars_id)
         )
-    ''')
+    '''))
     
     # Tabla de Facturas (Encabezado)
-    cursor.execute('''
+    cursor.execute(adapt_sql_for_database('''
         CREATE TABLE IF NOT EXISTS facturas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             numero_factura TEXT,
@@ -626,10 +626,10 @@ def init_db():
             FOREIGN KEY (medico_id) REFERENCES medicos(id),
             FOREIGN KEY (ars_id) REFERENCES ars(id)
         )
-    ''')
+    '''))
     
     # Tabla de Detalle de Facturas (Líneas)
-    cursor.execute('''
+    cursor.execute(adapt_sql_for_database('''
         CREATE TABLE IF NOT EXISTS facturas_detalle (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             factura_id INTEGER,
@@ -652,7 +652,7 @@ def init_db():
             FOREIGN KEY (medico_id) REFERENCES medicos(id),
             FOREIGN KEY (ars_id) REFERENCES ars(id)
         )
-    ''')
+    '''))
     
     # Crear usuario por defecto si no existe
     cursor.execute('SELECT COUNT(*) FROM usuarios')
@@ -672,11 +672,17 @@ def init_db():
 def adapt_sql_for_database(sql):
     """Adaptar consultas SQL para MySQL o SQLite"""
     if DATABASE_TYPE == 'mysql':
-        # Cambiar AUTOINCREMENT por AUTO_INCREMENT para MySQL
+        # Cambios específicos para MySQL
         sql = sql.replace('INTEGER PRIMARY KEY AUTOINCREMENT', 'INT AUTO_INCREMENT PRIMARY KEY')
         sql = sql.replace('BOOLEAN', 'TINYINT(1)')
         sql = sql.replace('TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP')
         sql = sql.replace('CURRENT_TIMESTAMP', 'NOW()')
+        sql = sql.replace('TEXT', 'TEXT')
+        sql = sql.replace('REAL', 'DECIMAL(10,2)')
+        sql = sql.replace('BLOB', 'LONGBLOB')
+        # Cambiar tipos de datos específicos
+        sql = sql.replace('INTEGER', 'INT')
+        sql = sql.replace('CHECK(perfil IN (', 'CHECK(perfil IN (')
     return sql
 
 def get_db_connection():
