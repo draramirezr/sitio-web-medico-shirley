@@ -314,6 +314,11 @@ print(f"🔍 DEBUG: MYSQL_AVAILABLE = {MYSQL_AVAILABLE}")
 
 if MYSQL_AVAILABLE and railway_env:
     # Usar MySQL en Railway (limpiando comillas automáticas)
+    # DEBUG: Mostrar valores RAW antes de limpiar
+    print(f"   🔍 RAW MYSQL_HOST: '{os.getenv('MYSQL_HOST', 'NO DEFINIDA')}'")
+    print(f"   🔍 RAW MYSQL_USER: '{os.getenv('MYSQL_USER', 'NO DEFINIDA')}'")
+    print(f"   🔍 RAW MYSQL_DATABASE: '{os.getenv('MYSQL_DATABASE', 'NO DEFINIDA')}'")
+    
     mysql_host = clean_env_var('MYSQL_HOST', 'localhost')
     mysql_user = clean_env_var('MYSQL_USER', 'root')
     mysql_password = clean_env_var('MYSQL_PASSWORD', '')
