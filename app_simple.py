@@ -325,11 +325,13 @@ class User(UserMixin):
 def load_user(user_id):
     """Cargar usuario desde la base de datos"""
     try:
-        conn = sqlite3.connect(DATABASE)
-        conn.row_factory = sqlite3.Row
+        conn = get_db_connection()
         cursor = conn.cursor()
         # Verificar que el usuario existe Y está activo
-        cursor.execute('SELECT id, nombre, email, perfil, activo FROM usuarios WHERE id = ? AND activo = 1', (user_id,))
+        if DATABASE_TYPE == 'mysql':
+            cursor.execute('SELECT id, nombre, email, perfil, activo FROM usuarios WHERE id = %s AND activo = 1', (user_id,))
+        else:
+            cursor.execute('SELECT id, nombre, email, perfil, activo FROM usuarios WHERE id = ? AND activo = 1', (user_id,))
         user_data = cursor.fetchone()
         conn.close()
         
@@ -471,7 +473,10 @@ def init_db():
     '''))
     
     # Inicializar contador si no existe
-    cursor.execute('INSERT OR IGNORE INTO site_visits (id, total_visits) VALUES (1, 0)')
+    if DATABASE_TYPE == 'mysql':
+        cursor.execute('INSERT IGNORE INTO site_visits (id, total_visits) VALUES (1, 0)')
+    else:
+        cursor.execute('INSERT OR IGNORE INTO site_visits (id, total_visits) VALUES (1, 0)')
     
     # ============ TABLAS DE FACTURACIÓN ============
     
@@ -659,10 +664,16 @@ def init_db():
     if cursor.fetchone()[0] == 0:
         # Usuario por defecto: ing.fpaula@gmail.com - Francisco Paula
         password_hash = generate_password_hash('2416Xpos@')
-        cursor.execute('''
-            INSERT INTO usuarios (nombre, email, password_hash, perfil, activo)
-            VALUES (?, ?, ?, ?, 1)
-        ''', ('Francisco Paula', 'ing.fpaula@gmail.com', password_hash, 'Administrador'))
+        if DATABASE_TYPE == 'mysql':
+            cursor.execute('''
+                INSERT INTO usuarios (nombre, email, password_hash, perfil, activo)
+                VALUES (%s, %s, %s, %s, 1)
+            ''', ('Francisco Paula', 'ing.fpaula@gmail.com', password_hash, 'Administrador'))
+        else:
+            cursor.execute('''
+                INSERT INTO usuarios (nombre, email, password_hash, perfil, activo)
+                VALUES (?, ?, ?, ?, 1)
+            ''', ('Francisco Paula', 'ing.fpaula@gmail.com', password_hash, 'Administrador'))
         print("✅ Usuario por defecto creado: ing.fpaula@gmail.com")
     
     conn.commit()
