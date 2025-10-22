@@ -451,7 +451,7 @@ def init_db():
         print("✅ Columna 'emergency_datetime' agregada a la tabla appointments")
     
     # Tabla de tratamientos estéticos ginecológicos
-    cursor.execute('''
+    cursor.execute(adapt_sql_for_database('''
         CREATE TABLE IF NOT EXISTS aesthetic_treatments (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -459,16 +459,16 @@ def init_db():
             icon TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
-    ''')
+    '''))
     
     # Tabla de contador de visitas
-    cursor.execute('''
+    cursor.execute(adapt_sql_for_database('''
         CREATE TABLE IF NOT EXISTS site_visits (
             id INTEGER PRIMARY KEY CHECK (id = 1),
             total_visits INTEGER DEFAULT 0,
             last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
-    ''')
+    '''))
     
     # Inicializar contador si no existe
     cursor.execute('INSERT OR IGNORE INTO site_visits (id, total_visits) VALUES (1, 0)')
@@ -558,7 +558,7 @@ def init_db():
     print("✅ Índices de base de datos creados/verificados")
     
     # Tabla de Código ARS (relación médico-ars con su código)
-    cursor.execute('''
+    cursor.execute(adapt_sql_for_database('''
         CREATE TABLE IF NOT EXISTS codigo_ars (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             medico_id INTEGER NOT NULL,
@@ -570,7 +570,7 @@ def init_db():
             FOREIGN KEY (ars_id) REFERENCES ars(id),
             UNIQUE(medico_id, ars_id)
         )
-    ''')
+    '''))
     
     # Tabla de Tipos de Servicios
     cursor.execute(adapt_sql_for_database('''
