@@ -313,16 +313,22 @@ print(f"🔍 DEBUG: RAILWAY_ENVIRONMENT = '{railway_env}'")
 print(f"🔍 DEBUG: MYSQL_AVAILABLE = {MYSQL_AVAILABLE}")
 
 if MYSQL_AVAILABLE and railway_env:
-    # Usar MySQL en Railway (limpiando comillas automáticas)
-    # DEBUG: Mostrar valores RAW antes de limpiar
-    print(f"   🔍 RAW MYSQL_HOST: '{os.getenv('MYSQL_HOST', 'NO DEFINIDA')}'")
-    print(f"   🔍 RAW MYSQL_USER: '{os.getenv('MYSQL_USER', 'NO DEFINIDA')}'")
-    print(f"   🔍 RAW MYSQL_DATABASE: '{os.getenv('MYSQL_DATABASE', 'NO DEFINIDA')}'")
+    # Intentar primero con variables automáticas de Railway (MYSQLHOST, MYSQLUSER, etc.)
+    # Estas son generadas automáticamente cuando agregas el servicio MySQL
+    mysqlhost = os.getenv('MYSQLHOST', os.getenv('MYSQL_HOST', ''))
+    mysqluser = os.getenv('MYSQLUSER', os.getenv('MYSQL_USER', ''))
+    mysqlpassword = os.getenv('MYSQLPASSWORD', os.getenv('MYSQL_ROOT_PASSWORD', os.getenv('MYSQL_PASSWORD', '')))
+    mysqldatabase = os.getenv('MYSQLDATABASE', os.getenv('MYSQL_DATABASE', ''))
     
-    mysql_host = clean_env_var('MYSQL_HOST', 'localhost')
-    mysql_user = clean_env_var('MYSQL_USER', 'root')
-    mysql_password = clean_env_var('MYSQL_PASSWORD', '')
-    mysql_database = clean_env_var('MYSQL_DATABASE', 'drashirley')
+    print(f"   🔍 RAW MYSQLHOST: '{mysqlhost if mysqlhost else 'NO DEFINIDA'}'")
+    print(f"   🔍 RAW MYSQLUSER: '{mysqluser if mysqluser else 'NO DEFINIDA'}'")
+    print(f"   🔍 RAW MYSQLDATABASE: '{mysqldatabase if mysqldatabase else 'NO DEFINIDA'}'")
+    
+    # Limpiar comillas si existen
+    mysql_host = clean_env_var('MYSQLHOST', clean_env_var('MYSQL_HOST', 'localhost'))
+    mysql_user = clean_env_var('MYSQLUSER', clean_env_var('MYSQL_USER', 'root'))
+    mysql_password = clean_env_var('MYSQLPASSWORD', clean_env_var('MYSQL_ROOT_PASSWORD', clean_env_var('MYSQL_PASSWORD', '')))
+    mysql_database = clean_env_var('MYSQLDATABASE', clean_env_var('MYSQL_DATABASE', 'railway'))
     
     DATABASE_CONFIG = {
         'host': mysql_host,
