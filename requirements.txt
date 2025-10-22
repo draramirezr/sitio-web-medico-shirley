@@ -24,6 +24,9 @@ Flask-Compress==1.14
 # Producción
 gunicorn==21.2.0
 
+# Base de datos MySQL para Railway
+PyMySQL==1.1.0
+
 # ============================================
 # NOTAS IMPORTANTES
 # ============================================

@@ -19,6 +19,15 @@ import re
 from markupsafe import escape
 from io import BytesIO
 
+# Importar MySQL para Railway
+try:
+    import pymysql
+    pymysql.install_as_MySQLdb()
+    MYSQL_AVAILABLE = True
+except ImportError:
+    MYSQL_AVAILABLE = False
+    print("⚠️ PyMySQL no disponible - usando SQLite")
+
 # Importar templates de email
 try:
     from email_templates import (
@@ -232,11 +241,22 @@ EMAIL_DESTINATARIO = os.getenv('EMAIL_DESTINATARIO', 'dra.ramirezr@gmail.com')
 EMAIL_CONFIGURED = bool(EMAIL_USERNAME and EMAIL_PASSWORD)
 
 # Configuración de la base de datos
-DATABASE = os.getenv('DATABASE_URL', 'drashirley_simple.db')
-
-# Verificar si estamos en Railway (usar SQLite en memoria si es necesario)
-if os.getenv('RAILWAY_ENVIRONMENT'):
-    DATABASE = ':memory:'  # Usar base de datos en memoria en Railway
+if MYSQL_AVAILABLE and os.getenv('RAILWAY_ENVIRONMENT'):
+    # Usar MySQL en Railway
+    DATABASE_CONFIG = {
+        'host': os.getenv('MYSQL_HOST', 'localhost'),
+        'user': os.getenv('MYSQL_USER', 'root'),
+        'password': os.getenv('MYSQL_PASSWORD', ''),
+        'database': os.getenv('MYSQL_DATABASE', 'drashirley'),
+        'charset': 'utf8mb4'
+    }
+    DATABASE_TYPE = 'mysql'
+    print("✅ Configurado para usar MySQL en Railway")
+else:
+    # Usar SQLite localmente
+    DATABASE_CONFIG = os.getenv('DATABASE_URL', 'drashirley_simple.db')
+    DATABASE_TYPE = 'sqlite'
+    print("✅ Configurado para usar SQLite localmente")
 
 # Funciones de validación y sanitización
 def sanitize_input(text, max_length=500):
@@ -327,13 +347,13 @@ def load_user(user_id):
 
 def init_db():
     """Inicializar la base de datos"""
-    conn = sqlite3.connect(DATABASE)
+    conn = get_db_connection()
     cursor = conn.cursor()
     
-    print(f"✅ Base de datos conectada: {DATABASE}")
+    print(f"✅ Base de datos conectada: {DATABASE_TYPE}")
     
     # Tabla de servicios
-    cursor.execute('''
+    cursor.execute(adapt_sql_for_database('''
         CREATE TABLE IF NOT EXISTS services (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -343,7 +363,7 @@ def init_db():
             duration TEXT,
             active BOOLEAN DEFAULT 1
         )
-    ''')
+    '''))
     
     # Tabla de usuarios para autenticación
     cursor.execute('''
@@ -649,19 +669,34 @@ def init_db():
     conn.close()
     print("✅ Base de datos inicializada correctamente")
 
+def adapt_sql_for_database(sql):
+    """Adaptar consultas SQL para MySQL o SQLite"""
+    if DATABASE_TYPE == 'mysql':
+        # Cambiar AUTOINCREMENT por AUTO_INCREMENT para MySQL
+        sql = sql.replace('INTEGER PRIMARY KEY AUTOINCREMENT', 'INT AUTO_INCREMENT PRIMARY KEY')
+        sql = sql.replace('BOOLEAN', 'TINYINT(1)')
+        sql = sql.replace('TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP')
+        sql = sql.replace('CURRENT_TIMESTAMP', 'NOW()')
+    return sql
+
 def get_db_connection():
-    """Obtener conexión optimizada a la base de datos"""
-    conn = sqlite3.connect(DATABASE, check_same_thread=False)
-    conn.row_factory = sqlite3.Row
-    
-    # Optimizaciones de rendimiento para SQLite
-    conn.execute('PRAGMA journal_mode=WAL')  # Write-Ahead Logging para mejor concurrencia
-    conn.execute('PRAGMA synchronous=NORMAL')  # Balance entre seguridad y velocidad
-    conn.execute('PRAGMA cache_size=10000')  # Cache de 10MB para consultas rápidas
-    conn.execute('PRAGMA temp_store=MEMORY')  # Tablas temporales en memoria
-    conn.execute('PRAGMA mmap_size=268435456')  # Memory-mapped I/O de 256MB
-    
-    return conn
+    try:
+        if DATABASE_TYPE == 'mysql':
+            conn = pymysql.connect(**DATABASE_CONFIG)
+            conn.autocommit = False
+            return conn
+        else:
+            conn = sqlite3.connect(DATABASE_CONFIG, check_same_thread=False)
+            conn.row_factory = sqlite3.Row
+            # Optimizaciones de rendimiento para SQLite
+            conn.execute('PRAGMA journal_mode=WAL')
+            conn.execute('PRAGMA synchronous=NORMAL')
+            conn.execute('PRAGMA cache_size=10000')
+            conn.execute('PRAGMA temp_store=MEMORY')
+            return conn
+    except Exception as e:
+        print(f"❌ Error al conectar a la base de datos: {e}")
+        raise e
 
 def increment_visit_counter():
     """Incrementar el contador de visitas del sitio"""
