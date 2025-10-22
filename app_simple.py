@@ -232,7 +232,11 @@ EMAIL_DESTINATARIO = os.getenv('EMAIL_DESTINATARIO', 'dra.ramirezr@gmail.com')
 EMAIL_CONFIGURED = bool(EMAIL_USERNAME and EMAIL_PASSWORD)
 
 # Configuración de la base de datos
-DATABASE = 'drashirley_simple.db'
+DATABASE = os.getenv('DATABASE_URL', 'drashirley_simple.db')
+
+# Verificar si estamos en Railway (usar SQLite en memoria si es necesario)
+if os.getenv('RAILWAY_ENVIRONMENT'):
+    DATABASE = ':memory:'  # Usar base de datos en memoria en Railway
 
 # Funciones de validación y sanitización
 def sanitize_input(text, max_length=500):
@@ -325,6 +329,8 @@ def init_db():
     """Inicializar la base de datos"""
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
+    
+    print(f"✅ Base de datos conectada: {DATABASE}")
     
     # Tabla de servicios
     cursor.execute('''
@@ -641,6 +647,7 @@ def init_db():
     
     conn.commit()
     conn.close()
+    print("✅ Base de datos inicializada correctamente")
 
 def get_db_connection():
     """Obtener conexión optimizada a la base de datos"""
