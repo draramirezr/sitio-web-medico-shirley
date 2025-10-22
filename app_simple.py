@@ -253,10 +253,10 @@ if MYSQL_AVAILABLE and os.getenv('RAILWAY_ENVIRONMENT'):
     DATABASE_TYPE = 'mysql'
     print("✅ Configurado para usar MySQL en Railway")
 else:
-    # Usar SQLite localmente
+    # Usar SQLite localmente o como fallback
     DATABASE_CONFIG = os.getenv('DATABASE_URL', 'drashirley_simple.db')
     DATABASE_TYPE = 'sqlite'
-    print("✅ Configurado para usar SQLite localmente")
+    print("✅ Configurado para usar SQLite (local o fallback)")
 
 # Funciones de validación y sanitización
 def sanitize_input(text, max_length=500):
@@ -686,12 +686,15 @@ def adapt_sql_for_database(sql):
     return sql
 
 def get_db_connection():
+    """Obtener conexión universal a la base de datos (MySQL o SQLite)"""
     try:
         if DATABASE_TYPE == 'mysql':
+            # Intentar conectar a MySQL
             conn = pymysql.connect(**DATABASE_CONFIG)
             conn.autocommit = False
             return conn
         else:
+            # Usar SQLite
             conn = sqlite3.connect(DATABASE_CONFIG, check_same_thread=False)
             conn.row_factory = sqlite3.Row
             # Optimizaciones de rendimiento para SQLite
@@ -701,8 +704,25 @@ def get_db_connection():
             conn.execute('PRAGMA temp_store=MEMORY')
             return conn
     except Exception as e:
-        print(f"❌ Error al conectar a la base de datos: {e}")
-        raise e
+        print(f"❌ Error al conectar a {DATABASE_TYPE}: {e}")
+        
+        # Si es MySQL y falla, intentar con SQLite como fallback
+        if DATABASE_TYPE == 'mysql':
+            print("🔄 Intentando fallback a SQLite...")
+            try:
+                conn = sqlite3.connect(':memory:', check_same_thread=False)
+                conn.row_factory = sqlite3.Row
+                conn.execute('PRAGMA journal_mode=WAL')
+                conn.execute('PRAGMA synchronous=NORMAL')
+                conn.execute('PRAGMA cache_size=10000')
+                conn.execute('PRAGMA temp_store=MEMORY')
+                print("✅ Fallback a SQLite en memoria exitoso")
+                return conn
+            except Exception as e2:
+                print(f"❌ Error crítico con fallback SQLite: {e2}")
+                raise e2
+        else:
+            raise e
 
 def increment_visit_counter():
     """Incrementar el contador de visitas del sitio"""
