@@ -9,12 +9,6 @@ Werkzeug==3.0.1
 # Autenticación
 Flask-Login==0.6.3
 
-# Base de datos
-sqlite3
-
-# Email
-secure-smtplib==0.1.1
-
 # PDF Generation
 reportlab==4.0.7
 
@@ -34,14 +28,20 @@ gunicorn==21.2.0
 Pillow==10.1.0
 
 # ============================================
-# NOTAS DE INSTALACIÓN
+# NOTAS IMPORTANTES
 # ============================================
+# 
+# sqlite3 - Incluido con Python por defecto
+# smtplib - Incluido con Python por defecto
+# secrets - Incluido con Python por defecto
+# re - Incluido con Python por defecto
+# os - Incluido con Python por defecto
+# json - Incluido con Python por defecto
+# datetime - Incluido con Python por defecto
+# time - Incluido con Python por defecto
+# threading - Incluido con Python por defecto
+# collections - Incluido con Python por defecto
+# io - Incluido con Python por defecto
 # 
 # Railway instalará automáticamente estas dependencias
 # Si hay problemas, verificar que todas las versiones sean compatibles
-# 
-# Para desarrollo local:
-# pip install -r requirements.txt
-# 
-# Para Railway:
-# Las dependencias se instalan automáticamente al hacer deploy
