@@ -8,6 +8,7 @@ import sqlite3
 import os
 from datetime import datetime, timedelta
 import json
+import functools
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -117,7 +118,8 @@ rate_limit_lock = Lock()
 def rate_limit(max_requests=10, window=60):
     """Decorador para rate limiting"""
     def decorator(f):
-        def rate_limit_wrapper(*args, **kwargs):
+        @functools.wraps(f)
+        def wrapper(*args, **kwargs):
             client_ip = request.remote_addr
             current_time = time.time()
             
@@ -136,7 +138,7 @@ def rate_limit(max_requests=10, window=60):
                 request_counts[client_ip].append(current_time)
             
             return f(*args, **kwargs)
-        return rate_limit_wrapper
+        return wrapper
     return decorator
 
 def sanitize_input(text):
