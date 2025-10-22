@@ -26,6 +26,35 @@
         overflow: hidden;
     }
     
+    /* Contenedor con scroll horizontal para responsive */
+    .table-responsive-wrapper {
+        overflow-x: auto;
+        overflow-y: visible;
+    }
+    
+    /* Barra de desplazamiento personalizada */
+    .table-responsive-wrapper::-webkit-scrollbar {
+        height: 10px;
+    }
+    
+    .table-responsive-wrapper::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    
+    .table-responsive-wrapper::-webkit-scrollbar-thumb {
+        background: #AB9B9F;
+        border-radius: 10px;
+    }
+    
+    .table-responsive-wrapper::-webkit-scrollbar-thumb:hover {
+        background: #8A7A7F;
+    }
+    
+    .table-facturacion table {
+        min-width: 1100px; /* Ancho mínimo para NCF (muchas columnas) */
+    }
+    
     .table-facturacion th {
         background: #AB9B9F !important;
         background-color: #AB9B9F !important;
@@ -166,8 +195,9 @@
     </div>
 
     <!-- Tabla -->
-    <div class="table-responsive">
-        <table class="table table-facturacion">
+    <div class="table-facturacion">
+        <div class="table-responsive-wrapper">
+            <table class="table mb-0">
             <thead>
                 <tr>
                     <th style="width: 6%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">ID</th>
@@ -225,6 +255,7 @@
                 {% endfor %}
             </tbody>
         </table>
+        </div>
     </div>
 </div>
 {% endblock %}

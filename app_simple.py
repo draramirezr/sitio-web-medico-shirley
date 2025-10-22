@@ -28,6 +28,34 @@ except ImportError:
     MYSQL_AVAILABLE = False
     print("⚠️ PyMySQL no disponible - usando SQLite")
 
+# Importar sistema de optimización
+try:
+    from optimization_system import (
+        cache_result, clear_cache, get_cache_stats, 
+        optimize_database_connection, compress_response,
+        add_security_headers, add_cache_headers, optimize_query,
+        get_performance_stats
+    )
+    OPTIMIZATION_AVAILABLE = True
+    print("✅ Sistema de optimización cargado")
+except ImportError as e:
+    print(f"⚠️ Sistema de optimización no disponible: {e}")
+    OPTIMIZATION_AVAILABLE = False
+    
+    # Funciones dummy para fallback
+    def cache_result(expiration_seconds=300):
+        def decorator(func):
+            return func
+        return decorator
+    
+    def clear_cache(): pass
+    def get_cache_stats(): return {}
+    def compress_response(response): return response
+    def add_security_headers(response): return response
+    def add_cache_headers(response, max_age=3600): return response
+    def optimize_query(query, params=None): return query
+    def get_performance_stats(): return {}
+
 # Importar templates de email
 try:
     from email_templates import (
@@ -110,15 +138,41 @@ app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=7)
 app.config['REMEMBER_COOKIE_SECURE'] = os.getenv('FLASK_ENV') == 'production'
 app.config['REMEMBER_COOKIE_HTTPONLY'] = True
 
+# Desactivar caché de templates para desarrollo
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+
 # Headers de seguridad
 @app.after_request
-def security_headers(response):
-    """Agregar headers de seguridad críticos"""
+def security_and_performance_headers(response):
+    """Agregar headers de seguridad y optimización"""
+    # Headers de seguridad
     response.headers['X-Content-Type-Options'] = 'nosniff'
     response.headers['X-Frame-Options'] = 'DENY'
     response.headers['X-XSS-Protection'] = '1; mode=block'
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
-    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self';"
+    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;"
+    
+    # Headers de caché
+    if response.content_type:
+        if 'text/html' in response.content_type:
+            # NO cachear HTML en desarrollo para ver cambios inmediatamente
+            response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+            response.headers['Pragma'] = 'no-cache'
+            response.headers['Expires'] = '0'
+        elif any(ext in response.content_type for ext in ['css', 'js', 'png', 'jpg', 'jpeg', 'gif', 'svg']):
+            response.headers['Cache-Control'] = 'public, max-age=2592000'  # 30 días
+        else:
+            response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    
+    # Compresión de respuesta
+    if OPTIMIZATION_AVAILABLE:
+        response = compress_response(response)
+    
+    # Headers adicionales de rendimiento
+    response.headers['X-Powered-By'] = 'Flask-Optimized'
+    response.headers['Server'] = 'Nginx/1.18.0'  # Ocultar información del servidor
+    
     return response
 
 # Configuración adicional de sesiones
@@ -240,18 +294,29 @@ EMAIL_DESTINATARIO = os.getenv('EMAIL_DESTINATARIO', 'dra.ramirezr@gmail.com')
 # Verificar configuración de email
 EMAIL_CONFIGURED = bool(EMAIL_USERNAME and EMAIL_PASSWORD and EMAIL_PASSWORD != 'tu_password_aqui')
 
+# Función para limpiar comillas de variables de entorno
+def clean_env_var(var_name, default=''):
+    """Limpiar comillas que Railway puede agregar automáticamente a las variables"""
+    value = os.getenv(var_name, default)
+    if value and isinstance(value, str):
+        # Eliminar comillas dobles y simples al inicio y final
+        value = value.strip('"').strip("'")
+    return value
+
 # Configuración de la base de datos
-if MYSQL_AVAILABLE and os.getenv('RAILWAY_ENVIRONMENT'):
-    # Usar MySQL en Railway
+railway_env = clean_env_var('RAILWAY_ENVIRONMENT')
+if MYSQL_AVAILABLE and railway_env:
+    # Usar MySQL en Railway (limpiando comillas automáticas)
     DATABASE_CONFIG = {
-        'host': os.getenv('MYSQL_HOST', 'localhost'),
-        'user': os.getenv('MYSQL_USER', 'root'),
-        'password': os.getenv('MYSQL_PASSWORD', ''),
-        'database': os.getenv('MYSQL_DATABASE', 'drashirley'),
+        'host': clean_env_var('MYSQL_HOST', 'localhost'),
+        'user': clean_env_var('MYSQL_USER', 'root'),
+        'password': clean_env_var('MYSQL_PASSWORD', ''),
+        'database': clean_env_var('MYSQL_DATABASE', 'drashirley'),
         'charset': 'utf8mb4'
     }
     DATABASE_TYPE = 'mysql'
     print("✅ Configurado para usar MySQL en Railway")
+    print(f"   🔌 Conectando a: {DATABASE_CONFIG['host']}")
 else:
     # Usar SQLite localmente o como fallback
     DATABASE_CONFIG = os.getenv('DATABASE_URL', 'drashirley_simple.db')
@@ -322,8 +387,9 @@ class User(UserMixin):
         self.perfil = perfil
 
 @login_manager.user_loader
+@cache_result(expiration_seconds=300)  # Cachear por 5 minutos
 def load_user(user_id):
-    """Cargar usuario desde la base de datos"""
+    """Cargar usuario desde la base de datos con caché"""
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -679,6 +745,9 @@ def init_db():
     conn.commit()
     conn.close()
     print("✅ Base de datos inicializada correctamente")
+    
+    # Crear índices críticos para optimización
+    create_database_indexes()
 
 def adapt_sql_for_database(sql):
     """Adaptar consultas SQL para MySQL o SQLite"""
@@ -697,22 +766,45 @@ def adapt_sql_for_database(sql):
     return sql
 
 def get_db_connection():
-    """Obtener conexión universal a la base de datos (MySQL o SQLite)"""
+    """Obtener conexión universal a la base de datos (MySQL o SQLite) con optimizaciones"""
     try:
         if DATABASE_TYPE == 'mysql':
             # Intentar conectar a MySQL
             conn = pymysql.connect(**DATABASE_CONFIG)
             conn.autocommit = False
+            
+            # Aplicar optimizaciones MySQL
+            if OPTIMIZATION_AVAILABLE:
+                optimizations = optimize_database_connection()
+                for opt in optimizations.get('mysql', []):
+                    try:
+                        conn.execute(opt)
+                    except:
+                        pass  # Ignorar errores de optimización
+            
             return conn
         else:
-            # Usar SQLite
+            # Usar SQLite con optimizaciones
             conn = sqlite3.connect(DATABASE_CONFIG, check_same_thread=False)
             conn.row_factory = sqlite3.Row
-            # Optimizaciones de rendimiento para SQLite
-            conn.execute('PRAGMA journal_mode=WAL')
-            conn.execute('PRAGMA synchronous=NORMAL')
-            conn.execute('PRAGMA cache_size=10000')
-            conn.execute('PRAGMA temp_store=MEMORY')
+            
+            # Optimizaciones críticas de rendimiento para SQLite
+            optimizations = [
+                'PRAGMA journal_mode=WAL',
+                'PRAGMA synchronous=NORMAL', 
+                'PRAGMA cache_size=20000',
+                'PRAGMA temp_store=MEMORY',
+                'PRAGMA mmap_size=268435456',  # 256MB
+                'PRAGMA page_size=4096',
+                'PRAGMA auto_vacuum=INCREMENTAL'
+            ]
+            
+            for opt in optimizations:
+                try:
+                    conn.execute(opt)
+                except:
+                    pass  # Ignorar errores de optimización
+            
             return conn
     except Exception as e:
         print(f"❌ Error al conectar a {DATABASE_TYPE}: {e}")
@@ -723,10 +815,14 @@ def get_db_connection():
             try:
                 conn = sqlite3.connect(':memory:', check_same_thread=False)
                 conn.row_factory = sqlite3.Row
-                conn.execute('PRAGMA journal_mode=WAL')
-                conn.execute('PRAGMA synchronous=NORMAL')
-                conn.execute('PRAGMA cache_size=10000')
-                conn.execute('PRAGMA temp_store=MEMORY')
+                
+                # Aplicar optimizaciones básicas
+                for opt in ['PRAGMA journal_mode=WAL', 'PRAGMA synchronous=NORMAL', 'PRAGMA cache_size=10000']:
+                    try:
+                        conn.execute(opt)
+                    except:
+                        pass
+                
                 print("✅ Fallback a SQLite en memoria exitoso")
                 return conn
             except Exception as e2:
@@ -750,6 +846,81 @@ def increment_visit_counter():
         conn.close()
     except Exception as e:
         print(f"Error al incrementar contador de visitas: {e}")
+
+def create_database_indexes():
+    """Crear índices críticos para mejorar rendimiento"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        print("🔧 Creando índices de base de datos...")
+        
+        # Índices críticos para mejorar velocidad
+        indexes = [
+            # Facturas Detalle (tabla más consultada)
+            "CREATE INDEX IF NOT EXISTS idx_facturas_detalle_estado_activo ON facturas_detalle(estado, activo)",
+            "CREATE INDEX IF NOT EXISTS idx_facturas_detalle_ars_estado ON facturas_detalle(ars_id, estado, activo)",
+            "CREATE INDEX IF NOT EXISTS idx_facturas_detalle_medico_estado ON facturas_detalle(medico_id, estado, activo)",
+            "CREATE INDEX IF NOT EXISTS idx_facturas_detalle_fecha_servicio ON facturas_detalle(fecha_servicio)",
+            "CREATE INDEX IF NOT EXISTS idx_facturas_detalle_nss ON facturas_detalle(nss)",
+            "CREATE INDEX IF NOT EXISTS idx_facturas_detalle_factura_id ON facturas_detalle(factura_id, activo)",
+            
+            # Pacientes
+            "CREATE INDEX IF NOT EXISTS idx_pacientes_nss_ars_activo ON pacientes(nss, ars_id, activo)",
+            "CREATE INDEX IF NOT EXISTS idx_pacientes_nombre_activo ON pacientes(nombre, activo)",
+            "CREATE INDEX IF NOT EXISTS idx_pacientes_activo ON pacientes(activo)",
+            
+            # Facturas
+            "CREATE INDEX IF NOT EXISTS idx_facturas_fecha_factura ON facturas(fecha_factura)",
+            "CREATE INDEX IF NOT EXISTS idx_facturas_medico_activo ON facturas(medico_id, activo)",
+            "CREATE INDEX IF NOT EXISTS idx_facturas_ars_activo ON facturas(ars_id, activo)",
+            "CREATE INDEX IF NOT EXISTS idx_facturas_activo ON facturas(activo)",
+            
+            # Appointments
+            "CREATE INDEX IF NOT EXISTS idx_appointments_status_created ON appointments(status, created_at)",
+            "CREATE INDEX IF NOT EXISTS idx_appointments_date ON appointments(appointment_date)",
+            "CREATE INDEX IF NOT EXISTS idx_appointments_email ON appointments(email)",
+            
+            # Contact Messages
+            "CREATE INDEX IF NOT EXISTS idx_messages_read_created ON contact_messages(read, created_at)",
+            "CREATE INDEX IF NOT EXISTS idx_messages_email ON contact_messages(email)",
+            
+            # Usuarios
+            "CREATE INDEX IF NOT EXISTS idx_usuarios_email_activo ON usuarios(email, activo)",
+            "CREATE INDEX IF NOT EXISTS idx_usuarios_activo ON usuarios(activo)",
+            "CREATE INDEX IF NOT EXISTS idx_usuarios_perfil_activo ON usuarios(perfil, activo)",
+            
+            # Médicos
+            "CREATE INDEX IF NOT EXISTS idx_medicos_activo_factura ON medicos(activo, factura)",
+            "CREATE INDEX IF NOT EXISTS idx_medicos_email ON medicos(email)",
+            "CREATE INDEX IF NOT EXISTS idx_medicos_nombre ON medicos(nombre)",
+            
+            # ARS
+            "CREATE INDEX IF NOT EXISTS idx_ars_activo ON ars(activo)",
+            "CREATE INDEX IF NOT EXISTS idx_ars_nombre ON ars(nombre_ars)",
+            
+            # NCF
+            "CREATE INDEX IF NOT EXISTS idx_ncf_activo ON ncf(activo)",
+            "CREATE INDEX IF NOT EXISTS idx_ncf_tipo_activo ON ncf(tipo, activo)",
+            
+            # Código ARS
+            "CREATE INDEX IF NOT EXISTS idx_codigo_ars_medico_ars ON codigo_ars(medico_id, ars_id, activo)",
+            "CREATE INDEX IF NOT EXISTS idx_codigo_ars_codigo ON codigo_ars(codigo_ars)"
+        ]
+        
+        for index_sql in indexes:
+            try:
+                cursor.execute(index_sql)
+                print(f"✅ Índice creado: {index_sql.split('idx_')[1].split(' ON')[0]}")
+            except Exception as e:
+                print(f"⚠️ Error creando índice: {e}")
+        
+        conn.commit()
+        conn.close()
+        print("✅ Índices de base de datos creados exitosamente")
+        
+    except Exception as e:
+        print(f"❌ Error creando índices: {e}")
 
 def get_visit_count():
     """Obtener el número total de visitas del sitio"""
@@ -1017,6 +1188,11 @@ def services():
     conn.close()
     
     return render_template('services.html', services=services)
+
+@app.route('/test-icons')
+def test_icons():
+    """Test de iconos Font Awesome"""
+    return render_template('test_icons.html')
 
 @app.route('/tratamientos-esteticos')
 def aesthetic_treatments():
@@ -1767,11 +1943,12 @@ def recuperar_contrasena(token):
 
 @app.route('/admin')
 @login_required
+@cache_result(expiration_seconds=60)  # Cachear estadísticas por 1 minuto
 def admin():
-    """Panel de administración simple"""
+    """Panel de administración simple con caché"""
     conn = get_db_connection()
     
-    # Estadísticas
+    # Estadísticas (con caché)
     stats = {
         'total_appointments': conn.execute('SELECT COUNT(*) FROM appointments').fetchone()[0],
         'pending_appointments': conn.execute('SELECT COUNT(*) FROM appointments WHERE status = "pending"').fetchone()[0],
