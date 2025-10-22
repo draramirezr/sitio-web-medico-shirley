@@ -1,0 +1,379 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Mensajes - Panel Admin | Dra. Shirley Ramírez{% endblock %}
+
+{% block content %}
+<style>
+    /* Paleta de colores Dra. Shirley para Admin */
+    .messages-hero {
+        background: linear-gradient(135deg, rgba(206, 176, 183, 0.1) 0%, rgba(242, 226, 230, 0.3) 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .messages-hero::before {
+        content: '';
+        position: absolute;
+        width: 250px;
+        height: 250px;
+        background-image: url("{{ url_for('static', filename='images/icono-marca.png') }}");
+        background-size: contain;
+        background-repeat: no-repeat;
+        opacity: 0.03;
+        top: -50px;
+        left: -50px;
+        transform: rotate(15deg);
+        pointer-events: none;
+    }
+    
+    .message-card {
+        background: white;
+        border-radius: 15px;
+        border-left: 4px solid var(--primary-color);
+        box-shadow: 0 4px 20px rgba(206, 176, 183, 0.15);
+        transition: all 0.3s ease;
+        margin-bottom: 1.5rem;
+    }
+    
+    .message-card:hover {
+        box-shadow: 0 8px 30px rgba(206, 176, 183, 0.25);
+        transform: translateY(-5px);
+        border-left-color: var(--primary-dark);
+    }
+    
+    .message-unread {
+        border-left-color: #dc3545;
+        background: linear-gradient(135deg, rgba(255, 243, 205, 0.3) 0%, rgba(255, 235, 205, 0.5) 100%);
+    }
+    
+    .message-unread::before {
+        content: '●';
+        position: absolute;
+        top: 1rem;
+        left: -1rem;
+        color: #dc3545;
+        font-size: 1.5rem;
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    
+    .whatsapp-btn {
+        background: #128C7E;
+        border: none;
+        color: white;
+        transition: all 0.3s ease;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+    
+    .whatsapp-btn:hover {
+        background: #075E54;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(18, 140, 126, 0.3);
+        color: white;
+    }
+    
+    .admin-page-title {
+        color: var(--primary-color);
+        font-weight: 800;
+        font-size: 2.2rem;
+    }
+    
+    .btn-back {
+        background: white;
+        border: 2px solid var(--primary-color);
+        color: var(--primary-color);
+        border-radius: 15px;
+        padding: 0.5rem 1.5rem;
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+    
+    .btn-back:hover {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(206, 176, 183, 0.3);
+    }
+    
+    .summary-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(206, 176, 183, 0.15);
+        border: 1px solid rgba(206, 176, 183, 0.2);
+    }
+    
+    .summary-card .card-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        font-weight: 700;
+        border-radius: 15px 15px 0 0 !important;
+    }
+    
+    .summary-card .card-header h5 {
+        color: white !important;
+    }
+    
+    .badge-nuevo {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        animation: pulse-badge 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse-badge {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    
+    /* Animaciones */
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .animate-card {
+        animation: slideInUp 0.5s ease-out;
+    }
+</style>
+
+<div class="container py-5">
+    <!-- Hero Section -->
+    <div class="messages-hero animate-card">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="admin-page-title mb-2">
+                    <i class="fas fa-envelope-open-text me-2"></i>
+                    Gestión de Mensajes
+                </h1>
+                <p class="text-muted mb-0">Responde a consultas y contactos de pacientes</p>
+            </div>
+            <a href="{{ url_for('admin') }}" class="btn-back">
+                <i class="fas fa-arrow-left me-2"></i>
+                Volver al Panel
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="row">
+        {% for message in messages %}
+        <div class="col-12 mb-4">
+            <div class="card message-card {% if not message[6] %}message-unread{% endif %}">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <!-- Información del Remitente -->
+                        <div class="col-lg-4 mb-3 mb-lg-0">
+                            <h5 class="mb-2">
+                                <i class="fas fa-user me-2"></i>
+                                {{ message[1] }}
+                                {% if not message[6] %}
+                                <span class="badge-nuevo ms-2">Nuevo</span>
+                                {% endif %}
+                            </h5>
+                            <div class="small">
+                                <div class="mb-1">
+                                    <i class="fas fa-envelope me-2"></i>
+                                    <strong>Email:</strong> {{ message[2] }}
+                                </div>
+                                {% if message[3] %}
+                                <div class="mb-1">
+                                    <i class="fas fa-phone me-2"></i>
+                                    <strong>Teléfono:</strong> {{ message[3] }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Contenido del Mensaje -->
+                        <div class="col-lg-5 mb-3 mb-lg-0">
+                            <div class="small">
+                                <strong><i class="fas fa-comment-dots me-2"></i>Asunto:</strong>
+                                <p class="mb-2">{{ message[4] }}</p>
+                                <strong><i class="fas fa-file-alt me-2"></i>Mensaje:</strong>
+                                <p class="text-muted mb-0">
+                                    {{ message[5][:100] }}{% if message[5]|length > 100 %}...{% endif %}
+                                </p>
+                            </div>
+                            <small class="text-muted">
+                                <i class="fas fa-calendar-alt"></i>
+                                {{ message[7] }}
+                            </small>
+                        </div>
+
+                        <!-- Acciones -->
+                        <div class="col-lg-3">
+                            <div class="d-grid gap-2">
+                                <!-- Botón de WhatsApp (si tiene teléfono) -->
+                                {% if message[3] %}
+                                <a href="https://wa.me/{{ message[3]|replace('(', '')|replace(')', '')|replace('-', '')|replace(' ', '') }}?text=Hola%20{{ message[1]|replace(' ', '%20') }},%20soy%20la%20Dra.%20Shirley%20Ram%C3%ADrez.%20Te%20contacto%20en%20relaci%C3%B3n%20a%20tu%20mensaje." 
+                                   class="btn whatsapp-btn btn-sm" 
+                                   target="_blank"
+                                   title="Contactar por WhatsApp">
+                                    <i class="fab fa-whatsapp me-2"></i>
+                                    Enviar WhatsApp
+                                </a>
+                                {% endif %}
+
+                                <!-- Botón de Email -->
+                                <a href="mailto:{{ message[2] }}?subject=Re: {{ message[4] }}" 
+                                   class="btn btn-sm btn-outline-primary"
+                                   title="Responder por Email">
+                                    <i class="fas fa-reply me-2"></i>
+                                    Responder Email
+                                </a>
+
+                                <!-- Botón Ver Detalles -->
+                                <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#messageModal{{ message[0] }}">
+                                    <i class="fas fa-eye me-2"></i>
+                                    Ver Completo
+                                </button>
+
+                                <!-- Marcar como leído -->
+                                {% if not message[6] %}
+                                <button class="btn btn-sm btn-outline-success mark-read-btn" data-message-id="{{ message[0] }}">
+                                    <i class="fas fa-check me-2"></i>
+                                    Marcar como Leído
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal con mensaje completo -->
+        <div class="modal fade" id="messageModal{{ message[0] }}" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-envelope-open me-2"></i>
+                            Mensaje de {{ message[1] }}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <strong><i class="fas fa-user me-2"></i>Nombre:</strong><br>
+                            {{ message[1] }}
+                        </div>
+                        <div class="mb-3">
+                            <strong><i class="fas fa-envelope me-2"></i>Email:</strong><br>
+                            <a href="mailto:{{ message[2] }}">{{ message[2] }}</a>
+                        </div>
+                        {% if message[3] %}
+                        <div class="mb-3">
+                            <strong><i class="fas fa-phone me-2"></i>Teléfono:</strong><br>
+                            {{ message[3] }}
+                        </div>
+                        {% endif %}
+                        <div class="mb-3">
+                            <strong><i class="fas fa-comment-dots me-2"></i>Asunto:</strong><br>
+                            {{ message[4] }}
+                        </div>
+                        <div class="mb-3">
+                            <strong><i class="fas fa-file-alt me-2"></i>Mensaje Completo:</strong><br>
+                            <div class="p-3 bg-light rounded">
+                                {{ message[5] }}
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <strong><i class="fas fa-calendar-alt me-2"></i>Fecha de Recepción:</strong><br>
+                            {{ message[7] }}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        {% if message[3] %}
+                        <a href="https://wa.me/{{ message[3]|replace('(', '')|replace(')', '')|replace('-', '')|replace(' ', '') }}?text=Hola%20{{ message[1]|replace(' ', '%20') }},%20soy%20la%20Dra.%20Shirley%20Ram%C3%ADrez." 
+                           class="btn whatsapp-btn" 
+                           target="_blank">
+                            <i class="fab fa-whatsapp me-2"></i>
+                            WhatsApp
+                        </a>
+                        {% endif %}
+                        <a href="mailto:{{ message[2] }}?subject=Re: {{ message[4] }}" class="btn btn-primary">
+                            <i class="fas fa-reply me-2"></i>
+                            Responder Email
+                        </a>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Resumen -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="summary-card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Resumen de Mensajes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-6">
+                            <h4 class="text-danger">{{ messages|rejectattr('6')|list|length }}</h4>
+                            <p>Sin Leer</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h4 class="text-success">{{ messages|selectattr('6')|list|length }}</h4>
+                            <p>Leídos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>
+        No hay mensajes todavía.
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Marcar mensajes como leídos
+document.querySelectorAll('.mark-read-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        const messageId = this.getAttribute('data-message-id');
+        
+        fetch(`/admin/messages/${messageId}/mark-read`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+});
+</script>
+{% endblock %}
+

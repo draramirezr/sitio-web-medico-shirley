@@ -1,0 +1,611 @@
+{% extends "base.html" %}
+
+{% block title %}Solicitar Cita - Dra. Shirley Ramírez | Agenda tu Consulta Ginecológica en Panamá{% endblock %}
+
+{% block description %}Agenda tu cita con la Dra. Shirley Ramírez - Ginecóloga en Panamá. Reserva tu consulta en línea de forma rápida y segura. Atención inmediata, horarios flexibles. Primera consulta disponible. ☎️ +507 6981-9863{% endblock %}
+
+{% block og_title %}Agenda tu Cita con Dra. Shirley Ramírez | Ginecóloga en Panamá{% endblock %}
+{% block og_description %}Reserva tu consulta ginecológica en Panamá. Proceso rápido y seguro. Horarios flexibles y atención personalizada. ¡Agenda ahora!{% endblock %}
+
+{% block content %}
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<style>
+    /* Iconos de marca decorativos - Solicitar Cita */
+    .container {
+        position: relative;
+    }
+    
+    .container::before {
+        content: '';
+        position: absolute;
+        width: 280px;
+        height: 280px;
+        background-image: url("{{ url_for('static', filename='images/icono-marca.png') }}");
+        background-size: contain;
+        background-repeat: no-repeat;
+        opacity: 0.04;
+        top: 5%;
+        left: 2%;
+        transform: rotate(-22deg);
+        z-index: 0;
+        pointer-events: none;
+        animation: float-brand-4 15s ease-in-out infinite;
+    }
+    
+    .container::after {
+        content: '';
+        position: absolute;
+        width: 320px;
+        height: 320px;
+        background-image: url("{{ url_for('static', filename='images/icono-marca.png') }}");
+        background-size: contain;
+        background-repeat: no-repeat;
+        opacity: 0.03;
+        bottom: 8%;
+        right: 3%;
+        transform: rotate(18deg);
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    @keyframes float-brand-4 {
+        0%, 100% { transform: rotate(-22deg) translateY(0); }
+        50% { transform: rotate(-25deg) translateY(-13px); }
+    }
+    
+    .appointment-form {
+        background: linear-gradient(135deg, #ffffff 0%, #F2E2E6 100%);
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        position: relative;
+        z-index: 1;
+    }
+    
+    .section-header {
+        background: linear-gradient(135deg, #ACACAD 0%, #949495 100%);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(172, 172, 173, 0.3);
+    }
+    
+    .section-header i {
+        margin-right: 10px;
+        font-size: 1.2em;
+    }
+    
+    /* Estilos para encabezados del formulario */
+    .appointment-form .card-header {
+        background: linear-gradient(135deg, #CEB0B7 0%, #ACACAD 100%) !important;
+        color: white !important;
+        padding: 18px 30px !important;
+        border-radius: 25px !important;
+        margin-bottom: 25px !important;
+        box-shadow: 0 4px 15px rgba(206, 176, 183, 0.3) !important;
+        border: none !important;
+    }
+    
+    .appointment-form .card-header h5 {
+        color: white !important;
+        font-weight: 600 !important;
+        font-size: 1.1rem !important;
+    }
+    
+    .appointment-form .card-header i {
+        color: white !important;
+        font-size: 1.2rem !important;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #282828;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+    
+    .form-label i {
+        color: #CEB0B7;
+        margin-right: 8px;
+    }
+    
+    .form-control, .form-select {
+        border: 2px solid #F2E2E6;
+        border-radius: 10px;
+        padding: 12px 15px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #CEB0B7;
+        box-shadow: 0 0 0 0.2rem rgba(206, 176, 183, 0.25);
+    }
+    
+    .form-control:disabled, .form-select:disabled {
+        background-color: #f8f9fa;
+        opacity: 0.7;
+    }
+    
+    .btn-submit-appointment {
+        background: linear-gradient(135deg, #ACACAD 0%, #949495 100%);
+        border: none;
+        border-radius: 50px;
+        padding: 15px 50px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 20px rgba(172, 172, 173, 0.4);
+    }
+    
+    .btn-submit-appointment:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(172, 172, 173, 0.5);
+        background: linear-gradient(135deg, #949495 0%, #ACACAD 100%);
+    }
+    
+    .alert-info-custom {
+        background-color: #F2E2E6;
+        border: 2px solid #CEB0B7;
+        border-radius: 10px;
+        color: #282828;
+    }
+    
+    .required-asterisk {
+        color: #CEB0B7;
+        font-weight: bold;
+    }
+    
+    small.text-muted {
+        color: #ACACAD !important;
+        font-style: italic;
+    }
+    
+    .emergency-alert {
+        background-color: #fff3cd;
+        border-left: 5px solid #ffc107;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    /* ============ RESPONSIVE - OPTIMIZADO ============ */
+    @media (max-width: 992px) {
+        .container::before {
+            width: 230px;
+            height: 230px;
+        }
+        
+        .container::after {
+            width: 260px;
+            height: 260px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .container::before {
+            width: 190px;
+            height: 190px;
+            top: 3%;
+            left: 1%;
+        }
+        
+        .container::after {
+            width: 210px;
+            height: 210px;
+            bottom: 5%;
+            right: 1%;
+        }
+        
+        .section-header {
+            padding: 12px 15px;
+            font-size: 1.1rem;
+        }
+        
+        .appointment-form {
+            padding: 2rem 1.5rem !important;
+        }
+        
+        .form-label {
+            font-size: 0.95rem;
+        }
+        
+        .form-control,
+        .form-select {
+            font-size: 0.9rem;
+            padding: 0.6rem 0.75rem;
+        }
+        
+        .btn-lg {
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+        }
+        
+        h1 {
+            font-size: 2rem !important;
+        }
+        
+        .mb-4 {
+            margin-bottom: 1rem !important;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .container::before,
+        .container::after {
+            width: 140px;
+            height: 140px;
+        }
+        
+        .appointment-form {
+            padding: 1.5rem 1rem !important;
+            border-radius: 15px;
+        }
+        
+        .section-header {
+            padding: 10px 12px;
+            font-size: 1rem;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 1.75rem !important;
+        }
+        
+        p.lead {
+            font-size: 1rem !important;
+        }
+        
+        .form-label {
+            font-size: 0.9rem;
+        }
+        
+        .form-control,
+        .form-select,
+        textarea.form-control {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.65rem;
+        }
+        
+        .btn-lg {
+            padding: 0.7rem 1.5rem;
+            font-size: 0.95rem;
+        }
+        
+        .text-muted {
+            font-size: 0.85rem !important;
+        }
+        
+        .alert {
+            padding: 12px;
+            font-size: 0.85rem;
+        }
+    }
+    
+    @media (max-width: 375px) {
+        .appointment-form {
+            padding: 1.2rem 0.8rem !important;
+        }
+        
+        h1 {
+            font-size: 1.5rem !important;
+        }
+        
+        .section-header {
+            font-size: 0.95rem;
+        }
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="text-center mb-5">
+                <h1 class="display-5 fw-bold mb-3" style="color: #ACACAD;">
+                    <i class="fas fa-calendar-check me-3"></i>Solicitar Cita Médica
+                </h1>
+                <p class="lead" style="color: #282828;">Completa el formulario para programar tu consulta. Te contactaremos para confirmar la disponibilidad.</p>
+            </div>
+            
+            <div class="appointment-form">
+                <div class="p-5">
+                    <form method="POST">
+                        <!-- Sección: Datos Personales -->
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-user me-2"></i>
+                                Datos Personales
+                            </h5>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">
+                                    <i class="fas fa-user-circle"></i>Nombre <span class="required-asterisk">*</span>
+                                </label>
+                                <input type="text" class="form-control" name="first_name" placeholder="Ingrese su nombre" required>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">
+                                    <i class="fas fa-user-tag"></i>Apellidos <span class="required-asterisk">*</span>
+                                </label>
+                                <input type="text" class="form-control" name="last_name" placeholder="Ingrese sus apellidos" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">
+                                    <i class="fas fa-envelope"></i>Correo Electrónico
+                                </label>
+                                <input type="email" class="form-control" name="email" placeholder="correo@ejemplo.com">
+                                <small class="text-muted">Opcional</small>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">
+                                    <i class="fas fa-phone"></i>Teléfono <span class="required-asterisk">*</span>
+                                </label>
+                                <input type="tel" class="form-control" name="phone" placeholder="(000) 000-0000" required>
+                            </div>
+                        </div>
+                        
+                        <!-- Sección: Información de la Cita -->
+                        <div class="card-header bg-primary text-white mt-4">
+                            <h5 class="mb-0">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                Información de la Cita
+                            </h5>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-12 mb-4">
+                                <label class="form-label">
+                                    <i class="fas fa-stethoscope"></i>Tipo de Consulta <span class="required-asterisk">*</span>
+                                </label>
+                                <select class="form-select" name="appointment_type" id="appointment_type" required>
+                                    <option value="">Seleccionar tipo de consulta...</option>
+                                    <option value="emergencia" style="color: #dc3545; font-weight: 600;">Consulta de Emergencia</option>
+                                    <option value="consulta">Consulta para Chequeo Rutinario</option>
+                                    <option value="estetico">Tratamiento Estético</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">
+                                    <i class="fas fa-calendar-day"></i>Fecha de Consulta
+                                </label>
+                                <input type="text" class="form-control" name="appointment_date" id="appointment_date" placeholder="Seleccione una fecha" readonly>
+                                <small class="text-muted">Solo martes y jueves disponibles</small>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">
+                                    <i class="fas fa-clock"></i>Hora de Consulta
+                                </label>
+                                <select class="form-select" name="appointment_time" id="appointment_time" disabled>
+                                    <option value="">Seleccione primero una fecha</option>
+                                </select>
+                                <small class="text-muted" id="schedule_info"></small>
+                            </div>
+                        </div>
+                        
+                        <!-- Campo de Emergencia (se muestra solo cuando es emergencia) -->
+                        <div class="row" id="emergency_section" style="display: none;">
+                            <div class="col-md-12 mb-4">
+                                <div class="emergency-alert">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>Cita de Emergencia:</strong> Seleccione la fecha y hora deseada (Lunes a Viernes, 8:00 AM – 6:00 PM).<br>
+                                    <strong>Aplica tarifa especial.</strong> El pago debe efectuarse antes de la consulta.
+                                </div>
+                                <label class="form-label">
+                                    <i class="fas fa-ambulance"></i>Fecha y Hora de Emergencia
+                                </label>
+                                <input type="datetime-local" class="form-control" name="emergency_datetime" id="emergency_datetime">
+                            </div>
+                        </div>
+                        
+                        <!-- Sección: Información Médica -->
+                        <div class="card-header bg-primary text-white mt-4">
+                            <h5 class="mb-0">
+                                <i class="fas fa-notes-medical me-2"></i>
+                                Información Médica
+                            </h5>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-12 mb-4">
+                                <label class="form-label">
+                                    <i class="fas fa-shield-alt"></i>Seguro Médico <span class="required-asterisk">*</span>
+                                </label>
+                                <select class="form-select" name="medical_insurance" required>
+                                    <option value="">Seleccionar seguro médico...</option>
+                                    <option value="APS">APS</option>
+                                    <option value="Asemap">Asemap</option>
+                                    <option value="Futuro">Futuro</option>
+                                    <option value="Humano ARS">Humano ARS</option>
+                                    <option value="Mapfre">Mapfre</option>
+                                    <option value="Monumental">Monumental</option>
+                                    <option value="Primera">Primera</option>
+                                    <option value="Renacer">Renacer</option>
+                                    <option value="Reservas">Reservas</option>
+                                    <option value="Semma">Semma</option>
+                                    <option value="Senasa">Senasa</option>
+                                    <option value="Universal">Universal</option>
+                                    <option value="Otros">Otros</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-12 mb-4">
+                                <label class="form-label">
+                                    <i class="fas fa-comment-medical"></i>Motivo de la Consulta
+                                </label>
+                                <textarea class="form-control" name="reason" rows="4" placeholder="Describa brevemente el motivo de su consulta (opcional)..."></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-5">
+                            <button type="submit" class="btn btn-submit-appointment">
+                                <i class="fas fa-calendar-check me-2"></i>
+                                Solicitar Mi Cita
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Flatpickr JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const appointmentType = document.getElementById('appointment_type');
+    const appointmentDateInput = document.getElementById('appointment_date');
+    const appointmentTime = document.getElementById('appointment_time');
+    const emergencySection = document.getElementById('emergency_section');
+    const emergencyDatetime = document.getElementById('emergency_datetime');
+    const scheduleInfo = document.getElementById('schedule_info');
+    
+    // Inicializar Flatpickr con restricción de solo martes y jueves
+    const datePicker = flatpickr(appointmentDateInput, {
+        locale: "es",
+        dateFormat: "Y-m-d",
+        minDate: "today",
+        disable: [
+            function(date) {
+                // Deshabilitar todos los días EXCEPTO martes (2) y jueves (4)
+                return (date.getDay() !== 2 && date.getDay() !== 4);
+            }
+        ],
+        onChange: function(selectedDates, dateStr, instance) {
+            if (selectedDates.length > 0) {
+                const selectedDate = selectedDates[0];
+                const dayOfWeek = selectedDate.getDay();
+                
+                // Habilitar selector de hora y cargar horarios disponibles
+                appointmentTime.disabled = true;
+                appointmentTime.innerHTML = '<option value="">Cargando horarios disponibles...</option>';
+                loadAvailableTimeSlots(dateStr, dayOfWeek);
+            } else {
+                appointmentTime.disabled = true;
+                appointmentTime.innerHTML = '<option value="">Seleccione primero una fecha</option>';
+                scheduleInfo.textContent = '';
+            }
+        }
+    });
+    
+    // Mostrar/ocultar campo de emergencia según el tipo de consulta
+    appointmentType.addEventListener('change', function() {
+        if (this.value === 'emergencia') {
+            emergencySection.style.display = 'block';
+            appointmentDateInput.parentElement.parentElement.style.display = 'none';
+            // Limpiar fecha normal
+            datePicker.clear();
+            appointmentTime.disabled = true;
+            appointmentTime.innerHTML = '<option value="">Seleccione primero una fecha</option>';
+            scheduleInfo.textContent = '';
+        } else {
+            emergencySection.style.display = 'none';
+            appointmentDateInput.parentElement.parentElement.style.display = 'flex';
+            emergencyDatetime.value = '';
+        }
+    });
+    
+    // Cargar horarios disponibles desde el servidor (solo muestra horarios libres)
+    function loadAvailableTimeSlots(fecha, dayOfWeek) {
+        let scheduleText;
+        
+        if (dayOfWeek === 2) { // Martes
+            scheduleText = 'Martes: 1:00 PM - 6:00 PM';
+        } else if (dayOfWeek === 4) { // Jueves
+            scheduleText = 'Jueves: 8:00 AM - 1:00 PM';
+        }
+        
+        scheduleInfo.textContent = scheduleText + ' - Verificando disponibilidad...';
+        
+        // Llamada AJAX para obtener solo horarios disponibles
+        fetch(`/api/horarios-disponibles?fecha=${fecha}`)
+            .then(response => response.json())
+            .then(data => {
+                appointmentTime.innerHTML = '<option value="">Seleccionar hora...</option>';
+                
+                if (data.horarios && data.horarios.length > 0) {
+                    data.horarios.forEach(horario => {
+                        // Convertir formato 24h a 12h con AM/PM para mostrar
+                        const [hour, min] = horario.split(':');
+                        const hourNum = parseInt(hour);
+                        const period = hourNum < 12 ? 'AM' : 'PM';
+                        const displayHour = hourNum > 12 ? hourNum - 12 : (hourNum === 0 ? 12 : hourNum);
+                        const displayTime = `${displayHour}:${min} ${period}`;
+                        
+                        const option = document.createElement('option');
+                        option.value = horario;
+                        option.textContent = displayTime;
+                        appointmentTime.appendChild(option);
+                    });
+                    appointmentTime.disabled = false;
+                    
+                    // Mostrar mensaje de horarios disponibles
+                    const horariosCount = data.horarios.length;
+                    scheduleInfo.textContent = scheduleText + ` - ✅ ${horariosCount} horarios disponibles`;
+                    scheduleInfo.style.color = '#28a745';
+                } else {
+                    appointmentTime.innerHTML = '<option value="">No hay horarios disponibles</option>';
+                    appointmentTime.disabled = true;
+                    scheduleInfo.textContent = scheduleText + ' - ⚠️ Todos los horarios están ocupados';
+                    scheduleInfo.style.color = '#dc3545';
+                }
+            })
+            .catch(error => {
+                console.error('Error al cargar horarios:', error);
+                appointmentTime.innerHTML = '<option value="">Error al cargar horarios</option>';
+                appointmentTime.disabled = true;
+                scheduleInfo.textContent = scheduleText + ' - ❌ Error al cargar horarios';
+                scheduleInfo.style.color = '#dc3545';
+            });
+    }
+    
+    // Validar fecha de emergencia (solo lunes a viernes)
+    if (emergencyDatetime) {
+        emergencyDatetime.addEventListener('change', function() {
+            const selectedDate = new Date(this.value);
+            const dayOfWeek = selectedDate.getDay();
+            const hour = selectedDate.getHours();
+            
+            // Validar que sea lunes a viernes (1-5)
+            if (dayOfWeek === 0 || dayOfWeek === 6) {
+                alert('Las citas de emergencia solo están disponibles de lunes a viernes.');
+                this.value = '';
+                return;
+            }
+            
+            // Validar que la hora esté entre 8:00 AM y 6:00 PM
+            if (hour < 8 || hour >= 18) {
+                alert('El horario de emergencia es de 8:00 AM a 6:00 PM.');
+                this.value = '';
+                return;
+            }
+        });
+        
+        // Establecer límites min y max para el campo datetime-local
+        const today = new Date();
+        const maxDate = new Date();
+        maxDate.setMonth(maxDate.getMonth() + 3); // 3 meses adelante
+        
+        emergencyDatetime.min = today.toISOString().slice(0, 16);
+        emergencyDatetime.max = maxDate.toISOString().slice(0, 16);
+    }
+});
+</script>
+
+{% endblock %}

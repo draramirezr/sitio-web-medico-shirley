@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Testimonios - Dra. Shirley Ramírez | Opiniones de Pacientes en Panamá ⭐⭐⭐⭐⭐{% endblock %}
+
+{% block description %}Lee las experiencias reales de pacientes de la Dra. Shirley Ramírez en Panamá. Testimonios verificados sobre control prenatal, tratamientos ginecológicos y estéticos. ⭐ Calificación 5/5. Más de 50 opiniones positivas.{% endblock %}
+
+{% block og_title %}Testimonios de Pacientes - Dra. Shirley Ramírez | Panamá{% endblock %}
+{% block og_description %}Conoce las experiencias reales de pacientes satisfechas. Testimonios sobre ginecología, obstetricia y tratamientos estéticos en Panamá. Calificación 5 estrellas.{% endblock %}
+
+{% block content %}
+<style>
+    /* Iconos de marca decorativos - Testimonios */
+    .container.py-5 {
+        position: relative;
+    }
+    
+    .container.py-5::before {
+        content: '';
+        position: absolute;
+        width: 340px;
+        height: 340px;
+        background-image: url("{{ url_for('static', filename='images/icono-marca.png') }}");
+        background-size: contain;
+        background-repeat: no-repeat;
+        opacity: 0.03;
+        top: 8%;
+        left: 4%;
+        transform: rotate(-16deg);
+        z-index: 0;
+        pointer-events: none;
+        animation: float-brand-5 11s ease-in-out infinite;
+    }
+    
+    .container.py-5::after {
+        content: '';
+        position: absolute;
+        width: 290px;
+        height: 290px;
+        background-image: url("{{ url_for('static', filename='images/icono-marca.png') }}");
+        background-size: contain;
+        background-repeat: no-repeat;
+        opacity: 0.04;
+        bottom: 12%;
+        right: 5%;
+        transform: rotate(24deg);
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    @keyframes float-brand-5 {
+        0%, 100% { transform: rotate(-16deg) translateY(0); }
+        50% { transform: rotate(-19deg) translateY(-11px); }
+    }
+    
+    .row {
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* ============ RESPONSIVE - OPTIMIZADO ============ */
+    @media (max-width: 992px) {
+        .container.py-5::before {
+            width: 270px;
+            height: 270px;
+        }
+        
+        .container.py-5::after {
+            width: 240px;
+            height: 240px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .container.py-5::before {
+            width: 210px;
+            height: 210px;
+            top: 6%;
+            left: 2%;
+        }
+        
+        .container.py-5::after {
+            width: 190px;
+            height: 190px;
+            bottom: 10%;
+            right: 3%;
+        }
+        
+        .display-5 {
+            font-size: 2rem !important;
+        }
+        
+        p.lead {
+            font-size: 1rem !important;
+        }
+        
+        .testimonial-card {
+            padding: 1.5rem;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .container.py-5::before,
+        .container.py-5::after {
+            width: 150px;
+            height: 150px;
+        }
+        
+        .display-5 {
+            font-size: 1.75rem !important;
+        }
+        
+        p.lead {
+            font-size: 0.95rem !important;
+        }
+        
+        .testimonial-card {
+            padding: 1.2rem;
+            border-radius: 15px;
+        }
+        
+        .testimonial-text {
+            font-size: 0.9rem;
+        }
+        
+        .testimonial-rating {
+            font-size: 1.1rem;
+        }
+    }
+    
+    @media (max-width: 375px) {
+        .display-5 {
+            font-size: 1.5rem !important;
+        }
+        
+        .testimonial-card {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto text-center mb-5">
+            <h1 class="display-5 fw-bold mb-3">Testimonios de Nuestras Pacientes</h1>
+            <p class="lead text-muted">La confianza de nuestras pacientes es nuestro mayor logro y motivación.</p>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        {% for testimonial in testimonials %}
+        <div class="col-lg-4 col-md-6">
+            <div class="testimonial-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="testimonial-rating">
+                        {% for i in range(testimonial.rating or 5) %}
+                        <i class="fas fa-star text-warning"></i>
+                        {% endfor %}
+                    </div>
+                    <small class="text-muted">
+                        <i class="fas fa-clock me-1"></i>{{ testimonial.time_ago }}
+                    </small>
+                </div>
+                <p class="testimonial-text">{{ testimonial.testimonial_text }}</p>
+                <div class="testimonial-author">
+                    <strong>{{ testimonial.patient_initials or testimonial.patient_name }}</strong>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

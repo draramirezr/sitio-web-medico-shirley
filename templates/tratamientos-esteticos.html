@@ -1,0 +1,351 @@
+{% extends "base.html" %}
+
+{% block title %}Tratamientos Estéticos Ginecológicos en Panamá | Dra. Shirley Ramírez{% endblock %}
+
+{% block description %}Tratamientos estéticos ginecológicos en Panamá: Rejuvenecimiento íntimo, láser vaginal CO2, bioestimuladores, rellenos faciales y corporales, hilos tensores. Tecnología avanzada, resultados naturales. Dra. Shirley Ramírez - Especialista certificada.{% endblock %}
+
+{% block og_title %}Tratamientos Estéticos Ginecológicos - Dra. Shirley Ramírez | Panamá{% endblock %}
+{% block og_description %}Especialista en ginecología estética en Panamá. Rejuvenecimiento íntimo, láser vaginal CO2, bioestimuladores, rellenos. Tecnología de vanguardia y resultados naturales.{% endblock %}
+
+{% block content %}
+<style>
+    /* Iconos de marca decorativos - Tratamientos Estéticos */
+    .container.py-5 {
+        position: relative;
+    }
+    
+    .container.py-5::before {
+        content: '';
+        position: absolute;
+        width: 310px;
+        height: 310px;
+        background-image: url("{{ url_for('static', filename='images/icono-marca.png') }}");
+        background-size: contain;
+        background-repeat: no-repeat;
+        opacity: 0.04;
+        top: 12%;
+        right: 4%;
+        transform: rotate(19deg);
+        z-index: 0;
+        pointer-events: none;
+        animation: float-brand-6 16s ease-in-out infinite;
+    }
+    
+    .container.py-5::after {
+        content: '';
+        position: absolute;
+        width: 270px;
+        height: 270px;
+        background-image: url("{{ url_for('static', filename='images/icono-marca.png') }}");
+        background-size: contain;
+        background-repeat: no-repeat;
+        opacity: 0.035;
+        bottom: 10%;
+        left: 3%;
+        transform: rotate(-23deg);
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    @keyframes float-brand-6 {
+        0%, 100% { transform: rotate(19deg) translateY(0); }
+        50% { transform: rotate(22deg) translateY(-14px); }
+    }
+    
+    .row {
+        position: relative;
+        z-index: 1;
+    }
+</style>
+
+<div class="container py-5">
+    <!-- Hero Section -->
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto text-center">
+            <h1 class="display-4 fw-bold mb-4" style="color: var(--title-color);">
+                Tratamientos Estéticos Ginecológicos
+            </h1>
+            <p class="lead text-muted fs-5">
+                Tecnología láser de última generación para tu bienestar íntimo
+            </p>
+            <div class="mt-4">
+                <a href="{{ url_for('services') }}" class="btn btn-outline-secondary btn-lg px-5">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    Volver a Servicios
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid de Tratamientos -->
+    <div class="row g-4">
+        {% for treatment in treatments %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 shadow-sm treatment-card">
+                <div class="card-body p-4">
+                    <!-- Barra decorativa superior -->
+                    <div class="treatment-bar"></div>
+                    
+                    <!-- Título -->
+                    <h5 class="card-title mb-3" style="color: var(--title-color); font-weight: 600; min-height: 60px; line-height: 1.3;">
+                        {{ treatment.name }}
+                    </h5>
+                    
+                    <!-- Descripción con bullets elegantes -->
+                    <div class="treatment-description text-muted">
+                        {% set benefits = treatment.description.split('\n') %}
+                        <ul class="list-unstyled">
+                            {% for benefit in benefits %}
+                            <li class="mb-2">
+                                <span class="benefit-dot"></span>
+                                {{ benefit }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Call to Action Final -->
+    <div class="row mt-5">
+        <div class="col-lg-8 mx-auto text-center">
+            <div class="card shadow-lg" style="background: var(--gradient-primary); border: none;">
+                <div class="card-body p-5">
+                    <h3 class="text-white mb-3">¿Interesada en algún tratamiento?</h3>
+                    <p class="text-white mb-4">
+                        Agenda tu consulta personalizada y descubre la mejor opción para ti.
+                    </p>
+                    <a href="{{ url_for('request_appointment') }}" class="btn btn-light btn-lg px-5">
+                        <i class="fas fa-calendar-check me-2"></i>
+                        Agendar Consulta
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .treatment-card {
+        transition: all 0.4s ease;
+        border: none;
+        border-left: 4px solid var(--primary-color);
+        height: 100%;
+        background: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
+        position: relative;
+        overflow: visible;
+    }
+    
+    .treatment-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: radial-gradient(circle, rgba(206, 176, 183, 0.08) 0%, transparent 70%);
+        border-radius: 50%;
+        transform: translate(30%, -30%);
+    }
+    
+    .treatment-card:hover {
+        transform: translateY(-10px) scale(1.08);
+        box-shadow: 0 15px 40px rgba(206, 176, 183, 0.4) !important;
+        border-left-width: 6px;
+        z-index: 10;
+    }
+    
+    /* Número decorativo */
+    .treatment-number {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color) 0%, #ACACAD 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.2rem;
+        box-shadow: 0 4px 10px rgba(206, 176, 183, 0.3);
+    }
+    
+    /* Barra decorativa superior */
+    .treatment-bar {
+        width: 60px;
+        height: 4px;
+        background: var(--gradient-primary);
+        border-radius: 2px;
+        margin-bottom: 1.2rem;
+    }
+    
+    .treatment-card:hover .treatment-bar {
+        width: 100%;
+        transition: width 0.4s ease;
+    }
+    
+    .treatment-card h5 {
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .treatment-card:hover h5 {
+        font-size: 1.2rem;
+        color: var(--primary-color) !important;
+    }
+    
+    .treatment-description {
+        font-size: 0.9rem;
+        line-height: 1.7;
+        transition: all 0.3s ease;
+    }
+    
+    .treatment-card:hover .treatment-description {
+        font-size: 0.95rem;
+    }
+    
+    .treatment-description ul {
+        text-align: left;
+        padding-left: 0;
+    }
+    
+    .treatment-description li {
+        display: flex;
+        align-items: flex-start;
+        padding-left: 1.5rem;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    
+    .treatment-card:hover .treatment-description li {
+        padding-left: 1.8rem;
+    }
+    
+    /* Punto decorativo personalizado */
+    .benefit-dot {
+        position: absolute;
+        left: 0;
+        top: 8px;
+        width: 8px;
+        height: 8px;
+        background: var(--gradient-primary);
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+    
+    .treatment-card:hover .benefit-dot {
+        animation: dot-pulse 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes dot-pulse {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.3);
+            opacity: 0.7;
+        }
+    }
+    
+    /* ============ RESPONSIVE - OPTIMIZADO ============ */
+    @media (max-width: 992px) {
+        .container.py-5::before {
+            width: 250px;
+            height: 250px;
+        }
+        
+        .container.py-5::after {
+            width: 230px;
+            height: 230px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .container.py-5::before {
+            width: 200px;
+            height: 200px;
+            top: 10%;
+            right: 2%;
+        }
+        
+        .container.py-5::after {
+            width: 180px;
+            height: 180px;
+            bottom: 8%;
+            left: 2%;
+        }
+        
+        .display-4 {
+            font-size: 2rem !important;
+        }
+        
+        p.lead {
+            font-size: 1rem !important;
+        }
+        
+        .treatment-card {
+            padding: 1.5rem !important;
+        }
+        
+        .btn-lg {
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .container.py-5::before,
+        .container.py-5::after {
+            width: 150px;
+            height: 150px;
+        }
+        
+        .display-4 {
+            font-size: 1.75rem !important;
+        }
+        
+        p.lead {
+            font-size: 0.95rem !important;
+        }
+        
+        .treatment-card {
+            padding: 1.2rem !important;
+        }
+        
+        .treatment-card h5 {
+            font-size: 1.1rem !important;
+        }
+        
+        .treatment-card p {
+            font-size: 0.9rem;
+        }
+        
+        .btn-lg {
+            padding: 0.7rem 1.5rem;
+            font-size: 0.95rem;
+        }
+        
+        .badge {
+            font-size: 0.75rem;
+        }
+    }
+    
+    @media (max-width: 375px) {
+        .display-4 {
+            font-size: 1.5rem !important;
+        }
+        
+        .treatment-card {
+            padding: 1rem !important;
+        }
+    }
+</style>
+{% endblock %}
+

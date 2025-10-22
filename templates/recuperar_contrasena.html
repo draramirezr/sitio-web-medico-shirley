@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restablecer Contraseña - Panel Administrativo | Dra. Shirley Ramírez</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="{{ url_for('static', filename='logos/favicon.ico') }}" type="image/x-icon">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', 'Segoe UI', sans-serif;
+            background: #F2E2E6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .reset-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            max-width: 450px;
+            width: 100%;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .reset-header {
+            background: #CEB0B7;
+            padding: 40px 30px;
+            text-align: center;
+            color: white;
+        }
+        
+        .reset-header h1 {
+            font-size: 26px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .reset-header p {
+            font-size: 14px;
+            opacity: 0.95;
+        }
+        
+        .reset-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+        
+        .reset-body {
+            padding: 40px 30px;
+        }
+        
+        .user-info {
+            background-color: #F2E2E6;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        .user-info strong {
+            color: #282828;
+            font-size: 16px;
+        }
+        
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        
+        .flash {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .flash.success {
+            background-color: #D4EDDA;
+            color: #155724;
+            border-left: 4px solid #28A745;
+        }
+        
+        .flash.error {
+            background-color: #F8D7DA;
+            color: #721C24;
+            border-left: 4px solid #DC3545;
+        }
+        
+        .flash.warning {
+            background-color: #FFF3CD;
+            color: #856404;
+            border-left: 4px solid #FFC107;
+        }
+        
+        .flash.info {
+            background-color: #D1ECF1;
+            color: #0C5460;
+            border-left: 4px solid #17A2B8;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #282828;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #E0E0E0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #CEB0B7;
+            box-shadow: 0 0 0 3px rgba(206, 176, 183, 0.1);
+        }
+        
+        .form-group input::placeholder {
+            color: #999;
+        }
+        
+        .password-requirements {
+            background-color: #E7F3FF;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-size: 13px;
+            color: #0D47A1;
+        }
+        
+        .password-requirements ul {
+            margin: 10px 0 0 20px;
+            line-height: 1.8;
+        }
+        
+        .btn-reset {
+            width: 100%;
+            padding: 14px;
+            background: #CEB0B7;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .btn-reset:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+        
+        .btn-reset:active {
+            transform: translateY(0);
+        }
+        
+        .back-to-login {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #E0E0E0;
+        }
+        
+        .back-to-login a {
+            color: #ACACAD;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+        
+        .back-to-login a:hover {
+            color: #CEB0B7;
+            text-decoration: underline;
+        }
+        
+        .password-strength {
+            height: 4px;
+            background-color: #E0E0E0;
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        
+        .password-strength-bar {
+            height: 100%;
+            width: 0;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+        
+        .strength-weak { background-color: #DC3545; width: 33%; }
+        .strength-medium { background-color: #FFC107; width: 66%; }
+        .strength-strong { background-color: #28A745; width: 100%; }
+        
+        @media (max-width: 480px) {
+            .reset-container {
+                margin: 10px;
+            }
+            
+            .reset-header {
+                padding: 30px 20px;
+            }
+            
+            .reset-body {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="reset-container">
+        <div class="reset-header">
+            <div class="reset-icon">🔑</div>
+            <h1>Nueva Contraseña</h1>
+            <p>Crea una contraseña segura para tu cuenta</p>
+        </div>
+        
+        <div class="reset-body">
+            <div class="user-info">
+                👤 <strong>{{ user['nombre'] }}</strong><br>
+                <small style="color: #666;">{{ user['email'] }}</small>
+            </div>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="flash {{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            <div class="password-requirements">
+                <strong>🔒 Requisitos de seguridad:</strong>
+                <ul>
+                    <li>Mínimo 8 caracteres</li>
+                    <li>Se recomienda usar mayúsculas, minúsculas, números y símbolos</li>
+                </ul>
+            </div>
+            
+            <form method="POST" action="{{ url_for('recuperar_contrasena', token=token) }}" id="resetForm">
+                <div class="form-group">
+                    <label for="password">🔒 Nueva Contraseña</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        required 
+                        minlength="8"
+                        autofocus
+                        placeholder="••••••••"
+                        autocomplete="new-password"
+                    >
+                    <div class="password-strength">
+                        <div class="password-strength-bar" id="strengthBar"></div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password_confirm">✅ Confirmar Contraseña</label>
+                    <input 
+                        type="password" 
+                        id="password_confirm" 
+                        name="password_confirm" 
+                        required
+                        minlength="8"
+                        placeholder="••••••••"
+                        autocomplete="new-password"
+                    >
+                </div>
+                
+                <button type="submit" class="btn-reset">
+                    🔐 Cambiar Contraseña
+                </button>
+            </form>
+            
+            <div class="back-to-login">
+                <a href="{{ url_for('login') }}">← Volver al inicio de sesión</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Indicador de fortaleza de contraseña
+        const passwordInput = document.getElementById('password');
+        const strengthBar = document.getElementById('strengthBar');
+        
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            const length = password.length;
+            
+            // Remover clases anteriores
+            strengthBar.classList.remove('strength-weak', 'strength-medium', 'strength-strong');
+            
+            if (length === 0) {
+                strengthBar.style.width = '0';
+            } else if (length < 8) {
+                strengthBar.classList.add('strength-weak');
+            } else if (length < 12 || !/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+                strengthBar.classList.add('strength-medium');
+            } else {
+                strengthBar.classList.add('strength-strong');
+            }
+        });
+        
+        // Validar que las contraseñas coincidan
+        document.getElementById('resetForm').addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            const passwordConfirm = document.getElementById('password_confirm').value;
+            
+            if (password !== passwordConfirm) {
+                e.preventDefault();
+                alert('❌ Las contraseñas no coinciden. Por favor verifica e intenta nuevamente.');
+                document.getElementById('password_confirm').focus();
+            }
+        });
+    </script>
+</body>
+</html>
+

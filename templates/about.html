@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+
+{% block title %}Sobre Mí - Dra. Shirley Ramírez | Ginecóloga Certificada en Panamá{% endblock %}
+
+{% block description %}Dra. Shirley Ramírez - Ginecóloga y Obstetra certificada en Panamá. +10 años de experiencia, especialista en medicina reproductiva, ginecología estética y salud femenina integral. Conoce mi trayectoria profesional.{% endblock %}
+
+{% block og_title %}Dra. Shirley Ramírez - Ginecóloga Certificada con +10 Años de Experiencia{% endblock %}
+{% block og_description %}Conoce a la Dra. Shirley Ramírez: Ginecóloga y Obstetra en Panamá con formación internacional. Especialista en salud femenina integral, medicina reproductiva y ginecología estética.{% endblock %}
+
+{% block content %}
+<style>
+    /* Iconos de marca decorativos - Sobre Mí */
+    .container.py-5 {
+        position: relative;
+    }
+    
+    .container.py-5::before {
+        content: '';
+        position: absolute;
+        width: 320px;
+        height: 320px;
+        background-image: url("{{ url_for('static', filename='images/icono-marca.png') }}");
+        background-size: contain;
+        background-repeat: no-repeat;
+        opacity: 0.04;
+        top: 10%;
+        right: 3%;
+        transform: rotate(-25deg);
+        z-index: 0;
+        pointer-events: none;
+        animation: float-brand-1 12s ease-in-out infinite;
+    }
+    
+    .container.py-5::after {
+        content: '';
+        position: absolute;
+        width: 280px;
+        height: 280px;
+        background-image: url("{{ url_for('static', filename='images/icono-marca.png') }}");
+        background-size: contain;
+        background-repeat: no-repeat;
+        opacity: 0.03;
+        bottom: 15%;
+        left: 5%;
+        transform: rotate(20deg);
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    @keyframes float-brand-1 {
+        0%, 100% { transform: rotate(-25deg) translateY(0); }
+        50% { transform: rotate(-28deg) translateY(-12px); }
+    }
+    
+    /* Marco parcial animado para la imagen */
+    .image-frame-container {
+        position: relative;
+        display: inline-block;
+        padding: 20px;
+        z-index: 1;
+    }
+    
+    /* Marco superior izquierdo */
+    .image-frame-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 60%;
+        height: 60%;
+        border-top: 4px solid var(--primary-color);
+        border-left: 4px solid var(--primary-color);
+        border-radius: 15px 0 0 0;
+    }
+    
+    /* Marco inferior derecho */
+    .image-frame-container::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 60%;
+        height: 60%;
+        border-bottom: 4px solid #ACACAD;
+        border-right: 4px solid #ACACAD;
+        border-radius: 0 0 15px 0;
+    }
+    
+    .image-frame-container img {
+        position: relative;
+        z-index: 1;
+        border-radius: 10px;
+    }
+    
+    /* ============ RESPONSIVE - OPTIMIZADO ============ */
+    @media (max-width: 992px) {
+        .container.py-5::before {
+            width: 250px;
+            height: 250px;
+        }
+        
+        .container.py-5::after {
+            width: 220px;
+            height: 220px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .display-4 {
+            font-size: 2rem !important;
+        }
+        
+        h5 {
+            font-size: 1.1rem;
+        }
+        
+        p {
+            font-size: 0.95rem;
+        }
+        
+        .container.py-5::before {
+            width: 200px;
+            height: 200px;
+            top: 5%;
+            right: 2%;
+        }
+        
+        .container.py-5::after {
+            width: 180px;
+            height: 180px;
+            bottom: 10%;
+            left: 2%;
+        }
+        
+        .image-frame-container {
+            padding: 15px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        ul.list-unstyled li {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .service-icon {
+            width: 60px !important;
+            height: 60px !important;
+            font-size: 1.5rem !important;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .display-4 {
+            font-size: 1.75rem !important;
+        }
+        
+        h5 {
+            font-size: 1rem;
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+        }
+        
+        h6 {
+            font-size: 0.9rem;
+        }
+        
+        p, ul.list-unstyled li {
+            font-size: 0.9rem;
+        }
+        
+        .container.py-5::before,
+        .container.py-5::after {
+            width: 150px;
+            height: 150px;
+        }
+        
+        .image-frame-container {
+            padding: 10px;
+            max-width: 100%;
+        }
+        
+        .image-frame-container::before,
+        .image-frame-container::after {
+            border-width: 3px;
+        }
+        
+        .text-primary.mb-4 {
+            font-size: 0.95rem;
+        }
+        
+        .service-icon {
+            width: 50px !important;
+            height: 50px !important;
+            font-size: 1.3rem !important;
+        }
+        
+        .col-lg-3.col-md-6 {
+            margin-bottom: 1rem;
+        }
+    }
+    
+    @media (max-width: 375px) {
+        .display-4 {
+            font-size: 1.5rem !important;
+        }
+        
+        .container.py-5 {
+            padding: 2rem 0 !important;
+        }
+        
+        .image-frame-container img {
+            max-width: 90%;
+        }
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row align-items-center">
+        <div class="col-lg-5 mb-4 mb-lg-0 text-center">
+            <div class="image-frame-container">
+                <picture>
+                    <source srcset="{{ url_for('static', filename='images/dra-shirley-profesional.webp') }}" type="image/webp">
+                    <img src="{{ url_for('static', filename='images/dra-shirley-profesional.jpg') }}" 
+                         alt="Dra. Shirley Ramírez" 
+                         class="img-fluid shadow"
+                         loading="lazy"
+                         decoding="async"
+                         style="max-width: 100%; height: auto; opacity: 0; transition: opacity 0.5s ease-in-out;"
+                         onload="this.style.opacity='1'">
+                </picture>
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <h1 class="display-4 fw-bold mb-2" style="color: var(--title-color);">Dra. Shirley Ramírez</h1>
+            <h5 class="text-primary mb-4">Ginecóloga y Obstetra</h5>
+            
+            <p class="mb-4">
+                <strong>Doctor en Medicina</strong> - Egresada de la Universidad Autónoma de Santo Domingo (UASD), 
+                una de las universidades más reconocidas del país, donde obtuve una formación exhaustiva y práctica 
+                en medicina, preparándome de manera óptima para mi carrera profesional.
+            </p>
+            
+            <p class="mb-4">
+                <strong>Ginecólogo-Obstetra</strong> - Post Grado en el Hospital Docente Universitario Maternidad 
+                Nuestra Señora de la Altagracia. Trabajar en un entorno de alta complejidad, ofreciendo atención 
+                especializada en salud materna y fetal, me ha permitido perfeccionar mis habilidades en el diagnóstico 
+                y tratamiento de condiciones ginecológicas y obstétricas.
+            </p>
+            
+            <p class="mb-4">
+                <strong>Ginecología Estética Funcional y Regenerativa</strong> en la Universidad Nororiental Privada 
+                Gran Mariscal de Ayacucho (Venezuela). Esta capacitación avanzada me ha permitido proporcionar tratamientos 
+                innovadores y personalizados que mejoran la calidad de vida de mis pacientes.
+            </p>
+            
+            <p class="mb-4">
+                <strong>Máster en Reproducción Humana</strong> – Universidad Europea del Atlántico. 
+                Formación enfocada en el estudio integral de la fertilidad y las técnicas de reproducción asistida, 
+                con bases científicas, clínicas y éticas.
+            </p>
+            
+            <h5 class="mb-3">Formación Académica</h5>
+            <ul class="list-unstyled mb-4">
+                <li><i class="fas fa-graduation-cap text-primary me-2"></i>Doctor en Medicina - Universidad Autónoma de Santo Domingo (UASD)</li>
+                <li><i class="fas fa-graduation-cap text-primary me-2"></i>Ginecólogo-Obstetra - Hospital Docente Universitario Maternidad Nuestra Señora de la Altagracia</li>
+                <li><i class="fas fa-graduation-cap text-primary me-2"></i>Ginecología Estética Funcional y Regenerativa - Universidad Nororiental Privada Gran Mariscal de Ayacucho (Venezuela)</li>
+                <li><i class="fas fa-graduation-cap text-primary me-2"></i>Máster en Reproducción Humana - Universidad Europea del Atlántico</li>
+            </ul>
+            
+            <h5 class="mb-3">Experiencia Profesional</h5>
+            <ul class="list-unstyled mb-4">
+                <li><i class="fas fa-hospital text-primary me-2"></i>Más de 10 años de experiencia</li>
+                <li><i class="fas fa-baby text-primary me-2"></i>Especialista en embarazos de alto riesgo</li>
+                <li><i class="fas fa-heart text-primary me-2"></i>Experta en medicina preventiva femenina</li>
+                <li><i class="fas fa-users text-primary me-2"></i>Más de 2000 pacientes atendidas</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Certificaciones -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="text-center mb-5">Certificaciones y Membresías</h3>
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="text-center">
+                        <div class="service-icon mx-auto mb-3">
+                            <i class="fas fa-certificate"></i>
+                        </div>
+                        <h6>Sociedad Dominicana de Obstetricia y Ginecología</h6>
+                        <p class="text-muted small">Miembro activo</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="text-center">
+                        <div class="service-icon mx-auto mb-3">
+                            <i class="fas fa-award"></i>
+                        </div>
+                        <h6>Colegio Médico Dominicano</h6>
+                        <p class="text-muted small">Miembro activo</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="text-center">
+                        <div class="service-icon mx-auto mb-3">
+                            <i class="fas fa-microscope"></i>
+                        </div>
+                        <h6>Medicina Reproductiva</h6>
+                        <p class="text-muted small">Especialización</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="text-center">
+                        <div class="service-icon mx-auto mb-3">
+                            <i class="fas fa-spa"></i>
+                        </div>
+                        <h6>Ginecología Estética Funcional</h6>
+                        <p class="text-muted small">Certificación</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

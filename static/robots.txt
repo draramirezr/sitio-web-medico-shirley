@@ -1,0 +1,28 @@
+User-agent: *
+Allow: /
+
+# Permitir acceso a recursos estáticos
+Allow: /static/
+Allow: /images/
+Allow: /css/
+Allow: /js/
+
+# Bloquear acceso al panel administrativo
+Disallow: /admin/
+Disallow: /login
+Disallow: /cambiar-password-obligatorio
+Disallow: /solicitar-recuperacion
+Disallow: /recuperar-contrasena/
+
+# Bloquear acceso a archivos sensibles
+Disallow: /*.env
+Disallow: /*.log
+Disallow: /database.db
+Disallow: /requirements.txt
+Disallow: /Procfile
+
+# Sitemap
+Sitemap: https://tu-dominio.railway.app/sitemap.xml
+
+# Crawl-delay para ser respetuosos
+Crawl-delay: 1

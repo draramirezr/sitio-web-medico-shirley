@@ -1,0 +1,380 @@
+{% extends "base.html" %}
+
+{% block title %}Contacto - Dra. Shirley Ramírez | Agenda tu Cita en Panamá 📞 +507 6981-9863{% endblock %}
+
+{% block description %}Contacta a la Dra. Shirley Ramírez - Ginecóloga en Panamá. 📞 +507 6981-9863 | 📧 dra.ramirezr@gmail.com | 📍 Zona Oriental, Panamá. Agenda tu cita hoy. Horarios flexibles y atención inmediata.{% endblock %}
+
+{% block og_title %}Contacto - Agenda tu Cita con Dra. Shirley Ramírez | Panamá{% endblock %}
+{% block og_description %}Contacta a la mejor ginecóloga en Panamá. Teléfono: +507 6981-9863. Ubicación: Zona Oriental. Agenda tu cita hoy y recibe atención personalizada.{% endblock %}
+
+{% block content %}
+<style>
+    /* ============================================
+       FORZAR ELIMINACIÓN DE CHECKMARKS VERDES
+       ============================================ */
+    input:valid,
+    select:valid,
+    textarea:valid,
+    .form-control:valid,
+    .form-select:valid,
+    input[type="text"]:valid,
+    input[type="email"]:valid,
+    input[type="tel"]:valid,
+    input[type="date"]:valid,
+    input[type="password"]:valid,
+    input[required]:valid,
+    select[required]:valid,
+    textarea[required]:valid,
+    input:not(:placeholder-shown):valid,
+    textarea:not(:placeholder-shown):valid {
+        background-image: none !important;
+        border-color: #ced4da !important;
+    }
+    
+    input:valid:focus,
+    select:valid:focus,
+    textarea:valid:focus {
+        background-image: none !important;
+        border-color: #AB9B9F !important;
+        box-shadow: 0 0 0 0.2rem rgba(171, 155, 159, 0.25) !important;
+    }
+    
+    .valid-feedback,
+    .valid-tooltip {
+        display: none !important;
+    }
+
+    /* Iconos de marca decorativos - Contacto */
+    main {
+        position: relative;
+    }
+    
+    main::before {
+        content: '';
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        background-image: url("{{ url_for('static', filename='images/icono-marca.png') }}");
+        background-size: contain;
+        background-repeat: no-repeat;
+        opacity: 0.035;
+        top: 10%;
+        right: 5%;
+        transform: rotate(15deg);
+        z-index: 0;
+        pointer-events: none;
+        animation: float-brand-3 13s ease-in-out infinite;
+    }
+    
+    main::after {
+        content: '';
+        position: absolute;
+        width: 260px;
+        height: 260px;
+        background-image: url("{{ url_for('static', filename='images/icono-marca.png') }}");
+        background-size: contain;
+        background-repeat: no-repeat;
+        opacity: 0.04;
+        bottom: 10%;
+        left: 3%;
+        transform: rotate(-20deg);
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    @keyframes float-brand-3 {
+        0%, 100% { transform: rotate(15deg) translateY(0); }
+        50% { transform: rotate(18deg) translateY(-10px); }
+    }
+    
+    .card-header.bg-primary {
+        background: var(--gradient-primary) !important;
+    }
+    
+    .card-header.bg-primary h5,
+    .card-header.bg-primary i {
+        color: white !important;
+    }
+    
+    /* Tarjetas Clickeables */
+    .card-clickable {
+        display: block;
+        transition: all 0.3s ease;
+    }
+    
+    .card-clickable:hover .card {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(206, 176, 183, 0.3) !important;
+        border-color: var(--primary-color);
+    }
+    
+    .card-clickable:hover h5 {
+        color: var(--primary-color);
+    }
+    
+    .card-clickable .card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    /* ============ RESPONSIVE - OPTIMIZADO ============ */
+    @media (max-width: 992px) {
+        main::before {
+            width: 250px;
+            height: 250px;
+        }
+        
+        main::after {
+            width: 220px;
+            height: 220px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        main::before {
+            width: 200px;
+            height: 200px;
+            top: 8%;
+            right: 2%;
+        }
+        
+        main::after {
+            width: 180px;
+            height: 180px;
+            bottom: 8%;
+            left: 2%;
+        }
+        
+        .card-header h5 {
+            font-size: 1.1rem;
+        }
+        
+        .card-body {
+            padding: 1.25rem;
+        }
+        
+        .btn {
+            padding: 0.7rem 1.5rem;
+            font-size: 0.95rem;
+        }
+        
+        iframe {
+            height: 300px !important;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        main::before,
+        main::after {
+            width: 150px;
+            height: 150px;
+        }
+        
+        .card-header h5 {
+            font-size: 1rem;
+        }
+        
+        .card-header i {
+            font-size: 1.2rem;
+        }
+        
+        .card-body {
+            padding: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .form-label {
+            font-size: 0.9rem;
+        }
+        
+        .form-control {
+            font-size: 0.9rem;
+        }
+        
+        .btn {
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+        }
+        
+        iframe {
+            height: 250px !important;
+        }
+    }
+    
+    @media (max-width: 375px) {
+        .card-body {
+            padding: 0.8rem;
+        }
+        
+        iframe {
+            height: 200px !important;
+        }
+    }
+</style>
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto text-center mb-5">
+            <h1 class="display-3 fw-bold mb-4" style="color: var(--title-color); line-height: 1.3;">
+                ¿Tienes dudas o necesitas agendar una cita?
+            </h1>
+            <p class="lead fs-4 text-muted">Escríbenos y con gusto te atenderemos.</p>
+        </div>
+    </div>
+    
+    <div class="row g-5">
+        <!-- Formulario de Contacto -->
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-envelope me-2"></i>
+                        Envíanos un Mensaje
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nombre Completo *</label>
+                                <input type="text" class="form-control" name="name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Correo Electrónico *</label>
+                                <input type="email" class="form-control" name="email" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Teléfono *</label>
+                                <input type="tel" class="form-control" name="phone" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Asunto *</label>
+                                <input type="text" class="form-control" name="subject" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Mensaje *</label>
+                            <textarea class="form-control" name="message" rows="5" required></textarea>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                Enviar Mensaje
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Redes Sociales -->
+            <div class="row g-4" style="margin-top: calc(2 * (var(--bs-card-spacer-y) + 1rem) + 11rem);">
+                <!-- LinkedIn -->
+                <div class="col-md-6">
+                    <a href="https://www.linkedin.com/in/shirley-ramirez-montero-a10964168/" 
+                       target="_blank" 
+                       rel="noopener noreferrer" 
+                       class="text-decoration-none card-clickable">
+                        <div class="card h-100 shadow">
+                            <div class="card-body text-center">
+                                <div class="service-icon mx-auto mb-3" style="background: linear-gradient(135deg, #0077B5 0%, #005582 100%);">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </div>
+                                <h5>LinkedIn</h5>
+                                <p class="text-muted">
+                                    Shirley Ramírez Montero
+                                </p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                
+                <!-- Instagram -->
+                <div class="col-md-6">
+                    <a href="https://www.instagram.com/dra.ramirezr/" 
+                       target="_blank" 
+                       rel="noopener noreferrer" 
+                       class="text-decoration-none card-clickable">
+                        <div class="card h-100 shadow">
+                            <div class="card-body text-center">
+                                <div class="service-icon mx-auto mb-3" style="background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);">
+                                    <i class="fab fa-instagram"></i>
+                                </div>
+                                <h5>Instagram</h5>
+                                <p class="text-muted">
+                                    @dra.ramirezr
+                                </p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Información de Contacto -->
+        <div class="col-lg-4">
+            <div class="row g-4">
+                <!-- Ubicación -->
+                <div class="col-12">
+                    <a href="https://www.google.com/maps/place/Centro+Oriental+de+Ginecolog%C3%ADa+y+Obstetricia/@18.4975225,-69.8651385,17z/data=!3m1!4b1!4m6!3m5!1s0x8eaf887e90af3bd9:0x5a34a05877ad0b13!8m2!3d18.4975225!4d-69.8651385!16s%2Fg%2F1tcx2l68?entry=ttu&g_ep=EgoyMDI5MTAwOC4wIKXMDSoASAFQAw%3D%3D"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="text-decoration-none card-clickable">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <div class="service-icon mx-auto mb-3">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </div>
+                                <h5>Ubicación</h5>
+                                <p class="text-muted">
+                                    Centro Oriental de Ginecología y Obstetricia<br>
+                                    Zona Oriental<br>
+                                    República Dominicana<br>
+                                    <i class="fas fa-external-link-alt mt-2"></i> Ver en Google Maps
+                                </p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                
+                <!-- Teléfono -->
+                <div class="col-12">
+                    <a href="tel:+18297405073" class="text-decoration-none card-clickable">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <div class="service-icon mx-auto mb-3">
+                                    <i class="fas fa-phone"></i>
+                                </div>
+                                <h5>Teléfono</h5>
+                                <p class="text-muted fs-5">
+                                    (829) 740-5073
+                                </p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                
+                <!-- Email -->
+                <div class="col-12">
+                    <a href="mailto:dra.ramirezr@gmail.com" class="text-decoration-none card-clickable">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <div class="service-icon mx-auto mb-3">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <h5>Email</h5>
+                                <p class="text-muted">
+                                    dra.ramirezr@gmail.com
+                                </p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
