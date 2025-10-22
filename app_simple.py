@@ -297,26 +297,40 @@ EMAIL_CONFIGURED = bool(EMAIL_USERNAME and EMAIL_PASSWORD and EMAIL_PASSWORD != 
 # Función para limpiar comillas de variables de entorno
 def clean_env_var(var_name, default=''):
     """Limpiar comillas que Railway puede agregar automáticamente a las variables"""
-    value = os.getenv(var_name, default)
+    original = os.getenv(var_name, default)
+    value = original
     if value and isinstance(value, str):
         # Eliminar comillas dobles y simples al inicio y final
-        value = value.strip('"').strip("'")
-    return value
+        value = value.strip().strip('"').strip("'").strip()
+    # DEBUG: mostrar transformación
+    if original != value:
+        print(f"   🔧 {var_name}: '{original}' → '{value}'")
+    return value if value else default
 
 # Configuración de la base de datos
 railway_env = clean_env_var('RAILWAY_ENVIRONMENT')
+print(f"🔍 DEBUG: RAILWAY_ENVIRONMENT = '{railway_env}'")
+print(f"🔍 DEBUG: MYSQL_AVAILABLE = {MYSQL_AVAILABLE}")
+
 if MYSQL_AVAILABLE and railway_env:
     # Usar MySQL en Railway (limpiando comillas automáticas)
+    mysql_host = clean_env_var('MYSQL_HOST', 'localhost')
+    mysql_user = clean_env_var('MYSQL_USER', 'root')
+    mysql_password = clean_env_var('MYSQL_PASSWORD', '')
+    mysql_database = clean_env_var('MYSQL_DATABASE', 'drashirley')
+    
     DATABASE_CONFIG = {
-        'host': clean_env_var('MYSQL_HOST', 'localhost'),
-        'user': clean_env_var('MYSQL_USER', 'root'),
-        'password': clean_env_var('MYSQL_PASSWORD', ''),
-        'database': clean_env_var('MYSQL_DATABASE', 'drashirley'),
+        'host': mysql_host,
+        'user': mysql_user,
+        'password': mysql_password,
+        'database': mysql_database,
         'charset': 'utf8mb4'
     }
     DATABASE_TYPE = 'mysql'
     print("✅ Configurado para usar MySQL en Railway")
     print(f"   🔌 Conectando a: {DATABASE_CONFIG['host']}")
+    print(f"   👤 Usuario: {DATABASE_CONFIG['user']}")
+    print(f"   📁 Base de datos: {DATABASE_CONFIG['database']}")
 else:
     # Usar SQLite localmente o como fallback
     DATABASE_CONFIG = os.getenv('DATABASE_URL', 'drashirley_simple.db')
