@@ -20,14 +20,27 @@ from markupsafe import escape
 from io import BytesIO
 
 # Importar templates de email
-from email_templates import (
-    template_contacto,
-    template_cita,
-    template_recuperacion,
-    template_constancia_pdf,
-    template_factura,
-    template_confirmacion_cita
-)
+try:
+    from email_templates import (
+        template_contacto,
+        template_cita,
+        template_recuperacion,
+        template_constancia_pdf,
+        template_factura,
+        template_confirmacion_cita
+    )
+    EMAIL_TEMPLATES_AVAILABLE = True
+except ImportError as e:
+    print(f"⚠️ Email templates no disponibles: {e}")
+    EMAIL_TEMPLATES_AVAILABLE = False
+    
+    # Funciones dummy para evitar errores
+    def template_contacto(*args): return "Email template no disponible"
+    def template_cita(*args): return "Email template no disponible"
+    def template_recuperacion(*args): return "Email template no disponible"
+    def template_constancia_pdf(*args): return "Email template no disponible"
+    def template_factura(*args): return "Email template no disponible"
+    def template_confirmacion_cita(*args): return "Email template no disponible"
 
 # Importar Flask-Compress de forma opcional
 try:
@@ -214,6 +227,9 @@ def add_security_and_cache_headers(response):
 EMAIL_USERNAME = os.getenv('EMAIL_USERNAME', 'dra.ramirezr@gmail.com')
 EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD', '')
 EMAIL_DESTINATARIO = os.getenv('EMAIL_DESTINATARIO', 'dra.ramirezr@gmail.com')
+
+# Verificar configuración de email
+EMAIL_CONFIGURED = bool(EMAIL_USERNAME and EMAIL_PASSWORD)
 
 # Configuración de la base de datos
 DATABASE = 'drashirley_simple.db'
