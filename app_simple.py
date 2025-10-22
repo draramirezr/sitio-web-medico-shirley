@@ -28,6 +28,27 @@ except ImportError:
     MYSQL_AVAILABLE = False
     print("⚠️ PyMySQL no disponible - usando SQLite")
 
+# Función para parsear MySQL URL
+def parse_mysql_url(url):
+    """Parsear URL de MySQL en formato: mysql://user:password@host:port/database"""
+    import re
+    if not url:
+        return None
+    
+    pattern = r'mysql://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)'
+    match = re.match(pattern, url)
+    
+    if match:
+        return {
+            'user': match.group(1),
+            'password': match.group(2),
+            'host': match.group(3),
+            'port': int(match.group(4)),
+            'database': match.group(5),
+            'charset': 'utf8mb4'
+        }
+    return None
+
 # Importar sistema de optimización
 try:
     from optimization_system import (
@@ -313,35 +334,49 @@ print(f"🔍 DEBUG: RAILWAY_ENVIRONMENT = '{railway_env}'")
 print(f"🔍 DEBUG: MYSQL_AVAILABLE = {MYSQL_AVAILABLE}")
 
 if MYSQL_AVAILABLE and railway_env:
-    # Intentar primero con variables automáticas de Railway (MYSQLHOST, MYSQLUSER, etc.)
-    # Estas son generadas automáticamente cuando agregas el servicio MySQL
-    mysqlhost = os.getenv('MYSQLHOST', os.getenv('MYSQL_HOST', ''))
-    mysqluser = os.getenv('MYSQLUSER', os.getenv('MYSQL_USER', ''))
-    mysqlpassword = os.getenv('MYSQLPASSWORD', os.getenv('MYSQL_ROOT_PASSWORD', os.getenv('MYSQL_PASSWORD', '')))
-    mysqldatabase = os.getenv('MYSQLDATABASE', os.getenv('MYSQL_DATABASE', ''))
+    # Opción 1: Intentar parsear MYSQL_URL (generada automáticamente por Railway)
+    mysql_url = os.getenv('MYSQL_URL', '')
+    print(f"   🔍 RAW MYSQL_URL: '{mysql_url[:50] if mysql_url else 'NO DEFINIDA'}...'")
     
-    print(f"   🔍 RAW MYSQLHOST: '{mysqlhost if mysqlhost else 'NO DEFINIDA'}'")
-    print(f"   🔍 RAW MYSQLUSER: '{mysqluser if mysqluser else 'NO DEFINIDA'}'")
-    print(f"   🔍 RAW MYSQLDATABASE: '{mysqldatabase if mysqldatabase else 'NO DEFINIDA'}'")
+    parsed_config = parse_mysql_url(mysql_url)
     
-    # Limpiar comillas si existen
-    mysql_host = clean_env_var('MYSQLHOST', clean_env_var('MYSQL_HOST', 'localhost'))
-    mysql_user = clean_env_var('MYSQLUSER', clean_env_var('MYSQL_USER', 'root'))
-    mysql_password = clean_env_var('MYSQLPASSWORD', clean_env_var('MYSQL_ROOT_PASSWORD', clean_env_var('MYSQL_PASSWORD', '')))
-    mysql_database = clean_env_var('MYSQLDATABASE', clean_env_var('MYSQL_DATABASE', 'railway'))
-    
-    DATABASE_CONFIG = {
-        'host': mysql_host,
-        'user': mysql_user,
-        'password': mysql_password,
-        'database': mysql_database,
-        'charset': 'utf8mb4'
-    }
-    DATABASE_TYPE = 'mysql'
-    print("✅ Configurado para usar MySQL en Railway")
-    print(f"   🔌 Conectando a: {DATABASE_CONFIG['host']}")
-    print(f"   👤 Usuario: {DATABASE_CONFIG['user']}")
-    print(f"   📁 Base de datos: {DATABASE_CONFIG['database']}")
+    if parsed_config:
+        # MYSQL_URL encontrada y parseada exitosamente
+        DATABASE_CONFIG = parsed_config
+        DATABASE_TYPE = 'mysql'
+        print("✅ Configurado para usar MySQL en Railway (usando MYSQL_URL)")
+        print(f"   🔌 Conectando a: {DATABASE_CONFIG['host']}")
+        print(f"   👤 Usuario: {DATABASE_CONFIG['user']}")
+        print(f"   📁 Base de datos: {DATABASE_CONFIG['database']}")
+    else:
+        # Opción 2: Intentar con variables individuales (MYSQLHOST, MYSQLUSER, etc.)
+        mysqlhost = os.getenv('MYSQLHOST', os.getenv('MYSQL_HOST', ''))
+        mysqluser = os.getenv('MYSQLUSER', os.getenv('MYSQL_USER', ''))
+        mysqlpassword = os.getenv('MYSQLPASSWORD', os.getenv('MYSQL_ROOT_PASSWORD', os.getenv('MYSQL_PASSWORD', '')))
+        mysqldatabase = os.getenv('MYSQLDATABASE', os.getenv('MYSQL_DATABASE', ''))
+        
+        print(f"   🔍 RAW MYSQLHOST: '{mysqlhost if mysqlhost else 'NO DEFINIDA'}'")
+        print(f"   🔍 RAW MYSQLUSER: '{mysqluser if mysqluser else 'NO DEFINIDA'}'")
+        print(f"   🔍 RAW MYSQLDATABASE: '{mysqldatabase if mysqldatabase else 'NO DEFINIDA'}'")
+        
+        # Limpiar comillas si existen
+        mysql_host = clean_env_var('MYSQLHOST', clean_env_var('MYSQL_HOST', 'localhost'))
+        mysql_user = clean_env_var('MYSQLUSER', clean_env_var('MYSQL_USER', 'root'))
+        mysql_password = clean_env_var('MYSQLPASSWORD', clean_env_var('MYSQL_ROOT_PASSWORD', clean_env_var('MYSQL_PASSWORD', '')))
+        mysql_database = clean_env_var('MYSQLDATABASE', clean_env_var('MYSQL_DATABASE', 'railway'))
+        
+        DATABASE_CONFIG = {
+            'host': mysql_host,
+            'user': mysql_user,
+            'password': mysql_password,
+            'database': mysql_database,
+            'charset': 'utf8mb4'
+        }
+        DATABASE_TYPE = 'mysql'
+        print("✅ Configurado para usar MySQL en Railway (usando variables individuales)")
+        print(f"   🔌 Conectando a: {DATABASE_CONFIG['host']}")
+        print(f"   👤 Usuario: {DATABASE_CONFIG['user']}")
+        print(f"   📁 Base de datos: {DATABASE_CONFIG['database']}")
 else:
     # Usar SQLite localmente o como fallback
     DATABASE_CONFIG = os.getenv('DATABASE_URL', 'drashirley_simple.db')
