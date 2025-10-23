@@ -1623,10 +1623,30 @@ def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora
         return False
 
 @app.route('/contacto', methods=['GET', 'POST'])
-@rate_limit(max_requests=5, window=300)  # 5 requests por 5 minutos
 def contact():
     """Página de contacto"""
     if request.method == 'POST':
+        # Rate limit solo para POST (envío de formularios)
+        client_ip = request.remote_addr
+        current_time = time.time()
+        
+        with rate_limit_lock:
+            # Limpiar requests antiguos (últimos 5 minutos)
+            request_counts[f'{client_ip}_contact'] = [
+                req_time for req_time in request_counts.get(f'{client_ip}_contact', [])
+                if current_time - req_time < 300  # 5 minutos
+            ]
+            
+            # Verificar límite (5 envíos por 5 minutos)
+            if len(request_counts.get(f'{client_ip}_contact', [])) >= 5:
+                flash('⚠️ Has enviado demasiados mensajes. Por favor espera 5 minutos.', 'warning')
+                return redirect(url_for('contact'))
+            
+            # Agregar request actual
+            if f'{client_ip}_contact' not in request_counts:
+                request_counts[f'{client_ip}_contact'] = []
+            request_counts[f'{client_ip}_contact'].append(current_time)
+        
         name = request.form['name']
         email = request.form['email']
         phone = request.form.get('phone', '')
@@ -1703,10 +1723,30 @@ def horarios_disponibles():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/solicitar-cita', methods=['GET', 'POST'])
-@rate_limit(max_requests=3, window=300)  # 3 requests por 5 minutos
 def request_appointment():
     """Solicitar cita"""
     if request.method == 'POST':
+        # Rate limit solo para POST (envío de formularios)
+        client_ip = request.remote_addr
+        current_time = time.time()
+        
+        with rate_limit_lock:
+            # Limpiar requests antiguos (últimos 5 minutos)
+            request_counts[f'{client_ip}_appointment'] = [
+                req_time for req_time in request_counts.get(f'{client_ip}_appointment', [])
+                if current_time - req_time < 300  # 5 minutos
+            ]
+            
+            # Verificar límite (3 envíos por 5 minutos)
+            if len(request_counts.get(f'{client_ip}_appointment', [])) >= 3:
+                flash('⚠️ Has enviado demasiadas solicitudes. Por favor espera 5 minutos.', 'warning')
+                return redirect(url_for('request_appointment'))
+            
+            # Agregar request actual
+            if f'{client_ip}_appointment' not in request_counts:
+                request_counts[f'{client_ip}_appointment'] = []
+            request_counts[f'{client_ip}_appointment'].append(current_time)
+        
         # Validar y sanitizar entrada
         first_name = sanitize_input(request.form.get('first_name', ''))
         last_name = sanitize_input(request.form.get('last_name', ''))
