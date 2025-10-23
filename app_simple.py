@@ -206,6 +206,26 @@ import time
 request_counts = defaultdict(list)
 rate_limit_lock = Lock()
 
+def cleanup_old_rate_limits():
+    """Limpiar rate limits antiguos para evitar memory leaks"""
+    current_time = time.time()
+    with rate_limit_lock:
+        # Eliminar entradas completamente vacías después de limpiar
+        keys_to_delete = []
+        for key in list(request_counts.keys()):
+            # Filtrar requests antiguos (más de 10 minutos)
+            request_counts[key] = [
+                req_time for req_time in request_counts[key]
+                if current_time - req_time < 600  # 10 minutos
+            ]
+            # Si está vacío, marcarlo para eliminación
+            if not request_counts[key]:
+                keys_to_delete.append(key)
+        
+        # Eliminar claves vacías
+        for key in keys_to_delete:
+            del request_counts[key]
+
 def rate_limit(max_requests=10, window=60):
     """Decorador para rate limiting"""
     def decorator(f):
@@ -280,7 +300,9 @@ def add_security_and_cache_headers(response):
         # Cache de 1 año para CSS, JS, imágenes
         if any(request.path.endswith(ext) for ext in ['.css', '.js', '.jpg', '.jpeg', '.png', '.gif', '.ico', '.svg', '.woff', '.woff2', '.ttf']):
             response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
-            response.headers['Expires'] = (datetime.utcnow() + timedelta(days=365)).strftime('%a, %d %b %Y %H:%M:%S GMT')
+            # Usar datetime.now(timezone.utc) en lugar de utcnow() (deprecated)
+            from datetime import timezone
+            response.headers['Expires'] = (datetime.now(timezone.utc) + timedelta(days=365)).strftime('%a, %d %b %Y %H:%M:%S GMT')
         else:
             response.headers['Cache-Control'] = 'public, max-age=86400'  # 1 día para otros
     else:
@@ -1111,6 +1133,12 @@ def index():
     from datetime import datetime, timedelta
     import random
     
+    # Limpiar rate limits antiguos periódicamente (cada visita a inicio)
+    try:
+        cleanup_old_rate_limits()
+    except:
+        pass  # No detener la página si falla la limpieza
+    
     # Incrementar contador de visitas
     increment_visit_counter()
     
@@ -1842,13 +1870,33 @@ def request_appointment():
 # ============================================================================
 
 @app.route('/login', methods=['GET', 'POST'])
-@rate_limit(max_requests=5, window=300)  # 5 intentos por 5 minutos
 def login():
     """Inicio de sesión para el panel de administración"""
     if current_user.is_authenticated:
         return redirect(url_for('admin'))
     
     if request.method == 'POST':
+        # Rate limit manual para POST (5 intentos por 5 minutos)
+        client_ip = request.remote_addr
+        current_time = time.time()
+        
+        with rate_limit_lock:
+            # Limpiar requests antiguos
+            request_counts[f'{client_ip}_login'] = [
+                req_time for req_time in request_counts.get(f'{client_ip}_login', [])
+                if current_time - req_time < 300  # 5 minutos
+            ]
+            
+            # Verificar límite
+            if len(request_counts.get(f'{client_ip}_login', [])) >= 5:
+                flash('⚠️ Demasiados intentos de inicio de sesión. Por favor espera 5 minutos.', 'error')
+                return redirect(url_for('login'))
+            
+            # Agregar request actual
+            if f'{client_ip}_login' not in request_counts:
+                request_counts[f'{client_ip}_login'] = []
+            request_counts[f'{client_ip}_login'].append(current_time)
+        
         email = request.form.get('email', '').strip().lower()
         password = request.form.get('password', '')
         remember = request.form.get('remember', False)
