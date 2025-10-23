@@ -620,7 +620,7 @@ def init_db():
     cursor.execute(adapt_sql_for_database('''
         CREATE TABLE IF NOT EXISTS ars (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre_ars TEXT NOT NULL,
+            nombre_ars VARCHAR(255) NOT NULL,
             rnc TEXT NOT NULL,
             activo BOOLEAN DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -631,7 +631,7 @@ def init_db():
     cursor.execute(adapt_sql_for_database('''
         CREATE TABLE IF NOT EXISTS medicos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre TEXT NOT NULL,
+            nombre VARCHAR(255) NOT NULL,
             especialidad TEXT NOT NULL,
             cedula VARCHAR(50) NOT NULL UNIQUE,
             email VARCHAR(255),
@@ -743,8 +743,8 @@ def init_db():
     cursor.execute(adapt_sql_for_database('''
         CREATE TABLE IF NOT EXISTS pacientes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nss TEXT NOT NULL,
-            nombre TEXT NOT NULL,
+            nss VARCHAR(50) NOT NULL,
+            nombre VARCHAR(255) NOT NULL,
             ars_id INTEGER,
             activo BOOLEAN DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -777,7 +777,7 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             factura_id INTEGER,
             paciente_id INTEGER NOT NULL,
-            nss TEXT NOT NULL,
+            nss VARCHAR(50) NOT NULL,
             nombre_paciente TEXT NOT NULL,
             fecha_servicio DATE NOT NULL,
             autorizacion TEXT,
