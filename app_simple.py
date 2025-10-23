@@ -809,12 +809,14 @@ def init_db():
     
     if count == 0:
         # Usuario por defecto: ing.fpaula@gmail.com - Francisco Paula
+        # Normalizar email a lowercase para evitar problemas de case-sensitivity
+        admin_email = 'ing.fpaula@gmail.com'.lower()
         password_hash = generate_password_hash('2416Xpos@')
         cursor.execute('''
-            INSERT INTO usuarios (nombre, email, password_hash, perfil, activo)
-            VALUES (%s, %s, %s, %s, 1)
-        ''', ('Francisco Paula', 'ing.fpaula@gmail.com', password_hash, 'Administrador'))
-        print("✅ Usuario por defecto creado: ing.fpaula@gmail.com")
+            INSERT INTO usuarios (nombre, email, password_hash, perfil, activo, password_temporal)
+            VALUES (%s, %s, %s, %s, 1, 0)
+        ''', ('Francisco Paula', admin_email, password_hash, 'Administrador'))
+        print(f"✅ Usuario por defecto creado: {admin_email}")
     
     conn.commit()
     conn.close()
