@@ -898,79 +898,94 @@ def increment_visit_counter():
         print(f"Error al incrementar contador de visitas: {e}")
 
 def create_database_indexes():
-    """Crear índices críticos para mejorar rendimiento"""
+    """Verificar y crear índices críticos si no existen - MySQL optimized"""
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        print("🔧 Creando índices de base de datos...")
+        # Obtener lista de índices existentes en la base de datos
+        cursor.execute("""
+            SELECT DISTINCT INDEX_NAME 
+            FROM INFORMATION_SCHEMA.STATISTICS 
+            WHERE TABLE_SCHEMA = DATABASE()
+        """)
+        existing_indexes = {row['INDEX_NAME'] for row in cursor.fetchall()}
+        
+        print(f"🔧 Verificando índices de base de datos... ({len(existing_indexes)} existentes)")
         
         # Índices críticos para mejorar velocidad
-        indexes = [
+        indexes = {
             # Facturas Detalle (tabla más consultada)
-            "CREATE INDEX IF NOT EXISTS idx_facturas_detalle_estado_activo ON facturas_detalle(estado, activo)",
-            "CREATE INDEX IF NOT EXISTS idx_facturas_detalle_ars_estado ON facturas_detalle(ars_id, estado, activo)",
-            "CREATE INDEX IF NOT EXISTS idx_facturas_detalle_medico_estado ON facturas_detalle(medico_id, estado, activo)",
-            "CREATE INDEX IF NOT EXISTS idx_facturas_detalle_fecha_servicio ON facturas_detalle(fecha_servicio)",
-            "CREATE INDEX IF NOT EXISTS idx_facturas_detalle_nss ON facturas_detalle(nss)",
-            "CREATE INDEX IF NOT EXISTS idx_facturas_detalle_factura_id ON facturas_detalle(factura_id, activo)",
+            "idx_facturas_detalle_estado_activo": "CREATE INDEX idx_facturas_detalle_estado_activo ON facturas_detalle(estado, activo)",
+            "idx_facturas_detalle_ars_estado": "CREATE INDEX idx_facturas_detalle_ars_estado ON facturas_detalle(ars_id, estado, activo)",
+            "idx_facturas_detalle_medico_estado": "CREATE INDEX idx_facturas_detalle_medico_estado ON facturas_detalle(medico_id, estado, activo)",
+            "idx_facturas_detalle_fecha_servicio": "CREATE INDEX idx_facturas_detalle_fecha_servicio ON facturas_detalle(fecha_servicio)",
+            "idx_facturas_detalle_nss": "CREATE INDEX idx_facturas_detalle_nss ON facturas_detalle(nss)",
+            "idx_facturas_detalle_factura_id": "CREATE INDEX idx_facturas_detalle_factura_id ON facturas_detalle(factura_id, activo)",
             
             # Pacientes
-            "CREATE INDEX IF NOT EXISTS idx_pacientes_nss_ars_activo ON pacientes(nss, ars_id, activo)",
-            "CREATE INDEX IF NOT EXISTS idx_pacientes_nombre_activo ON pacientes(nombre, activo)",
-            "CREATE INDEX IF NOT EXISTS idx_pacientes_activo ON pacientes(activo)",
+            "idx_pacientes_nss_ars_activo": "CREATE INDEX idx_pacientes_nss_ars_activo ON pacientes(nss, ars_id, activo)",
+            "idx_pacientes_nombre_activo": "CREATE INDEX idx_pacientes_nombre_activo ON pacientes(nombre, activo)",
+            "idx_pacientes_activo": "CREATE INDEX idx_pacientes_activo ON pacientes(activo)",
             
             # Facturas
-            "CREATE INDEX IF NOT EXISTS idx_facturas_fecha_factura ON facturas(fecha_factura)",
-            "CREATE INDEX IF NOT EXISTS idx_facturas_medico_activo ON facturas(medico_id, activo)",
-            "CREATE INDEX IF NOT EXISTS idx_facturas_ars_activo ON facturas(ars_id, activo)",
-            "CREATE INDEX IF NOT EXISTS idx_facturas_activo ON facturas(activo)",
+            "idx_facturas_fecha_factura": "CREATE INDEX idx_facturas_fecha_factura ON facturas(fecha_factura)",
+            "idx_facturas_medico_activo": "CREATE INDEX idx_facturas_medico_activo ON facturas(medico_id, activo)",
+            "idx_facturas_ars_activo": "CREATE INDEX idx_facturas_ars_activo ON facturas(ars_id, activo)",
+            "idx_facturas_activo": "CREATE INDEX idx_facturas_activo ON facturas(activo)",
             
             # Appointments
-            "CREATE INDEX IF NOT EXISTS idx_appointments_status_created ON appointments(status, created_at)",
-            "CREATE INDEX IF NOT EXISTS idx_appointments_date ON appointments(appointment_date)",
-            "CREATE INDEX IF NOT EXISTS idx_appointments_email ON appointments(email)",
+            "idx_appointments_status_created": "CREATE INDEX idx_appointments_status_created ON appointments(status, created_at)",
+            "idx_appointments_date": "CREATE INDEX idx_appointments_date ON appointments(appointment_date)",
+            "idx_appointments_email": "CREATE INDEX idx_appointments_email ON appointments(email)",
             
             # Contact Messages
-            "CREATE INDEX IF NOT EXISTS idx_messages_read_created ON contact_messages(read, created_at)",
-            "CREATE INDEX IF NOT EXISTS idx_messages_email ON contact_messages(email)",
+            "idx_messages_read_created": "CREATE INDEX idx_messages_read_created ON contact_messages(`read`, created_at)",
+            "idx_messages_email": "CREATE INDEX idx_messages_email ON contact_messages(email)",
             
             # Usuarios
-            "CREATE INDEX IF NOT EXISTS idx_usuarios_email_activo ON usuarios(email, activo)",
-            "CREATE INDEX IF NOT EXISTS idx_usuarios_activo ON usuarios(activo)",
-            "CREATE INDEX IF NOT EXISTS idx_usuarios_perfil_activo ON usuarios(perfil, activo)",
+            "idx_usuarios_email_activo": "CREATE INDEX idx_usuarios_email_activo ON usuarios(email, activo)",
+            "idx_usuarios_activo": "CREATE INDEX idx_usuarios_activo ON usuarios(activo)",
+            "idx_usuarios_perfil_activo": "CREATE INDEX idx_usuarios_perfil_activo ON usuarios(perfil, activo)",
             
             # Médicos
-            "CREATE INDEX IF NOT EXISTS idx_medicos_activo_factura ON medicos(activo, factura)",
-            "CREATE INDEX IF NOT EXISTS idx_medicos_email ON medicos(email)",
-            "CREATE INDEX IF NOT EXISTS idx_medicos_nombre ON medicos(nombre)",
+            "idx_medicos_activo_factura": "CREATE INDEX idx_medicos_activo_factura ON medicos(activo, factura)",
+            "idx_medicos_email": "CREATE INDEX idx_medicos_email ON medicos(email)",
+            "idx_medicos_nombre": "CREATE INDEX idx_medicos_nombre ON medicos(nombre)",
             
             # ARS
-            "CREATE INDEX IF NOT EXISTS idx_ars_activo ON ars(activo)",
-            "CREATE INDEX IF NOT EXISTS idx_ars_nombre ON ars(nombre_ars)",
+            "idx_ars_activo": "CREATE INDEX idx_ars_activo ON ars(activo)",
+            "idx_ars_nombre": "CREATE INDEX idx_ars_nombre ON ars(nombre_ars)",
             
             # NCF
-            "CREATE INDEX IF NOT EXISTS idx_ncf_activo ON ncf(activo)",
-            "CREATE INDEX IF NOT EXISTS idx_ncf_tipo_activo ON ncf(tipo, activo)",
+            "idx_ncf_activo": "CREATE INDEX idx_ncf_activo ON ncf(activo)",
+            "idx_ncf_tipo_activo": "CREATE INDEX idx_ncf_tipo_activo ON ncf(tipo, activo)",
             
             # Código ARS
-            "CREATE INDEX IF NOT EXISTS idx_codigo_ars_medico_ars ON codigo_ars(medico_id, ars_id, activo)",
-            "CREATE INDEX IF NOT EXISTS idx_codigo_ars_codigo ON codigo_ars(codigo_ars)"
-        ]
+            "idx_codigo_ars_medico_ars": "CREATE INDEX idx_codigo_ars_medico_ars ON codigo_ars(medico_id, ars_id, activo)",
+            "idx_codigo_ars_codigo": "CREATE INDEX idx_codigo_ars_codigo ON codigo_ars(codigo_ars)"
+        }
         
-        for index_sql in indexes:
-            try:
-                cursor.execute(index_sql)
-                print(f"✅ Índice creado: {index_sql.split('idx_')[1].split(' ON')[0]}")
-            except Exception as e:
-                print(f"⚠️ Error creando índice: {e}")
+        created_count = 0
+        
+        # Solo crear índices que NO existen
+        for index_name, index_sql in indexes.items():
+            if index_name not in existing_indexes:
+                try:
+                    cursor.execute(index_sql)
+                    created_count += 1
+                except Exception as e:
+                    print(f"⚠️ Error creando {index_name}: {e}")
         
         conn.commit()
         conn.close()
-        print("✅ Índices de base de datos creados exitosamente")
+        
+        if created_count > 0:
+            print(f"✅ Nuevos índices creados: {created_count}")
+        print("✅ Índices de base de datos verificados")
         
     except Exception as e:
-        print(f"❌ Error creando índices: {e}")
+        print(f"❌ Error verificando índices: {e}")
 
 def get_visit_count():
     """Obtener el número total de visitas del sitio"""
