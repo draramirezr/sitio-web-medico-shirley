@@ -190,9 +190,9 @@
     }
     
     .btn-accion {
-        background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%);
+        background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%) !important;
         border: none;
-        color: white;
+        color: white !important;
         padding: 0.8rem 2rem;
         border-radius: 12px;
         font-weight: 600;
@@ -204,10 +204,14 @@
     }
     
     .btn-accion:hover {
-        background: linear-gradient(135deg, #B89BA3 0%, #A88A92 100%);
-        color: white;
+        background: linear-gradient(135deg, #B89BA3 0%, #A88A92 100%) !important;
+        color: white !important;
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(206, 176, 173, 0.4);
+        box-shadow: 0 8px 25px rgba(206, 176, 183, 0.4);
+    }
+    
+    .btn-accion i {
+        color: white !important;
     }
     
     .btn-volver {
@@ -235,7 +239,7 @@
     }
     
     .btn-email {
-        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%) !important;
+        background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%) !important;
         border: none;
         color: white !important;
         padding: 0.8rem 2rem;
@@ -249,10 +253,10 @@
     }
     
     .btn-email:hover {
-        background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%) !important;
+        background: linear-gradient(135deg, #B89BA3 0%, #A88A92 100%) !important;
         color: white !important;
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+        box-shadow: 0 8px 25px rgba(206, 176, 183, 0.4);
     }
     
     .btn-email i {
@@ -267,6 +271,21 @@
         font-weight: 700;
         font-size: 0.9rem;
         display: inline-block;
+    }
+    
+    /* Estilos del modal de email */
+    #modalEnviarEmail .modal-header {
+        background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%);
+        color: white !important;
+    }
+    
+    #modalEnviarEmail .modal-title {
+        color: white !important;
+        font-weight: 700;
+    }
+    
+    #modalEnviarEmail .modal-title i {
+        color: white !important;
     }
 </style>
 
@@ -436,7 +455,7 @@
                         <i class="fas fa-times me-1"></i>
                         Cancelar
                     </button>
-                    <button type="submit" class="btn" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white;">
+                    <button type="submit" class="btn" style="background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%); color: white; border: none; font-weight: 600;">
                         <i class="fas fa-paper-plane me-1"></i>
                         Enviar Email
                     </button>

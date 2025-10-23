@@ -513,7 +513,7 @@ def init_db():
             nombre TEXT NOT NULL,
             email VARCHAR(255) UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
-            perfil TEXT NOT NULL CHECK(perfil IN ('Administrador', 'Registro de Facturas')),
+            perfil TEXT NOT NULL CHECK(perfil IN ('Administrador', 'Nivel 2', 'Registro de Facturas')),
             activo BOOLEAN DEFAULT 1,
             password_temporal BOOLEAN DEFAULT 0,
             token_recuperacion TEXT,
@@ -1656,6 +1656,56 @@ def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora
         print(f"Error: {e}")
         print("\nEl cambio de estatus se guardó en la base de datos.")
         print("Pero el email no pudo ser enviado al paciente.")
+        print("=" * 60 + "\n")
+        return False
+
+def send_email(destinatario, asunto, cuerpo):
+    """Función genérica para enviar emails HTML"""
+    try:
+        # Verificar si hay contraseña configurada
+        if not EMAIL_PASSWORD or EMAIL_PASSWORD == "tu_password_aqui":
+            print("\n⚠️ CONFIGURACIÓN DE EMAIL PENDIENTE")
+            print("Por favor, configura EMAIL_PASSWORD en el archivo .env")
+            return False
+        
+        # Verificar que el destinatario tenga email
+        if not destinatario:
+            print("\n⚠️ No se proporcionó un destinatario")
+            return False
+        
+        print("\n" + "=" * 60)
+        print("📧 ENVIANDO EMAIL")
+        print("=" * 60)
+        print(f"📧 Destinatario: {destinatario}")
+        print(f"📝 Asunto: {asunto}")
+        
+        # Crear mensaje
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = asunto
+        msg['From'] = EMAIL_USERNAME
+        msg['To'] = destinatario
+        
+        # Adjuntar HTML
+        part = MIMEText(cuerpo, 'html')
+        msg.attach(part)
+        
+        # Conectar y enviar
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(EMAIL_USERNAME, EMAIL_PASSWORD)
+        server.send_message(msg)
+        server.quit()
+        
+        print("\n✅ EMAIL ENVIADO EXITOSAMENTE")
+        print("=" * 60 + "\n")
+        
+        return True
+        
+    except Exception as e:
+        print("\n" + "=" * 60)
+        print("❌ ERROR AL ENVIAR EMAIL")
+        print("=" * 60)
+        print(f"Error: {e}")
         print("=" * 60 + "\n")
         return False
 
@@ -2825,15 +2875,15 @@ def facturacion_pacientes_pendientes():
     
     # Si el usuario tiene rol "Registro de Facturas", filtrar solo sus pacientes
     if current_user.perfil == 'Registro de Facturas':
-        query += ' AND m.email = ?'
+        query += ' AND m.email = %s'
         params.append(current_user.email)
     
     if medico_id:
-        query += ' AND fd.medico_id = ?'
+        query += ' AND fd.medico_id = %s'
         params.append(medico_id)
     
     if ars_id:
-        query += ' AND fd.ars_id = ?'
+        query += ' AND fd.ars_id = %s'
         params.append(ars_id)
     
     query += ' ORDER BY fd.created_at DESC'
@@ -2905,15 +2955,15 @@ def facturacion_pacientes_pendientes_pdf():
     
     # Si el usuario tiene rol "Registro de Facturas", filtrar solo sus pacientes
     if current_user.perfil == 'Registro de Facturas':
-        query += ' AND m.email = ?'
+        query += ' AND m.email = %s'
         params.append(current_user.email)
     
     if medico_id:
-        query += ' AND fd.medico_id = ?'
+        query += ' AND fd.medico_id = %s'
         params.append(medico_id)
     
     if ars_id:
-        query += ' AND fd.ars_id = ?'
+        query += ' AND fd.ars_id = %s'
         params.append(ars_id)
     
     query += ' ORDER BY fd.created_at DESC'
@@ -3192,7 +3242,7 @@ def facturacion_pacientes_agregados_pdf():
     
     # Obtener los registros de la base de datos
     conn = get_db_connection()
-    placeholders = ','.join(['?' for _ in ids_agregados])
+    placeholders = ','.join(['%s' for _ in ids_agregados])
     pendientes = conn.execute(f'''
         SELECT fd.*, m.nombre as medico_nombre, m.email as medico_email, m.especialidad as medico_especialidad, 
                a.nombre_ars, p.nombre as paciente_nombre_completo
@@ -3965,7 +4015,7 @@ def facturacion_generar():
                 return redirect(url_for('facturacion_generar'))
             
             # Obtener datos de los pacientes seleccionados (SIN datos del médico)
-            placeholders = ','.join(['?' for _ in ids_list])
+            placeholders = ','.join(['%s' for _ in ids_list])
             pacientes = conn.execute(f'''
                 SELECT fd.*
                 FROM facturas_detalle fd
@@ -4088,7 +4138,7 @@ def facturacion_generar_final():
         medico_email = medico['email']
         
         # Obtener datos de los pacientes seleccionados
-        placeholders = ','.join(['?' for _ in ids_list])
+        placeholders = ','.join(['%s' for _ in ids_list])
         pacientes = conn.execute(f'''
             SELECT fd.*
             FROM facturas_detalle fd
@@ -4142,7 +4192,7 @@ def facturacion_generar_final():
                        a.nombre_ars, a.rnc as ars_rnc,
                        ca.codigo_ars as codigo_ars
                 FROM facturas_detalle fd
-                JOIN medicos m ON m.id = ?
+                JOIN medicos m ON m.id = %s
                 JOIN ars a ON fd.ars_id = a.id
                 LEFT JOIN codigo_ars ca ON ca.medico_id = m.id AND ca.ars_id = a.id
                 WHERE fd.id IN ({placeholders})
@@ -4278,20 +4328,17 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None)
     # Información en 3 columnas (como el HTML)
     if pacientes and len(pacientes) > 0:
         # Extraer datos dinámicos
-        ars_nombre = pacientes[0]['nombre_ars'] if 'nombre_ars' in pacientes[0].keys() else 'N/A'
-        ars_rnc = pacientes[0]['ars_rnc'] if 'ars_rnc' in pacientes[0].keys() and pacientes[0]['ars_rnc'] else ''
-        medico_nombre = pacientes[0]['medico_nombre'] if 'medico_nombre' in pacientes[0].keys() else 'N/A'
-        medico_especialidad = pacientes[0]['medico_especialidad'] if 'medico_especialidad' in pacientes[0].keys() else 'N/A'
-        codigo_ars = pacientes[0]['codigo_ars'] if 'codigo_ars' in pacientes[0].keys() and pacientes[0]['codigo_ars'] else 'N/A'
-        medico_exequatur = pacientes[0]['medico_exequatur'] if 'medico_exequatur' in pacientes[0].keys() and pacientes[0]['medico_exequatur'] else ''
-        ncf_tipo = ncf_data['tipo'] if ncf_data and 'tipo' in ncf_data.keys() else 'CRÉDITO FISCAL'
-        ncf_fecha_fin = ncf_data['fecha_fin'] if ncf_data and 'fecha_fin' in ncf_data.keys() and ncf_data['fecha_fin'] else ''
+        ars_nombre = pacientes[0].get('nombre_ars', 'N/A')
+        ars_rnc = pacientes[0].get('ars_rnc', 'N/A')
+        medico_nombre = pacientes[0].get('medico_nombre', 'N/A')
+        medico_especialidad = pacientes[0].get('medico_especialidad', 'N/A')
+        codigo_ars = pacientes[0].get('codigo_ars', 'N/A')
+        medico_exequatur = pacientes[0].get('medico_exequatur', '')
+        ncf_tipo = ncf_data.get('tipo', 'CRÉDITO FISCAL') if ncf_data else 'CRÉDITO FISCAL'
+        ncf_fecha_fin = ncf_data.get('fecha_fin', '') if ncf_data else ''
         
         # Construir las 3 columnas (sin etiquetas de título, letras más grandes)
-        col1_text = f"<font size='10'>Fecha: {fecha}<br/>Cliente: {ars_nombre}"
-        if ars_rnc:
-            col1_text += f"<br/>RNC: {ars_rnc}"
-        col1_text += "</font>"
+        col1_text = f"<font size='10'>Fecha: {fecha}<br/>Cliente: {ars_nombre}<br/>RNC: {ars_rnc}</font>"
         
         col2_text = f"<b>NCF</b><br/><font size='11' color='#CEB0B7'><b>{ncf}</b></font><br/><font size='10'>Tipo: {ncf_tipo}"
         if ncf_fecha_fin:
@@ -4457,11 +4504,11 @@ def facturacion_historico():
     params = []
     
     if ars_id:
-        query += ' AND f.ars_id = ?'
+        query += ' AND f.ars_id = %s'
         params.append(ars_id)
     
     if medico_id:
-        query += ' AND f.medico_id = ?'
+        query += ' AND f.medico_id = %s'
         params.append(medico_id)
     
     if ncf:
@@ -4498,6 +4545,237 @@ def facturacion_historico():
                          ncf=ncf,
                          fecha_desde=fecha_desde,
                          fecha_hasta=fecha_hasta)
+
+@app.route('/facturacion/dashboard')
+@login_required
+def facturacion_dashboard():
+    """Dashboard de indicadores de facturación - Solo Administradores"""
+    # Solo administradores pueden ver el dashboard
+    if current_user.perfil != 'Administrador':
+        flash('No tienes permisos para acceder a esta sección', 'error')
+        return redirect(url_for('facturacion_menu'))
+    
+    from datetime import datetime
+    
+    # Obtener filtros de fecha (por defecto: año actual)
+    fecha_desde = request.args.get('fecha_desde', default=f'{datetime.now().year}-01-01')
+    fecha_hasta = request.args.get('fecha_hasta', default=f'{datetime.now().year}-12-31')
+    
+    # Obtener filtros de ARS y Médico
+    ars_id = request.args.get('ars_id', type=int)
+    medico_id = request.args.get('medico_id', type=int)
+    
+    conn = get_db_connection()
+    
+    # Obtener listas para los filtros
+    ars_list = conn.execute('SELECT * FROM ars WHERE activo = 1 ORDER BY nombre_ars').fetchall()
+    medicos_list = conn.execute('SELECT * FROM medicos WHERE activo = 1 ORDER BY nombre').fetchall()
+    
+    # ==================== INDICADORES GENERALES ====================
+    # Total de facturas generadas (en el rango y filtros)
+    query_facturas = '''
+        SELECT COUNT(*) as total FROM facturas 
+        WHERE activo = 1 
+        AND fecha_factura BETWEEN %s AND %s
+    '''
+    params_facturas = [fecha_desde, fecha_hasta]
+    
+    if ars_id:
+        query_facturas += ' AND ars_id = %s'
+        params_facturas.append(ars_id)
+    
+    if medico_id:
+        query_facturas += ' AND medico_id = %s'
+        params_facturas.append(medico_id)
+    
+    total_facturas = conn.execute(query_facturas, params_facturas).fetchone()['total']
+    
+    # Total facturado (monto en el rango y filtros)
+    query_monto = '''
+        SELECT COALESCE(SUM(total), 0) as total FROM facturas 
+        WHERE activo = 1 
+        AND fecha_factura BETWEEN %s AND %s
+    '''
+    params_monto = [fecha_desde, fecha_hasta]
+    
+    if ars_id:
+        query_monto += ' AND ars_id = %s'
+        params_monto.append(ars_id)
+    
+    if medico_id:
+        query_monto += ' AND medico_id = %s'
+        params_monto.append(medico_id)
+    
+    total_facturado = conn.execute(query_monto, params_monto).fetchone()['total']
+    
+    # Pacientes pendientes (siempre actual, pero con filtros de ARS/Médico)
+    query_pendientes = "SELECT COUNT(*) as total FROM facturas_detalle WHERE estado = 'pendiente' AND activo = 1"
+    params_pendientes = []
+    
+    if ars_id:
+        query_pendientes += ' AND ars_id = %s'
+        params_pendientes.append(ars_id)
+    
+    if medico_id:
+        query_pendientes += ' AND medico_id = %s'
+        params_pendientes.append(medico_id)
+    
+    pacientes_pendientes = conn.execute(query_pendientes, params_pendientes).fetchone()['total']
+    
+    # Pacientes facturados (en el rango y filtros)
+    query_facturados = '''
+        SELECT COUNT(*) as total FROM facturas_detalle fd
+        JOIN facturas f ON fd.factura_id = f.id
+        WHERE fd.estado = 'facturado' AND fd.activo = 1
+        AND f.fecha_factura BETWEEN %s AND %s
+    '''
+    params_facturados = [fecha_desde, fecha_hasta]
+    
+    if ars_id:
+        query_facturados += ' AND f.ars_id = %s'
+        params_facturados.append(ars_id)
+    
+    if medico_id:
+        query_facturados += ' AND f.medico_id = %s'
+        params_facturados.append(medico_id)
+    
+    pacientes_facturados = conn.execute(query_facturados, params_facturados).fetchone()['total']
+    
+    # ==================== FACTURACIÓN POR MES ====================
+    query_mes = '''
+        SELECT 
+            DATE_FORMAT(fecha_factura, '%%Y-%%m') as mes,
+            COALESCE(SUM(total), 0) as total_monto
+        FROM facturas
+        WHERE activo = 1 
+        AND fecha_factura BETWEEN %s AND %s
+    '''
+    params_mes = [fecha_desde, fecha_hasta]
+    
+    if ars_id:
+        query_mes += ' AND ars_id = %s'
+        params_mes.append(ars_id)
+    
+    if medico_id:
+        query_mes += ' AND medico_id = %s'
+        params_mes.append(medico_id)
+    
+    query_mes += ' GROUP BY DATE_FORMAT(fecha_factura, \'%%Y-%%m\') ORDER BY mes ASC'
+    
+    facturacion_por_mes = conn.execute(query_mes, params_mes).fetchall()
+    
+    # ==================== FACTURACIÓN POR ARS ====================
+    query_ars = '''
+        SELECT a.nombre_ars, COALESCE(SUM(f.total), 0) as total_monto
+        FROM facturas f
+        JOIN ars a ON f.ars_id = a.id
+        WHERE f.activo = 1
+        AND f.fecha_factura BETWEEN %s AND %s
+    '''
+    params_ars = [fecha_desde, fecha_hasta]
+    
+    if ars_id:
+        query_ars += ' AND f.ars_id = %s'
+        params_ars.append(ars_id)
+    
+    if medico_id:
+        query_ars += ' AND f.medico_id = %s'
+        params_ars.append(medico_id)
+    
+    query_ars += ' GROUP BY a.id, a.nombre_ars ORDER BY total_monto DESC'
+    
+    facturacion_por_ars = conn.execute(query_ars, params_ars).fetchall()
+    
+    # ==================== FACTURACIÓN POR MÉDICO ====================
+    query_medico = '''
+        SELECT m.nombre, COALESCE(SUM(f.total), 0) as total_monto
+        FROM facturas f
+        JOIN medicos m ON f.medico_id = m.id
+        WHERE f.activo = 1
+        AND f.fecha_factura BETWEEN %s AND %s
+    '''
+    params_medico = [fecha_desde, fecha_hasta]
+    
+    if ars_id:
+        query_medico += ' AND f.ars_id = %s'
+        params_medico.append(ars_id)
+    
+    if medico_id:
+        query_medico += ' AND f.medico_id = %s'
+        params_medico.append(medico_id)
+    
+    query_medico += ' GROUP BY m.id, m.nombre ORDER BY total_monto DESC'
+    
+    facturacion_por_medico = conn.execute(query_medico, params_medico).fetchall()
+    
+    # ==================== FACTURACIÓN POR MÉDICO Y MES (para gráfico) ====================
+    query_medico_mes = '''
+        SELECT 
+            m.nombre,
+            DATE_FORMAT(f.fecha_factura, '%%Y-%%m') as mes,
+            COALESCE(SUM(f.total), 0) as total_monto
+        FROM facturas f
+        JOIN medicos m ON f.medico_id = m.id
+        WHERE f.activo = 1
+        AND f.fecha_factura BETWEEN %s AND %s
+    '''
+    params_medico_mes = [fecha_desde, fecha_hasta]
+    
+    if ars_id:
+        query_medico_mes += ' AND f.ars_id = %s'
+        params_medico_mes.append(ars_id)
+    
+    if medico_id:
+        query_medico_mes += ' AND f.medico_id = %s'
+        params_medico_mes.append(medico_id)
+    
+    query_medico_mes += ' GROUP BY m.id, m.nombre, DATE_FORMAT(f.fecha_factura, \'%%Y-%%m\') ORDER BY m.nombre, mes ASC'
+    
+    facturacion_medico_mes = conn.execute(query_medico_mes, params_medico_mes).fetchall()
+    
+    # ==================== FACTURACIÓN POR ARS Y MES (para gráfico) ====================
+    query_ars_mes = '''
+        SELECT 
+            a.nombre_ars,
+            DATE_FORMAT(f.fecha_factura, '%%Y-%%m') as mes,
+            COALESCE(SUM(f.total), 0) as total_monto
+        FROM facturas f
+        JOIN ars a ON f.ars_id = a.id
+        WHERE f.activo = 1
+        AND f.fecha_factura BETWEEN %s AND %s
+    '''
+    params_ars_mes = [fecha_desde, fecha_hasta]
+    
+    if ars_id:
+        query_ars_mes += ' AND f.ars_id = %s'
+        params_ars_mes.append(ars_id)
+    
+    if medico_id:
+        query_ars_mes += ' AND f.medico_id = %s'
+        params_ars_mes.append(medico_id)
+    
+    query_ars_mes += ' GROUP BY a.id, a.nombre_ars, DATE_FORMAT(f.fecha_factura, \'%%Y-%%m\') ORDER BY a.nombre_ars, mes ASC'
+    
+    facturacion_ars_mes = conn.execute(query_ars_mes, params_ars_mes).fetchall()
+    
+    conn.close()
+    
+    return render_template('facturacion/dashboard.html',
+                         total_facturas=total_facturas,
+                         total_facturado=total_facturado,
+                         pacientes_pendientes=pacientes_pendientes,
+                         pacientes_facturados=pacientes_facturados,
+                         facturacion_por_mes=facturacion_por_mes,
+                         facturacion_por_ars=facturacion_por_ars,
+                         facturacion_por_medico=facturacion_por_medico,
+                         facturacion_ars_mes=facturacion_ars_mes,
+                         facturacion_medico_mes=facturacion_medico_mes,
+                         fecha_desde=fecha_desde,
+                         fecha_hasta=fecha_hasta,
+                         ars_list=ars_list,
+                         medicos_list=medicos_list,
+                         ars_id_seleccionado=ars_id,
+                         medico_id_seleccionado=medico_id)
 
 @app.route('/facturacion/ver-factura/<int:factura_id>')
 @login_required
@@ -4584,7 +4862,7 @@ def facturacion_enviar_email(factura_id):
         pacientes = conn.execute('''
             SELECT fd.*, m.nombre as medico_nombre, m.especialidad as medico_especialidad,
                    m.cedula as medico_cedula, m.exequatur as medico_exequatur,
-                   a.nombre_ars, ca.codigo_ars
+                   a.nombre_ars, a.rnc as ars_rnc, ca.codigo_ars
             FROM facturas_detalle fd
             JOIN medicos m ON fd.medico_id = m.id
             JOIN ars a ON fd.ars_id = a.id
@@ -4655,7 +4933,7 @@ def facturacion_descargar_pdf(factura_id):
         pacientes = conn.execute('''
             SELECT fd.*, m.nombre as medico_nombre, m.especialidad as medico_especialidad,
                    m.cedula as medico_cedula, m.exequatur as medico_exequatur,
-                   a.nombre_ars, ca.codigo_ars
+                   a.nombre_ars, a.rnc as ars_rnc, ca.codigo_ars
             FROM facturas_detalle fd
             JOIN medicos m ON fd.medico_id = m.id
             JOIN ars a ON fd.ars_id = a.id
@@ -4751,7 +5029,7 @@ def facturacion_paciente_editar(paciente_id):
             conn.execute('''
                 UPDATE facturas_detalle
                 SET nss = %s, nombre_paciente = %s, fecha_servicio = %s,
-                    autorizacion = ?, descripcion_servicio = ?, monto = ?
+                    autorizacion = %s, descripcion_servicio = %s, monto = %s
                 WHERE id = %s
             ''', (nss, nombre, fecha, autorizacion, servicio, monto, paciente_id))
             
@@ -4984,7 +5262,7 @@ def admin_usuarios_nuevo():
             flash(f'Contraseña no cumple los requisitos: {", ".join(password_errors)}', 'error')
             return redirect(url_for('admin_usuarios_nuevo'))
         
-        if perfil not in ['Administrador', 'Registro de Facturas']:
+        if perfil not in ['Administrador', 'Nivel 2', 'Registro de Facturas']:
             flash('Perfil inválido', 'error')
             return redirect(url_for('admin_usuarios_nuevo'))
         
@@ -5006,7 +5284,40 @@ def admin_usuarios_nuevo():
         conn.commit()
         conn.close()
         
-        flash(f'Usuario {nombre} creado exitosamente. Contraseña temporal: {password} (el usuario deberá cambiarla en el primer login)', 'success')
+        # Enviar email de bienvenida si es usuario de facturación
+        if perfil in ['Nivel 2', 'Registro de Facturas']:
+            try:
+                from email_templates import template_bienvenida_facturacion
+                
+                # Generar link del admin (usar el dominio de Railway o el actual)
+                link_admin = request.url_root.rstrip('/') + url_for('admin')
+                
+                # Determinar si puede generar facturas
+                puede_generar_facturas = (perfil == 'Nivel 2')
+                
+                # Generar HTML del email
+                html_body = template_bienvenida_facturacion(
+                    nombre=nombre,
+                    email=email,
+                    password_temporal=password,
+                    link_admin=link_admin,
+                    puede_generar_facturas=puede_generar_facturas
+                )
+                
+                # Enviar email
+                send_email(
+                    destinatario=email,
+                    asunto=f'🎉 Bienvenido al Sistema de Facturación - Dra. Shirley Ramírez',
+                    cuerpo=html_body
+                )
+                
+                flash(f'Usuario {nombre} creado exitosamente. Se ha enviado un email a {email} con las credenciales e instrucciones de acceso.', 'success')
+            except Exception as e:
+                print(f"Error al enviar email de bienvenida: {e}")
+                flash(f'Usuario {nombre} creado exitosamente. Contraseña temporal: {password} (el usuario deberá cambiarla en el primer login). No se pudo enviar el email de bienvenida.', 'warning')
+        else:
+            flash(f'Usuario {nombre} creado exitosamente. Contraseña temporal: {password} (el usuario deberá cambiarla en el primer login)', 'success')
+        
         return redirect(url_for('admin_usuarios'))
     
     return render_template('admin_usuarios_form.html', usuario=None)
@@ -5045,7 +5356,7 @@ def admin_usuarios_editar(usuario_id):
             flash('Email inválido', 'error')
             return redirect(url_for('admin_usuarios_editar', usuario_id=usuario_id))
         
-        if perfil not in ['Administrador', 'Registro de Facturas']:
+        if perfil not in ['Administrador', 'Nivel 2', 'Registro de Facturas']:
             flash('Perfil inválido', 'error')
             return redirect(url_for('admin_usuarios_editar', usuario_id=usuario_id))
         

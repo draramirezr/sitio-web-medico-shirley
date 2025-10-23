@@ -413,6 +413,159 @@ def template_confirmacion_cita(nombre, apellido, fecha, hora, tipo, estatus, mot
     
     return get_base_template(config['icon'], config['titulo'], content)
 
+def template_bienvenida_facturacion(nombre, email, password_temporal, link_admin):
+    """Template para email de bienvenida a usuarios de facturación"""
+    content = f"""
+    <div style="color: #282828; line-height: 1.8; margin: 20px 0; font-size: 15px;">
+        <p style="margin: 15px 0;">Hola <strong style="color: #ACACAD;">{nombre}</strong>,</p>
+        <p style="margin: 15px 0;">
+            ¡Bienvenido al <strong>Sistema de Facturación</strong> de la Dra. Shirley Ramírez! 🎉
+        </p>
+        <p style="margin: 15px 0;">
+            Tu cuenta ha sido creada exitosamente con perfil de <strong style="color: #4CAF50;">Registro de Facturas</strong>.
+        </p>
+    </div>
+    
+    <div style="background: linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(129, 199, 132, 0.2) 100%); padding: 25px; border-radius: 10px; margin: 25px 0; border: 2px solid #4CAF50; text-align: center;">
+        <div style="font-size: 48px; margin-bottom: 15px;">
+            🔐
+        </div>
+        <h3 style="color: #2E7D32; margin: 10px 0; font-size: 20px; font-weight: 700;">
+            Acceso al Sistema
+        </h3>
+    </div>
+    
+    <div style="background-color: #F2E2E6; padding: 20px; border-radius: 10px; margin: 20px 0;">
+        <p style="margin: 0 0 15px 0; color: #ACACAD; font-weight: 600; font-size: 16px;">🔑 Credenciales de Acceso:</p>
+        <p style="margin: 12px 0; color: #282828; font-size: 15px;">
+            <strong style="color: #ACACAD; font-weight: 600;">📧 Email:</strong> 
+            <span style="font-family: 'Courier New', monospace; background: #fff; padding: 5px 10px; border-radius: 5px; display: inline-block;">{email}</span>
+        </p>
+        <p style="margin: 12px 0; color: #282828; font-size: 15px;">
+            <strong style="color: #ACACAD; font-weight: 600;">🔒 Contraseña Temporal:</strong> 
+            <span style="font-family: 'Courier New', monospace; background: #fff; padding: 5px 10px; border-radius: 5px; display: inline-block; color: #D32F2F; font-weight: 700;">{password_temporal}</span>
+        </p>
+    </div>
+    
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="{link_admin}" 
+           style="display: inline-block; padding: 16px 45px; background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white !important; text-decoration: none; border-radius: 30px; font-weight: 600; font-size: 16px; box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);">
+            🚀 Acceder al Sistema
+        </a>
+    </div>
+    
+    <div style="background-color: #FFF3E0; padding: 20px; border-radius: 10px; margin: 25px 0; border-left: 4px solid #FF9800;">
+        <p style="margin: 0 0 10px 0; color: #E65100; font-weight: 600; font-size: 15px;">⚠️ Importante - Primera Vez:</p>
+        <p style="margin: 8px 0; color: #E65100; font-size: 14px; line-height: 1.7;">
+            • Al iniciar sesión, el sistema te pedirá <strong>cambiar tu contraseña</strong> por seguridad<br>
+            • Elige una contraseña segura que solo tú conozcas<br>
+            • No compartas tus credenciales con nadie
+        </p>
+    </div>
+    
+    <div style="background-color: #E3F2FD; padding: 25px; border-radius: 10px; margin: 25px 0; border: 2px solid #2196F3;">
+        <p style="margin: 0 0 15px 0; color: #1565C0; font-weight: 700; font-size: 17px;">📋 Objetivo del Sistema</p>
+        <p style="margin: 10px 0; color: #1976D2; font-size: 14px; line-height: 1.8;">
+            Este sistema te permite <strong>gestionar la facturación de pacientes</strong> de manera eficiente:
+        </p>
+    </div>
+    
+    <div style="background-color: #fff; padding: 20px; border-left: 4px solid #CEB0B7; margin: 20px 0; border-radius: 5px;">
+        <p style="margin: 0 0 15px 0; color: #ACACAD; font-weight: 600; font-size: 15px;">✨ Funciones Principales:</p>
+        
+        <div style="margin: 15px 0; padding: 15px; background-color: #F8F9FA; border-radius: 8px;">
+            <p style="margin: 0 0 8px 0; color: #4CAF50; font-weight: 700; font-size: 15px;">
+                📝 1. Agregar Pacientes
+            </p>
+            <p style="margin: 0; color: #282828; font-size: 14px; line-height: 1.7;">
+                Puedes <strong>cargar pacientes de manera masiva desde Excel</strong> o <strong>editar/agregar individualmente</strong>. 
+                Incluye información completa: NSS, nombre, servicios, montos, ARS, médico tratante, etc.
+            </p>
+        </div>
+        
+        <div style="margin: 15px 0; padding: 15px; background-color: #F8F9FA; border-radius: 8px;">
+            <p style="margin: 0 0 8px 0; color: #FF9800; font-weight: 700; font-size: 15px;">
+                📊 2. Estado de Facturación
+            </p>
+            <p style="margin: 0; color: #282828; font-size: 14px; line-height: 1.7;">
+                <strong>Da seguimiento en tiempo real</strong> al estado de cada factura: pendiente, en proceso, 
+                pagada, rechazada. Filtra por ARS, médico, fecha, monto y más.
+            </p>
+        </div>
+        
+        <div style="margin: 15px 0; padding: 15px; background-color: #F8F9FA; border-radius: 8px;">
+            <p style="margin: 0 0 8px 0; color: #2196F3; font-weight: 700; font-size: 15px;">
+                💰 3. Generar Facturas
+            </p>
+            <p style="margin: 0; color: #282828; font-size: 14px; line-height: 1.7;">
+                Genera facturas profesionales en PDF con NCF automático, listas para imprimir y enviar.
+            </p>
+        </div>
+        
+        <div style="margin: 15px 0; padding: 15px; background-color: #F8F9FA; border-radius: 8px;">
+            <p style="margin: 0 0 8px 0; color: #9C27B0; font-weight: 700; font-size: 15px;">
+                📈 4. Reportes y Estadísticas
+            </p>
+            <p style="margin: 0; color: #282828; font-size: 14px; line-height: 1.7;">
+                Consulta el histórico completo de facturación, exporta reportes a Excel, y visualiza estadísticas.
+            </p>
+        </div>
+    </div>
+    
+    <div style="background-color: #E8F5E9; padding: 20px; border-radius: 10px; margin: 25px 0; border-left: 4px solid #4CAF50;">
+        <p style="margin: 0 0 10px 0; color: #2E7D32; font-weight: 600; font-size: 15px;">🎯 Cómo Empezar:</p>
+        <ol style="margin: 10px 0; padding-left: 25px; color: #282828; line-height: 2; font-size: 14px;">
+            <li><strong>Inicia sesión</strong> con tus credenciales</li>
+            <li><strong>Cambia tu contraseña temporal</strong> por una segura</li>
+            <li>Ve a <strong>"Facturación → Agregar Pacientes"</strong></li>
+            <li>Carga pacientes desde Excel o agrégalos manualmente</li>
+            <li>Usa <strong>"Estado de Facturación"</strong> para dar seguimiento</li>
+        </ol>
+    </div>
+    
+    <div style="background-color: #FFF9E6; padding: 18px; border-radius: 10px; margin: 25px 0; border-left: 4px solid #FFC107;">
+        <p style="margin: 0; color: #F57C00; font-size: 14px; line-height: 1.7;">
+            <strong>💡 Consejos Útiles:</strong><br>
+            • El sistema guarda automáticamente todos los cambios<br>
+            • Puedes exportar reportes a Excel en cualquier momento<br>
+            • Los filtros te ayudan a encontrar información rápidamente<br>
+            • Cada acción queda registrada en el historial
+        </p>
+    </div>
+    
+    <div style="background-color: #FFEBEE; padding: 20px; border-radius: 10px; margin: 25px 0; border-left: 4px solid #F44336;">
+        <p style="margin: 0 0 10px 0; color: #C62828; font-weight: 600; font-size: 15px;">🔒 Seguridad y Privacidad:</p>
+        <p style="margin: 8px 0; color: #D32F2F; font-size: 14px; line-height: 1.7;">
+            • Toda la información está <strong>encriptada</strong> y protegida<br>
+            • Solo usuarios autorizados tienen acceso<br>
+            • Cumplimos con estándares de privacidad médica<br>
+            • Tu sesión expira automáticamente por seguridad
+        </p>
+    </div>
+    
+    <div style="background-color: #E3F2FD; padding: 20px; border-radius: 10px; margin: 25px 0; border-left: 4px solid #2196F3;">
+        <p style="margin: 0 0 10px 0; color: #1565C0; font-weight: 600; font-size: 15px;">📞 ¿Necesitas Ayuda?</p>
+        <p style="margin: 8px 0; color: #1976D2; font-size: 14px;">
+            Si tienes problemas para acceder o necesitas asistencia técnica:
+        </p>
+        <p style="margin: 8px 0; color: #1976D2; font-size: 14px;">
+            • Teléfono: <a href="tel:+50769819863" style="color: #2196F3; text-decoration: none; font-weight: 600;">+507 6981-9863</a>
+        </p>
+        <p style="margin: 8px 0; color: #1976D2; font-size: 14px;">
+            • Email: <a href="mailto:dra.ramirezr@gmail.com" style="color: #2196F3; text-decoration: none; font-weight: 600;">dra.ramirezr@gmail.com</a>
+        </p>
+    </div>
+    
+    <div style="margin-top: 25px; padding-top: 20px; border-top: 2px solid #F2E2E6;">
+        <p style="color: #999; font-size: 13px; line-height: 1.5; margin: 0;">
+            <strong>Enlace directo al sistema:</strong><br>
+            <a href="{link_admin}" style="color: #CEB0B7; word-break: break-all; font-size: 13px; font-weight: 600;">{link_admin}</a>
+        </p>
+    </div>
+    """
+    
+    return get_base_template("🎉", f"Bienvenido al Sistema de Facturación - {nombre}", content)
+
 # Exportar funciones
 __all__ = [
     'template_contacto',
@@ -420,6 +573,7 @@ __all__ = [
     'template_recuperacion',
     'template_constancia_pdf',
     'template_factura',
-    'template_confirmacion_cita'
+    'template_confirmacion_cita',
+    'template_bienvenida_facturacion'
 ]
 
