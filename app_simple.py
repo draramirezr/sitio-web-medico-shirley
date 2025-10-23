@@ -1814,10 +1814,18 @@ def request_appointment():
                 pass
         
         conn = get_db_connection()
+        
+        # Convertir campos vacíos a None (NULL en SQL)
+        appointment_date_val = appointment_date if appointment_date else None
+        appointment_time_val = appointment_time if appointment_time else None
+        emergency_datetime_val = emergency_datetime if emergency_datetime else None
+        reason_val = reason if reason else None
+        email_val = email if email else None
+        
         conn.execute('''
             INSERT INTO appointments (first_name, last_name, email, phone, appointment_date, appointment_time, appointment_type, medical_insurance, emergency_datetime, reason)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        ''', (first_name, last_name, email, phone, appointment_date, appointment_time, appointment_type, medical_insurance, emergency_datetime, reason))
+        ''', (first_name, last_name, email_val, phone, appointment_date_val, appointment_time_val, appointment_type, medical_insurance, emergency_datetime_val, reason_val))
         conn.commit()
         conn.close()
         
