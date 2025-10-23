@@ -573,22 +573,22 @@ def init_db():
     # Verificar si la columna medical_insurance existe, si no, agregarla
     try:
         cursor.execute("SELECT medical_insurance FROM appointments LIMIT 1")
-    except sqlite3.OperationalError:
+    except:
         cursor.execute("ALTER TABLE appointments ADD COLUMN medical_insurance TEXT NOT NULL DEFAULT 'Otros'")
         print("✅ Columna 'medical_insurance' agregada a la tabla appointments")
     
     # Verificar si la columna appointment_time existe, si no, agregarla
     try:
         cursor.execute("SELECT appointment_time FROM appointments LIMIT 1")
-    except sqlite3.OperationalError:
-        cursor.execute("ALTER TABLE appointments ADD COLUMN appointment_time TEXT DEFAULT ''")
+    except:
+        cursor.execute("ALTER TABLE appointments ADD COLUMN appointment_time VARCHAR(10)")
         print("✅ Columna 'appointment_time' agregada a la tabla appointments")
     
     # Verificar si la columna emergency_datetime existe, si no, agregarla
     try:
         cursor.execute("SELECT emergency_datetime FROM appointments LIMIT 1")
-    except sqlite3.OperationalError:
-        cursor.execute("ALTER TABLE appointments ADD COLUMN emergency_datetime TEXT DEFAULT ''")
+    except:
+        cursor.execute("ALTER TABLE appointments ADD COLUMN emergency_datetime VARCHAR(50)")
         print("✅ Columna 'emergency_datetime' agregada a la tabla appointments")
     
     # Tabla de tratamientos estéticos ginecológicos
@@ -643,48 +643,48 @@ def init_db():
     # Agregar columna email si no existe
     try:
         cursor.execute("SELECT email FROM medicos LIMIT 1")
-    except sqlite3.OperationalError:
+    except:
         cursor.execute("ALTER TABLE medicos ADD COLUMN email TEXT")
         print("✅ Columna 'email' agregada a la tabla medicos")
     
     # Agregar columna exequatur si no existe
     try:
         cursor.execute("SELECT exequatur FROM medicos LIMIT 1")
-    except sqlite3.OperationalError:
+    except:
         cursor.execute("ALTER TABLE medicos ADD COLUMN exequatur TEXT")
         print("✅ Columna 'exequatur' agregada a la tabla medicos")
     
     # Agregar columna factura si no existe (indica si está habilitado para facturar)
     try:
         cursor.execute("SELECT factura FROM medicos LIMIT 1")
-    except sqlite3.OperationalError:
+    except:
         cursor.execute("ALTER TABLE medicos ADD COLUMN factura BOOLEAN DEFAULT 0")
         print("✅ Columna 'factura' agregada a la tabla medicos")
     
     # Agregar columnas ncf_id y ncf_numero a facturas si no existen
     try:
         cursor.execute("SELECT ncf_id FROM facturas LIMIT 1")
-    except sqlite3.OperationalError:
+    except:
         cursor.execute("ALTER TABLE facturas ADD COLUMN ncf_id INTEGER")
         print("✅ Columna 'ncf_id' agregada a la tabla facturas")
     
     try:
         cursor.execute("SELECT ncf_numero FROM facturas LIMIT 1")
-    except sqlite3.OperationalError:
+    except:
         cursor.execute("ALTER TABLE facturas ADD COLUMN ncf_numero TEXT")
         print("✅ Columna 'ncf_numero' agregada a la tabla facturas")
     
     # Agregar columna fecha_fin a NCF si no existe
     try:
         cursor.execute("SELECT fecha_fin FROM ncf LIMIT 1")
-    except sqlite3.OperationalError:
+    except:
         cursor.execute("ALTER TABLE ncf ADD COLUMN fecha_fin DATE")
         print("✅ Columna 'fecha_fin' agregada a la tabla ncf")
     
     # Agregar columna password_temporal a usuarios si no existe
     try:
         cursor.execute("SELECT password_temporal FROM usuarios LIMIT 1")
-    except sqlite3.OperationalError:
+    except:
         cursor.execute("ALTER TABLE usuarios ADD COLUMN password_temporal BOOLEAN DEFAULT 0")
         print("✅ Columna 'password_temporal' agregada a la tabla usuarios")
     
@@ -2048,7 +2048,7 @@ def solicitar_recuperacion():
             expiracion = datetime.now() + timedelta(hours=1)
             
             conn.execute(
-                'UPDATE usuarios SET token_recuperacion = %s, token_expiracion = ? WHERE id = %s',
+                'UPDATE usuarios SET token_recuperacion = %s, token_expiracion = %s WHERE id = %s',
                 (token, expiracion, user['id'])
             )
             conn.commit()
@@ -2810,7 +2810,7 @@ def facturacion_pacientes_pendientes():
         JOIN medicos m ON fd.medico_id = m.id
         JOIN ars a ON fd.ars_id = a.id
         JOIN pacientes p ON fd.paciente_id = p.id
-        WHERE fd.activo = 1 AND fd.estado = ?
+        WHERE fd.activo = 1 AND fd.estado = %s
     '''
     params = [estado]
     
@@ -2890,7 +2890,7 @@ def facturacion_pacientes_pendientes_pdf():
         JOIN medicos m ON fd.medico_id = m.id
         JOIN ars a ON fd.ars_id = a.id
         JOIN pacientes p ON fd.paciente_id = p.id
-        WHERE fd.activo = 1 AND fd.estado = ?
+        WHERE fd.activo = 1 AND fd.estado = %s
     '''
     params = [estado]
     
@@ -3907,7 +3907,7 @@ def facturacion_generar():
                 JOIN medicos m ON fd.medico_id = m.id
                 JOIN ars a ON fd.ars_id = a.id
                 JOIN pacientes p ON fd.paciente_id = p.id
-                WHERE fd.estado = 'pendiente' AND fd.activo = 1 AND fd.ars_id = ?
+                WHERE fd.estado = 'pendiente' AND fd.activo = 1 AND fd.ars_id = %s
                 ORDER BY fd.fecha_servicio DESC
             ''', (ars_id,)).fetchall()
             
@@ -3920,7 +3920,7 @@ def facturacion_generar():
                 SELECT DISTINCT m.id, m.nombre 
                 FROM facturas_detalle fd
                 JOIN medicos m ON fd.medico_id = m.id
-                WHERE fd.estado = 'pendiente' AND fd.ars_id = ? AND fd.activo = 1
+                WHERE fd.estado = 'pendiente' AND fd.ars_id = %s AND fd.activo = 1
                 ORDER BY m.nombre
             ''', (ars_id,)).fetchall()
             
@@ -3960,7 +3960,7 @@ def facturacion_generar():
             pacientes = conn.execute(f'''
                 SELECT fd.*
                 FROM facturas_detalle fd
-                WHERE fd.id IN ({placeholders}) AND fd.estado = 'pendiente' AND fd.ars_id = ?
+                WHERE fd.id IN ({placeholders}) AND fd.estado = 'pendiente' AND fd.ars_id = %s
             ''', ids_list + [ars_id]).fetchall()
             
             if not pacientes:
@@ -4083,7 +4083,7 @@ def facturacion_generar_final():
         pacientes = conn.execute(f'''
             SELECT fd.*
             FROM facturas_detalle fd
-            WHERE fd.id IN ({placeholders}) AND fd.estado = 'pendiente' AND fd.ars_id = ?
+            WHERE fd.id IN ({placeholders}) AND fd.estado = 'pendiente' AND fd.ars_id = %s
         ''', ids_list + [ars_id]).fetchall()
         
         if not pacientes:
@@ -4507,7 +4507,7 @@ def facturacion_ver_factura(factura_id):
         JOIN ars a ON f.ars_id = a.id
         JOIN medicos m ON f.medico_id = m.id
         LEFT JOIN ncf n ON f.ncf_id = n.id
-        WHERE f.id = ? AND f.activo = 1
+        WHERE f.id = %s AND f.activo = 1
     ''', (factura_id,)).fetchone()
     
     if not factura:
@@ -4520,7 +4520,7 @@ def facturacion_ver_factura(factura_id):
         SELECT fd.*, m.nombre as medico_nombre
         FROM facturas_detalle fd
         JOIN medicos m ON fd.medico_id = m.id
-        WHERE fd.factura_id = ? AND fd.activo = 1
+        WHERE fd.factura_id = %s AND fd.activo = 1
         ORDER BY fd.id
     ''', (factura_id,)).fetchall()
     
@@ -4563,7 +4563,7 @@ def facturacion_enviar_email(factura_id):
             JOIN ars a ON f.ars_id = a.id
             JOIN medicos m ON f.medico_id = m.id
             LEFT JOIN ncf n ON f.ncf_id = n.id
-            WHERE f.id = ? AND f.activo = 1
+            WHERE f.id = %s AND f.activo = 1
         ''', (factura_id,)).fetchone()
         
         if not factura:
@@ -4580,7 +4580,7 @@ def facturacion_enviar_email(factura_id):
             JOIN medicos m ON fd.medico_id = m.id
             JOIN ars a ON fd.ars_id = a.id
             LEFT JOIN codigo_ars ca ON ca.medico_id = m.id AND ca.ars_id = a.id
-            WHERE fd.factura_id = ? AND fd.activo = 1
+            WHERE fd.factura_id = %s AND fd.activo = 1
             ORDER BY fd.id
         ''', (factura_id,)).fetchall()
         
@@ -4634,7 +4634,7 @@ def facturacion_descargar_pdf(factura_id):
             JOIN ars a ON f.ars_id = a.id
             JOIN medicos m ON f.medico_id = m.id
             LEFT JOIN ncf n ON f.ncf_id = n.id
-            WHERE f.id = ? AND f.activo = 1
+            WHERE f.id = %s AND f.activo = 1
         ''', (factura_id,)).fetchone()
         
         if not factura:
@@ -4651,7 +4651,7 @@ def facturacion_descargar_pdf(factura_id):
             JOIN medicos m ON fd.medico_id = m.id
             JOIN ars a ON fd.ars_id = a.id
             LEFT JOIN codigo_ars ca ON ca.medico_id = m.id AND ca.ars_id = a.id
-            WHERE fd.factura_id = ? AND fd.activo = 1
+            WHERE fd.factura_id = %s AND fd.activo = 1
             ORDER BY fd.id
         ''', (factura_id,)).fetchall()
         
@@ -4741,7 +4741,7 @@ def facturacion_paciente_editar(paciente_id):
             # Actualizar registro
             conn.execute('''
                 UPDATE facturas_detalle
-                SET nss = %s, nombre_paciente = ?, fecha_servicio = ?,
+                SET nss = %s, nombre_paciente = %s, fecha_servicio = %s,
                     autorizacion = ?, descripcion_servicio = ?, monto = ?
                 WHERE id = %s
             ''', (nss, nombre, fecha, autorizacion, servicio, monto, paciente_id))
@@ -4818,7 +4818,7 @@ def api_buscar_paciente(nss, ars_id=None):
             SELECT p.*, a.nombre_ars 
             FROM pacientes p
             LEFT JOIN ars a ON p.ars_id = a.id
-            WHERE p.nss = ? AND p.ars_id = ? AND p.activo = 1
+            WHERE p.nss = %s AND p.ars_id = %s AND p.activo = 1
         ''', (nss, ars_id)).fetchone()
     else:
         # Si no se proporciona ARS, buscar solo por NSS (puede haber múltiples)
@@ -4826,7 +4826,7 @@ def api_buscar_paciente(nss, ars_id=None):
             SELECT p.*, a.nombre_ars 
             FROM pacientes p
             LEFT JOIN ars a ON p.ars_id = a.id
-            WHERE p.nss = ? AND p.activo = 1
+            WHERE p.nss = %s AND p.activo = 1
             LIMIT 1
         ''', (nss,)).fetchone()
     
@@ -5063,13 +5063,13 @@ def admin_usuarios_editar(usuario_id):
             password_hash = generate_password_hash(password)
             conn.execute('''
                 UPDATE usuarios 
-                SET nombre = %s, email = ?, password_hash = ?, perfil = ?, activo = ?
+                SET nombre = %s, email = %s, password_hash = %s, perfil = %s, activo = %s
                 WHERE id = %s
             ''', (nombre, email, password_hash, perfil, activo, usuario_id))
         else:
             conn.execute('''
                 UPDATE usuarios 
-                SET nombre = %s, email = ?, perfil = ?, activo = ?
+                SET nombre = %s, email = %s, perfil = %s, activo = %s
                 WHERE id = %s
             ''', (nombre, email, perfil, activo, usuario_id))
         
