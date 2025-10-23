@@ -4,7 +4,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, make_response, send_file, session
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-import sqlite3
 import os
 from datetime import datetime, timedelta
 import json
@@ -19,14 +18,9 @@ import re
 from markupsafe import escape
 from io import BytesIO
 
-# Importar MySQL para Railway
-try:
-    import pymysql
-    pymysql.install_as_MySQLdb()
-    MYSQL_AVAILABLE = True
-except ImportError:
-    MYSQL_AVAILABLE = False
-    print("⚠️ PyMySQL no disponible - usando SQLite")
+# Importar MySQL (obligatorio)
+import pymysql
+pymysql.install_as_MySQLdb()
 
 # Función para parsear MySQL URL
 def parse_mysql_url(url):
@@ -328,60 +322,60 @@ def clean_env_var(var_name, default=''):
         print(f"   🔧 {var_name}: '{original}' → '{value}'")
     return value if value else default
 
-# Configuración de la base de datos
-railway_env = clean_env_var('RAILWAY_ENVIRONMENT')
-print(f"🔍 DEBUG: RAILWAY_ENVIRONMENT = '{railway_env}'")
-print(f"🔍 DEBUG: MYSQL_AVAILABLE = {MYSQL_AVAILABLE}")
+# Configuración de la base de datos (SOLO MYSQL)
+print("🔍 DEBUG: Configurando conexión MySQL...")
 
-if MYSQL_AVAILABLE and railway_env:
-    # Opción 1: Intentar parsear MYSQL_URL (generada automáticamente por Railway)
-    mysql_url = os.getenv('MYSQL_URL', '')
-    print(f"   🔍 RAW MYSQL_URL: '{mysql_url[:50] if mysql_url else 'NO DEFINIDA'}...'")
-    
+# Intentar primero con MYSQL_URL (local o de Railway)
+mysql_url = os.getenv('MYSQL_URL', '')
+print(f"   🔍 RAW MYSQL_URL: '{mysql_url[:50] if mysql_url else 'NO DEFINIDA'}...'")
+
+if mysql_url:
+    # Opción 1: Usar MYSQL_URL
     parsed_config = parse_mysql_url(mysql_url)
     
     if parsed_config:
-        # MYSQL_URL encontrada y parseada exitosamente
         DATABASE_CONFIG = parsed_config
         DATABASE_TYPE = 'mysql'
-        print("✅ Configurado para usar MySQL en Railway (usando MYSQL_URL)")
+        print("✅ Configurado para usar MySQL (usando MYSQL_URL)")
         print(f"   🔌 Conectando a: {DATABASE_CONFIG['host']}")
         print(f"   👤 Usuario: {DATABASE_CONFIG['user']}")
         print(f"   📁 Base de datos: {DATABASE_CONFIG['database']}")
     else:
-        # Opción 2: Intentar con variables individuales (MYSQLHOST, MYSQLUSER, etc.)
-        mysqlhost = os.getenv('MYSQLHOST', os.getenv('MYSQL_HOST', ''))
-        mysqluser = os.getenv('MYSQLUSER', os.getenv('MYSQL_USER', ''))
-        mysqlpassword = os.getenv('MYSQLPASSWORD', os.getenv('MYSQL_ROOT_PASSWORD', os.getenv('MYSQL_PASSWORD', '')))
-        mysqldatabase = os.getenv('MYSQLDATABASE', os.getenv('MYSQL_DATABASE', ''))
-        
-        print(f"   🔍 RAW MYSQLHOST: '{mysqlhost if mysqlhost else 'NO DEFINIDA'}'")
-        print(f"   🔍 RAW MYSQLUSER: '{mysqluser if mysqluser else 'NO DEFINIDA'}'")
-        print(f"   🔍 RAW MYSQLDATABASE: '{mysqldatabase if mysqldatabase else 'NO DEFINIDA'}'")
-        
-        # Limpiar comillas si existen
-        mysql_host = clean_env_var('MYSQLHOST', clean_env_var('MYSQL_HOST', 'localhost'))
-        mysql_user = clean_env_var('MYSQLUSER', clean_env_var('MYSQL_USER', 'root'))
-        mysql_password = clean_env_var('MYSQLPASSWORD', clean_env_var('MYSQL_ROOT_PASSWORD', clean_env_var('MYSQL_PASSWORD', '')))
-        mysql_database = clean_env_var('MYSQLDATABASE', clean_env_var('MYSQL_DATABASE', 'railway'))
-        
-        DATABASE_CONFIG = {
-            'host': mysql_host,
-            'user': mysql_user,
-            'password': mysql_password,
-            'database': mysql_database,
-            'charset': 'utf8mb4'
-        }
-        DATABASE_TYPE = 'mysql'
-        print("✅ Configurado para usar MySQL en Railway (usando variables individuales)")
-        print(f"   🔌 Conectando a: {DATABASE_CONFIG['host']}")
-        print(f"   👤 Usuario: {DATABASE_CONFIG['user']}")
-        print(f"   📁 Base de datos: {DATABASE_CONFIG['database']}")
+        print("❌ Error: MYSQL_URL inválida")
+        raise Exception("MYSQL_URL no pudo ser parseada")
 else:
-    # Usar SQLite localmente o como fallback
-    DATABASE_CONFIG = os.getenv('DATABASE_URL', 'drashirley_simple.db')
-    DATABASE_TYPE = 'sqlite'
-    print("✅ Configurado para usar SQLite (local o fallback)")
+    # Opción 2: Usar variables individuales (MYSQLHOST, MYSQLUSER, etc.)
+    mysqlhost = os.getenv('MYSQLHOST', os.getenv('MYSQL_HOST', ''))
+    mysqluser = os.getenv('MYSQLUSER', os.getenv('MYSQL_USER', ''))
+    mysqlpassword = os.getenv('MYSQLPASSWORD', os.getenv('MYSQL_ROOT_PASSWORD', os.getenv('MYSQL_PASSWORD', '')))
+    mysqldatabase = os.getenv('MYSQLDATABASE', os.getenv('MYSQL_DATABASE', ''))
+    
+    print(f"   🔍 RAW MYSQLHOST: '{mysqlhost if mysqlhost else 'NO DEFINIDA'}'")
+    print(f"   🔍 RAW MYSQLUSER: '{mysqluser if mysqluser else 'NO DEFINIDA'}'")
+    print(f"   🔍 RAW MYSQLDATABASE: '{mysqldatabase if mysqldatabase else 'NO DEFINIDA'}'")
+    
+    if not mysqlhost or not mysqluser or not mysqldatabase:
+        print("❌ Error: Variables MySQL incompletas")
+        raise Exception("Configura MYSQL_URL o las variables MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE")
+    
+    # Limpiar comillas si existen
+    mysql_host = clean_env_var('MYSQLHOST', clean_env_var('MYSQL_HOST', ''))
+    mysql_user = clean_env_var('MYSQLUSER', clean_env_var('MYSQL_USER', ''))
+    mysql_password = clean_env_var('MYSQLPASSWORD', clean_env_var('MYSQL_ROOT_PASSWORD', clean_env_var('MYSQL_PASSWORD', '')))
+    mysql_database = clean_env_var('MYSQLDATABASE', clean_env_var('MYSQL_DATABASE', ''))
+    
+    DATABASE_CONFIG = {
+        'host': mysql_host,
+        'user': mysql_user,
+        'password': mysql_password,
+        'database': mysql_database,
+        'charset': 'utf8mb4'
+    }
+    DATABASE_TYPE = 'mysql'
+    print("✅ Configurado para usar MySQL (usando variables individuales)")
+    print(f"   🔌 Conectando a: {DATABASE_CONFIG['host']}")
+    print(f"   👤 Usuario: {DATABASE_CONFIG['user']}")
+    print(f"   📁 Base de datos: {DATABASE_CONFIG['database']}")
 
 # Funciones de validación y sanitización
 def sanitize_input(text, max_length=500):
@@ -453,11 +447,8 @@ def load_user(user_id):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        # Verificar que el usuario existe Y está activo
-        if DATABASE_TYPE == 'mysql':
-            cursor.execute('SELECT id, nombre, email, perfil, activo FROM usuarios WHERE id = %s AND activo = 1', (user_id,))
-        else:
-            cursor.execute('SELECT id, nombre, email, perfil, activo FROM usuarios WHERE id = ? AND activo = 1', (user_id,))
+        # Verificar que el usuario existe Y está activo (MySQL)
+        cursor.execute('SELECT id, nombre, email, perfil, activo FROM usuarios WHERE id = %s AND activo = 1', (user_id,))
         user_data = cursor.fetchone()
         conn.close()
         
@@ -533,7 +524,7 @@ def init_db():
             phone TEXT,
             subject TEXT NOT NULL,
             message TEXT NOT NULL,
-            read BOOLEAN DEFAULT 0,
+            `read` BOOLEAN DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     '''))
@@ -552,7 +543,7 @@ def init_db():
             medical_insurance TEXT NOT NULL,
             emergency_datetime TEXT,
             reason TEXT,
-            status TEXT DEFAULT 'pending',
+            status VARCHAR(50) DEFAULT 'pending',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     '''))
@@ -598,11 +589,8 @@ def init_db():
         )
     '''))
     
-    # Inicializar contador si no existe
-    if DATABASE_TYPE == 'mysql':
-        cursor.execute('INSERT IGNORE INTO site_visits (id, total_visits) VALUES (1, 0)')
-    else:
-        cursor.execute('INSERT OR IGNORE INTO site_visits (id, total_visits) VALUES (1, 0)')
+    # Inicializar contador si no existe (MySQL)
+    cursor.execute('INSERT IGNORE INTO site_visits (id, total_visits) VALUES (1, 0)')
     
     # ============ TABLAS DE FACTURACIÓN ============
     
@@ -679,13 +667,15 @@ def init_db():
         print("✅ Columna 'password_temporal' agregada a la tabla usuarios")
     
     # Crear índices para optimizar consultas
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_facturas_detalle_estado ON facturas_detalle(estado)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_facturas_detalle_factura_id ON facturas_detalle(factura_id)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_facturas_detalle_medico_id ON facturas_detalle(medico_id)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_facturas_detalle_ars_id ON facturas_detalle(ars_id)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_facturas_fecha ON facturas(fecha_factura)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_appointments_date ON appointments(appointment_date)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_contact_messages_read ON contact_messages(read)")
+    # NOTA: Los índices ya se crean en el script SQL y en create_database_indexes()
+    # MySQL no soporta CREATE INDEX IF NOT EXISTS
+    # cursor.execute("CREATE INDEX IF NOT EXISTS idx_facturas_detalle_estado ON facturas_detalle(estado)")
+    # cursor.execute("CREATE INDEX IF NOT EXISTS idx_facturas_detalle_factura_id ON facturas_detalle(factura_id)")
+    # cursor.execute("CREATE INDEX IF NOT EXISTS idx_facturas_detalle_medico_id ON facturas_detalle(medico_id)")
+    # cursor.execute("CREATE INDEX IF NOT EXISTS idx_facturas_detalle_ars_id ON facturas_detalle(ars_id)")
+    # cursor.execute("CREATE INDEX IF NOT EXISTS idx_facturas_fecha ON facturas(fecha_factura)")
+    # cursor.execute("CREATE INDEX IF NOT EXISTS idx_appointments_date ON appointments(appointment_date)")
+    # cursor.execute("CREATE INDEX IF NOT EXISTS idx_contact_messages_read ON contact_messages(read)")
     print("✅ Índices de base de datos creados/verificados")
     
     # Tabla de Código ARS (relación médico-ars con su código)
@@ -774,7 +764,7 @@ def init_db():
             monto REAL NOT NULL,
             medico_id INTEGER NOT NULL,
             ars_id INTEGER NOT NULL,
-            estado TEXT DEFAULT 'pendiente',
+            estado VARCHAR(50) DEFAULT 'pendiente',
             activo BOOLEAN DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (factura_id) REFERENCES facturas(id),
@@ -786,20 +776,17 @@ def init_db():
     '''))
     
     # Crear usuario por defecto si no existe
-    cursor.execute('SELECT COUNT(*) FROM usuarios')
-    if cursor.fetchone()[0] == 0:
+    cursor.execute('SELECT COUNT(*) as count FROM usuarios')
+    result = cursor.fetchone()
+    count = result['count'] if isinstance(result, dict) else result[0]
+    
+    if count == 0:
         # Usuario por defecto: ing.fpaula@gmail.com - Francisco Paula
         password_hash = generate_password_hash('2416Xpos@')
-        if DATABASE_TYPE == 'mysql':
-            cursor.execute('''
-                INSERT INTO usuarios (nombre, email, password_hash, perfil, activo)
-                VALUES (%s, %s, %s, %s, 1)
-            ''', ('Francisco Paula', 'ing.fpaula@gmail.com', password_hash, 'Administrador'))
-        else:
-            cursor.execute('''
-                INSERT INTO usuarios (nombre, email, password_hash, perfil, activo)
-                VALUES (?, ?, ?, ?, 1)
-            ''', ('Francisco Paula', 'ing.fpaula@gmail.com', password_hash, 'Administrador'))
+        cursor.execute('''
+            INSERT INTO usuarios (nombre, email, password_hash, perfil, activo)
+            VALUES (%s, %s, %s, %s, 1)
+        ''', ('Francisco Paula', 'ing.fpaula@gmail.com', password_hash, 'Administrador'))
         print("✅ Usuario por defecto creado: ing.fpaula@gmail.com")
     
     conn.commit()
@@ -810,86 +797,89 @@ def init_db():
     create_database_indexes()
 
 def adapt_sql_for_database(sql):
-    """Adaptar consultas SQL para MySQL o SQLite"""
-    if DATABASE_TYPE == 'mysql':
-        # Cambios específicos para MySQL
-        sql = sql.replace('INTEGER PRIMARY KEY AUTOINCREMENT', 'INT AUTO_INCREMENT PRIMARY KEY')
-        sql = sql.replace('BOOLEAN', 'TINYINT(1)')
-        sql = sql.replace('TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP')
-        sql = sql.replace('CURRENT_TIMESTAMP', 'NOW()')
-        sql = sql.replace('TEXT', 'TEXT')
-        sql = sql.replace('REAL', 'DECIMAL(10,2)')
-        sql = sql.replace('BLOB', 'LONGBLOB')
-        # Cambiar tipos de datos específicos
-        sql = sql.replace('INTEGER', 'INT')
-        sql = sql.replace('CHECK(perfil IN (', 'CHECK(perfil IN (')
+    """Adaptar consultas SQL para MySQL"""
+    # Cambios específicos para MySQL
+    sql = sql.replace('INTEGER PRIMARY KEY AUTOINCREMENT', 'INT AUTO_INCREMENT PRIMARY KEY')
+    sql = sql.replace('BOOLEAN', 'TINYINT(1)')
+    sql = sql.replace('TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP')
+    sql = sql.replace('CURRENT_TIMESTAMP', 'NOW()')
+    sql = sql.replace('TEXT', 'TEXT')
+    sql = sql.replace('REAL', 'DECIMAL(10,2)')
+    sql = sql.replace('BLOB', 'LONGBLOB')
+    sql = sql.replace('INTEGER', 'INT')
     return sql
 
+class MySQLConnectionWrapper:
+    """Wrapper para hacer que PyMySQL se comporte como SQLite con conn.execute()"""
+    def __init__(self, connection):
+        self._conn = connection
+        self._cursor = None
+    
+    def execute(self, query, params=None):
+        """Ejecutar query y devolver cursor - ESCAPA % en parámetros"""
+        self._cursor = self._conn.cursor()
+        if params:
+            # ✅ SOLUCIÓN: Escapar % en los parámetros para evitar interpolación de PyMySQL
+            escaped_params = []
+            for param in params:
+                if isinstance(param, str) and '%' in param:
+                    # Duplicar % para escaparlo: % -> %%
+                    escaped_params.append(param.replace('%', '%%'))
+                else:
+                    escaped_params.append(param)
+            self._cursor.execute(query, tuple(escaped_params))
+        else:
+            self._cursor.execute(query)
+        return self._cursor
+    
+    def commit(self):
+        return self._conn.commit()
+    
+    def rollback(self):
+        return self._conn.rollback()
+    
+    def close(self):
+        if self._cursor:
+            self._cursor.close()
+        return self._conn.close()
+    
+    def cursor(self):
+        return self._conn.cursor()
+
 def get_db_connection():
-    """Obtener conexión universal a la base de datos (MySQL o SQLite) con optimizaciones"""
+    """Obtener conexión a MySQL con optimizaciones - RETORNA WRAPPER"""
     try:
-        if DATABASE_TYPE == 'mysql':
-            # Intentar conectar a MySQL
-            conn = pymysql.connect(**DATABASE_CONFIG)
-            conn.autocommit = False
-            
-            # Aplicar optimizaciones MySQL
-            if OPTIMIZATION_AVAILABLE:
-                optimizations = optimize_database_connection()
-                for opt in optimizations.get('mysql', []):
-                    try:
-                        conn.execute(opt)
-                    except:
-                        pass  # Ignorar errores de optimización
-            
-            return conn
-        else:
-            # Usar SQLite con optimizaciones
-            conn = sqlite3.connect(DATABASE_CONFIG, check_same_thread=False)
-            conn.row_factory = sqlite3.Row
-            
-            # Optimizaciones críticas de rendimiento para SQLite
-            optimizations = [
-                'PRAGMA journal_mode=WAL',
-                'PRAGMA synchronous=NORMAL', 
-                'PRAGMA cache_size=20000',
-                'PRAGMA temp_store=MEMORY',
-                'PRAGMA mmap_size=268435456',  # 256MB
-                'PRAGMA page_size=4096',
-                'PRAGMA auto_vacuum=INCREMENTAL'
-            ]
-            
-            for opt in optimizations:
-                try:
-                    conn.execute(opt)
-                except:
-                    pass  # Ignorar errores de optimización
-            
-            return conn
-    except Exception as e:
-        print(f"❌ Error al conectar a {DATABASE_TYPE}: {e}")
+        # Conectar a MySQL con pool settings para evitar rate limit
+        config = DATABASE_CONFIG.copy()
+        config['cursorclass'] = pymysql.cursors.DictCursor
+        config['connect_timeout'] = 10
+        config['read_timeout'] = 10
+        config['write_timeout'] = 10
+        # Reutilizar conexiones
+        config['autocommit'] = True  # Evita mantener transacciones abiertas
         
-        # Si es MySQL y falla, intentar con SQLite como fallback
-        if DATABASE_TYPE == 'mysql':
-            print("🔄 Intentando fallback a SQLite...")
+        conn = pymysql.connect(**config)
+        
+        # ✅ RETORNAR WRAPPER que permite conn.execute()
+        return MySQLConnectionWrapper(conn)
+    except Exception as e:
+        print(f"❌ Error al conectar a MySQL: {e}")
+        print(f"   Host: {DATABASE_CONFIG.get('host', 'N/A')}")
+        print(f"   Database: {DATABASE_CONFIG.get('database', 'N/A')}")
+        
+        # Si falla por rate limit, esperar y reintentar
+        if "rate limit" in str(e).lower() or "too many connections" in str(e).lower():
+            print("⚠️ Rate limit detectado - esperando 2 segundos...")
+            import time
+            time.sleep(2)
+            # Reintentar UNA vez
             try:
-                conn = sqlite3.connect(':memory:', check_same_thread=False)
-                conn.row_factory = sqlite3.Row
-                
-                # Aplicar optimizaciones básicas
-                for opt in ['PRAGMA journal_mode=WAL', 'PRAGMA synchronous=NORMAL', 'PRAGMA cache_size=10000']:
-                    try:
-                        conn.execute(opt)
-                    except:
-                        pass
-                
-                print("✅ Fallback a SQLite en memoria exitoso")
-                return conn
-            except Exception as e2:
-                print(f"❌ Error crítico con fallback SQLite: {e2}")
-                raise e2
-        else:
-            raise e
+                conn = pymysql.connect(**config)
+                return MySQLConnectionWrapper(conn)
+            except:
+                pass
+        
+        raise e
 
 def increment_visit_counter():
     """Incrementar el contador de visitas del sitio"""
@@ -1001,8 +991,11 @@ def create_sample_data():
     cursor = conn.cursor()
     
     # Verificar si ya existen datos
-    cursor.execute('SELECT COUNT(*) FROM services')
-    if cursor.fetchone()[0] > 0:
+    cursor.execute('SELECT COUNT(*) as count FROM services')
+    result = cursor.fetchone()
+    count = result['count'] if isinstance(result, dict) else result[0]
+    
+    if count > 0:
         conn.close()
         return
     
@@ -1016,7 +1009,7 @@ def create_sample_data():
         ('Tratamientos Estéticos Ginecológicos', 'Tecnología láser de última generación para rejuvenecimiento vaginal, blanqueamiento genital, corrección de cicatrices y más. Click para ver todos los tratamientos disponibles.', 'fas fa-wand-magic-sparkles', 'Ver Tratamientos', 'Variable')
     ]
     
-    cursor.executemany('INSERT INTO services (name, description, icon, price_range, duration) VALUES (?, ?, ?, ?, ?)', services)
+    cursor.executemany('INSERT INTO services (name, description, icon, price_range, duration) VALUES (%s, %s, %s, %s, %s)', services)
     
     # Tratamientos Estéticos Ginecológicos
     aesthetic_treatments = [
@@ -1035,7 +1028,7 @@ def create_sample_data():
         ('Bartolinitis crónica o recidivante (marsupialización asistida con láser)', 'Facilita drenaje y recuperación más rápida.', 'fas fa-bolt'),
     ]
     
-    cursor.executemany('INSERT INTO aesthetic_treatments (name, description, icon) VALUES (?, ?, ?)', aesthetic_treatments)
+    cursor.executemany('INSERT INTO aesthetic_treatments (name, description, icon) VALUES (%s, %s, %s)', aesthetic_treatments)
     
     # Pool de 50 testimonios variados con nombres diferentes
     testimonials = [
@@ -1091,7 +1084,7 @@ def create_sample_data():
         ('Encarnación Cano', 'E.C.', 'Gran experiencia desde el primer día. La recomiendo completamente. Gracias doctora.', 5)
     ]
     
-    cursor.executemany('INSERT INTO testimonials (patient_name, patient_initials, testimonial_text, rating, approved) VALUES (?, ?, ?, ?, 1)', testimonials)
+    cursor.executemany('INSERT INTO testimonials (patient_name, patient_initials, testimonial_text, rating, approved) VALUES (%s, %s, %s, %s, 1)', testimonials)
     
     conn.commit()
     conn.close()
@@ -1253,6 +1246,11 @@ def services():
 def test_icons():
     """Test de iconos Font Awesome"""
     return render_template('test_icons.html')
+
+@app.route('/test-simple')
+def test_simple():
+    """Test sin base de datos"""
+    return "<h1>✅ SERVIDOR FUNCIONANDO</h1><p>Si ves esto, el servidor Flask está OK</p>"
 
 @app.route('/tratamientos-esteticos')
 def aesthetic_treatments():
@@ -1629,7 +1627,7 @@ def contact():
         conn = get_db_connection()
         conn.execute('''
             INSERT INTO contact_messages (name, email, phone, subject, message)
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s)
         ''', (name, email, phone, subject, message))
         conn.commit()
         conn.close()
@@ -1673,7 +1671,7 @@ def horarios_disponibles():
         # Obtener citas ya agendadas para esa fecha (que no estén canceladas)
         conn = get_db_connection()
         citas_ocupadas = conn.execute(
-            'SELECT appointment_time FROM appointments WHERE appointment_date = ? AND status != "cancelled"',
+            'SELECT appointment_time FROM appointments WHERE appointment_date = %s AND status != "cancelled"',
             (fecha,)
         ).fetchall()
         conn.close()
@@ -1724,7 +1722,7 @@ def request_appointment():
         if appointment_type in ["consulta", "estetico"] and appointment_date and appointment_time:
             conn = get_db_connection()
             cita_existente = conn.execute(
-                'SELECT id FROM appointments WHERE appointment_date = ? AND appointment_time = ? AND status != "cancelled"',
+                'SELECT id FROM appointments WHERE appointment_date = %s AND appointment_time = %s AND status != "cancelled"',
                 (appointment_date, appointment_time)
             ).fetchone()
             
@@ -1746,7 +1744,7 @@ def request_appointment():
                 
                 conn = get_db_connection()
                 cita_existente = conn.execute(
-                    'SELECT id FROM appointments WHERE emergency_datetime LIKE ? AND status != "cancelled"',
+                    'SELECT id FROM appointments WHERE emergency_datetime LIKE %s AND status != "cancelled"',
                     (f'{emergency_date}%',)
                 ).fetchall()
                 
@@ -1763,7 +1761,7 @@ def request_appointment():
         conn = get_db_connection()
         conn.execute('''
             INSERT INTO appointments (first_name, last_name, email, phone, appointment_date, appointment_time, appointment_type, medical_insurance, emergency_datetime, reason)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ''', (first_name, last_name, email, phone, appointment_date, appointment_time, appointment_type, medical_insurance, emergency_datetime, reason))
         conn.commit()
         conn.close()
@@ -1799,7 +1797,7 @@ def login():
         # Buscar usuario en la base de datos
         conn = get_db_connection()
         user_data = conn.execute(
-            'SELECT id, nombre, email, password_hash, perfil, activo, password_temporal FROM usuarios WHERE email = ?',
+            'SELECT id, nombre, email, password_hash, perfil, activo, password_temporal FROM usuarios WHERE email = %s',
             (email,)
         ).fetchone()
         conn.close()
@@ -1829,7 +1827,7 @@ def login():
                 
                 # Actualizar last_login
                 conn = get_db_connection()
-                conn.execute('UPDATE usuarios SET last_login = ? WHERE id = ?',
+                conn.execute('UPDATE usuarios SET last_login = %s WHERE id = %s',
                            (datetime.now(), user_data['id']))
                 conn.commit()
                 conn.close()
@@ -1889,7 +1887,7 @@ def cambiar_password_obligatorio():
         # Verificar contraseña temporal
         conn = get_db_connection()
         user_data = conn.execute(
-            'SELECT password_hash FROM usuarios WHERE id = ?',
+            'SELECT password_hash FROM usuarios WHERE id = %s',
             (usuario_id,)
         ).fetchone()
         
@@ -1901,7 +1899,7 @@ def cambiar_password_obligatorio():
         # Actualizar contraseña
         nueva_password_hash = generate_password_hash(nueva_password)
         conn.execute(
-            'UPDATE usuarios SET password_hash = ?, password_temporal = 0 WHERE id = ?',
+            'UPDATE usuarios SET password_hash = %s, password_temporal = 0 WHERE id = %s',
             (nueva_password_hash, usuario_id)
         )
         conn.commit()
@@ -1931,7 +1929,7 @@ def solicitar_recuperacion():
         
         # Buscar usuario
         conn = get_db_connection()
-        user = conn.execute('SELECT id, nombre FROM usuarios WHERE email = ? AND activo = 1', (email,)).fetchone()
+        user = conn.execute('SELECT id, nombre FROM usuarios WHERE email = %s AND activo = 1', (email,)).fetchone()
         
         if user:
             # Generar token de recuperación
@@ -1939,7 +1937,7 @@ def solicitar_recuperacion():
             expiracion = datetime.now() + timedelta(hours=1)
             
             conn.execute(
-                'UPDATE usuarios SET token_recuperacion = ?, token_expiracion = ? WHERE id = ?',
+                'UPDATE usuarios SET token_recuperacion = %s, token_expiracion = ? WHERE id = %s',
                 (token, expiracion, user['id'])
             )
             conn.commit()
@@ -1965,7 +1963,7 @@ def recuperar_contrasena(token):
     # Verificar token
     conn = get_db_connection()
     user = conn.execute(
-        'SELECT id, nombre, email FROM usuarios WHERE token_recuperacion = ? AND token_expiracion > ? AND activo = 1',
+        'SELECT id, nombre, email FROM usuarios WHERE token_recuperacion = %s AND token_expiracion > %s AND activo = 1',
         (token, datetime.now())
     ).fetchone()
     
@@ -1989,7 +1987,7 @@ def recuperar_contrasena(token):
         # Actualizar contraseña
         password_hash = generate_password_hash(password)
         conn.execute(
-            'UPDATE usuarios SET password_hash = ?, token_recuperacion = NULL, token_expiracion = NULL WHERE id = ?',
+            'UPDATE usuarios SET password_hash = %s, token_recuperacion = NULL, token_expiracion = NULL WHERE id = %s',
             (password_hash, user['id'])
         )
         conn.commit()
@@ -2009,11 +2007,17 @@ def admin():
     conn = get_db_connection()
     
     # Estadísticas (con caché)
+    def get_count(query):
+        result = conn.execute(query).fetchone()
+        if isinstance(result, dict):
+            return list(result.values())[0]
+        return result[0]
+    
     stats = {
-        'total_appointments': conn.execute('SELECT COUNT(*) FROM appointments').fetchone()[0],
-        'pending_appointments': conn.execute('SELECT COUNT(*) FROM appointments WHERE status = "pending"').fetchone()[0],
-        'unread_messages': conn.execute('SELECT COUNT(*) FROM contact_messages WHERE read = 0').fetchone()[0],
-        'total_testimonials': conn.execute('SELECT COUNT(*) FROM testimonials').fetchone()[0],
+        'total_appointments': get_count('SELECT COUNT(*) FROM appointments'),
+        'pending_appointments': get_count('SELECT COUNT(*) FROM appointments WHERE status = "pending"'),
+        'unread_messages': get_count('SELECT COUNT(*) FROM contact_messages WHERE `read` = 0'),
+        'total_testimonials': get_count('SELECT COUNT(*) FROM testimonials'),
         'total_visits': get_visit_count()
     }
     
@@ -2055,7 +2059,7 @@ def update_appointment_status(appointment_id):
     
     # Obtener datos de la cita antes de actualizar
     appointment = conn.execute(
-        'SELECT * FROM appointments WHERE id = ?',
+        'SELECT * FROM appointments WHERE id = %s',
         (appointment_id,)
     ).fetchone()
     
@@ -2065,7 +2069,7 @@ def update_appointment_status(appointment_id):
         return redirect(url_for('admin_appointments'))
     
     # Actualizar estado
-    conn.execute('UPDATE appointments SET status = ? WHERE id = ?', (new_status, appointment_id))
+    conn.execute('UPDATE appointments SET status = %s WHERE id = %s', (new_status, appointment_id))
     conn.commit()
     conn.close()
     
@@ -2103,7 +2107,7 @@ def update_appointment_status(appointment_id):
 def mark_message_read(message_id):
     """Marcar mensaje como leído"""
     conn = get_db_connection()
-    conn.execute('UPDATE contact_messages SET read = 1 WHERE id = ?', (message_id,))
+    conn.execute('UPDATE contact_messages SET read = 1 WHERE id = %s', (message_id,))
     conn.commit()
     conn.close()
     
@@ -2125,9 +2129,10 @@ def facturacion_ars():
     conn = get_db_connection()
     
     if search:
+        search_pattern = f"%{search}%"
         ars_list = conn.execute(
-            'SELECT * FROM ars WHERE (nombre_ars LIKE ? OR rnc LIKE ?) AND activo = 1 ORDER BY nombre_ars',
-            (f'%{search}%', f'%{search}%')
+            "SELECT * FROM ars WHERE (nombre_ars LIKE %s OR rnc LIKE %s) AND activo = 1 ORDER BY nombre_ars",
+            (search_pattern, search_pattern)
         ).fetchall()
     else:
         ars_list = conn.execute('SELECT * FROM ars WHERE activo = 1 ORDER BY nombre_ars').fetchall()
@@ -2148,7 +2153,7 @@ def facturacion_ars_nuevo():
             return redirect(url_for('facturacion_ars_nuevo'))
         
         conn = get_db_connection()
-        conn.execute('INSERT INTO ars (nombre_ars, rnc) VALUES (?, ?)', (nombre_ars, rnc))
+        conn.execute('INSERT INTO ars (nombre_ars, rnc) VALUES (%s, %s)', (nombre_ars, rnc))
         conn.commit()
         conn.close()
         
@@ -2171,14 +2176,14 @@ def facturacion_ars_editar(ars_id):
             flash('Todos los campos son obligatorios', 'error')
             return redirect(url_for('facturacion_ars_editar', ars_id=ars_id))
         
-        conn.execute('UPDATE ars SET nombre_ars = ?, rnc = ? WHERE id = ?', (nombre_ars, rnc, ars_id))
+        conn.execute('UPDATE ars SET nombre_ars = %s, rnc = %s WHERE id = %s', (nombre_ars, rnc, ars_id))
         conn.commit()
         conn.close()
         
         flash('ARS actualizado exitosamente', 'success')
         return redirect(url_for('facturacion_ars'))
     
-    ars = conn.execute('SELECT * FROM ars WHERE id = ?', (ars_id,)).fetchone()
+    ars = conn.execute('SELECT * FROM ars WHERE id = %s', (ars_id,)).fetchone()
     conn.close()
     
     return render_template('facturacion/ars_form.html', ars=ars)
@@ -2189,14 +2194,15 @@ def facturacion_ars_eliminar(ars_id):
     """Eliminar ARS (soft delete)"""
     conn = get_db_connection()
     # Verificar si tiene códigos ARS relacionados
-    relacionados = conn.execute('SELECT COUNT(*) FROM codigo_ars WHERE ars_id = ? AND activo = 1', (ars_id,)).fetchone()[0]
+    result = conn.execute('SELECT COUNT(*) FROM codigo_ars WHERE ars_id = %s AND activo = 1', (ars_id,)).fetchone()
+    relacionados = result[list(result.keys())[0]] if isinstance(result, dict) else result[0]
     
     if relacionados > 0:
         conn.close()
         flash(f'No se puede eliminar. Hay {relacionados} código(s) ARS asociados.', 'error')
         return redirect(url_for('facturacion_ars'))
     
-    conn.execute('UPDATE ars SET activo = 0 WHERE id = ?', (ars_id,))
+    conn.execute('UPDATE ars SET activo = 0 WHERE id = %s', (ars_id,))
     conn.commit()
     conn.close()
     
@@ -2212,9 +2218,10 @@ def facturacion_medicos():
     conn = get_db_connection()
     
     if search:
+        search_pattern = f"%{search}%"
         medicos_list = conn.execute(
-            'SELECT * FROM medicos WHERE (nombre LIKE ? OR cedula LIKE ? OR especialidad LIKE ?) AND activo = 1 ORDER BY nombre',
-            (f'%{search}%', f'%{search}%', f'%{search}%')
+            "SELECT * FROM medicos WHERE (nombre LIKE %s OR cedula LIKE %s OR especialidad LIKE %s) AND activo = 1 ORDER BY nombre",
+            (search_pattern, search_pattern, search_pattern)
         ).fetchall()
     else:
         medicos_list = conn.execute('SELECT * FROM medicos WHERE activo = 1 ORDER BY nombre').fetchall()
@@ -2245,13 +2252,13 @@ def facturacion_medicos_nuevo():
         
         conn = get_db_connection()
         # Verificar si la cédula ya existe
-        existe = conn.execute('SELECT id FROM medicos WHERE cedula = ?', (cedula,)).fetchone()
+        existe = conn.execute('SELECT id FROM medicos WHERE cedula = %s', (cedula,)).fetchone()
         if existe:
             conn.close()
             flash('Ya existe un médico con esa cédula', 'error')
             return redirect(url_for('facturacion_medicos_nuevo'))
         
-        conn.execute('INSERT INTO medicos (nombre, especialidad, cedula, exequatur, email, factura) VALUES (?, ?, ?, ?, ?, ?)', 
+        conn.execute('INSERT INTO medicos (nombre, especialidad, cedula, exequatur, email, factura) VALUES (%s, %s, %s, %s, %s, %s)', 
                     (nombre, especialidad, cedula, exequatur, email, factura))
         conn.commit()
         conn.close()
@@ -2285,13 +2292,13 @@ def facturacion_medicos_editar(medico_id):
             return redirect(url_for('facturacion_medicos_editar', medico_id=medico_id))
         
         # Verificar si la cédula ya existe en otro médico
-        existe = conn.execute('SELECT id FROM medicos WHERE cedula = ? AND id != ?', (cedula, medico_id)).fetchone()
+        existe = conn.execute('SELECT id FROM medicos WHERE cedula = %s AND id != %s', (cedula, medico_id)).fetchone()
         if existe:
             conn.close()
             flash('Ya existe otro médico con esa cédula', 'error')
             return redirect(url_for('facturacion_medicos_editar', medico_id=medico_id))
         
-        conn.execute('UPDATE medicos SET nombre = ?, especialidad = ?, cedula = ?, exequatur = ?, email = ?, factura = ? WHERE id = ?', 
+        conn.execute('UPDATE medicos SET nombre = %s, especialidad = %s, cedula = %s, exequatur = %s, email = %s, factura = %s WHERE id = %s', 
                     (nombre, especialidad, cedula, exequatur, email, factura, medico_id))
         conn.commit()
         conn.close()
@@ -2299,7 +2306,7 @@ def facturacion_medicos_editar(medico_id):
         flash('Médico actualizado exitosamente', 'success')
         return redirect(url_for('facturacion_medicos'))
     
-    medico = conn.execute('SELECT * FROM medicos WHERE id = ?', (medico_id,)).fetchone()
+    medico = conn.execute('SELECT * FROM medicos WHERE id = %s', (medico_id,)).fetchone()
     conn.close()
     
     return render_template('facturacion/medicos_form.html', medico=medico)
@@ -2310,14 +2317,15 @@ def facturacion_medicos_eliminar(medico_id):
     """Eliminar Médico (soft delete)"""
     conn = get_db_connection()
     # Verificar si tiene códigos ARS relacionados
-    relacionados = conn.execute('SELECT COUNT(*) FROM codigo_ars WHERE medico_id = ? AND activo = 1', (medico_id,)).fetchone()[0]
+    result = conn.execute('SELECT COUNT(*) FROM codigo_ars WHERE medico_id = %s AND activo = 1', (medico_id,)).fetchone()
+    relacionados = result[list(result.keys())[0]] if isinstance(result, dict) else result[0]
     
     if relacionados > 0:
         conn.close()
         flash(f'No se puede eliminar. Hay {relacionados} código(s) ARS asociados.', 'error')
         return redirect(url_for('facturacion_medicos'))
     
-    conn.execute('UPDATE medicos SET activo = 0 WHERE id = ?', (medico_id,))
+    conn.execute('UPDATE medicos SET activo = 0 WHERE id = %s', (medico_id,))
     conn.commit()
     conn.close()
     
@@ -2333,14 +2341,15 @@ def facturacion_codigo_ars():
     conn = get_db_connection()
     
     if search:
-        codigos_list = conn.execute('''
+        search_pattern = f"%{search}%"
+        codigos_list = conn.execute("""
             SELECT ca.*, m.nombre as medico_nombre, a.nombre_ars 
             FROM codigo_ars ca
             JOIN medicos m ON ca.medico_id = m.id
             JOIN ars a ON ca.ars_id = a.id
-            WHERE (m.nombre LIKE ? OR a.nombre_ars LIKE ? OR ca.codigo_ars LIKE ?) AND ca.activo = 1
+            WHERE (m.nombre LIKE %s OR a.nombre_ars LIKE %s OR ca.codigo_ars LIKE %s) AND ca.activo = 1
             ORDER BY m.nombre, a.nombre_ars
-        ''', (f'%{search}%', f'%{search}%', f'%{search}%')).fetchall()
+        """, (search_pattern, search_pattern, search_pattern)).fetchall()
     else:
         codigos_list = conn.execute('''
             SELECT ca.*, m.nombre as medico_nombre, a.nombre_ars 
@@ -2370,14 +2379,14 @@ def facturacion_codigo_ars_nuevo():
             return redirect(url_for('facturacion_codigo_ars_nuevo'))
         
         # Verificar si ya existe la combinación médico-ars
-        existe = conn.execute('SELECT id FROM codigo_ars WHERE medico_id = ? AND ars_id = ? AND activo = 1', 
+        existe = conn.execute('SELECT id FROM codigo_ars WHERE medico_id = %s AND ars_id = %s AND activo = 1', 
                              (medico_id, ars_id)).fetchone()
         if existe:
             conn.close()
             flash('Ya existe un código para esta combinación de médico y ARS', 'error')
             return redirect(url_for('facturacion_codigo_ars_nuevo'))
         
-        conn.execute('INSERT INTO codigo_ars (medico_id, ars_id, codigo_ars) VALUES (?, ?, ?)', 
+        conn.execute('INSERT INTO codigo_ars (medico_id, ars_id, codigo_ars) VALUES (%s, %s, %s)', 
                     (medico_id, ars_id, codigo_ars))
         conn.commit()
         conn.close()
@@ -2408,14 +2417,14 @@ def facturacion_codigo_ars_editar(codigo_id):
             return redirect(url_for('facturacion_codigo_ars_editar', codigo_id=codigo_id))
         
         # Verificar si ya existe la combinación en otro registro
-        existe = conn.execute('SELECT id FROM codigo_ars WHERE medico_id = ? AND ars_id = ? AND id != ? AND activo = 1', 
+        existe = conn.execute('SELECT id FROM codigo_ars WHERE medico_id = %s AND ars_id = %s AND id != %s AND activo = 1', 
                              (medico_id, ars_id, codigo_id)).fetchone()
         if existe:
             conn.close()
             flash('Ya existe un código para esta combinación de médico y ARS', 'error')
             return redirect(url_for('facturacion_codigo_ars_editar', codigo_id=codigo_id))
         
-        conn.execute('UPDATE codigo_ars SET medico_id = ?, ars_id = ?, codigo_ars = ? WHERE id = ?', 
+        conn.execute('UPDATE codigo_ars SET medico_id = %s, ars_id = %s, codigo_ars = %s WHERE id = %s', 
                     (medico_id, ars_id, codigo_ars, codigo_id))
         conn.commit()
         conn.close()
@@ -2423,7 +2432,7 @@ def facturacion_codigo_ars_editar(codigo_id):
         flash('Código ARS actualizado exitosamente', 'success')
         return redirect(url_for('facturacion_codigo_ars'))
     
-    codigo = conn.execute('SELECT * FROM codigo_ars WHERE id = ?', (codigo_id,)).fetchone()
+    codigo = conn.execute('SELECT * FROM codigo_ars WHERE id = %s', (codigo_id,)).fetchone()
     medicos = conn.execute('SELECT id, nombre, especialidad FROM medicos WHERE activo = 1 ORDER BY nombre').fetchall()
     ars_list = conn.execute('SELECT id, nombre_ars FROM ars WHERE activo = 1 ORDER BY nombre_ars').fetchall()
     conn.close()
@@ -2435,7 +2444,7 @@ def facturacion_codigo_ars_editar(codigo_id):
 def facturacion_codigo_ars_eliminar(codigo_id):
     """Eliminar Código ARS (soft delete)"""
     conn = get_db_connection()
-    conn.execute('UPDATE codigo_ars SET activo = 0 WHERE id = ?', (codigo_id,))
+    conn.execute('UPDATE codigo_ars SET activo = 0 WHERE id = %s', (codigo_id,))
     conn.commit()
     conn.close()
     
@@ -2452,7 +2461,7 @@ def facturacion_servicios():
     
     if search:
         servicios_list = conn.execute(
-            'SELECT * FROM tipos_servicios WHERE descripcion LIKE ? AND activo = 1 ORDER BY descripcion',
+            'SELECT * FROM tipos_servicios WHERE descripcion LIKE %s AND activo = 1 ORDER BY descripcion',
             (f'%{search}%',)
         ).fetchall()
     else:
@@ -2479,7 +2488,7 @@ def facturacion_servicios_nuevo():
             precio_base = 0
         
         conn = get_db_connection()
-        conn.execute('INSERT INTO tipos_servicios (descripcion, precio_base) VALUES (?, ?)', 
+        conn.execute('INSERT INTO tipos_servicios (descripcion, precio_base) VALUES (%s, %s)', 
                     (descripcion, precio_base))
         conn.commit()
         conn.close()
@@ -2508,7 +2517,7 @@ def facturacion_servicios_editar(servicio_id):
         except ValueError:
             precio_base = 0
         
-        conn.execute('UPDATE tipos_servicios SET descripcion = ?, precio_base = ? WHERE id = ?', 
+        conn.execute('UPDATE tipos_servicios SET descripcion = %s, precio_base = %s WHERE id = %s', 
                     (descripcion, precio_base, servicio_id))
         conn.commit()
         conn.close()
@@ -2516,7 +2525,7 @@ def facturacion_servicios_editar(servicio_id):
         flash('Tipo de servicio actualizado exitosamente', 'success')
         return redirect(url_for('facturacion_servicios'))
     
-    servicio = conn.execute('SELECT * FROM tipos_servicios WHERE id = ?', (servicio_id,)).fetchone()
+    servicio = conn.execute('SELECT * FROM tipos_servicios WHERE id = %s', (servicio_id,)).fetchone()
     conn.close()
     
     return render_template('facturacion/servicios_form.html', servicio=servicio)
@@ -2526,7 +2535,7 @@ def facturacion_servicios_editar(servicio_id):
 def facturacion_servicios_eliminar(servicio_id):
     """Eliminar Tipo de Servicio (soft delete)"""
     conn = get_db_connection()
-    conn.execute('UPDATE tipos_servicios SET activo = 0 WHERE id = ?', (servicio_id,))
+    conn.execute('UPDATE tipos_servicios SET activo = 0 WHERE id = %s', (servicio_id,))
     conn.commit()
     conn.close()
     
@@ -2547,7 +2556,7 @@ def facturacion_pacientes():
                    (SELECT COUNT(*) FROM facturas_detalle fd WHERE fd.paciente_id = p.id AND fd.activo = 1) as total_registros
             FROM pacientes p
             LEFT JOIN ars a ON p.ars_id = a.id
-            WHERE (p.nss LIKE ? OR p.nombre LIKE ?) AND p.activo = 1
+            WHERE (p.nss LIKE %s OR p.nombre LIKE %s) AND p.activo = 1
             ORDER BY p.nombre
         ''', (f'%{search}%', f'%{search}%')).fetchall()
     else:
@@ -2573,7 +2582,7 @@ def facturacion_ncf():
     
     if search:
         ncf_list = conn.execute(
-            'SELECT * FROM ncf WHERE (tipo LIKE ? OR prefijo LIKE ?) AND activo = 1 ORDER BY tipo',
+            'SELECT * FROM ncf WHERE (tipo LIKE %s OR prefijo LIKE %s) AND activo = 1 ORDER BY tipo',
             (f'%{search}%', f'%{search}%')
         ).fetchall()
     else:
@@ -2612,7 +2621,7 @@ def facturacion_ncf_nuevo():
             return redirect(url_for('facturacion_ncf_nuevo'))
         
         conn = get_db_connection()
-        conn.execute('INSERT INTO ncf (tipo, prefijo, tamaño, ultimo_numero, fecha_fin) VALUES (?, ?, ?, ?, ?)', 
+        conn.execute('INSERT INTO ncf (tipo, prefijo, tamaño, ultimo_numero, fecha_fin) VALUES (%s, %s, %s, %s, %s)', 
                     (tipo, prefijo, tamaño, ultimo_numero, fecha_fin if fecha_fin else None))
         conn.commit()
         conn.close()
@@ -2646,7 +2655,7 @@ def facturacion_ncf_editar(ncf_id):
             flash('Tamaño y Último Número deben ser números enteros', 'error')
             return redirect(url_for('facturacion_ncf_editar', ncf_id=ncf_id))
         
-        conn.execute('UPDATE ncf SET tipo = ?, prefijo = ?, tamaño = ?, ultimo_numero = ?, fecha_fin = ? WHERE id = ?', 
+        conn.execute('UPDATE ncf SET tipo = %s, prefijo = %s, tamaño = %s, ultimo_numero = %s, fecha_fin = %s WHERE id = %s', 
                     (tipo, prefijo, tamaño, ultimo_numero, fecha_fin if fecha_fin else None, ncf_id))
         conn.commit()
         conn.close()
@@ -2654,7 +2663,7 @@ def facturacion_ncf_editar(ncf_id):
         flash('NCF actualizado exitosamente', 'success')
         return redirect(url_for('facturacion_ncf'))
     
-    ncf = conn.execute('SELECT * FROM ncf WHERE id = ?', (ncf_id,)).fetchone()
+    ncf = conn.execute('SELECT * FROM ncf WHERE id = %s', (ncf_id,)).fetchone()
     conn.close()
     
     return render_template('facturacion/ncf_form.html', ncf=ncf)
@@ -2664,7 +2673,7 @@ def facturacion_ncf_editar(ncf_id):
 def facturacion_ncf_eliminar(ncf_id):
     """Eliminar NCF (soft delete)"""
     conn = get_db_connection()
-    conn.execute('UPDATE ncf SET activo = 0 WHERE id = ?', (ncf_id,))
+    conn.execute('UPDATE ncf SET activo = 0 WHERE id = %s', (ncf_id,))
     conn.commit()
     conn.close()
     
@@ -2715,7 +2724,7 @@ def facturacion_pacientes_pendientes():
     # Filtrar médicos según el perfil del usuario
     if current_user.perfil == 'Registro de Facturas':
         # Solo mostrar el médico con el mismo email del usuario
-        medicos = conn.execute('SELECT * FROM medicos WHERE activo = 1 AND email = ? ORDER BY nombre', (current_user.email,)).fetchall()
+        medicos = conn.execute('SELECT * FROM medicos WHERE activo = 1 AND email = %s ORDER BY nombre', (current_user.email,)).fetchall()
     else:
         # Administrador: mostrar todos los médicos
         medicos = conn.execute('SELECT * FROM medicos WHERE activo = 1 ORDER BY nombre').fetchall()
@@ -2727,12 +2736,12 @@ def facturacion_pacientes_pendientes():
     ars_seleccionada = None
     
     if medico_id:
-        medico = conn.execute('SELECT nombre FROM medicos WHERE id = ?', (medico_id,)).fetchone()
+        medico = conn.execute('SELECT nombre FROM medicos WHERE id = %s', (medico_id,)).fetchone()
         if medico:
             medico_seleccionado = medico['nombre']
     
     if ars_id:
-        ars = conn.execute('SELECT nombre_ars FROM ars WHERE id = ?', (ars_id,)).fetchone()
+        ars = conn.execute('SELECT nombre_ars FROM ars WHERE id = %s', (ars_id,)).fetchone()
         if ars:
             ars_seleccionada = ars['nombre_ars']
     
@@ -2796,12 +2805,12 @@ def facturacion_pacientes_pendientes_pdf():
     ars_nombre = None
     
     if medico_id:
-        medico = conn.execute('SELECT nombre FROM medicos WHERE id = ?', (medico_id,)).fetchone()
+        medico = conn.execute('SELECT nombre FROM medicos WHERE id = %s', (medico_id,)).fetchone()
         if medico:
             medico_nombre = medico['nombre']
     
     if ars_id:
-        ars = conn.execute('SELECT nombre_ars FROM ars WHERE id = ?', (ars_id,)).fetchone()
+        ars = conn.execute('SELECT nombre_ars FROM ars WHERE id = %s', (ars_id,)).fetchone()
         if ars:
             ars_nombre = ars['nombre_ars']
     
@@ -3324,7 +3333,7 @@ def facturacion_facturas_nueva():
                 # VALIDACIÓN: Verificar si ya existe el mismo registro (NSS + FECHA + AUTORIZACIÓN + ARS)
                 duplicado = conn.execute('''
                     SELECT * FROM facturas_detalle 
-                    WHERE nss = ? AND fecha_servicio = ? AND autorizacion = ? AND ars_id = ? AND activo = 1
+                    WHERE nss = %s AND fecha_servicio = %s AND autorizacion = %s AND ars_id = %s AND activo = 1
                 ''', (nss, fecha_servicio, autorizacion, ars_id)).fetchone()
                 
                 if duplicado:
@@ -3332,27 +3341,27 @@ def facturacion_facturas_nueva():
                     continue
                 
                 # Buscar o crear paciente (llave única: NSS + ARS)
-                paciente = conn.execute('SELECT * FROM pacientes WHERE nss = ? AND ars_id = ?', 
+                paciente = conn.execute('SELECT * FROM pacientes WHERE nss = %s AND ars_id = %s', 
                                        (nss, ars_id)).fetchone()
                 if paciente:
                     paciente_id = paciente['id']
                     # Actualizar nombre si cambió
-                    conn.execute('UPDATE pacientes SET nombre = ? WHERE id = ?',
+                    conn.execute('UPDATE pacientes SET nombre = %s WHERE id = %s',
                                (nombre, paciente_id))
                 else:
                     # Crear nuevo paciente con esta combinación NSS + ARS
-                    cursor.execute('INSERT INTO pacientes (nss, nombre, ars_id) VALUES (?, ?, ?)',
+                    cursor.execute('INSERT INTO pacientes (nss, nombre, ars_id) VALUES (%s, %s, %s)',
                                  (nss, nombre, ars_id))
                     paciente_id = cursor.lastrowid
                 
                 # Buscar o crear servicio
-                servicio = conn.execute('SELECT * FROM tipos_servicios WHERE descripcion = ? AND activo = 1',
+                servicio = conn.execute('SELECT * FROM tipos_servicios WHERE descripcion = %s AND activo = 1',
                                       (servicio_desc,)).fetchone()
                 if servicio:
                     servicio_id = servicio['id']
                 else:
                     # Crear servicio automáticamente
-                    cursor.execute('INSERT INTO tipos_servicios (descripcion, precio_base) VALUES (?, ?)',
+                    cursor.execute('INSERT INTO tipos_servicios (descripcion, precio_base) VALUES (%s, %s)',
                                  (servicio_desc, monto))
                     servicio_id = cursor.lastrowid
                 
@@ -3361,7 +3370,7 @@ def facturacion_facturas_nueva():
                     INSERT INTO facturas_detalle 
                     (paciente_id, nss, nombre_paciente, fecha_servicio, autorizacion, 
                      servicio_id, descripcion_servicio, monto, medico_id, ars_id, estado)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendiente')
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pendiente')
                 ''', (paciente_id, nss, nombre, fecha_servicio, autorizacion, 
                      servicio_id, servicio_desc, monto, medico_id, ars_id))
                 
@@ -3401,7 +3410,7 @@ def facturacion_facturas_nueva():
         # Filtrar médicos según el perfil del usuario
         if current_user.perfil == 'Registro de Facturas':
             # Solo mostrar el médico con el mismo email del usuario
-            medicos = conn.execute('SELECT * FROM medicos WHERE activo = 1 AND email = ? ORDER BY nombre', (current_user.email,)).fetchall()
+            medicos = conn.execute('SELECT * FROM medicos WHERE activo = 1 AND email = %s ORDER BY nombre', (current_user.email,)).fetchall()
         else:
             # Administrador: mostrar todos los médicos
             medicos = conn.execute('SELECT * FROM medicos WHERE activo = 1 ORDER BY nombre').fetchall()
@@ -3774,7 +3783,7 @@ def facturacion_generar():
                 return redirect(url_for('facturacion_generar'))
             
             # Verificar que el médico esté habilitado para facturar
-            medico_habilitado = conn.execute('SELECT * FROM medicos WHERE id = ? AND activo = 1 AND factura = 1', 
+            medico_habilitado = conn.execute('SELECT * FROM medicos WHERE id = %s AND activo = 1 AND factura = 1', 
                                              (medico_factura_id,)).fetchone()
             if not medico_habilitado:
                 flash('El médico seleccionado no está habilitado para facturar', 'error')
@@ -3792,8 +3801,8 @@ def facturacion_generar():
             ''', (ars_id,)).fetchall()
             
             # Obtener info de ARS, NCF y Médico para facturar
-            ars = conn.execute('SELECT * FROM ars WHERE id = ?', (ars_id,)).fetchone()
-            ncf = conn.execute('SELECT * FROM ncf WHERE id = ?', (ncf_id,)).fetchone()
+            ars = conn.execute('SELECT * FROM ars WHERE id = %s', (ars_id,)).fetchone()
+            ncf = conn.execute('SELECT * FROM ncf WHERE id = %s', (ncf_id,)).fetchone()
             
             # Obtener lista de médicos únicos en los pendientes (para filtro visual)
             medicos = conn.execute('''
@@ -3849,7 +3858,7 @@ def facturacion_generar():
             
             # Obtener info del MÉDICO QUE FACTURA
             medico = conn.execute('''
-                SELECT * FROM medicos WHERE id = ? AND activo = 1 AND factura = 1
+                SELECT * FROM medicos WHERE id = %s AND activo = 1 AND factura = 1
             ''', (medico_factura_id,)).fetchone()
             
             if not medico:
@@ -3857,8 +3866,8 @@ def facturacion_generar():
                 return redirect(url_for('facturacion_generar'))
             
             # Obtener info de ARS y NCF
-            ars = conn.execute('SELECT * FROM ars WHERE id = ?', (ars_id,)).fetchone()
-            ncf = conn.execute('SELECT * FROM ncf WHERE id = ?', (ncf_id,)).fetchone()
+            ars = conn.execute('SELECT * FROM ars WHERE id = %s', (ars_id,)).fetchone()
+            ncf = conn.execute('SELECT * FROM ncf WHERE id = %s', (ncf_id,)).fetchone()
             
             # Calcular el próximo NCF
             proximo_numero = ncf['ultimo_numero'] + 1
@@ -3948,7 +3957,7 @@ def facturacion_generar_final():
         
         # Obtener datos del MÉDICO QUE FACTURA
         medico = conn.execute('''
-            SELECT * FROM medicos WHERE id = ? AND activo = 1 AND factura = 1
+            SELECT * FROM medicos WHERE id = %s AND activo = 1 AND factura = 1
         ''', (medico_factura_id,)).fetchone()
         
         if not medico:
@@ -3974,7 +3983,7 @@ def facturacion_generar_final():
         total = sum(p['monto'] for p in pacientes)
         
         # Obtener y actualizar NCF
-        ncf = conn.execute('SELECT * FROM ncf WHERE id = ?', (ncf_id,)).fetchone()
+        ncf = conn.execute('SELECT * FROM ncf WHERE id = %s', (ncf_id,)).fetchone()
         proximo_numero = ncf['ultimo_numero'] + 1
         ncf_completo = f"{ncf['prefijo']}{str(proximo_numero).zfill(ncf['tamaño'])}"
         
@@ -3982,20 +3991,20 @@ def facturacion_generar_final():
         cursor = conn.cursor()
         cursor.execute('''
             INSERT INTO facturas (fecha_factura, medico_id, ars_id, ncf_id, ncf_numero, total)
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s)
         ''', (fecha_factura, medico_id, ars_id, ncf_id, ncf_completo, total))
         
         factura_id = cursor.lastrowid
         
         # Actualizar el último número del NCF
         cursor.execute('''
-            UPDATE ncf SET ultimo_numero = ? WHERE id = ?
+            UPDATE ncf SET ultimo_numero = %s WHERE id = %s
         ''', (proximo_numero, ncf_id))
         
         # Actualizar pacientes a facturados
         cursor.execute(f'''
             UPDATE facturas_detalle 
-            SET factura_id = ?, estado = 'facturado'
+            SET factura_id = %s, estado = 'facturado'
             WHERE id IN ({placeholders})
         ''', [factura_id] + ids_list)
         
@@ -4020,7 +4029,7 @@ def facturacion_generar_final():
             ''', [medico_id] + ids_list).fetchall()
             
             # Obtener datos del NCF
-            ncf_data = conn.execute('SELECT fecha_fin, tipo FROM ncf WHERE id = ?', (ncf_id,)).fetchone()
+            ncf_data = conn.execute('SELECT fecha_fin, tipo FROM ncf WHERE id = %s', (ncf_id,)).fetchone()
             
             # Generar PDF
             pdf_buffer = generar_pdf_factura(factura_id, ncf_completo, fecha_factura, pacientes_pdf, total, ncf_data)
@@ -4336,16 +4345,16 @@ def facturacion_historico():
         params.append(medico_id)
     
     if ncf:
-        query += ' AND (f.ncf LIKE ? OR f.ncf_numero LIKE ?)'
+        query += ' AND (f.ncf LIKE %s OR f.ncf_numero LIKE %s)'
         params.append(f'%{ncf}%')
         params.append(f'%{ncf}%')
     
     if fecha_desde:
-        query += ' AND f.fecha_factura >= ?'
+        query += ' AND f.fecha_factura >= %s'
         params.append(fecha_desde)
     
     if fecha_hasta:
-        query += ' AND f.fecha_factura <= ?'
+        query += ' AND f.fecha_factura <= %s'
         params.append(fecha_hasta)
     
     query += ' ORDER BY f.fecha_factura DESC, f.id DESC'
@@ -4472,7 +4481,7 @@ def facturacion_enviar_email(factura_id):
         # Generar PDF
         if REPORTLAB_AVAILABLE:
             # Obtener datos del NCF
-            ncf_data = conn.execute('SELECT fecha_fin, tipo FROM ncf WHERE id = ?', (factura['ncf_id'],)).fetchone()
+            ncf_data = conn.execute('SELECT fecha_fin, tipo FROM ncf WHERE id = %s', (factura['ncf_id'],)).fetchone()
             
             # Generar PDF
             ncf_numero = factura['ncf_numero'] if factura['ncf_numero'] else factura.get('ncf', 'N/A')
@@ -4543,7 +4552,7 @@ def facturacion_descargar_pdf(factura_id):
         # Generar PDF
         if REPORTLAB_AVAILABLE:
             # Obtener datos del NCF
-            ncf_data = conn.execute('SELECT fecha_fin, tipo FROM ncf WHERE id = ?', (factura['ncf_id'],)).fetchone()
+            ncf_data = conn.execute('SELECT fecha_fin, tipo FROM ncf WHERE id = %s', (factura['ncf_id'],)).fetchone()
             
             # Generar PDF
             ncf_numero = factura['ncf_numero'] if factura['ncf_numero'] else factura.get('ncf', 'N/A')
@@ -4580,7 +4589,7 @@ def facturacion_paciente_editar(paciente_id):
     
     # Verificar que el paciente existe y está pendiente
     paciente = conn.execute('''
-        SELECT * FROM facturas_detalle WHERE id = ? AND activo = 1
+        SELECT * FROM facturas_detalle WHERE id = %s AND activo = 1
     ''', (paciente_id,)).fetchone()
     
     if not paciente:
@@ -4610,7 +4619,7 @@ def facturacion_paciente_editar(paciente_id):
             # Verificar autorización única (excepto el mismo registro)
             existe_autorizacion = conn.execute('''
                 SELECT id FROM facturas_detalle 
-                WHERE autorizacion = ? AND id != ? AND activo = 1
+                WHERE autorizacion = %s AND id != %s AND activo = 1
             ''', (autorizacion, paciente_id)).fetchone()
             
             if existe_autorizacion:
@@ -4621,9 +4630,9 @@ def facturacion_paciente_editar(paciente_id):
             # Actualizar registro
             conn.execute('''
                 UPDATE facturas_detalle
-                SET nss = ?, nombre_paciente = ?, fecha_servicio = ?,
+                SET nss = %s, nombre_paciente = ?, fecha_servicio = ?,
                     autorizacion = ?, descripcion_servicio = ?, monto = ?
-                WHERE id = ?
+                WHERE id = %s
             ''', (nss, nombre, fecha, autorizacion, servicio, monto, paciente_id))
             
             conn.commit()
@@ -4656,7 +4665,7 @@ def facturacion_paciente_eliminar(paciente_id):
     
     # Verificar que el paciente existe y está pendiente
     paciente = conn.execute('''
-        SELECT * FROM facturas_detalle WHERE id = ? AND activo = 1
+        SELECT * FROM facturas_detalle WHERE id = %s AND activo = 1
     ''', (paciente_id,)).fetchone()
     
     if not paciente:
@@ -4672,7 +4681,7 @@ def facturacion_paciente_eliminar(paciente_id):
     try:
         # Soft delete
         conn.execute('''
-            UPDATE facturas_detalle SET activo = 0 WHERE id = ?
+            UPDATE facturas_detalle SET activo = 0 WHERE id = %s
         ''', (paciente_id,))
         
         conn.commit()
@@ -4730,7 +4739,7 @@ def api_buscar_servicio():
     servicios = conn.execute('''
         SELECT id, descripcion, precio_base 
         FROM tipos_servicios 
-        WHERE descripcion LIKE ? AND activo = 1 
+        WHERE descripcion LIKE %s AND activo = 1 
         ORDER BY descripcion 
         LIMIT 10
     ''', (f'%{query}%',)).fetchall()
@@ -4763,7 +4772,7 @@ def sitemap():
     
     today = datetime.now().strftime('%Y-%m-%d')
     
-    sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    sitemap_xml = '< %sxml version="1.0" encoding="UTF-8"?>\n'
     sitemap_xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     
     for url in urls:
@@ -4861,7 +4870,7 @@ def admin_usuarios_nuevo():
         
         # Verificar que el email no exista
         conn = get_db_connection()
-        existe = conn.execute('SELECT id FROM usuarios WHERE email = ?', (email,)).fetchone()
+        existe = conn.execute('SELECT id FROM usuarios WHERE email = %s', (email,)).fetchone()
         
         if existe:
             conn.close()
@@ -4872,7 +4881,7 @@ def admin_usuarios_nuevo():
         password_hash = generate_password_hash(password)
         conn.execute('''
             INSERT INTO usuarios (nombre, email, password_hash, perfil, activo, password_temporal)
-            VALUES (?, ?, ?, ?, 1, 1)
+            VALUES (%s, %s, %s, %s, 1, 1)
         ''', (nombre, email, password_hash, perfil))
         conn.commit()
         conn.close()
@@ -4892,7 +4901,7 @@ def admin_usuarios_editar(usuario_id):
         return redirect(url_for('admin'))
     
     conn = get_db_connection()
-    usuario = conn.execute('SELECT * FROM usuarios WHERE id = ?', (usuario_id,)).fetchone()
+    usuario = conn.execute('SELECT * FROM usuarios WHERE id = %s', (usuario_id,)).fetchone()
     
     if not usuario:
         conn.close()
@@ -4926,7 +4935,7 @@ def admin_usuarios_editar(usuario_id):
             return redirect(url_for('admin_usuarios_editar', usuario_id=usuario_id))
         
         # Verificar que el email no exista en otro usuario
-        existe = conn.execute('SELECT id FROM usuarios WHERE email = ? AND id != ?', 
+        existe = conn.execute('SELECT id FROM usuarios WHERE email = %s AND id != %s', 
                              (email, usuario_id)).fetchone()
         
         if existe:
@@ -4943,14 +4952,14 @@ def admin_usuarios_editar(usuario_id):
             password_hash = generate_password_hash(password)
             conn.execute('''
                 UPDATE usuarios 
-                SET nombre = ?, email = ?, password_hash = ?, perfil = ?, activo = ?
-                WHERE id = ?
+                SET nombre = %s, email = ?, password_hash = ?, perfil = ?, activo = ?
+                WHERE id = %s
             ''', (nombre, email, password_hash, perfil, activo, usuario_id))
         else:
             conn.execute('''
                 UPDATE usuarios 
-                SET nombre = ?, email = ?, perfil = ?, activo = ?
-                WHERE id = ?
+                SET nombre = %s, email = ?, perfil = ?, activo = ?
+                WHERE id = %s
             ''', (nombre, email, perfil, activo, usuario_id))
         
         conn.commit()

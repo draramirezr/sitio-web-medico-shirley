@@ -1,5 +1,5 @@
 // Service Worker para PWA y cache offline
-const CACHE_NAME = 'drashirley-v2.0';
+const CACHE_NAME = 'drashirley-v2.1';
 const urlsToCache = [
   '/',
   '/static/css/critical.min.css',

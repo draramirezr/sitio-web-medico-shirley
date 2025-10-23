@@ -10,6 +10,50 @@
 {% block content %}
 <style>
     /* ============================================
+       MEJORA DE COLORES Y LEGIBILIDAD
+       ============================================ */
+    
+    /* Formulario de contacto - Fondo y texto mejorados */
+    .card-body {
+        background-color: #ffffff !important;
+    }
+    
+    .form-label {
+        color: #2c3e50 !important;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+    
+    .form-control {
+        border: 2px solid #ddd;
+        background-color: #f8f9fa;
+        color: #2c3e50 !important;
+        font-size: 1rem;
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary-color);
+        background-color: #fff;
+        color: #2c3e50 !important;
+        box-shadow: 0 0 0 0.2rem rgba(171, 155, 159, 0.25);
+    }
+    
+    .form-control::placeholder {
+        color: #95a5a6;
+    }
+    
+    /* Tarjetas de información lateral - Mejor contraste */
+    .card h5 {
+        color: var(--title-color) !important;
+        font-weight: 700;
+    }
+    
+    .card .text-muted {
+        color: #5a6268 !important;
+        font-size: 0.95rem;
+    }
+    
+    /* ============================================
        FORZAR ELIMINACIÓN DE CHECKMARKS VERDES
        ============================================ */
     input:valid,
@@ -340,15 +384,15 @@
                     </a>
                 </div>
                 
-                <!-- Teléfono -->
+                <!-- Teléfono / WhatsApp -->
                 <div class="col-12">
-                    <a href="tel:+18297405073" class="text-decoration-none card-clickable">
+                    <a href="https://wa.me/18297405073" target="_blank" rel="noopener noreferrer" class="text-decoration-none card-clickable">
                         <div class="card h-100">
                             <div class="card-body text-center">
-                                <div class="service-icon mx-auto mb-3">
-                                    <i class="fas fa-phone"></i>
+                                <div class="service-icon mx-auto mb-3" style="background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);">
+                                    <i class="fab fa-whatsapp"></i>
                                 </div>
-                                <h5>Teléfono</h5>
+                                <h5>WhatsApp</h5>
                                 <p class="text-muted fs-5">
                                     (829) 740-5073
                                 </p>
