@@ -542,7 +542,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS contact_messages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
-            email TEXT NOT NULL,
+            email VARCHAR(255) NOT NULL,
             phone TEXT,
             subject TEXT NOT NULL,
             message TEXT NOT NULL,
@@ -557,7 +557,7 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             first_name TEXT NOT NULL,
             last_name TEXT NOT NULL,
-            email TEXT,
+            email VARCHAR(255),
             phone TEXT NOT NULL,
             appointment_date TEXT,
             appointment_time TEXT,
@@ -634,7 +634,7 @@ def init_db():
             nombre TEXT NOT NULL,
             especialidad TEXT NOT NULL,
             cedula TEXT NOT NULL UNIQUE,
-            email TEXT,
+            email VARCHAR(255),
             activo BOOLEAN DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -644,7 +644,7 @@ def init_db():
     try:
         cursor.execute("SELECT email FROM medicos LIMIT 1")
     except:
-        cursor.execute("ALTER TABLE medicos ADD COLUMN email TEXT")
+        cursor.execute("ALTER TABLE medicos ADD COLUMN email VARCHAR(255)")
         print("✅ Columna 'email' agregada a la tabla medicos")
     
     # Agregar columna exequatur si no existe
