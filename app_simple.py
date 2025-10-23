@@ -754,22 +754,27 @@ def init_db():
     '''))
     
     # Tabla de Facturas (Encabezado)
-    cursor.execute(adapt_sql_for_database('''
-        CREATE TABLE IF NOT EXISTS facturas (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            numero_factura TEXT,
-            ncf TEXT,
-            fecha_factura DATE NOT NULL,
-            medico_id INTEGER NOT NULL,
-            ars_id INTEGER NOT NULL,
-            total REAL DEFAULT 0,
-            observaciones TEXT,
-            activo BOOLEAN DEFAULT 1,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (medico_id) REFERENCES medicos(id),
-            FOREIGN KEY (ars_id) REFERENCES ars(id)
-        )
-    '''))
+    try:
+        cursor.execute(adapt_sql_for_database('''
+            CREATE TABLE IF NOT EXISTS facturas (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                numero_factura TEXT,
+                ncf TEXT,
+                fecha_factura DATE NOT NULL,
+                medico_id INTEGER NOT NULL,
+                ars_id INTEGER NOT NULL,
+                total REAL DEFAULT 0,
+                observaciones TEXT,
+                activo BOOLEAN DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (medico_id) REFERENCES medicos(id),
+                FOREIGN KEY (ars_id) REFERENCES ars(id)
+            )
+        '''))
+        print("✅ Tabla 'facturas' creada/verificada")
+    except Exception as e:
+        print(f"❌ Error creando tabla facturas: {e}")
+        raise
     
     # Tabla de Detalle de Facturas (Líneas)
     cursor.execute(adapt_sql_for_database('''
