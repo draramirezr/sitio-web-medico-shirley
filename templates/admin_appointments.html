@@ -188,22 +188,22 @@
                         <div class="col-lg-4 mb-3 mb-lg-0">
                             <h5 class="mb-2">
                                 <i class="fas fa-user-circle me-2 text-primary"></i>
-                                {{ appointment[1] }} {{ appointment[2] }}
+                                {{ appointment['first_name'] }} {{ appointment['last_name'] }}
                             </h5>
                             <div class="patient-info">
                                 <div class="mb-1">
                                     <i class="fas fa-phone"></i>
-                                    <strong>Teléfono:</strong> {{ appointment[4] }}
+                                    <strong>Teléfono:</strong> {{ appointment['phone'] }}
                                 </div>
-                                {% if appointment[3] %}
+                                {% if appointment['email'] %}
                                 <div class="mb-1">
                                     <i class="fas fa-envelope"></i>
-                                    <strong>Email:</strong> {{ appointment[3] }}
+                                    <strong>Email:</strong> {{ appointment['email'] }}
                                 </div>
                                 {% endif %}
                                 <div class="mb-1">
                                     <i class="fas fa-shield-alt"></i>
-                                    <strong>Seguro:</strong> {{ appointment[8] }}
+                                    <strong>Seguro:</strong> {{ appointment['medical_insurance'] }}
                                 </div>
                             </div>
                         </div>
@@ -213,36 +213,36 @@
                             <div class="patient-info">
                                 <div class="mb-1">
                                     <i class="fas fa-stethoscope"></i>
-                                    <strong>Tipo:</strong> {{ appointment[7] }}
+                                    <strong>Tipo:</strong> {{ appointment['appointment_type'] }}
                                 </div>
-                                {% if appointment[5] %}
+                                {% if appointment['appointment_date'] %}
                                 <div class="mb-1">
                                     <i class="fas fa-calendar-day"></i>
-                                    <strong>Fecha:</strong> {{ appointment[5] }}
+                                    <strong>Fecha:</strong> {{ appointment['appointment_date'] }}
                                 </div>
                                 {% endif %}
-                                {% if appointment[6] %}
+                                {% if appointment['appointment_time'] %}
                                 <div class="mb-1">
                                     <i class="fas fa-clock"></i>
-                                    <strong>Hora:</strong> {{ appointment[6] }}
+                                    <strong>Hora:</strong> {{ appointment['appointment_time'] }}
                                 </div>
                                 {% endif %}
-                                {% if appointment[9] %}
+                                {% if appointment['emergency_datetime'] %}
                                 <div class="mb-1">
                                     <i class="fas fa-ambulance"></i>
-                                    <strong>Emergencia:</strong> {{ appointment[9] }}
+                                    <strong>Emergencia:</strong> {{ appointment['emergency_datetime'] }}
                                 </div>
                                 {% endif %}
-                                {% if appointment[10] %}
+                                {% if appointment['reason'] %}
                                 <div class="mb-1">
                                     <i class="fas fa-comment-medical"></i>
-                                    <strong>Motivo:</strong> {{ appointment[10][:50] }}{% if appointment[10]|length > 50 %}...{% endif %}
+                                    <strong>Motivo:</strong> {{ appointment['reason'][:50] }}{% if appointment['reason']|length > 50 %}...{% endif %}
                                 </div>
                                 {% endif %}
                             </div>
                             <div class="mt-2">
-                                <span class="badge badge-{{ appointment[11] }}">
-                                    {{ appointment[11].upper() }}
+                                <span class="badge badge-{{ appointment['status'] }}">
+                                    {{ appointment['status'].upper() }}
                                 </span>
                             </div>
                         </div>
@@ -251,7 +251,7 @@
                         <div class="col-lg-4">
                             <div class="d-grid gap-2">
                                 <!-- Botón de WhatsApp -->
-                                <a href="https://wa.me/{{ appointment[4]|replace('(', '')|replace(')', '')|replace('-', '')|replace(' ', '') }}?text=Hola%20{{ appointment[1] }},%20soy%20la%20Dra.%20Shirley%20Ram%C3%ADrez.%20Te%20contacto%20en%20relaci%C3%B3n%20a%20tu%20solicitud%20de%20cita.%0A%0A%F0%9F%93%85%20Tipo:%20{{ appointment[7]|replace(' ', '%20') }}%0A%0A%C2%BFPodemos%20confirmar%20la%20cita?" 
+                                <a href="https://wa.me/{{ appointment['phone']|replace('(', '')|replace(')', '')|replace('-', '')|replace(' ', '') }}?text=Hola%20{{ appointment['first_name'] }},%20soy%20la%20Dra.%20Shirley%20Ram%C3%ADrez.%20Te%20contacto%20en%20relaci%C3%B3n%20a%20tu%20solicitud%20de%20cita.%0A%0A%F0%9F%93%85%20Tipo:%20{{ appointment['appointment_type']|replace(' ', '%20') }}%0A%0A%C2%BFPodemos%20confirmar%20la%20cita?" 
                                    class="btn whatsapp-btn" 
                                    target="_blank"
                                    title="Contactar por WhatsApp">
@@ -260,12 +260,12 @@
                                 </a>
 
                                 <!-- Formulario para cambiar estado -->
-                                <form action="{{ url_for('update_appointment_status', appointment_id=appointment[0]) }}" method="POST" class="d-flex gap-2">
+                                <form action="{{ url_for('update_appointment_status', appointment_id=appointment['id']) }}" method="POST" class="d-flex gap-2">
                                     <select name="status" class="form-select form-select-sm" required>
-                                        <option value="pending" {% if appointment[11] == 'pending' %}selected{% endif %}>Pendiente</option>
-                                        <option value="confirmed" {% if appointment[11] == 'confirmed' %}selected{% endif %}>Confirmada</option>
-                                        <option value="completed" {% if appointment[11] == 'completed' %}selected{% endif %}>Completada</option>
-                                        <option value="cancelled" {% if appointment[11] == 'cancelled' %}selected{% endif %}>Cancelada</option>
+                                        <option value="pending" {% if appointment['status'] == 'pending' %}selected{% endif %}>Pendiente</option>
+                                        <option value="confirmed" {% if appointment['status'] == 'confirmed' %}selected{% endif %}>Confirmada</option>
+                                        <option value="completed" {% if appointment['status'] == 'completed' %}selected{% endif %}>Completada</option>
+                                        <option value="cancelled" {% if appointment['status'] == 'cancelled' %}selected{% endif %}>Cancelada</option>
                                     </select>
                                     <button type="submit" class="btn btn-sm btn-primary">
                                         <i class="fas fa-save"></i>
@@ -273,14 +273,14 @@
                                 </form>
 
                                 <!-- Botón para ver detalles completos -->
-                                <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#detailsModal{{ appointment[0] }}">
+                                <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#detailsModal{{ appointment['id'] }}">
                                     <i class="fas fa-eye me-2"></i>
                                     Ver Detalles Completos
                                 </button>
                             </div>
                             <small class="text-muted d-block mt-2">
                                 <i class="fas fa-calendar-plus"></i>
-                                Registrada: {{ appointment[12] }}
+                                Registrada: {{ appointment['created_at'] }}
                             </small>
                         </div>
                     </div>
@@ -289,13 +289,13 @@
         </div>
 
         <!-- Modal con detalles completos -->
-        <div class="modal fade" id="detailsModal{{ appointment[0] }}" tabindex="-1">
+        <div class="modal fade" id="detailsModal{{ appointment['id'] }}" tabindex="-1">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">
                             <i class="fas fa-clipboard-list me-2"></i>
-                            Detalles de la Cita - {{ appointment[1] }} {{ appointment[2] }}
+                            Detalles de la Cita - {{ appointment['first_name'] }} {{ appointment['last_name'] }}
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
@@ -303,64 +303,64 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <strong><i class="fas fa-user me-2"></i>Nombre:</strong><br>
-                                {{ appointment[1] }} {{ appointment[2] }}
+                                {{ appointment['first_name'] }} {{ appointment['last_name'] }}
                             </div>
                             <div class="col-md-6 mb-3">
                                 <strong><i class="fas fa-phone me-2"></i>Teléfono:</strong><br>
-                                {{ appointment[4] }}
+                                {{ appointment['phone'] }}
                             </div>
-                            {% if appointment[3] %}
+                            {% if appointment['email'] %}
                             <div class="col-md-6 mb-3">
                                 <strong><i class="fas fa-envelope me-2"></i>Email:</strong><br>
-                                {{ appointment[3] }}
+                                {{ appointment['email'] }}
                             </div>
                             {% endif %}
                             <div class="col-md-6 mb-3">
                                 <strong><i class="fas fa-shield-alt me-2"></i>Seguro Médico:</strong><br>
-                                {{ appointment[8] }}
+                                {{ appointment['medical_insurance'] }}
                             </div>
                             <div class="col-md-6 mb-3">
                                 <strong><i class="fas fa-stethoscope me-2"></i>Tipo de Consulta:</strong><br>
-                                {{ appointment[7] }}
+                                {{ appointment['appointment_type'] }}
                             </div>
-                            {% if appointment[5] %}
+                            {% if appointment['appointment_date'] %}
                             <div class="col-md-6 mb-3">
                                 <strong><i class="fas fa-calendar-day me-2"></i>Fecha:</strong><br>
-                                {{ appointment[5] }}
+                                {{ appointment['appointment_date'] }}
                             </div>
                             {% endif %}
-                            {% if appointment[6] %}
+                            {% if appointment['appointment_time'] %}
                             <div class="col-md-6 mb-3">
                                 <strong><i class="fas fa-clock me-2"></i>Hora:</strong><br>
-                                {{ appointment[6] }}
+                                {{ appointment['appointment_time'] }}
                             </div>
                             {% endif %}
-                            {% if appointment[9] %}
+                            {% if appointment['emergency_datetime'] %}
                             <div class="col-md-6 mb-3">
                                 <strong><i class="fas fa-ambulance me-2"></i>Fecha/Hora Emergencia:</strong><br>
-                                {{ appointment[9] }}
+                                {{ appointment['emergency_datetime'] }}
                             </div>
                             {% endif %}
                             <div class="col-md-6 mb-3">
                                 <strong><i class="fas fa-info-circle me-2"></i>Estado:</strong><br>
-                                <span class="badge badge-{{ appointment[11] }}">{{ appointment[11].upper() }}</span>
+                                <span class="badge badge-{{ appointment['status'] }}">{{ appointment['status'].upper() }}</span>
                             </div>
-                            {% if appointment[10] %}
+                            {% if appointment['reason'] %}
                             <div class="col-12 mb-3">
                                 <strong><i class="fas fa-comment-medical me-2"></i>Motivo de la Consulta:</strong><br>
                                 <div class="p-3 bg-light rounded">
-                                    {{ appointment[10] }}
+                                    {{ appointment['reason'] }}
                                 </div>
                             </div>
                             {% endif %}
                             <div class="col-12 mb-3">
                                 <strong><i class="fas fa-calendar-plus me-2"></i>Fecha de Registro:</strong><br>
-                                {{ appointment[12] }}
+                                {{ appointment['created_at'] }}
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <a href="https://wa.me/{{ appointment[4]|replace('(', '')|replace(')', '')|replace('-', '')|replace(' ', '') }}?text=Hola%20{{ appointment[1] }},%20soy%20la%20Dra.%20Shirley%20Ram%C3%ADrez." 
+                        <a href="https://wa.me/{{ appointment['phone']|replace('(', '')|replace(')', '')|replace('-', '')|replace(' ', '') }}?text=Hola%20{{ appointment['first_name'] }},%20soy%20la%20Dra.%20Shirley%20Ram%C3%ADrez." 
                            class="btn whatsapp-btn" 
                            target="_blank">
                             <i class="fab fa-whatsapp me-2"></i>

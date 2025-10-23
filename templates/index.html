@@ -1375,17 +1375,17 @@
         
         <div class="row g-4 justify-content-center">
             {% for service in services %}
-            {% if service[1] in ['Consulta Ginecológica', 'Consulta Obstétrica', 'Planificación Familiar'] %}
+            {% if service['name'] in ['Consulta Ginecológica', 'Consulta Obstétrica', 'Planificación Familiar'] %}
             <div class="col-lg-4 col-md-6 fade-in-up" style="animation-delay: {{ loop.index * 0.15 }}s;">
                 <div class="card-premium">
                     <div class="card-icon-large">
-                        <i class="{{ service[3] or 'fas fa-stethoscope' }}"></i>
+                        <i class="{{ service['icon'] or 'fas fa-stethoscope' }}"></i>
                     </div>
                     <h4 class="mb-3" style="color: var(--title-color); font-weight: 700; font-size: 1.3rem;">
-                        {{ service[1] }}
+                        {{ service['name'] }}
                     </h4>
                     <p class="text-muted" style="line-height: 1.7;">
-                        {{ service[2][:100] }}{% if service[2]|length > 100 %}...{% endif %}
+                        {{ service['description'][:100] }}{% if service['description']|length > 100 %}...{% endif %}
                     </p>
                 </div>
             </div>

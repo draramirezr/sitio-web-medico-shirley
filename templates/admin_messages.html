@@ -174,27 +174,27 @@
     <div class="row">
         {% for message in messages %}
         <div class="col-12 mb-4">
-            <div class="card message-card {% if not message[6] %}message-unread{% endif %}">
+            <div class="card message-card {% if not message['read'] %}message-unread{% endif %}">
                 <div class="card-body">
                     <div class="row align-items-center">
                         <!-- Información del Remitente -->
                         <div class="col-lg-4 mb-3 mb-lg-0">
                             <h5 class="mb-2">
                                 <i class="fas fa-user me-2"></i>
-                                {{ message[1] }}
-                                {% if not message[6] %}
+                                {{ message['name'] }}
+                                {% if not message['read'] %}
                                 <span class="badge-nuevo ms-2">Nuevo</span>
                                 {% endif %}
                             </h5>
                             <div class="small">
                                 <div class="mb-1">
                                     <i class="fas fa-envelope me-2"></i>
-                                    <strong>Email:</strong> {{ message[2] }}
+                                    <strong>Email:</strong> {{ message['email'] }}
                                 </div>
-                                {% if message[3] %}
+                                {% if message['phone'] %}
                                 <div class="mb-1">
                                     <i class="fas fa-phone me-2"></i>
-                                    <strong>Teléfono:</strong> {{ message[3] }}
+                                    <strong>Teléfono:</strong> {{ message['phone'] }}
                                 </div>
                                 {% endif %}
                             </div>
@@ -204,15 +204,15 @@
                         <div class="col-lg-5 mb-3 mb-lg-0">
                             <div class="small">
                                 <strong><i class="fas fa-comment-dots me-2"></i>Asunto:</strong>
-                                <p class="mb-2">{{ message[4] }}</p>
+                                <p class="mb-2">{{ message['subject'] }}</p>
                                 <strong><i class="fas fa-file-alt me-2"></i>Mensaje:</strong>
                                 <p class="text-muted mb-0">
-                                    {{ message[5][:100] }}{% if message[5]|length > 100 %}...{% endif %}
+                                    {{ message['message'][:100] }}{% if message['message']|length > 100 %}...{% endif %}
                                 </p>
                             </div>
                             <small class="text-muted">
                                 <i class="fas fa-calendar-alt"></i>
-                                {{ message[7] }}
+                                {{ message['created_at'] }}
                             </small>
                         </div>
 
@@ -220,8 +220,8 @@
                         <div class="col-lg-3">
                             <div class="d-grid gap-2">
                                 <!-- Botón de WhatsApp (si tiene teléfono) -->
-                                {% if message[3] %}
-                                <a href="https://wa.me/{{ message[3]|replace('(', '')|replace(')', '')|replace('-', '')|replace(' ', '') }}?text=Hola%20{{ message[1]|replace(' ', '%20') }},%20soy%20la%20Dra.%20Shirley%20Ram%C3%ADrez.%20Te%20contacto%20en%20relaci%C3%B3n%20a%20tu%20mensaje." 
+                                {% if message['phone'] %}
+                                <a href="https://wa.me/{{ message['phone']|replace('(', '')|replace(')', '')|replace('-', '')|replace(' ', '') }}?text=Hola%20{{ message['name']|replace(' ', '%20') }},%20soy%20la%20Dra.%20Shirley%20Ram%C3%ADrez.%20Te%20contacto%20en%20relaci%C3%B3n%20a%20tu%20mensaje." 
                                    class="btn whatsapp-btn btn-sm" 
                                    target="_blank"
                                    title="Contactar por WhatsApp">
@@ -231,7 +231,7 @@
                                 {% endif %}
 
                                 <!-- Botón de Email -->
-                                <a href="mailto:{{ message[2] }}?subject=Re: {{ message[4] }}" 
+                                <a href="mailto:{{ message['email'] }}?subject=Re: {{ message['subject'] }}" 
                                    class="btn btn-sm btn-outline-primary"
                                    title="Responder por Email">
                                     <i class="fas fa-reply me-2"></i>
@@ -239,14 +239,14 @@
                                 </a>
 
                                 <!-- Botón Ver Detalles -->
-                                <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#messageModal{{ message[0] }}">
+                                <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#messageModal{{ message['id'] }}">
                                     <i class="fas fa-eye me-2"></i>
                                     Ver Completo
                                 </button>
 
                                 <!-- Marcar como leído -->
-                                {% if not message[6] %}
-                                <button class="btn btn-sm btn-outline-success mark-read-btn" data-message-id="{{ message[0] }}">
+                                {% if not message['read'] %}
+                                <button class="btn btn-sm btn-outline-success mark-read-btn" data-message-id="{{ message['id'] }}">
                                     <i class="fas fa-check me-2"></i>
                                     Marcar como Leído
                                 </button>
@@ -259,56 +259,56 @@
         </div>
 
         <!-- Modal con mensaje completo -->
-        <div class="modal fade" id="messageModal{{ message[0] }}" tabindex="-1">
+        <div class="modal fade" id="messageModal{{ message['id'] }}" tabindex="-1">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">
                             <i class="fas fa-envelope-open me-2"></i>
-                            Mensaje de {{ message[1] }}
+                            Mensaje de {{ message['name'] }}
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
                             <strong><i class="fas fa-user me-2"></i>Nombre:</strong><br>
-                            {{ message[1] }}
+                            {{ message['name'] }}
                         </div>
                         <div class="mb-3">
                             <strong><i class="fas fa-envelope me-2"></i>Email:</strong><br>
-                            <a href="mailto:{{ message[2] }}">{{ message[2] }}</a>
+                            <a href="mailto:{{ message['email'] }}">{{ message['email'] }}</a>
                         </div>
-                        {% if message[3] %}
+                        {% if message['phone'] %}
                         <div class="mb-3">
                             <strong><i class="fas fa-phone me-2"></i>Teléfono:</strong><br>
-                            {{ message[3] }}
+                            {{ message['phone'] }}
                         </div>
                         {% endif %}
                         <div class="mb-3">
                             <strong><i class="fas fa-comment-dots me-2"></i>Asunto:</strong><br>
-                            {{ message[4] }}
+                            {{ message['subject'] }}
                         </div>
                         <div class="mb-3">
                             <strong><i class="fas fa-file-alt me-2"></i>Mensaje Completo:</strong><br>
                             <div class="p-3 bg-light rounded">
-                                {{ message[5] }}
+                                {{ message['message'] }}
                             </div>
                         </div>
                         <div class="mb-3">
                             <strong><i class="fas fa-calendar-alt me-2"></i>Fecha de Recepción:</strong><br>
-                            {{ message[7] }}
+                            {{ message['created_at'] }}
                         </div>
                     </div>
                     <div class="modal-footer">
-                        {% if message[3] %}
-                        <a href="https://wa.me/{{ message[3]|replace('(', '')|replace(')', '')|replace('-', '')|replace(' ', '') }}?text=Hola%20{{ message[1]|replace(' ', '%20') }},%20soy%20la%20Dra.%20Shirley%20Ram%C3%ADrez." 
+                        {% if message['phone'] %}
+                        <a href="https://wa.me/{{ message['phone']|replace('(', '')|replace(')', '')|replace('-', '')|replace(' ', '') }}?text=Hola%20{{ message['name']|replace(' ', '%20') }},%20soy%20la%20Dra.%20Shirley%20Ram%C3%ADrez." 
                            class="btn whatsapp-btn" 
                            target="_blank">
                             <i class="fab fa-whatsapp me-2"></i>
                             WhatsApp
                         </a>
                         {% endif %}
-                        <a href="mailto:{{ message[2] }}?subject=Re: {{ message[4] }}" class="btn btn-primary">
+                        <a href="mailto:{{ message['email'] }}?subject=Re: {{ message['subject'] }}" class="btn btn-primary">
                             <i class="fas fa-reply me-2"></i>
                             Responder Email
                         </a>

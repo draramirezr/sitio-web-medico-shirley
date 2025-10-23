@@ -370,7 +370,7 @@
                     {% if recent_appointments %}
                                 {% for appointment in recent_appointments %}
                         <div class="appointment-card mb-3" style="background: rgba(242, 226, 230, 0.1); 
-                                    border-left: 4px solid {{ '#B89BA3' if appointment[9] == 'completed' else '#CEB0B7' if appointment[9] == 'pending' else '#ACACAD' }}; 
+                                    border-left: 4px solid {{ '#B89BA3' if appointment['status'] == 'completed' else '#CEB0B7' if appointment['status'] == 'pending' else '#ACACAD' }}; 
                                     border-radius: 10px; padding: 1rem; transition: all 0.3s ease; cursor: pointer;">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div class="flex-grow-1">
@@ -378,38 +378,38 @@
                                         <div class="avatar-circle me-2" style="width: 40px; height: 40px; border-radius: 50%; 
                                                     background: #CEB0B7; 
                                                     display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
-                                            {{ appointment[1][0] }}{{ appointment[2][0] }}
+                                            {{ appointment['first_name'][0] }}{{ appointment['last_name'][0] }}
                                         </div>
                                         <div>
                                             <h6 class="mb-0" style="color: var(--text-dark); font-weight: 700;">
-                                                {{ appointment[1] }} {{ appointment[2] }}
+                                                {{ appointment['first_name'] }} {{ appointment['last_name'] }}
                                             </h6>
                                             <small class="text-muted">
-                                                <i class="fas fa-envelope me-1"></i>{{ appointment[3] }}
+                                                <i class="fas fa-envelope me-1"></i>{{ appointment['email'] }}
                                             </small>
                                         </div>
                                     </div>
                                     <div class="d-flex align-items-center gap-3 mt-2">
                                         <span style="color: var(--text-muted); font-size: 0.9rem;">
                                             <i class="fas fa-calendar-day me-1" style="color: var(--primary-color);"></i>
-                                            <strong>{{ appointment[5] }}</strong>
+                                            <strong>{{ appointment['appointment_date'] }}</strong>
                                         </span>
                                         <span style="color: var(--text-muted); font-size: 0.9rem;">
                                             <i class="fas fa-clock me-1" style="color: var(--primary-color);"></i>
-                                            {{ appointment[6] if appointment[6] else 'Por definir' }}
+                                            {{ appointment['appointment_time'] if appointment['appointment_time'] else 'Por definir' }}
                                         </span>
                                     </div>
-                                    {% if appointment[7] %}
+                                    {% if appointment['appointment_type'] %}
                                     <p class="mb-0 mt-2" style="font-size: 0.85rem; color: var(--text-muted); font-style: italic;">
-                                        "{{ appointment[7][:60] }}{{ '...' if appointment[7]|length > 60 else '' }}"
+                                        "{{ appointment['appointment_type'][:60] }}{{ '...' if appointment['appointment_type']|length > 60 else '' }}"
                                     </p>
                                     {% endif %}
                                 </div>
                                 <div class="ms-2">
-                                    <span class="badge" style="background: {{ '#B89BA3' if appointment[9] == 'completed' else '#CEB0B7' if appointment[9] == 'pending' else '#ACACAD' }}; 
+                                    <span class="badge" style="background: {{ '#B89BA3' if appointment['status'] == 'completed' else '#CEB0B7' if appointment['status'] == 'pending' else '#ACACAD' }}; 
                                                 color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">
-                                        <i class="fas {{ 'fa-check-circle' if appointment[9] == 'completed' else 'fa-clock' if appointment[9] == 'pending' else 'fa-times-circle' }} me-1"></i>
-                                        {{ 'Completada' if appointment[9] == 'completed' else 'Pendiente' if appointment[9] == 'pending' else 'Cancelada' }}
+                                        <i class="fas {{ 'fa-check-circle' if appointment['status'] == 'completed' else 'fa-clock' if appointment['status'] == 'pending' else 'fa-times-circle' }} me-1"></i>
+                                        {{ 'Completada' if appointment['status'] == 'completed' else 'Pendiente' if appointment['status'] == 'pending' else 'Cancelada' }}
                                         </span>
                                 </div>
                             </div>
@@ -443,42 +443,42 @@
                 <div class="card-body" style="min-height: 200px; max-height: 450px; overflow-y: auto;">
                     {% if recent_messages %}
                                 {% for message in recent_messages %}
-                        <div class="message-card mb-3" style="background: {{ 'rgba(242, 226, 230, 0.25)' if not message[5] else 'rgba(248, 249, 250, 0.5)' }}; 
-                                    border-left: 4px solid {{ 'var(--primary-color)' if not message[5] else '#dee2e6' }}; 
+                        <div class="message-card mb-3" style="background: {{ 'rgba(242, 226, 230, 0.25)' if not message['read'] else 'rgba(248, 249, 250, 0.5)' }}; 
+                                    border-left: 4px solid {{ 'var(--primary-color)' if not message['read'] else '#dee2e6' }}; 
                                     border-radius: 10px; padding: 1rem; transition: all 0.3s ease; cursor: pointer;
-                                    {{ 'border: 2px solid var(--primary-color);' if not message[5] else '' }}">
+                                    {{ 'border: 2px solid var(--primary-color);' if not message['read'] else '' }}">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div class="flex-grow-1">
                                     <div class="d-flex align-items-center mb-2">
                                         <div class="avatar-circle me-2" style="width: 40px; height: 40px; border-radius: 50%; 
-                                                    background: {{ '#CEB0B7' if not message[5] else '#dee2e6' }}; 
+                                                    background: {{ '#CEB0B7' if not message['read'] else '#dee2e6' }}; 
                                                     display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
-                                            {{ message[1][0] }}
+                                            {{ message['name'][0] }}
                                         </div>
                                         <div class="flex-grow-1">
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <h6 class="mb-0" style="color: var(--text-dark); font-weight: {{ '800' if not message[5] else '600' }};">
-                                                    {{ message[1] }}
-                                                    {% if not message[5] %}
+                                                <h6 class="mb-0" style="color: var(--text-dark); font-weight: {{ '800' if not message['read'] else '600' }};">
+                                                    {{ message['name'] }}
+                                                    {% if not message['read'] %}
                                                     <span class="badge bg-danger ms-2" style="font-size: 0.65rem; padding: 0.2rem 0.5rem; vertical-align: middle;">NUEVO</span>
                                                     {% endif %}
                                                 </h6>
                                             </div>
                                             <small class="text-muted">
-                                                <i class="fas fa-envelope me-1"></i>{{ message[2] }}
+                                                <i class="fas fa-envelope me-1"></i>{{ message['email'] }}
                                             </small>
                                         </div>
                                     </div>
                                     <div class="mb-2">
                                         <strong style="color: var(--primary-color); font-size: 0.9rem;">
-                                            <i class="fas fa-tag me-1"></i>{{ message[3] }}
+                                            <i class="fas fa-tag me-1"></i>{{ message['subject'] }}
                                         </strong>
                                     </div>
                                     <p class="mb-2" style="font-size: 0.9rem; color: var(--text-dark); line-height: 1.5;">
-                                        {{ message[4][:100] }}{{ '...' if message[4]|length > 100 else '' }}
+                                        {{ message['message'][:100] }}{{ '...' if message['message']|length > 100 else '' }}
                                     </p>
                                     <small style="color: var(--text-muted); font-size: 0.8rem;">
-                                        <i class="fas fa-clock me-1"></i>{{ message[7] }}
+                                        <i class="fas fa-clock me-1"></i>{{ message['created_at'] }}
                                     </small>
                                 </div>
                             </div>

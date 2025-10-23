@@ -1017,7 +1017,9 @@ def get_visit_count():
         cursor.execute('SELECT total_visits FROM site_visits WHERE id = 1')
         result = cursor.fetchone()
         conn.close()
-        return result[0] if result else 0
+        if result:
+            return result['total_visits'] if isinstance(result, dict) else result[0]
+        return 0
     except Exception as e:
         print(f"Error al obtener contador de visitas: {e}")
         return 0
@@ -1832,7 +1834,7 @@ def request_appointment():
                 ).fetchall()
                 
                 # Verificar si hay conflicto de horario (dentro de 30 minutos)
-                for cita in cita_existente:
+                if cita_existente and len(cita_existente) > 0:
                     conn.close()
                     flash('⚠️ Lo sentimos, ya hay una cita de emergencia cerca de ese horario. Por favor selecciona otro horario.', 'warning')
                     return redirect(url_for('request_appointment'))
