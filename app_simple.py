@@ -511,7 +511,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS usuarios (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nombre TEXT NOT NULL,
-            email TEXT UNIQUE NOT NULL,
+            email VARCHAR(255) UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
             perfil TEXT NOT NULL CHECK(perfil IN ('Administrador', 'Registro de Facturas')),
             activo BOOLEAN DEFAULT 1,
