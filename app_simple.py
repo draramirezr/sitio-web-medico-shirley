@@ -633,7 +633,7 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nombre TEXT NOT NULL,
             especialidad TEXT NOT NULL,
-            cedula TEXT NOT NULL UNIQUE,
+            cedula VARCHAR(50) NOT NULL UNIQUE,
             email VARCHAR(255),
             activo BOOLEAN DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
