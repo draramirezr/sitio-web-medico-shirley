@@ -874,9 +874,9 @@ def get_db_connection():
         # Conectar a MySQL con pool settings para evitar rate limit
         config = DATABASE_CONFIG.copy()
         config['cursorclass'] = pymysql.cursors.DictCursor
-        config['connect_timeout'] = 10
-        config['read_timeout'] = 10
-        config['write_timeout'] = 10
+        config['connect_timeout'] = 60  # Aumentado para Railway
+        config['read_timeout'] = 60     # Aumentado para Railway
+        config['write_timeout'] = 60    # Aumentado para Railway
         # Reutilizar conexiones
         config['autocommit'] = True  # Evita mantener transacciones abiertas
         
