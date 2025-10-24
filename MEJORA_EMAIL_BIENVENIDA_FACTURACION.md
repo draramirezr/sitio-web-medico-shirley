@@ -217,3 +217,7 @@ Railway detectará automáticamente y hará deploy en 2-3 minutos.
 **Impacto:** Alto - Mejora significativa de UX  
 **Prioridad:** Alta - Reduce carga de soporte
 
+
+
+
+

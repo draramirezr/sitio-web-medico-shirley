@@ -93,3 +93,9 @@ El código ahora maneja automáticamente ambos casos:
 **Solución:** Función `clean_env_var()` en `app_simple.py`
 **Estado:** ✅ RESUELTO (pendiente deploy)
 
+
+
+
+
+
+

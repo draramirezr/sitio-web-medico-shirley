@@ -273,3 +273,7 @@ row['id']        # ✅ Funciona
 **Probado:** ✅ SÍ  
 **Listo para producción:** ✅ SÍ
 
+
+
+
+

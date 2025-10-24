@@ -228,3 +228,7 @@ print("\n" + "=" * 80)
 print("✅ ANÁLISIS COMPLETADO")
 print("=" * 80)
 
+
+
+
+

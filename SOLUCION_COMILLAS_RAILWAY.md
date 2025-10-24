@@ -76,3 +76,9 @@ MYSQL_HOST=mysql.railway.internal    ← Sin comillas
 
 El código siempre extraerá: `mysql.railway.internal`
 
+
+
+
+
+
+

@@ -110,3 +110,9 @@ railway run python inicializar_mysql_railway.py
 
 Una vez completados todos los pasos, **copia los logs finales** y avísame para verificar que todo funcione correctamente.
 
+
+
+
+
+
+

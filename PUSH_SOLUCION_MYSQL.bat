@@ -26,3 +26,9 @@ echo 4. Verificar: "Base de datos conectada: mysql"
 echo.
 pause
 
+
+
+
+
+
+
