@@ -77,3 +77,4 @@ Copia el mensaje de error completo que aparezca en MySQL Workbench y pégalo aqu
 
 
 
+

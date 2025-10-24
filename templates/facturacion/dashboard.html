@@ -229,6 +229,11 @@
         color: var(--warning-color);
     }
     
+    .stat-card.danger { 
+        border-color: var(--danger-color);
+        color: var(--danger-color);
+    }
+    
     .stat-icon {
         width: 70px;
         height: 70px;
@@ -255,6 +260,11 @@
     .stat-icon.warning { 
         background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.2) 100%);
         color: var(--warning-color);
+    }
+    
+    .stat-icon.danger { 
+        background: linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, rgba(220, 53, 69, 0.2) 100%);
+        color: var(--danger-color);
     }
     
     .stat-value {
@@ -507,11 +517,22 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="medico_id">Médico:</label>
-                <select id="medico_id" name="medico_id" class="form-select">
-                    <option value="">-- Todos los Médicos --</option>
-                    {% for medico in medicos_list %}
-                        <option value="{{ medico.id }}" {% if medico_id_seleccionado == medico.id %}selected{% endif %}>
+                <label for="medico_factura_id">Médico Factura:</label>
+                <select id="medico_factura_id" name="medico_factura_id" class="form-select">
+                    <option value="">-- Todos los Médicos (habilitados para facturar) --</option>
+                    {% for medico in medicos_factura_list %}
+                        <option value="{{ medico.id }}" {% if medico_factura_id_seleccionado == medico.id %}selected{% endif %}>
+                            {{ medico.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="medico_consulta_id">Médico Paciente:</label>
+                <select id="medico_consulta_id" name="medico_consulta_id" class="form-select">
+                    <option value="">-- Todos los Médicos (que atendieron pacientes) --</option>
+                    {% for medico in medicos_consulta_list %}
+                        <option value="{{ medico.id }}" {% if medico_consulta_id_seleccionado == medico.id %}selected{% endif %}>
                             {{ medico.nombre }}
                         </option>
                     {% endfor %}
@@ -526,7 +547,7 @@
     <!-- Tarjetas de Estadísticas Principales -->
     <div class="row g-4 mb-4">
         <!-- Facturas Generadas -->
-        <div class="col-lg-4 col-md-6 animate-card" style="animation-delay: 0.2s">
+        <div class="col-lg-3 col-md-6 animate-card" style="animation-delay: 0.2s">
             <div class="stat-card primary">
                 <div class="stat-icon primary">
                     <i class="fas fa-file-invoice"></i>
@@ -537,7 +558,7 @@
         </div>
         
         <!-- Total Facturado -->
-        <div class="col-lg-4 col-md-6 animate-card" style="animation-delay: 0.3s">
+        <div class="col-lg-3 col-md-6 animate-card" style="animation-delay: 0.3s">
             <div class="stat-card success">
                 <div class="stat-icon success">
                     <i class="fas fa-dollar-sign"></i>
@@ -547,14 +568,25 @@
             </div>
         </div>
         
+        <!-- Monto Pendiente por Facturar -->
+        <div class="col-lg-3 col-md-6 animate-card" style="animation-delay: 0.35s">
+            <div class="stat-card danger">
+                <div class="stat-icon danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <p class="stat-value">${{ "{:,.2f}".format(monto_pendiente) }}</p>
+                <p class="stat-label">Monto Pendiente por Facturar</p>
+            </div>
+        </div>
+        
         <!-- Pacientes Pendientes por Facturar -->
-        <div class="col-lg-4 col-md-6 animate-card" style="animation-delay: 0.4s">
+        <div class="col-lg-3 col-md-6 animate-card" style="animation-delay: 0.4s">
             <div class="stat-card warning">
                 <div class="stat-icon warning">
                     <i class="fas fa-clock"></i>
                 </div>
                 <p class="stat-value">{{ pacientes_pendientes }}</p>
-                <p class="stat-label">Pacientes Pendientes por Facturar</p>
+                <p class="stat-label">Pacientes Pendientes</p>
             </div>
         </div>
     </div>

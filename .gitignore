@@ -1,8 +1,4 @@
-# ============================================
-# .GITIGNORE PARA SITIO WEB MÉDICO
-# ============================================
-
-# Archivos de Python
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -25,85 +21,126 @@ wheels/
 *.egg
 MANIFEST
 
-# Entornos virtuales
+# Virtual Environment
 venv/
-env/
 ENV/
-env.bak/
-venv.bak/
+env/
+.venv
 
-# Variables de entorno
-.env
-.env.local
-.env.production
-.env.staging
-
-# Base de datos SQLite
-*.db
-*.sqlite
-*.sqlite3
-database.db
-
-# Logs
-*.log
-logs/
-
-# Archivos temporales
-*.tmp
-*.temp
-.DS_Store
-Thumbs.db
-
-# Archivos de configuración local
-config.local.py
-settings.local.py
-
-# Archivos de backup
-*.bak
-*.backup
-*.old
-
-# Archivos de IDE
+# IDEs
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-
-# Archivos de sistema
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
 
-# Archivos de Railway
-.railway/
+# Environment Variables (CRÍTICO)
+local.env
+railway.env
+.env
+*.env
+!env.example
 
-# Archivos de testing
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Backups
+*.backup
+*.backup_*
+*_backup.*
+*.bak
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Testing
 .pytest_cache/
 .coverage
 htmlcov/
+.tox/
+.hypothesis/
 
-# Archivos de documentación temporal
-*.md.bak
-*.txt.bak
+# Documentation temporal
+ACCESO_ADMIN.md
+ACTUALIZACION_BASE_DATOS.md
+ANALISIS_*.md
+AUDIT_REPORT.md
+AUDITORIA_*.md
+CAMBIOS_*.md
+CARGA_*.md
+CERTIFICACION_*.md
+CHANGELOG_*.md
+CHECKLIST_*.md
+CHECKMARKS_*.md
+COMANDOS_*.bat
+COMMIT_*.bat
+CONFIGURACION_*.md
+CONFIGURAR_*.md
+EMAIL_*.md
+FIX_*.md
+GUIA_*.md
+INSTRUCCIONES_*.md
+MEJORA_*.md
+MEJORAS_*.md
+OPTIMIZACION_*.md
+OPTIMIZACIONES_*.md
+PASO_*.txt
+PUBLICAR_*.bat
+PUSH_*.bat
+RECOMENDACIONES_*.md
+REPORTE_*.md
+RESUMEN_*.md
+RESUMEN_*.txt
+ROL_*.md
+SISTEMA_*.md
+SOLUCION_*.md
+TEMPLATES_*.md
+UPDATE_*.bat
 
-# Archivos de email de prueba
-test_email_*.html
-email_test_*.txt
+# Scripts temporales y de prueba
+activar_*.py
+actualizar_*.py
+actualizar_*.sql
+agregar_*.py
+agregar_*.sql
+analisis_*.py
+analizar_*.py
+convertir_*.py
+crear_base_datos_*.sql
+debug_*.py
+diagnostico_*.py
+export_*.sql
+fix_*.py
+inicializar_*.py
+insertar_100_*.sql
+insertar_datos_*.py
+optimize_database*.sql
+probar_*.py
+prueba_*.py
+resetear_*.py
+resetear_*.sql
+test_*.py
+verificar_*.py
 
-# Archivos de configuración de desarrollo
-dev_config.py
-local_settings.py
+# Sistema operativo
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
 
-# Archivos de caché
-.cache/
-*.cache
-
-# Archivos de compilación
-*.pyc
-*.pyo
-*.pyd
+# Archivos específicos del proyecto
+optimization_system.py
+email_templates.py
+security_middleware.py
+deploy_final.sh
+env_config.txt
