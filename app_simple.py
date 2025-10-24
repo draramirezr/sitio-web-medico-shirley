@@ -17,6 +17,7 @@ import secrets
 import re
 from markupsafe import escape
 from io import BytesIO
+import threading
 
 # Importar MySQL (obligatorio)
 import pymysql
@@ -1763,9 +1764,9 @@ def contact():
             conn.commit()
             conn.close()
             
-            # Enviar email de notificación (con timeout para evitar que la app se cuelgue)
+            # Enviar email de notificación de manera asíncrona (no bloquea la respuesta)
             try:
-                enviar_email_notificacion(name, email, phone, subject, message)
+                threading.Thread(target=enviar_email_notificacion, args=(name, email, phone, subject, message)).start()
             except Exception as email_error:
                 # Si falla el email, solo lo registramos pero no detenemos el proceso
                 print(f"⚠️ Error al enviar email (no crítico): {email_error}")
@@ -1938,9 +1939,9 @@ def request_appointment():
             conn.commit()
             conn.close()
             
-            # Enviar email de notificación a la doctora (con timeout para evitar que la app se cuelgue)
+            # Enviar email de notificación a la doctora de manera asíncrona (no bloquea la respuesta)
             try:
-                enviar_email_cita(first_name, last_name, email, phone, appointment_date, appointment_time, appointment_type, medical_insurance, emergency_datetime, reason)
+                threading.Thread(target=enviar_email_cita, args=(first_name, last_name, email, phone, appointment_date, appointment_time, appointment_type, medical_insurance, emergency_datetime, reason)).start()
             except Exception as email_error:
                 # Si falla el email, solo lo registramos pero no detenemos el proceso
                 print(f"⚠️ Error al enviar email (no crítico): {email_error}")
@@ -2288,8 +2289,8 @@ def update_appointment_status(appointment_id):
         tipo = appointment['appointment_type']
         motivo = appointment['reason'] if appointment['reason'] else None
         
-        # Enviar email
-        enviar_email_confirmacion_cita(
+        # Enviar email de manera asíncrona (no bloquea la respuesta)
+        threading.Thread(target=enviar_email_confirmacion_cita, args=(
             email_paciente,
             nombre,
             apellido,
@@ -2298,7 +2299,7 @@ def update_appointment_status(appointment_id):
             tipo,
             new_status,
             motivo
-        )
+        )).start()
         
         flash(f'Estado de la cita actualizado y notificación enviada a {nombre} {apellido}', 'success')
     else:
@@ -3521,14 +3522,14 @@ def facturacion_pacientes_agregados_pdf():
         email_buffer = BytesIO(buffer.getvalue())
         buffer.seek(0)  # Resetear el buffer original
         
-        # Enviar email con PDF adjunto
-        enviar_email_pdf_pacientes(
+        # Enviar email con PDF adjunto de manera asíncrona (no bloquea la descarga)
+        threading.Thread(target=enviar_email_pdf_pacientes, args=(
             medico_email,
             medico_nombre,
             email_buffer,
             len(pendientes),
             total
-        )
+        )).start()
         
         flash(f'✅ PDF enviado al correo: {medico_email}', 'success')
     else:
@@ -4289,9 +4290,11 @@ def facturacion_generar_final():
             # Generar PDF
             pdf_buffer = generar_pdf_factura(factura_id, ncf_completo, fecha_factura, pacientes_pdf, total, ncf_data)
             
-            # Enviar por email si hay email del médico
+            # Enviar por email si hay email del médico (de manera asíncrona)
             if medico_email:
-                enviar_email_factura(medico_email, factura_id, ncf_completo, pdf_buffer, total)
+                # Crear copia del buffer para el thread
+                email_pdf_buffer = BytesIO(pdf_buffer.getvalue())
+                threading.Thread(target=enviar_email_factura, args=(medico_email, factura_id, ncf_completo, email_pdf_buffer, total)).start()
             
             conn.close()
             
@@ -5151,11 +5154,18 @@ def facturacion_enviar_email(factura_id):
             ncf_numero = factura['ncf_numero'] if factura['ncf_numero'] else factura.get('ncf', 'N/A')
             pdf_buffer = generar_pdf_factura(factura_id, ncf_numero, factura['fecha_factura'], pacientes, factura['total'], ncf_data)
             
-            # Enviar email
-            if enviar_email_factura(destinatario, factura_id, ncf_numero, pdf_buffer, factura['total']):
-                flash(f'✅ Factura enviada exitosamente a {destinatario}', 'success')
-            else:
-                flash('⚠️ Hubo un problema al enviar el email. Verifica la configuración de correo.', 'warning')
+            # Enviar email de manera asíncrona (no bloquea la respuesta)
+            # Crear copia del buffer para el thread
+            email_pdf_buffer = BytesIO(pdf_buffer.getvalue())
+            
+            def enviar_email_async():
+                if enviar_email_factura(destinatario, factura_id, ncf_numero, email_pdf_buffer, factura['total']):
+                    print(f'✅ Factura enviada exitosamente a {destinatario}')
+                else:
+                    print('⚠️ Hubo un problema al enviar el email')
+            
+            threading.Thread(target=enviar_email_async).start()
+            flash(f'✅ Factura enviándose a {destinatario}. Recibirás el email en breve.', 'success')
         else:
             flash('No se puede generar el PDF. ReportLab no está disponible.', 'error')
         
