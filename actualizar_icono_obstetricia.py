@@ -18,12 +18,39 @@ def actualizar_icono():
     
     # Intentar conectar a MySQL (Railway)
     try:
+        # Usar variables MYSQLHOST, MYSQLUSER, etc. (Railway formato)
+        host = os.getenv('MYSQLHOST', os.getenv('MYSQL_HOST', 'localhost'))
+        user = os.getenv('MYSQLUSER', os.getenv('MYSQL_USER', 'root'))
+        password = os.getenv('MYSQLPASSWORD', os.getenv('MYSQL_PASSWORD', ''))
+        database = os.getenv('MYSQLDATABASE', os.getenv('MYSQL_DATABASE', 'drashirley'))
+        # El puerto está en la URL, extraerlo
+        mysql_url = os.getenv('MYSQL_URL', '')
+        port = 3306
+        if ':' in mysql_url and '@' in mysql_url:
+            try:
+                port_part = mysql_url.split('@')[1].split(':')[1].split('/')[0]
+                port = int(port_part)
+            except:
+                pass
+        
+        # También verificar variable directa
+        if os.getenv('MYSQLPORT'):
+            port = int(os.getenv('MYSQLPORT'))
+        elif os.getenv('MYSQL_PORT'):
+            port = int(os.getenv('MYSQL_PORT'))
+        
+        print(f"🔌 Conectando a MySQL:")
+        print(f"   Host: {host}")
+        print(f"   Puerto: {port}")
+        print(f"   Usuario: {user}")
+        print(f"   Base de datos: {database}\n")
+        
         connection = pymysql.connect(
-            host=os.getenv('MYSQL_HOST'),
-            user=os.getenv('MYSQL_USER'),
-            password=os.getenv('MYSQL_PASSWORD'),
-            database=os.getenv('MYSQL_DATABASE'),
-            port=int(os.getenv('MYSQL_PORT', 3306)),
+            host=host,
+            user=user,
+            password=password,
+            database=database,
+            port=port,
             charset='utf8mb4',
             cursorclass=pymysql.cursors.DictCursor
         )
