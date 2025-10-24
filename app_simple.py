@@ -2446,12 +2446,29 @@ def facturacion_medicos_nuevo():
             return redirect(url_for('facturacion_medicos_nuevo'))
         
         conn = get_db_connection()
+        
         # Verificar si la cédula ya existe
         existe = conn.execute('SELECT id FROM medicos WHERE cedula = %s', (cedula,)).fetchone()
         if existe:
             conn.close()
             flash('Ya existe un médico con esa cédula', 'error')
             return redirect(url_for('facturacion_medicos_nuevo'))
+        
+        # Verificar si el email ya existe (si se proporciona)
+        if email:
+            existe_email = conn.execute('SELECT id FROM medicos WHERE email = %s', (email,)).fetchone()
+            if existe_email:
+                conn.close()
+                flash('Ya existe un médico con ese correo electrónico', 'error')
+                return redirect(url_for('facturacion_medicos_nuevo'))
+        
+        # Verificar si el exequatur ya existe (si se proporciona)
+        if exequatur:
+            existe_exequatur = conn.execute('SELECT id FROM medicos WHERE exequatur = %s', (exequatur,)).fetchone()
+            if existe_exequatur:
+                conn.close()
+                flash('Ya existe un médico con ese exequátur', 'error')
+                return redirect(url_for('facturacion_medicos_nuevo'))
         
         conn.execute('INSERT INTO medicos (nombre, especialidad, cedula, exequatur, email, factura) VALUES (%s, %s, %s, %s, %s, %s)', 
                     (nombre, especialidad, cedula, exequatur, email, factura))
@@ -2492,6 +2509,22 @@ def facturacion_medicos_editar(medico_id):
             conn.close()
             flash('Ya existe otro médico con esa cédula', 'error')
             return redirect(url_for('facturacion_medicos_editar', medico_id=medico_id))
+        
+        # Verificar si el email ya existe en otro médico (si se proporciona)
+        if email:
+            existe_email = conn.execute('SELECT id FROM medicos WHERE email = %s AND id != %s', (email, medico_id)).fetchone()
+            if existe_email:
+                conn.close()
+                flash('Ya existe otro médico con ese correo electrónico', 'error')
+                return redirect(url_for('facturacion_medicos_editar', medico_id=medico_id))
+        
+        # Verificar si el exequatur ya existe en otro médico (si se proporciona)
+        if exequatur:
+            existe_exequatur = conn.execute('SELECT id FROM medicos WHERE exequatur = %s AND id != %s', (exequatur, medico_id)).fetchone()
+            if existe_exequatur:
+                conn.close()
+                flash('Ya existe otro médico con ese exequátur', 'error')
+                return redirect(url_for('facturacion_medicos_editar', medico_id=medico_id))
         
         conn.execute('UPDATE medicos SET nombre = %s, especialidad = %s, cedula = %s, exequatur = %s, email = %s, factura = %s WHERE id = %s', 
                     (nombre, especialidad, cedula, exequatur, email, factura, medico_id))
@@ -2581,6 +2614,14 @@ def facturacion_codigo_ars_nuevo():
             flash('Ya existe un código para esta combinación de médico y ARS', 'error')
             return redirect(url_for('facturacion_codigo_ars_nuevo'))
         
+        # Verificar si ya existe la combinación codigo_ars + ars_id
+        existe_codigo = conn.execute('SELECT id FROM codigo_ars WHERE codigo_ars = %s AND ars_id = %s AND activo = 1', 
+                                     (codigo_ars, ars_id)).fetchone()
+        if existe_codigo:
+            conn.close()
+            flash('Ya existe ese código para la ARS seleccionada', 'error')
+            return redirect(url_for('facturacion_codigo_ars_nuevo'))
+        
         conn.execute('INSERT INTO codigo_ars (medico_id, ars_id, codigo_ars) VALUES (%s, %s, %s)', 
                     (medico_id, ars_id, codigo_ars))
         conn.commit()
@@ -2617,6 +2658,14 @@ def facturacion_codigo_ars_editar(codigo_id):
         if existe:
             conn.close()
             flash('Ya existe un código para esta combinación de médico y ARS', 'error')
+            return redirect(url_for('facturacion_codigo_ars_editar', codigo_id=codigo_id))
+        
+        # Verificar si ya existe la combinación codigo_ars + ars_id en otro registro
+        existe_codigo = conn.execute('SELECT id FROM codigo_ars WHERE codigo_ars = %s AND ars_id = %s AND id != %s AND activo = 1', 
+                                     (codigo_ars, ars_id, codigo_id)).fetchone()
+        if existe_codigo:
+            conn.close()
+            flash('Ya existe ese código para la ARS seleccionada', 'error')
             return redirect(url_for('facturacion_codigo_ars_editar', codigo_id=codigo_id))
         
         conn.execute('UPDATE codigo_ars SET medico_id = %s, ars_id = %s, codigo_ars = %s WHERE id = %s', 
