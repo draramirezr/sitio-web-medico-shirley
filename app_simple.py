@@ -1048,7 +1048,7 @@ def create_sample_data():
     # Servicios de ejemplo
     services = [
         ('Consulta Ginecológica', 'Consulta ginecológica\nPapanicolau\nColposcopia/biopsias\nCirugías ginecológicas\nIrregularidad menstrual\nGenotipificación y manejo del virus de papiloma humano\nManejo del síndrome de ovario poliquístico\nPlanificación familiar\nMenopausia y climaterio', 'fas fa-female', 'Consultar', '45 min'),
-        ('Consulta Obstétrica', 'Consulta de obstetricia\nConsulta preconcepcional\nControl prenatal\nSeguimiento de embarazo de alto riesgo\nPartos y cesáreas\nAsesoría en lactancia materna', 'fas fa-baby', 'Consultar', '60 min'),
+        ('Consulta Obstétrica', 'Consulta de obstetricia\nConsulta preconcepcional\nControl prenatal\nSeguimiento de embarazo de alto riesgo\nPartos y cesáreas\nAsesoría en lactancia materna', 'fas fa-person-pregnant', 'Consultar', '60 min'),
         ('Ecografías', 'Estudios de imagen para diagnóstico y seguimiento del embarazo y condiciones ginecológicas.', 'fas fa-heartbeat', 'Consultar', '30 min'),
         ('Cirugía Ginecológica', 'Procedimientos quirúrgicos especializados en ginecología con técnicas avanzadas.', 'fas fa-cut', 'Consultar', 'Variable'),
         ('Planificación Familiar', 'Asesoría sobre métodos anticonceptivos y planificación reproductiva personalizada.', 'fas fa-calendar-check', 'Consultar', '30 min'),
