@@ -1,4 +1,4 @@
-# 🚀 GUÍA COMPLETA DE SEO - DRA. SHIRLEY RAMÍREZ
+﻿# 🚀 GUÍA COMPLETA DE SEO - DRA. SHIRLEY RAMÍREZ
 
 ## ✅ OPTIMIZACIONES IMPLEMENTADAS (100%)
 
@@ -7,9 +7,9 @@
 ## 1. META TAGS OPTIMIZADOS ✅
 
 ### **Página Principal (index.html)**
-- ✅ Title: "Dra. Shirley Ramírez - Ginecóloga y Obstetra en Panamá | #1 en Salud Femenina"
+- ✅ Title: "Dra. Shirley Ramírez - Ginecóloga y Obstetra en República Dominicana | #1 en Salud Femenina"
 - ✅ Description con emojis y Call-to-Action
-- ✅ Keywords: ginecóloga Panamá, obstetra Panamá, control prenatal, tratamientos estéticos
+- ✅ Keywords: ginecóloga República Dominicana, obstetra República Dominicana, control prenatal, tratamientos estéticos
 
 ### **Todas las Páginas**
 - ✅ Títulos únicos y descriptivos
@@ -30,7 +30,7 @@ Implementado en `base.html`:
   "name": "Dra. Shirley Ramírez Montero - Ginecóloga y Obstetra",
   "medicalSpecialty": ["Gynecology", "Obstetrics", "Women's Health"],
   "address": {
-    "addressLocality": "Panamá",
+    "addressLocality": "República Dominicana",
     "addressCountry": "PA"
   },
   "telephone": "+507 6981-9863",
@@ -86,23 +86,23 @@ Páginas incluidas:
 ## 5. KEYWORDS ESTRATÉGICAS ✅
 
 ### **Keywords Principales (High Volume)**
-1. ✅ ginecóloga Panamá
-2. ✅ obstetra Panamá
+1. ✅ ginecóloga República Dominicana
+2. ✅ obstetra República Dominicana
 3. ✅ ginecóloga zona oriental
-4. ✅ control prenatal Panamá
+4. ✅ control prenatal República Dominicana
 5. ✅ tratamientos estéticos ginecológicos
 
 ### **Keywords Long-Tail (High Intent)**
-6. ✅ mejor ginecóloga Panamá
-7. ✅ ginecología estética Panamá
-8. ✅ rejuvenecimiento íntimo Panamá
-9. ✅ consulta ginecológica Panamá
-10. ✅ medicina reproductiva Panamá
+6. ✅ mejor ginecóloga República Dominicana
+7. ✅ ginecología estética República Dominicana
+8. ✅ rejuvenecimiento íntimo República Dominicana
+9. ✅ consulta ginecológica República Dominicana
+10. ✅ medicina reproductiva República Dominicana
 
 ### **Keywords de Ubicación**
-11. ✅ ginecóloga zona oriental Panamá
+11. ✅ ginecóloga zona oriental Santo Domingo
 12. ✅ obstetra cerca de mí
-13. ✅ ginecóloga Panamá Este
+13. ✅ ginecóloga Santo Domingo Este
 
 ---
 
@@ -183,7 +183,7 @@ Tu perfil en Google Maps + búsquedas locales. **CRÍTICO para aparecer primero.
    Nombre del negocio: Dra. Shirley Ramírez - Ginecóloga y Obstetra
    Categoría: Ginecólogo/a
    Dirección: [Tu dirección exacta en Zona Oriental]
-   Área de servicio: Panamá, Panamá Este
+   Área de servicio: República Dominicana, Santo Domingo Este
    Teléfono: +507 6981-9863
    Sitio web: https://drashirleyramirez.com
    Horario: Lun-Vie 9:00-18:00
@@ -206,7 +206,7 @@ Tu perfil en Google Maps + búsquedas locales. **CRÍTICO para aparecer primero.
 **Blog de Salud Femenina (POTENTE para SEO)**
 
 Artículos recomendados:
-1. "Guía Completa del Control Prenatal en Panamá"
+1. "Guía Completa del Control Prenatal en República Dominicana"
 2. "10 Señales de que Debes Visitar al Ginecólogo"
 3. "Tratamientos Estéticos Ginecológicos: Todo lo que Debes Saber"
 4. "Preguntas Frecuentes sobre el Embarazo"
@@ -229,10 +229,10 @@ Links desde otros sitios hacia el tuyo. Google los ve como "votos de confianza".
 **Cómo conseguirlos:**
 
 1. **Directorios Médicos:**
-   - Doctoralia Panamá
+   - Doctoralia República Dominicana
    - Salud.pa
-   - MedicosPanama.com
-   - Zocdoc (si disponible en Panamá)
+   - MedicosDominicanos.com
+   - Zocdoc (si disponible en República Dominicana)
 
 2. **Colaboraciones:**
    - Guest posts en blogs de salud
@@ -272,21 +272,21 @@ El 90% de pacientes lee reseñas antes de elegir médico.
 ## 🎯 KEYWORDS TARGET PARA CONTENIDO
 
 ### **Para Blog/Artículos:**
-- control prenatal en Panamá
+- control prenatal en República Dominicana
 - síntomas de embarazo
 - ginecólogo cerca de mí
 - tratamientos para infertilidad
 - rejuvenecimiento íntimo beneficios
-- láser vaginal CO2 Panamá
+- láser vaginal CO2 República Dominicana
 - planificación familiar métodos
 - síntomas menopausia
 - infecciones vaginales tratamiento
-- ultrasonido 4D Panamá
+- ultrasonido 4D República Dominicana
 
 ### **Para Páginas de Servicios:**
-- precio control prenatal Panamá
+- precio control prenatal República Dominicana
 - cuánto cuesta consulta ginecológica
-- mejor ginecóloga Panamá opiniones
+- mejor ginecóloga República Dominicana opiniones
 - tratamientos estéticos íntimos precio
 - rejuvenecimiento vaginal costo
 - consulta ginecológica privada
@@ -316,7 +316,7 @@ Métricas clave:
 
 ### **Google My Business Insights**
 - Búsquedas directas (buscan tu nombre)
-- Búsquedas de descubrimiento (buscan "ginecóloga Panamá")
+- Búsquedas de descubrimiento (buscan "ginecóloga República Dominicana")
 - Acciones (llamadas, clicks al sitio, solicitudes de ruta)
 
 ---
@@ -336,7 +336,7 @@ Métricas clave:
 - Primeras conversiones orgánicas
 
 **Mes 6:**
-- **TOP 5** para "ginecóloga Panamá" 🎯
+- **TOP 5** para "ginecóloga República Dominicana" 🎯
 - **TOP 3** para "ginecóloga zona oriental"
 - **#1** para "Dra. Shirley Ramírez"
 - 50+ llamadas/mes desde Google
@@ -358,15 +358,15 @@ Métricas clave:
 
 ### **2. Monitorea Competencia**
 Busca en Google:
-- "ginecóloga Panamá"
+- "ginecóloga República Dominicana"
 - "obstetra zona oriental"
 - Ver qué hacen los primeros 3 resultados
 - Hacer lo mismo pero MEJOR
 
 ### **3. Local SEO es CLAVE**
-- Menciona "Panamá" en todo el contenido
+- Menciona "República Dominicana" en todo el contenido
 - Agrega "Zona Oriental" donde sea relevante
-- Usa español de Panamá (no España/México)
+- Usa español de República Dominicana (no España/México)
 
 ### **4. Fotos de Alta Calidad**
 - Google premia contenido visual
@@ -379,11 +379,11 @@ Busca en Google:
 
 | Error | Antes | Ahora | Impacto |
 |-------|-------|-------|---------|
-| **País** | República Dominicana ❌ | Panamá ✅ | CRÍTICO |
+| **País** | República Dominicana ❌ | República Dominicana ✅ | CRÍTICO |
 | **Imágenes bloqueadas** | robots.txt bloqueaba ❌ | Permite /static/images/ ✅ | ALTO |
 | **Sin meta descriptions** | Solo en base.html ❌ | Todas las páginas ✅ | ALTO |
 | **Sin Schema** | Básico ❌ | Completo (3 tipos) ✅ | ALTO |
-| **Keywords genéricas** | "ginecóloga" ❌ | "ginecóloga Panamá" ✅ | MEDIO |
+| **Keywords genéricas** | "ginecóloga" ❌ | "ginecóloga República Dominicana" ✅ | MEDIO |
 
 ---
 
@@ -421,7 +421,7 @@ Antes de lanzar/actualizar, verificar:
 3. Verificar (dame el código de verificación)
 4. Subir sitemap
 
-**Con estas 2 cosas, en 30 días estarás en el TOP 10 de "ginecóloga Panamá"** 🏆
+**Con estas 2 cosas, en 30 días estarás en el TOP 10 de "ginecóloga República Dominicana"** 🏆
 
 ---
 

@@ -1,4 +1,4 @@
-# 🎨 SISTEMA DE TEMPLATES DE EMAIL ESTANDARIZADOS
+﻿# 🎨 SISTEMA DE TEMPLATES DE EMAIL ESTANDARIZADOS
 
 ## 📅 Fecha de Implementación: 18 de Octubre de 2025
 
@@ -130,7 +130,7 @@ Todos los emails ahora tienen:
 │  (Fondo #F2E2E6)                   │
 │  📞 +507 6981-9863                 │
 │  📧 dra.ramirezr@gmail.com         │
-│  📍 Panamá | Zona Oriental         │
+│  📍 República Dominicana | Zona Oriental         │
 │  🔗 LinkedIn | 📷 Instagram        │
 │  © 2025 Dra. Shirley Ramírez       │
 └─────────────────────────────────────┘
