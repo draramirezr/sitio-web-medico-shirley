@@ -4294,7 +4294,7 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None)
             canvas.drawCentredString(letter[0]/2, footer_y + 10, linea2)
             
             # Línea 3: Centro
-            canvas.drawCentredString(letter[0]/2, footer_y, "Centro Oriental de Ginecología y Obstetricia")
+            canvas.drawCentredString(letter[0]/2, footer_y, "Centro Oriental de Ginecología y Obstetricia, Zona Oriental, República Dominicana")
         
         canvas.restoreState()
     
