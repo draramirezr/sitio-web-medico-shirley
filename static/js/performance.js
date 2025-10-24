@@ -79,17 +79,19 @@ function optimizeForms() {
 }
 
 // 5. OPTIMIZACIÓN DE SCROLL
-let ticking = false;
-window.addEventListener('scroll', function() {
-  if (!ticking) {
-    window.requestAnimationFrame(function() {
-      // Lógica de scroll (animaciones, etc)
-      handleScroll();
-      ticking = false;
-    });
-    ticking = true;
-  }
-});
+(function() {
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        // Lógica de scroll (animaciones, etc)
+        handleScroll();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+})();
 
 function handleScroll() {
   // Implementar animaciones o efectos de scroll aquí
