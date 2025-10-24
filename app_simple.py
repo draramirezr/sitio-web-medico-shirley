@@ -324,9 +324,9 @@ def add_security_and_cache_headers(response):
     
     return response
 
-# Configuración de email
+# Configuración de email (NUNCA incluir contraseñas en el código)
 EMAIL_USERNAME = os.getenv('EMAIL_USERNAME', 'dra.ramirezr@gmail.com')
-EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD', 'nqze lbab meit vprt')  # Valor por defecto para desarrollo
+EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')  # IMPORTANTE: Configurar en variables de entorno
 EMAIL_DESTINATARIO = os.getenv('EMAIL_DESTINATARIO', 'dra.ramirezr@gmail.com')
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
