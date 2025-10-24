@@ -1712,52 +1712,65 @@ def send_email(destinatario, asunto, cuerpo):
 def contact():
     """Página de contacto"""
     if request.method == 'POST':
-        # Rate limit solo para POST (envío de formularios)
-        client_ip = request.remote_addr
-        current_time = time.time()
-        
-        with rate_limit_lock:
-            # Limpiar requests antiguos (últimos 5 minutos)
-            request_counts[f'{client_ip}_contact'] = [
-                req_time for req_time in request_counts.get(f'{client_ip}_contact', [])
-                if current_time - req_time < 300  # 5 minutos
-            ]
+        try:
+            # Rate limit solo para POST (envío de formularios)
+            client_ip = request.remote_addr
+            current_time = time.time()
             
-            # Verificar límite (5 envíos por 5 minutos)
-            if len(request_counts.get(f'{client_ip}_contact', [])) >= 5:
-                flash('⚠️ Has enviado demasiados mensajes. Por favor espera 5 minutos.', 'warning')
+            with rate_limit_lock:
+                # Limpiar requests antiguos (últimos 5 minutos)
+                request_counts[f'{client_ip}_contact'] = [
+                    req_time for req_time in request_counts.get(f'{client_ip}_contact', [])
+                    if current_time - req_time < 300  # 5 minutos
+                ]
+                
+                # Verificar límite (5 envíos por 5 minutos)
+                if len(request_counts.get(f'{client_ip}_contact', [])) >= 5:
+                    flash('⚠️ Has enviado demasiados mensajes. Por favor espera 5 minutos.', 'warning')
+                    return redirect(url_for('contact'))
+                
+                # Agregar request actual
+                if f'{client_ip}_contact' not in request_counts:
+                    request_counts[f'{client_ip}_contact'] = []
+                request_counts[f'{client_ip}_contact'].append(current_time)
+            
+            name = request.form['name']
+            email = request.form['email']
+            phone = request.form.get('phone', '')
+            subject = request.form['subject']
+            message = request.form['message']
+            
+            # Validar que todos los campos estén completos
+            if not all([name, email, phone, subject, message]):
+                flash('Por favor, completa todos los campos obligatorios.', 'danger')
                 return redirect(url_for('contact'))
             
-            # Agregar request actual
-            if f'{client_ip}_contact' not in request_counts:
-                request_counts[f'{client_ip}_contact'] = []
-            request_counts[f'{client_ip}_contact'].append(current_time)
-        
-        name = request.form['name']
-        email = request.form['email']
-        phone = request.form.get('phone', '')
-        subject = request.form['subject']
-        message = request.form['message']
-        
-        # Validar que todos los campos estén completos
-        if not all([name, email, phone, subject, message]):
-            flash('Por favor, completa todos los campos obligatorios.', 'danger')
+            # Guardar en base de datos
+            conn = get_db_connection()
+            conn.execute('''
+                INSERT INTO contact_messages (name, email, phone, subject, message)
+                VALUES (%s, %s, %s, %s, %s)
+            ''', (name, email, phone, subject, message))
+            conn.commit()
+            conn.close()
+            
+            # Enviar email de notificación (con timeout para evitar que la app se cuelgue)
+            try:
+                enviar_email_notificacion(name, email, phone, subject, message)
+            except Exception as email_error:
+                # Si falla el email, solo lo registramos pero no detenemos el proceso
+                print(f"⚠️ Error al enviar email (no crítico): {email_error}")
+            
+            flash('¡Mensaje enviado correctamente! Te contactaremos pronto.', 'success')
             return redirect(url_for('contact'))
-        
-        # Guardar en base de datos
-        conn = get_db_connection()
-        conn.execute('''
-            INSERT INTO contact_messages (name, email, phone, subject, message)
-            VALUES (%s, %s, %s, %s, %s)
-        ''', (name, email, phone, subject, message))
-        conn.commit()
-        conn.close()
-        
-        # Enviar email de notificación
-        enviar_email_notificacion(name, email, phone, subject, message)
-        
-        flash('¡Mensaje enviado correctamente! Te contactaremos pronto.', 'success')
-        return redirect(url_for('contact'))
+            
+        except Exception as e:
+            # Capturar cualquier error y mostrar un mensaje amigable al usuario
+            print(f"❌ ERROR EN CONTACTO: {e}")
+            import traceback
+            traceback.print_exc()
+            flash('⚠️ Ocurrió un error al enviar tu mensaje. Por favor intenta nuevamente.', 'danger')
+            return redirect(url_for('contact'))
     
     return render_template('contact.html')
 
@@ -1812,114 +1825,127 @@ def horarios_disponibles():
 def request_appointment():
     """Solicitar cita"""
     if request.method == 'POST':
-        # Rate limit solo para POST (envío de formularios)
-        client_ip = request.remote_addr
-        current_time = time.time()
-        
-        with rate_limit_lock:
-            # Limpiar requests antiguos (últimos 5 minutos)
-            request_counts[f'{client_ip}_appointment'] = [
-                req_time for req_time in request_counts.get(f'{client_ip}_appointment', [])
-                if current_time - req_time < 300  # 5 minutos
-            ]
+        try:
+            # Rate limit solo para POST (envío de formularios)
+            client_ip = request.remote_addr
+            current_time = time.time()
             
-            # Verificar límite (3 envíos por 5 minutos)
-            if len(request_counts.get(f'{client_ip}_appointment', [])) >= 3:
-                flash('⚠️ Has enviado demasiadas solicitudes. Por favor espera 5 minutos.', 'warning')
-                return redirect(url_for('request_appointment'))
-            
-            # Agregar request actual
-            if f'{client_ip}_appointment' not in request_counts:
-                request_counts[f'{client_ip}_appointment'] = []
-            request_counts[f'{client_ip}_appointment'].append(current_time)
-        
-        # Validar y sanitizar entrada
-        first_name = sanitize_input(request.form.get('first_name', ''))
-        last_name = sanitize_input(request.form.get('last_name', ''))
-        email = sanitize_input(request.form.get('email', ''))
-        phone = sanitize_input(request.form.get('phone', ''))
-        appointment_date = sanitize_input(request.form.get('appointment_date', ''))
-        appointment_time = sanitize_input(request.form.get('appointment_time', ''))
-        appointment_type = sanitize_input(request.form.get('appointment_type', ''))
-        medical_insurance = sanitize_input(request.form.get('medical_insurance', ''))
-        
-        # Validaciones críticas
-        if not all([first_name, last_name, phone, appointment_type, medical_insurance]):
-            flash('Por favor, completa todos los campos obligatorios.', 'danger')
-            return redirect(url_for('request_appointment'))
-        
-        if email and not validate_email(email):
-            flash('Por favor, ingresa un email válido.', 'danger')
-            return redirect(url_for('request_appointment'))
-        
-        if len(first_name) > 50 or len(last_name) > 50:
-            flash('Los nombres no pueden exceder 50 caracteres.', 'danger')
-            return redirect(url_for('request_appointment'))
-        
-        emergency_datetime = sanitize_input(request.form.get('emergency_datetime', ''))
-        reason = sanitize_input(request.form.get('reason', ''))
-        
-        # Verificar disponibilidad de horario (solo para citas normales con fecha y hora)
-        if appointment_type in ["consulta", "estetico"] and appointment_date and appointment_time:
-            conn = get_db_connection()
-            cita_existente = conn.execute(
-                'SELECT id FROM appointments WHERE appointment_date = %s AND appointment_time = %s AND status != "cancelled"',
-                (appointment_date, appointment_time)
-            ).fetchone()
-            
-            if cita_existente:
-                conn.close()
-                flash('⚠️ Lo sentimos, ese horario ya está ocupado. Por favor selecciona otro horario.', 'warning')
-                return redirect(url_for('request_appointment'))
-            
-            conn.close()
-        
-        # Verificar disponibilidad de horario de emergencia
-        if appointment_type == "emergencia" and emergency_datetime:
-            # Extraer fecha y hora del datetime
-            try:
-                from datetime import datetime
-                emergency_dt = datetime.strptime(emergency_datetime, '%Y-%m-%dT%H:%M')
-                emergency_date = emergency_dt.strftime('%Y-%m-%d')
-                emergency_time = emergency_dt.strftime('%H:%M')
+            with rate_limit_lock:
+                # Limpiar requests antiguos (últimos 5 minutos)
+                request_counts[f'{client_ip}_appointment'] = [
+                    req_time for req_time in request_counts.get(f'{client_ip}_appointment', [])
+                    if current_time - req_time < 300  # 5 minutos
+                ]
                 
+                # Verificar límite (3 envíos por 5 minutos)
+                if len(request_counts.get(f'{client_ip}_appointment', [])) >= 3:
+                    flash('⚠️ Has enviado demasiadas solicitudes. Por favor espera 5 minutos.', 'warning')
+                    return redirect(url_for('request_appointment'))
+                
+                # Agregar request actual
+                if f'{client_ip}_appointment' not in request_counts:
+                    request_counts[f'{client_ip}_appointment'] = []
+                request_counts[f'{client_ip}_appointment'].append(current_time)
+            
+            # Validar y sanitizar entrada
+            first_name = sanitize_input(request.form.get('first_name', ''))
+            last_name = sanitize_input(request.form.get('last_name', ''))
+            email = sanitize_input(request.form.get('email', ''))
+            phone = sanitize_input(request.form.get('phone', ''))
+            appointment_date = sanitize_input(request.form.get('appointment_date', ''))
+            appointment_time = sanitize_input(request.form.get('appointment_time', ''))
+            appointment_type = sanitize_input(request.form.get('appointment_type', ''))
+            medical_insurance = sanitize_input(request.form.get('medical_insurance', ''))
+            
+            # Validaciones críticas
+            if not all([first_name, last_name, phone, appointment_type, medical_insurance]):
+                flash('Por favor, completa todos los campos obligatorios.', 'danger')
+                return redirect(url_for('request_appointment'))
+            
+            if email and not validate_email(email):
+                flash('Por favor, ingresa un email válido.', 'danger')
+                return redirect(url_for('request_appointment'))
+            
+            if len(first_name) > 50 or len(last_name) > 50:
+                flash('Los nombres no pueden exceder 50 caracteres.', 'danger')
+                return redirect(url_for('request_appointment'))
+            
+            emergency_datetime = sanitize_input(request.form.get('emergency_datetime', ''))
+            reason = sanitize_input(request.form.get('reason', ''))
+            
+            # Verificar disponibilidad de horario (solo para citas normales con fecha y hora)
+            if appointment_type in ["consulta", "estetico"] and appointment_date and appointment_time:
                 conn = get_db_connection()
                 cita_existente = conn.execute(
-                    'SELECT id FROM appointments WHERE emergency_datetime LIKE %s AND status != "cancelled"',
-                    (f'{emergency_date}%',)
-                ).fetchall()
+                    'SELECT id FROM appointments WHERE appointment_date = %s AND appointment_time = %s AND status != "cancelled"',
+                    (appointment_date, appointment_time)
+                ).fetchone()
                 
-                # Verificar si hay conflicto de horario (dentro de 30 minutos)
-                if cita_existente and len(cita_existente) > 0:
+                if cita_existente:
                     conn.close()
-                    flash('⚠️ Lo sentimos, ya hay una cita de emergencia cerca de ese horario. Por favor selecciona otro horario.', 'warning')
+                    flash('⚠️ Lo sentimos, ese horario ya está ocupado. Por favor selecciona otro horario.', 'warning')
                     return redirect(url_for('request_appointment'))
                 
                 conn.close()
-            except:
-                pass
-        
-        conn = get_db_connection()
-        
-        # Convertir campos vacíos a None (NULL en SQL)
-        appointment_date_val = appointment_date if appointment_date else None
-        appointment_time_val = appointment_time if appointment_time else None
-        emergency_datetime_val = emergency_datetime if emergency_datetime else None
-        reason_val = reason if reason else None
-        email_val = email if email else None
-        
-        conn.execute('''
-            INSERT INTO appointments (first_name, last_name, email, phone, appointment_date, appointment_time, appointment_type, medical_insurance, emergency_datetime, reason)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        ''', (first_name, last_name, email_val, phone, appointment_date_val, appointment_time_val, appointment_type, medical_insurance, emergency_datetime_val, reason_val))
-        conn.commit()
-        conn.close()
-        
-        # Enviar email de notificación a la doctora
-        enviar_email_cita(first_name, last_name, email, phone, appointment_date, appointment_time, appointment_type, medical_insurance, emergency_datetime, reason)
-        
-        flash('¡Cita solicitada correctamente! Te contactaremos para confirmar.', 'success')
-        return redirect(url_for('request_appointment'))
+            
+            # Verificar disponibilidad de horario de emergencia
+            if appointment_type == "emergencia" and emergency_datetime:
+                # Extraer fecha y hora del datetime
+                try:
+                    from datetime import datetime
+                    emergency_dt = datetime.strptime(emergency_datetime, '%Y-%m-%dT%H:%M')
+                    emergency_date = emergency_dt.strftime('%Y-%m-%d')
+                    emergency_time = emergency_dt.strftime('%H:%M')
+                    
+                    conn = get_db_connection()
+                    cita_existente = conn.execute(
+                        'SELECT id FROM appointments WHERE emergency_datetime LIKE %s AND status != "cancelled"',
+                        (f'{emergency_date}%',)
+                    ).fetchall()
+                    
+                    # Verificar si hay conflicto de horario (dentro de 30 minutos)
+                    if cita_existente and len(cita_existente) > 0:
+                        conn.close()
+                        flash('⚠️ Lo sentimos, ya hay una cita de emergencia cerca de ese horario. Por favor selecciona otro horario.', 'warning')
+                        return redirect(url_for('request_appointment'))
+                    
+                    conn.close()
+                except:
+                    pass
+            
+            conn = get_db_connection()
+            
+            # Convertir campos vacíos a None (NULL en SQL)
+            appointment_date_val = appointment_date if appointment_date else None
+            appointment_time_val = appointment_time if appointment_time else None
+            emergency_datetime_val = emergency_datetime if emergency_datetime else None
+            reason_val = reason if reason else None
+            email_val = email if email else None
+            
+            conn.execute('''
+                INSERT INTO appointments (first_name, last_name, email, phone, appointment_date, appointment_time, appointment_type, medical_insurance, emergency_datetime, reason)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ''', (first_name, last_name, email_val, phone, appointment_date_val, appointment_time_val, appointment_type, medical_insurance, emergency_datetime_val, reason_val))
+            conn.commit()
+            conn.close()
+            
+            # Enviar email de notificación a la doctora (con timeout para evitar que la app se cuelgue)
+            try:
+                enviar_email_cita(first_name, last_name, email, phone, appointment_date, appointment_time, appointment_type, medical_insurance, emergency_datetime, reason)
+            except Exception as email_error:
+                # Si falla el email, solo lo registramos pero no detenemos el proceso
+                print(f"⚠️ Error al enviar email (no crítico): {email_error}")
+            
+            flash('¡Cita solicitada correctamente! Te contactaremos para confirmar.', 'success')
+            return redirect(url_for('request_appointment'))
+            
+        except Exception as e:
+            # Capturar cualquier error y mostrar un mensaje amigable al usuario
+            print(f"❌ ERROR EN SOLICITAR CITA: {e}")
+            import traceback
+            traceback.print_exc()
+            flash('⚠️ Ocurrió un error al procesar tu solicitud. Por favor intenta nuevamente o contáctanos directamente.', 'danger')
+            return redirect(url_for('request_appointment'))
     
     return render_template('request_appointment.html')
 
