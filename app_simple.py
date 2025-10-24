@@ -327,6 +327,9 @@ def add_security_and_cache_headers(response):
 EMAIL_USERNAME = os.getenv('EMAIL_USERNAME', 'dra.ramirezr@gmail.com')
 EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD', 'nqze lbab meit vprt')  # Valor por defecto para desarrollo
 EMAIL_DESTINATARIO = os.getenv('EMAIL_DESTINATARIO', 'dra.ramirezr@gmail.com')
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() in ('true', '1', 'yes')
 
 # Verificar configuración de email
 EMAIL_CONFIGURED = bool(EMAIL_USERNAME and EMAIL_PASSWORD and EMAIL_PASSWORD != 'tu_password_aqui')
@@ -1402,9 +1405,10 @@ def enviar_email_pdf_pacientes(medico_email, medico_nombre, pdf_buffer, num_paci
                                  filename=f'constancia_pacientes_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf')
         msg.attach(pdf_attachment)
         
-        # Enviar email
-        with smtplib.SMTP('smtp.gmail.com', 587) as server:
-            server.starttls()
+        # Enviar email con configuración desde variables de entorno
+        with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=30) as server:
+            if EMAIL_USE_TLS:
+                server.starttls()
             server.login(EMAIL_USERNAME, EMAIL_PASSWORD)
             server.send_message(msg)
         
@@ -1457,9 +1461,10 @@ def enviar_email_notificacion(name, email, phone, subject, message):
         part = MIMEText(html, 'html')
         msg.attach(part)
         
-        # Enviar email
-        with smtplib.SMTP('smtp.gmail.com', 587) as server:
-            server.starttls()
+        # Enviar email con configuración desde variables de entorno
+        with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=30) as server:
+            if EMAIL_USE_TLS:
+                server.starttls()
             server.login(EMAIL_USERNAME, EMAIL_PASSWORD)
             server.send_message(msg)
         
@@ -1517,9 +1522,10 @@ def enviar_email_recuperacion(email, nombre, link_recuperacion):
         part = MIMEText(html, 'html')
         msg.attach(part)
         
-        # Enviar email
-        with smtplib.SMTP('smtp.gmail.com', 587) as server:
-            server.starttls()
+        # Enviar email con configuración desde variables de entorno
+        with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=30) as server:
+            if EMAIL_USE_TLS:
+                server.starttls()
             server.login(EMAIL_USERNAME, EMAIL_PASSWORD)
             server.send_message(msg)
         
@@ -1564,9 +1570,10 @@ def enviar_email_cita(first_name, last_name, email, phone, appointment_date, app
         part = MIMEText(html, 'html')
         msg.attach(part)
         
-        # Enviar email
-        with smtplib.SMTP('smtp.gmail.com', 587) as server:
-            server.starttls()
+        # Enviar email con configuración desde variables de entorno
+        with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=30) as server:
+            if EMAIL_USE_TLS:
+                server.starttls()
             server.login(EMAIL_USERNAME, EMAIL_PASSWORD)
             server.send_message(msg)
         
@@ -1630,9 +1637,10 @@ def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora
         part = MIMEText(html, 'html')
         msg.attach(part)
         
-        # Conectar y enviar
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
+        # Conectar y enviar con configuración desde variables de entorno
+        server = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=30)
+        if EMAIL_USE_TLS:
+            server.starttls()
         server.login(EMAIL_USERNAME, EMAIL_PASSWORD)
         server.send_message(msg)
         server.quit()
@@ -1688,9 +1696,10 @@ def send_email(destinatario, asunto, cuerpo):
         part = MIMEText(cuerpo, 'html')
         msg.attach(part)
         
-        # Conectar y enviar
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
+        # Conectar y enviar con configuración desde variables de entorno
+        server = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=30)
+        if EMAIL_USE_TLS:
+            server.starttls()
         server.login(EMAIL_USERNAME, EMAIL_PASSWORD)
         server.send_message(msg)
         server.quit()
@@ -4528,9 +4537,10 @@ def enviar_email_factura(destinatario, factura_id, ncf, pdf_buffer, monto_total=
                                  filename=f'Factura_{ncf}_{factura_id}.pdf')
         msg.attach(pdf_attachment)
         
-        # Enviar email
-        with smtplib.SMTP('smtp.gmail.com', 587) as server:
-            server.starttls()
+        # Enviar email con configuración desde variables de entorno
+        with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=30) as server:
+            if EMAIL_USE_TLS:
+                server.starttls()
             server.login(EMAIL_USERNAME, EMAIL_PASSWORD)
             server.send_message(msg)
         
