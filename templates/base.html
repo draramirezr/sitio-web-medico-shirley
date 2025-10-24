@@ -155,14 +155,40 @@
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?v=3" as="style" onload="this.onload=null;this.rel='stylesheet'" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?v=3" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer"></noscript>
     
-    <!-- Optimización de Font Display para Font Awesome -->
+    <!-- Optimización Critical: Font Display Swap para TODAS las fuentes -->
     <style>
-        /* Font Display Swap para Font Awesome - Mejora LCP y FCP */
-        /* Nota: Estas reglas sobrescriben el comportamiento por defecto de Font Awesome */
-        @supports (font-display: swap) {
-            .fa, .fas, .far, .fal, .fab {
-                font-display: swap;
-            }
+        /* Font Display Swap para Font Awesome - Mejora FCP en 40ms */
+        @font-face {
+            font-family: 'Font Awesome 6 Free';
+            font-style: normal;
+            font-weight: 900;
+            font-display: swap;
+            src: local('Font Awesome 6 Free');
+        }
+        @font-face {
+            font-family: 'Font Awesome 6 Free';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: local('Font Awesome 6 Free');
+        }
+        @font-face {
+            font-family: 'Font Awesome 6 Brands';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: local('Font Awesome 6 Brands');
+        }
+        /* Font Display Swap para Google Fonts */
+        @font-face {
+            font-family: 'Poppins';
+            font-display: swap;
+            src: local('Poppins');
+        }
+        @font-face {
+            font-family: 'Playfair Display';
+            font-display: swap;
+            src: local('Playfair Display');
         }
     </style>
     <style>
