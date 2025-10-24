@@ -113,11 +113,10 @@
     <div class="facturacion-hero animate-card">
         <div class="d-flex justify-content-between align-items-center">
             <div>
-                <h1 style="color: var(--primary-color); font-weight: 800; font-size: 2.2rem; margin-bottom: 0.5rem;">
+                <h1 style="color: var(--primary-color); font-weight: 800; font-size: 2.2rem; margin-bottom: 0;">
                     <i class="fas fa-file-invoice-dollar me-2"></i>
                     Sistema de Facturación
                 </h1>
-                <p class="text-muted mb-0">Gestión de ARS, Médicos, Códigos, Servicios, NCF y Pacientes | Facturación</p>
             </div>
             <a href="{{ url_for('admin') }}" class="btn-volver">
                 <i class="fas fa-arrow-left me-2"></i>
@@ -126,7 +125,7 @@
         </div>
     </div>
 
-    {% if current_user.perfil == 'Administrador' %}
+    {% if current_user.perfil == 'Administrador' or current_user.perfil == 'Nivel 2' %}
     <!-- Maestras -->
     <div class="row g-4">
         <!-- Maestra de ARS -->
@@ -205,6 +204,19 @@
                 </div>
             </a>
         </div>
+
+        <!-- Dashboard (Solo Administradores) -->
+        {% if current_user.perfil == 'Administrador' %}
+        <div class="col-lg-3 col-md-6 animate-card" style="animation-delay: 0.8s">
+            <a href="{{ url_for('facturacion_dashboard') }}" style="text-decoration: none;">
+                <div class="maestra-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h4>Dashboard</h4>
+                    <p>Indicadores y estadísticas</p>
+                </div>
+            </a>
+        </div>
+        {% endif %}
     </div>
     {% endif %}
 
@@ -238,7 +250,7 @@
             </a>
         </div>
         
-        {% if current_user.perfil == 'Administrador' %}
+        {% if current_user.perfil in ['Administrador', 'Nivel 2'] %}
         <!-- Generar Factura -->
         <div class="col-lg-4 animate-card" style="animation-delay: 0.8s">
             <a href="{{ url_for('facturacion_generar') }}" style="text-decoration: none;">

@@ -279,6 +279,8 @@
                         <td>
                             {% if usuario.perfil == 'Administrador' %}
                                 <span class="badge badge-admin">🔑 Administrador</span>
+                            {% elif usuario.perfil == 'Nivel 2' %}
+                                <span class="badge badge-admin" style="background: #CEB0B7;">⭐ Nivel 2</span>
                             {% else %}
                                 <span class="badge badge-user">📝 {{ usuario.perfil }}</span>
                             {% endif %}
@@ -292,14 +294,14 @@
                         </td>
                         <td>
                             {% if usuario.last_login %}
-                                {{ usuario.last_login[:16] }}
+                                {{ usuario.last_login.strftime('%Y-%m-%d %H:%M') if usuario.last_login is not string else usuario.last_login[:16] }}
                             {% else %}
                                 <span style="color: #999;">Nunca</span>
                             {% endif %}
                         </td>
                         <td>
                             {% if usuario.created_at %}
-                                {{ usuario.created_at[:10] }}
+                                {{ usuario.created_at.strftime('%Y-%m-%d') if usuario.created_at is not string else usuario.created_at[:10] }}
                             {% else %}
                                 <span style="color: #999;">N/A</span>
                             {% endif %}

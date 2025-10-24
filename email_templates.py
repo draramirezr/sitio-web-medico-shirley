@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 Sistema de Templates de Email Unificado
 Plantillas HTML profesionales con diseño estándar
@@ -23,10 +23,10 @@ def get_email_footer():
     <div style="background-color: #F2E2E6; padding: 25px; text-align: center; border-radius: 0 0 15px 15px; margin-top: 20px;">
         <div style="border-top: 2px solid #CEB0B7; padding-top: 20px; margin-bottom: 15px;">
             <p style="color: #ACACAD; font-size: 14px; margin: 8px 0; font-weight: 600;">
-                📞 +507 6981-9863 | 📧 dra.ramirezr@gmail.com
+                📞 829-740-5073 | 📧 dra.ramirezr@gmail.com
             </p>
             <p style="color: #ACACAD; font-size: 13px; margin: 8px 0;">
-                📍 Panamá | Zona Oriental
+                📍 Santo Domingo | República Dominicana
             </p>
         </div>
         <div style="margin-top: 15px;">
@@ -392,7 +392,7 @@ def template_confirmacion_cita(nombre, apellido, fecha, hora, tipo, estatus, mot
     <div style="background-color: #E3F2FD; padding: 20px; border-radius: 10px; margin: 25px 0; border-left: 4px solid #2196F3;">
         <p style="margin: 0 0 10px 0; color: #1565C0; font-weight: 600; font-size: 15px;">📞 ¿Necesitas ayuda?</p>
         <p style="margin: 8px 0; color: #1976D2; font-size: 14px;">
-            • Teléfono: <a href="tel:+50769819863" style="color: #2196F3; text-decoration: none; font-weight: 600;">+507 6981-9863</a>
+            • Teléfono: <a href="tel:+18297405073" style="color: #2196F3; text-decoration: none; font-weight: 600;">829-740-5073</a>
         </p>
         <p style="margin: 8px 0; color: #1976D2; font-size: 14px;">
             • Email: <a href="mailto:dra.ramirezr@gmail.com" style="color: #2196F3; text-decoration: none; font-weight: 600;">dra.ramirezr@gmail.com</a>
@@ -413,8 +413,32 @@ def template_confirmacion_cita(nombre, apellido, fecha, hora, tipo, estatus, mot
     
     return get_base_template(config['icon'], config['titulo'], content)
 
-def template_bienvenida_facturacion(nombre, email, password_temporal, link_admin):
-    """Template para email de bienvenida a usuarios de facturación"""
+def template_bienvenida_facturacion(nombre, email, password_temporal, link_admin, puede_generar_facturas=False):
+    """Template para email de bienvenida a usuarios de facturación
+    
+    Args:
+        nombre: Nombre del usuario
+        email: Email del usuario
+        password_temporal: Contraseña temporal
+        link_admin: Link al panel de admin
+        puede_generar_facturas: Si True, el usuario es Nivel 2 y puede generar facturas finales
+    """
+    
+    # Texto adicional para Nivel 2
+    texto_nivel2 = ""
+    if puede_generar_facturas:
+        texto_nivel2 = """
+        <div style="background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(129, 199, 132, 0.3) 100%); padding: 20px; border-radius: 10px; margin: 20px 0; border: 3px solid #4CAF50;">
+            <p style="margin: 0 0 10px 0; color: #2E7D32; font-weight: 700; font-size: 16px; text-align: center;">
+                🌟 TU PERFIL: NIVEL 2 - PERMISOS COMPLETOS
+            </p>
+            <p style="margin: 8px 0; color: #1B5E20; font-size: 14px; line-height: 1.8; text-align: center;">
+                ¡Tienes acceso COMPLETO al módulo de facturación!<br>
+                Puedes <strong>agregar pacientes, ver estados Y generar las facturas finales en PDF</strong>.
+            </p>
+        </div>
+        """
+    
     content = f"""
     <div style="color: #282828; line-height: 1.8; margin: 20px 0; font-size: 15px;">
         <p style="margin: 15px 0;">Hola <strong style="color: #ACACAD;">{nombre}</strong>,</p>
@@ -422,9 +446,11 @@ def template_bienvenida_facturacion(nombre, email, password_temporal, link_admin
             ¡Bienvenido al <strong>Sistema de Facturación</strong> de la Dra. Shirley Ramírez! 🎉
         </p>
         <p style="margin: 15px 0;">
-            Tu cuenta ha sido creada exitosamente con perfil de <strong style="color: #4CAF50;">Registro de Facturas</strong>.
+            Tu cuenta ha sido creada exitosamente con perfil de <strong style="color: #4CAF50;">{"Nivel 2" if puede_generar_facturas else "Registro de Facturas"}</strong>.
         </p>
     </div>
+    
+    {texto_nivel2}
     
     <div style="background: linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(129, 199, 132, 0.2) 100%); padding: 25px; border-radius: 10px; margin: 25px 0; border: 2px solid #4CAF50; text-align: center;">
         <div style="font-size: 48px; margin-bottom: 15px;">
@@ -493,14 +519,26 @@ def template_bienvenida_facturacion(nombre, email, password_temporal, link_admin
             </p>
         </div>
         
+        {"" if not puede_generar_facturas else '''
+        <div style="margin: 15px 0; padding: 15px; background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(129, 199, 132, 0.15) 100%); border-radius: 8px; border: 2px solid #4CAF50;">
+            <p style="margin: 0 0 8px 0; color: #2E7D32; font-weight: 700; font-size: 15px;">
+                💰 3. Generar Facturas Finales ⭐ NIVEL 2
+            </p>
+            <p style="margin: 0; color: #1B5E20; font-size: 14px; line-height: 1.7;">
+                <strong>¡Permiso especial!</strong> Puedes generar las <strong>facturas finales en PDF con NCF automático</strong>, 
+                listas para imprimir, firmar y enviar a las ARS. Esta función es exclusiva de tu nivel.
+            </p>
+        </div>
+        ''' if puede_generar_facturas else '''
         <div style="margin: 15px 0; padding: 15px; background-color: #F8F9FA; border-radius: 8px;">
             <p style="margin: 0 0 8px 0; color: #2196F3; font-weight: 700; font-size: 15px;">
                 💰 3. Generar Facturas
             </p>
             <p style="margin: 0; color: #282828; font-size: 14px; line-height: 1.7;">
-                Genera facturas profesionales en PDF con NCF automático, listas para imprimir y enviar.
+                Los usuarios con perfil <strong>Nivel 2</strong> pueden generar facturas profesionales en PDF con NCF automático.
             </p>
         </div>
+        '''}
         
         <div style="margin: 15px 0; padding: 15px; background-color: #F8F9FA; border-radius: 8px;">
             <p style="margin: 0 0 8px 0; color: #9C27B0; font-weight: 700; font-size: 15px;">
@@ -520,6 +558,7 @@ def template_bienvenida_facturacion(nombre, email, password_temporal, link_admin
             <li>Ve a <strong>"Facturación → Agregar Pacientes"</strong></li>
             <li>Carga pacientes desde Excel o agrégalos manualmente</li>
             <li>Usa <strong>"Estado de Facturación"</strong> para dar seguimiento</li>
+            {"<li><strong>Genera facturas finales</strong> desde el menú de facturación</li>" if puede_generar_facturas else ""}
         </ol>
     </div>
     
@@ -549,7 +588,7 @@ def template_bienvenida_facturacion(nombre, email, password_temporal, link_admin
             Si tienes problemas para acceder o necesitas asistencia técnica:
         </p>
         <p style="margin: 8px 0; color: #1976D2; font-size: 14px;">
-            • Teléfono: <a href="tel:+50769819863" style="color: #2196F3; text-decoration: none; font-weight: 600;">+507 6981-9863</a>
+            • Teléfono: <a href="tel:+18297405073" style="color: #2196F3; text-decoration: none; font-weight: 600;">829-740-5073</a>
         </p>
         <p style="margin: 8px 0; color: #1976D2; font-size: 14px;">
             • Email: <a href="mailto:dra.ramirezr@gmail.com" style="color: #2196F3; text-decoration: none; font-weight: 600;">dra.ramirezr@gmail.com</a>

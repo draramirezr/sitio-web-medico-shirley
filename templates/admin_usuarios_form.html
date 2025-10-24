@@ -270,13 +270,17 @@
                 <option value="Administrador" {% if usuario and usuario.perfil == 'Administrador' %}selected{% endif %}>
                     🔑 Administrador (Acceso total)
                 </option>
+                <option value="Nivel 2" {% if usuario and usuario.perfil == 'Nivel 2' %}selected{% endif %}>
+                    ⭐ Nivel 2 (Facturación completa + Generar facturas finales)
+                </option>
                 <option value="Registro de Facturas" {% if usuario and usuario.perfil == 'Registro de Facturas' %}selected{% endif %}>
-                    📝 Registro de Facturas (Solo facturación)
+                    📝 Registro de Facturas (Solo registro, sin generación final)
                 </option>
             </select>
             <small>
                 <strong>Administrador:</strong> Acceso completo a todas las funciones<br>
-                <strong>Registro de Facturas:</strong> Solo puede gestionar facturación
+                <strong>Nivel 2:</strong> Acceso completo a facturación + Puede generar facturas finales con NCF ⭐<br>
+                <strong>Registro de Facturas:</strong> Solo registro de facturas, no puede generar facturas finales
             </small>
         </div>
         
