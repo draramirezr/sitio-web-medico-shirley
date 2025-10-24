@@ -400,11 +400,11 @@ def template_confirmacion_cita(nombre, apellido, fecha, hora, tipo, estatus, mot
     </div>
     
     <div style="text-align: center; margin-top: 30px;">
-        <a href="tel:+50769819863" 
+        <a href="tel:+18297405073" 
            style="display: inline-block; padding: 14px 35px; background: linear-gradient(135deg, #CEB0B7 0%, #B89CA3 100%); color: white !important; text-decoration: none; border-radius: 25px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 12px rgba(206, 176, 183, 0.4); margin: 5px;">
             📞 Llamar Ahora
         </a>
-        <a href="https://wa.me/50769819863" 
+        <a href="https://wa.me/18297405073" 
            style="display: inline-block; padding: 14px 35px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white !important; text-decoration: none; border-radius: 25px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4); margin: 5px;">
             💬 WhatsApp
         </a>
