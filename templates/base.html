@@ -9,8 +9,9 @@
     <meta name="description" content="{% block description %}🏆 Dra. Shirley Ramírez - Ginecóloga y Obstetra en Santo Domingo, República Dominicana. Especialista en salud femenina, embarazo, control prenatal y tratamientos estéticos ginecológicos. ✅ Atención personalizada. 📞 829-740-5073{% endblock %}">
     <meta name="keywords" content="ginecóloga Santo Domingo, obstetra República Dominicana, Dra Shirley Ramírez, control prenatal Santo Domingo, tratamientos estéticos ginecológicos, salud femenina República Dominicana, embarazo Santo Domingo, parto República Dominicana, ginecología estética, medicina reproductiva Santo Domingo, consulta ginecológica, mejor ginecóloga Santo Domingo">
     <meta name="author" content="Dra. Shirley Ramírez">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="{% block robots %}index, follow{% endblock %}">
     <link rel="canonical" href="https://drashirleyramirez.com{{ request.path }}">
+    {% block extra_meta %}{% endblock %}
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
