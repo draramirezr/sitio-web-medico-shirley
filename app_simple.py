@@ -5508,7 +5508,7 @@ def sitemap():
     urls = [
         {'loc': url_for('index', _external=True), 'priority': '1.0', 'changefreq': 'daily'},
         {'loc': url_for('services', _external=True), 'priority': '0.9', 'changefreq': 'weekly'},
-        {'loc': url_for('tratamientos_esteticos', _external=True), 'priority': '0.95', 'changefreq': 'weekly'},
+        {'loc': url_for('aesthetic_treatments', _external=True), 'priority': '0.95', 'changefreq': 'weekly'},
         {'loc': url_for('about', _external=True), 'priority': '0.85', 'changefreq': 'monthly'},
         {'loc': url_for('testimonials', _external=True), 'priority': '0.8', 'changefreq': 'weekly'},
         {'loc': url_for('contact', _external=True), 'priority': '0.9', 'changefreq': 'monthly'},
