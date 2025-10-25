@@ -335,18 +335,22 @@ def add_security_and_cache_headers(response):
     
     return response
 
-# Configuración de email
-# Limpiar comillas que Railway puede agregar automáticamente
-raw_api_key = os.getenv('EMAIL_PASSWORD') or os.getenv('SENDGRID_API_KEY')
+# ============ CONFIGURACIÓN DE EMAIL - SENDGRID API ============
+# SendGrid API (Railway bloquea SMTP, usamos API en su lugar)
+
+# API Key de SendGrid (limpiar comillas que Railway agrega automáticamente)
+raw_api_key = os.getenv('SENDGRID_API_KEY')
 SENDGRID_API_KEY = raw_api_key.strip().strip('"').strip("'") if raw_api_key else None
 
-raw_email_from = os.getenv('EMAIL_USERNAME', 'dra.ramirezr@gmail.com')
+# Email remitente (debe estar verificado en SendGrid)
+raw_email_from = os.getenv('EMAIL_FROM', 'dra.ramirezr@gmail.com')
 EMAIL_FROM = raw_email_from.strip().strip('"').strip("'") if raw_email_from else 'dra.ramirezr@gmail.com'
 
+# Email destinatario (donde llegan las notificaciones)
 raw_email_dest = os.getenv('EMAIL_DESTINATARIO', 'dra.ramirezr@gmail.com')
 EMAIL_DESTINATARIO = raw_email_dest.strip().strip('"').strip("'") if raw_email_dest else 'dra.ramirezr@gmail.com'
 
-# Verificar configuración de email
+# Verificar configuración
 EMAIL_CONFIGURED = bool(SENDGRID_API_KEY and SENDGRID_AVAILABLE)
 
 if EMAIL_CONFIGURED:
