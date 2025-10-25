@@ -1461,11 +1461,14 @@ def send_email_sendgrid(to_email, subject, html_content, attachment_data=None, a
         
         # Crear mensaje
         message = Mail(
-            from_email=Email(EMAIL_FROM, "Dra. Shirley Ramírez"),
+            from_email=Email(EMAIL_FROM, "Dra. Shirley Ramírez - Ginecóloga"),
             to_emails=To(to_email),
             subject=subject,
             html_content=Content("text/html", html_content)
         )
+        
+        # Configurar Reply-To para mejorar deliverability
+        message.reply_to = Email(EMAIL_FROM, "Dra. Shirley Ramírez")
         
         # Agregar adjunto si existe
         if attachment_data and attachment_filename:
@@ -1505,49 +1508,38 @@ def send_email_sendgrid(to_email, subject, html_content, attachment_data=None, a
         return False
 
 def enviar_email_pdf_pacientes(medico_email, medico_nombre, pdf_buffer, num_pacientes, total):
-    """Enviar email con PDF adjunto de pacientes agregados"""
+    """Enviar email con PDF adjunto de pacientes agregados usando SendGrid API"""
     try:
-        # Verificar si hay contraseña configurada
-        if not EMAIL_PASSWORD:
+        if not EMAIL_CONFIGURED:
             print("\n⚠️  Email no configurado. El PDF no se envió.")
             return False
-        
-        # Crear mensaje usando template estándar
-        msg = MIMEMultipart()
-        msg['Subject'] = f'📋 Constancia - {num_pacientes} Paciente(s) Pendiente(s) de Facturación'
-        msg['From'] = EMAIL_USERNAME
-        msg['To'] = medico_email
         
         # Usar template estandarizado
         html = template_constancia_pdf(medico_nombre, num_pacientes, total)
         
-        # Adjuntar HTML
-        part = MIMEText(html, 'html')
-        msg.attach(part)
+        # Nombre del archivo
+        filename = f'constancia_pacientes_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
         
-        # Adjuntar PDF
-        pdf_attachment = MIMEApplication(pdf_buffer.getvalue(), _subtype='pdf')
-        pdf_attachment.add_header('Content-Disposition', 'attachment', 
-                                 filename=f'constancia_pacientes_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf')
-        msg.attach(pdf_attachment)
+        # Enviar con SendGrid API
+        success = send_email_sendgrid(
+            to_email=medico_email,
+            subject=f'📋 Constancia - {num_pacientes} Paciente(s) Pendiente(s) de Facturación',
+            html_content=html,
+            attachment_data=pdf_buffer,
+            attachment_filename=filename
+        )
         
-        # Enviar email con configuración desde variables de entorno
-        with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=30) as server:
-            if EMAIL_USE_TLS:
-                server.starttls()
-            server.login(EMAIL_USERNAME, EMAIL_PASSWORD)
-            server.send_message(msg)
+        if success:
+            print("\n" + "=" * 60)
+            print("✅ EMAIL CON PDF ENVIADO EXITOSAMENTE")
+            print("=" * 60)
+            print(f"📧 Destinatario: {medico_email}")
+            print(f"👨‍⚕️ Médico: {medico_nombre}")
+            print(f"📋 Pacientes: {num_pacientes}")
+            print(f"💰 Total: {total:,.2f}")
+            print("=" * 60 + "\n")
         
-        print("\n" + "=" * 60)
-        print("✅ EMAIL CON PDF ENVIADO EXITOSAMENTE")
-        print("=" * 60)
-        print(f"📧 Destinatario: {medico_email}")
-        print(f"👨‍⚕️ Médico: {medico_nombre}")
-        print(f"📋 Pacientes: {num_pacientes}")
-        print(f"💰 Total: {total:,.2f}")
-        print("=" * 60 + "\n")
-        
-        return True
+        return success
         
     except Exception as e:
         print("\n" + "=" * 60)
@@ -1594,35 +1586,26 @@ def enviar_email_notificacion(name, email, phone, subject, message):
         return False
 
 def enviar_email_recuperacion(email, nombre, link_recuperacion):
-    """Enviar email de recuperación de contraseña"""
+    """Enviar email de recuperación de contraseña usando SendGrid API"""
     try:
-        # Verificar si hay contraseña configurada
-        if not EMAIL_PASSWORD:
-            print("⚠️  No se puede enviar email de recuperación: EMAIL_PASSWORD no configurado")
+        if not EMAIL_CONFIGURED:
+            print("⚠️  No se puede enviar email de recuperación: Email no configurado")
             return False
-        
-        # Crear mensaje usando template estándar
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = '🔐 Recuperación de Contraseña - Panel Administrativo'
-        msg['From'] = EMAIL_USERNAME
-        msg['To'] = email
         
         # Usar template estandarizado
         html = template_recuperacion(nombre, link_recuperacion)
         
-        # Adjuntar HTML
-        part = MIMEText(html, 'html')
-        msg.attach(part)
+        # Enviar con SendGrid API
+        success = send_email_sendgrid(
+            to_email=email,
+            subject='🔐 Recuperación de Contraseña - Panel Administrativo',
+            html_content=html
+        )
         
-        # Enviar email con configuración desde variables de entorno
-        with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=30) as server:
-            if EMAIL_USE_TLS:
-                server.starttls()
-            server.login(EMAIL_USERNAME, EMAIL_PASSWORD)
-            server.send_message(msg)
+        if success:
+            print(f"✅ Email de recuperación enviado a {email}")
         
-        print(f"✅ Email de recuperación enviado a {email}")
-        return True
+        return success
         
     except Exception as e:
         print(f"❌ Error al enviar email de recuperación: {e}")
@@ -1739,12 +1722,11 @@ def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora
         return False
 
 def send_email(destinatario, asunto, cuerpo):
-    """Función genérica para enviar emails HTML"""
+    """Función genérica para enviar emails HTML usando SendGrid API"""
     try:
-        # Verificar si hay contraseña configurada
-        if not EMAIL_PASSWORD or EMAIL_PASSWORD == "tu_password_aqui":
+        if not EMAIL_CONFIGURED:
             print("\n⚠️ CONFIGURACIÓN DE EMAIL PENDIENTE")
-            print("Por favor, configura EMAIL_PASSWORD en el archivo .env")
+            print("Por favor, configura SENDGRID_API_KEY")
             return False
         
         # Verificar que el destinatario tenga email
@@ -1758,28 +1740,18 @@ def send_email(destinatario, asunto, cuerpo):
         print(f"📧 Destinatario: {destinatario}")
         print(f"📝 Asunto: {asunto}")
         
-        # Crear mensaje
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = asunto
-        msg['From'] = EMAIL_USERNAME
-        msg['To'] = destinatario
+        # Enviar con SendGrid API
+        success = send_email_sendgrid(
+            to_email=destinatario,
+            subject=asunto,
+            html_content=cuerpo
+        )
         
-        # Adjuntar HTML
-        part = MIMEText(cuerpo, 'html')
-        msg.attach(part)
+        if success:
+            print("\n✅ EMAIL ENVIADO EXITOSAMENTE")
+            print("=" * 60 + "\n")
         
-        # Conectar y enviar con configuración desde variables de entorno
-        server = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=30)
-        if EMAIL_USE_TLS:
-            server.starttls()
-        server.login(EMAIL_USERNAME, EMAIL_PASSWORD)
-        server.send_message(msg)
-        server.quit()
-        
-        print("\n✅ EMAIL ENVIADO EXITOSAMENTE")
-        print("=" * 60 + "\n")
-        
-        return True
+        return success
         
     except Exception as e:
         print("\n" + "=" * 60)
@@ -4584,50 +4556,38 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None)
     return buffer
 
 def enviar_email_factura(destinatario, factura_id, ncf, pdf_buffer, monto_total=0.00):
-    """Enviar factura por email con template estandarizado"""
+    """Enviar factura por email con template estandarizado usando SendGrid API"""
     try:
-        # Verificar si hay contraseña configurada
-        if not EMAIL_PASSWORD:
+        if not EMAIL_CONFIGURED:
             print("\n⚠️  Email no configurado. La factura no se envió por correo.")
             return False
-        
-        # Crear mensaje usando template estándar
-        msg = MIMEMultipart()
-        msg['Subject'] = f'💰 Factura #{factura_id} - NCF: {ncf}'
-        msg['From'] = EMAIL_USERNAME
-        msg['To'] = destinatario
         
         # Usar template estandarizado
         html = template_factura(factura_id, ncf, monto_total)
         
-        # Adjuntar HTML
-        part = MIMEText(html, 'html')
-        msg.attach(part)
+        # Nombre del archivo
+        filename = f'Factura_{ncf}_{factura_id}.pdf'
         
-        # Adjuntar PDF
-        pdf_buffer.seek(0)
-        pdf_attachment = MIMEApplication(pdf_buffer.read(), _subtype='pdf')
-        pdf_attachment.add_header('Content-Disposition', 'attachment', 
-                                 filename=f'Factura_{ncf}_{factura_id}.pdf')
-        msg.attach(pdf_attachment)
+        # Enviar con SendGrid API
+        success = send_email_sendgrid(
+            to_email=destinatario,
+            subject=f'💰 Factura #{factura_id} - NCF: {ncf}',
+            html_content=html,
+            attachment_data=pdf_buffer,
+            attachment_filename=filename
+        )
         
-        # Enviar email con configuración desde variables de entorno
-        with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=30) as server:
-            if EMAIL_USE_TLS:
-                server.starttls()
-            server.login(EMAIL_USERNAME, EMAIL_PASSWORD)
-            server.send_message(msg)
+        if success:
+            print("\n" + "=" * 60)
+            print("✅ EMAIL CON FACTURA ENVIADO EXITOSAMENTE")
+            print("=" * 60)
+            print(f"📧 Destinatario: {destinatario}")
+            print(f"📄 Factura: #{factura_id}")
+            print(f"🔢 NCF: {ncf}")
+            print(f"💰 Monto: ${monto_total:,.2f}")
+            print("=" * 60 + "\n")
         
-        print("\n" + "=" * 60)
-        print("✅ EMAIL CON FACTURA ENVIADO EXITOSAMENTE")
-        print("=" * 60)
-        print(f"📧 Destinatario: {destinatario}")
-        print(f"📄 Factura: #{factura_id}")
-        print(f"🔢 NCF: {ncf}")
-        print(f"💰 Monto: ${monto_total:,.2f}")
-        print("=" * 60 + "\n")
-        
-        return True
+        return success
         
     except Exception as e:
         print("\n" + "=" * 60)

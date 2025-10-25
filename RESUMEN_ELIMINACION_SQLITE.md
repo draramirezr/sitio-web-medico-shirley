@@ -82,3 +82,6 @@ Si ves algún error de `sqlite3` o `SQLite`, es posible que haya quedado alguna 
 
 
 
+
+
+
