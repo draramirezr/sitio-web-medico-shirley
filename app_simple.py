@@ -1161,6 +1161,35 @@ def create_sample_data():
     conn.close()
 
 # Rutas principales
+# ============ CACHE SIMPLE PARA HOMEPAGE ============
+homepage_cache = {
+    'services': None,
+    'testimonials': None,
+    'timestamp': None
+}
+
+CACHE_DURATION = 300  # 5 minutos
+
+def get_cached_homepage_data():
+    """Obtener datos de homepage con cache de 5 minutos"""
+    from datetime import datetime
+    
+    now = datetime.now()
+    
+    # Si no hay cache o expiró, recargar
+    if (homepage_cache['timestamp'] is None or 
+        (now - homepage_cache['timestamp']).total_seconds() > CACHE_DURATION):
+        
+        conn = get_db_connection()
+        homepage_cache['services'] = conn.execute('SELECT * FROM services WHERE active = 1 LIMIT 6').fetchall()
+        homepage_cache['testimonials'] = conn.execute('SELECT * FROM testimonials WHERE approved = 1').fetchall()
+        homepage_cache['timestamp'] = now
+        conn.close()
+        
+        print(f"🔄 Cache actualizado a las {now.strftime('%H:%M:%S')}")
+    
+    return homepage_cache['services'], homepage_cache['testimonials']
+
 @app.route('/')
 def index():
     """Página principal con testimonios rotativos"""
@@ -1176,10 +1205,8 @@ def index():
     # Incrementar contador de visitas
     increment_visit_counter()
     
-    conn = get_db_connection()
-    services = conn.execute('SELECT * FROM services WHERE active = 1 LIMIT 6').fetchall()
-    all_testimonials = conn.execute('SELECT * FROM testimonials WHERE approved = 1').fetchall()
-    conn.close()
+    # Usar cache para datos (reduce consultas DB)
+    services, all_testimonials = get_cached_homepage_data()
     
     # Rotación diaria de testimonios
     today = datetime.now()
