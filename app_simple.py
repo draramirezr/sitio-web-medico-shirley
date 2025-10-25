@@ -336,9 +336,15 @@ def add_security_and_cache_headers(response):
     return response
 
 # Configuración de email
-SENDGRID_API_KEY = os.getenv('EMAIL_PASSWORD') or os.getenv('SENDGRID_API_KEY')  # API Key de SendGrid
-EMAIL_FROM = os.getenv('EMAIL_USERNAME', 'dra.ramirezr@gmail.com')  # Email del remitente verificado
-EMAIL_DESTINATARIO = os.getenv('EMAIL_DESTINATARIO', 'dra.ramirezr@gmail.com')  # Email para notificaciones
+# Limpiar comillas que Railway puede agregar automáticamente
+raw_api_key = os.getenv('EMAIL_PASSWORD') or os.getenv('SENDGRID_API_KEY')
+SENDGRID_API_KEY = raw_api_key.strip().strip('"').strip("'") if raw_api_key else None
+
+raw_email_from = os.getenv('EMAIL_USERNAME', 'dra.ramirezr@gmail.com')
+EMAIL_FROM = raw_email_from.strip().strip('"').strip("'") if raw_email_from else 'dra.ramirezr@gmail.com'
+
+raw_email_dest = os.getenv('EMAIL_DESTINATARIO', 'dra.ramirezr@gmail.com')
+EMAIL_DESTINATARIO = raw_email_dest.strip().strip('"').strip("'") if raw_email_dest else 'dra.ramirezr@gmail.com'
 
 # Verificar configuración de email
 EMAIL_CONFIGURED = bool(SENDGRID_API_KEY and SENDGRID_AVAILABLE)
@@ -347,6 +353,7 @@ if EMAIL_CONFIGURED:
     print(f"✅ Email configurado con SendGrid API")
     print(f"   📧 From: {EMAIL_FROM}")
     print(f"   📬 Notificaciones a: {EMAIL_DESTINATARIO}")
+    print(f"   🔑 API Key: {SENDGRID_API_KEY[:10]}...{SENDGRID_API_KEY[-4:] if SENDGRID_API_KEY else ''}")
 else:
     print("⚠️ Email NO configurado - revisa SENDGRID_API_KEY")
 
