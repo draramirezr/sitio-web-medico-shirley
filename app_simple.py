@@ -19,6 +19,17 @@ from markupsafe import escape
 from io import BytesIO
 import threading
 
+# SendGrid para envío de emails (API en lugar de SMTP bloqueado por Railway)
+try:
+    from sendgrid import SendGridAPIClient
+    from sendgrid.helpers.mail import Mail, Email, To, Content, Attachment, FileContent, FileName, FileType, Disposition
+    import base64
+    SENDGRID_AVAILABLE = True
+    print("✅ SendGrid API disponible")
+except ImportError:
+    SENDGRID_AVAILABLE = False
+    print("⚠️ SendGrid no disponible - instalar con: pip install sendgrid")
+
 # Importar MySQL (obligatorio)
 import pymysql
 pymysql.install_as_MySQLdb()
@@ -324,16 +335,20 @@ def add_security_and_cache_headers(response):
     
     return response
 
-# Configuración de email (NUNCA incluir contraseñas en el código)
-EMAIL_USERNAME = os.getenv('EMAIL_USERNAME', 'dra.ramirezr@gmail.com')
-EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')  # IMPORTANTE: Configurar en variables de entorno
-EMAIL_DESTINATARIO = os.getenv('EMAIL_DESTINATARIO', 'dra.ramirezr@gmail.com')
-EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() in ('true', '1', 'yes')
+# Configuración de email
+SENDGRID_API_KEY = os.getenv('EMAIL_PASSWORD') or os.getenv('SENDGRID_API_KEY')  # API Key de SendGrid
+EMAIL_FROM = os.getenv('EMAIL_USERNAME', 'dra.ramirezr@gmail.com')  # Email del remitente verificado
+EMAIL_DESTINATARIO = os.getenv('EMAIL_DESTINATARIO', 'dra.ramirezr@gmail.com')  # Email para notificaciones
 
 # Verificar configuración de email
-EMAIL_CONFIGURED = bool(EMAIL_USERNAME and EMAIL_PASSWORD and EMAIL_PASSWORD != 'tu_password_aqui')
+EMAIL_CONFIGURED = bool(SENDGRID_API_KEY and SENDGRID_AVAILABLE)
+
+if EMAIL_CONFIGURED:
+    print(f"✅ Email configurado con SendGrid API")
+    print(f"   📧 From: {EMAIL_FROM}")
+    print(f"   📬 Notificaciones a: {EMAIL_DESTINATARIO}")
+else:
+    print("⚠️ Email NO configurado - revisa SENDGRID_API_KEY")
 
 # Función para limpiar comillas de variables de entorno
 def clean_env_var(var_name, default=''):
@@ -1379,6 +1394,78 @@ def testimonials():
     
     return render_template('testimonials.html', testimonials=testimonials_with_dates)
 
+# ============================================================================
+# FUNCIONES DE ENVÍO DE EMAIL CON SENDGRID API
+# ============================================================================
+
+def send_email_sendgrid(to_email, subject, html_content, attachment_data=None, attachment_filename=None):
+    """
+    Enviar email usando SendGrid API (funciona en Railway donde SMTP está bloqueado)
+    
+    Args:
+        to_email: Destinatario
+        subject: Asunto del email
+        html_content: Contenido HTML del email
+        attachment_data: Datos del adjunto (BytesIO o bytes) - opcional
+        attachment_filename: Nombre del archivo adjunto - opcional
+    
+    Returns:
+        bool: True si se envió exitosamente, False si hubo error
+    """
+    try:
+        if not SENDGRID_AVAILABLE:
+            print("⚠️ SendGrid no está instalado")
+            return False
+            
+        if not SENDGRID_API_KEY:
+            print("⚠️ SENDGRID_API_KEY no configurada")
+            return False
+        
+        # Crear mensaje
+        message = Mail(
+            from_email=Email(EMAIL_FROM, "Dra. Shirley Ramírez"),
+            to_emails=To(to_email),
+            subject=subject,
+            html_content=Content("text/html", html_content)
+        )
+        
+        # Agregar adjunto si existe
+        if attachment_data and attachment_filename:
+            # Convertir BytesIO a bytes si es necesario
+            if isinstance(attachment_data, BytesIO):
+                attachment_data.seek(0)
+                file_data = attachment_data.read()
+            else:
+                file_data = attachment_data
+            
+            # Codificar en base64
+            encoded_file = base64.b64encode(file_data).decode()
+            
+            # Agregar adjunto
+            attached_file = Attachment(
+                FileContent(encoded_file),
+                FileName(attachment_filename),
+                FileType('application/pdf'),
+                Disposition('attachment')
+            )
+            message.attachment = attached_file
+        
+        # Enviar
+        sg = SendGridAPIClient(SENDGRID_API_KEY)
+        response = sg.send(message)
+        
+        print(f"✅ Email enviado exitosamente (Status: {response.status_code})")
+        print(f"   📧 To: {to_email}")
+        print(f"   📝 Subject: {subject}")
+        
+        return True
+        
+    except Exception as e:
+        print(f"❌ Error al enviar email con SendGrid: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
 def enviar_email_pdf_pacientes(medico_email, medico_nombre, pdf_buffer, num_pacientes, total):
     """Enviar email con PDF adjunto de pacientes agregados"""
     try:
@@ -1434,72 +1521,38 @@ def enviar_email_pdf_pacientes(medico_email, medico_nombre, pdf_buffer, num_paci
         return False
 
 def enviar_email_notificacion(name, email, phone, subject, message):
-    """Enviar email de notificación a la doctora"""
+    """Enviar email de notificación a la doctora usando SendGrid API"""
     try:
         # Verificar configuración de email
         if not EMAIL_CONFIGURED:
             print("\n⚠️  CONFIGURACIÓN DE EMAIL NECESARIA")
             print("=" * 60)
-            print("Para recibir emails, configura las variables de entorno:")
-            print("EMAIL_USERNAME, EMAIL_PASSWORD, EMAIL_DESTINATARIO")
+            print("Para recibir emails, configura SENDGRID_API_KEY")
             print("=" * 60)
             print("\nPor ahora, el mensaje se guardó en la base de datos.")
-            print("Puedes verlo en: http://localhost:5000/admin")
             print("=" * 60 + "\n")
             return False
-        
-        # Crear mensaje usando el template estándar
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = f'🔔 Nuevo mensaje: {subject}'
-        msg['From'] = EMAIL_USERNAME
-        msg['To'] = EMAIL_DESTINATARIO
-        msg['Reply-To'] = email
         
         # Usar template estandarizado
         html = template_contacto(name, email, phone, subject, message)
         
-        # Adjuntar HTML
-        part = MIMEText(html, 'html')
-        msg.attach(part)
+        # Enviar usando SendGrid API
+        success = send_email_sendgrid(
+            to_email=EMAIL_DESTINATARIO,
+            subject=f'🔔 Nuevo mensaje: {subject}',
+            html_content=html
+        )
         
-        # Enviar email con configuración desde variables de entorno
-        with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=30) as server:
-            if EMAIL_USE_TLS:
-                server.starttls()
-            server.login(EMAIL_USERNAME, EMAIL_PASSWORD)
-            server.send_message(msg)
+        if success:
+            print(f"✅ Notificación enviada a {EMAIL_DESTINATARIO}")
         
-        print("\n" + "=" * 60)
-        print("✅ EMAIL ENVIADO EXITOSAMENTE")
-        print("=" * 60)
-        print(f"📧 Destinatario: {EMAIL_DESTINATARIO}")
-        print(f"👤 Remitente: {name} ({email})")
-        print(f"📝 Asunto: {subject}")
-        print("=" * 60 + "\n")
-        
-        return True
-        
-    except smtplib.SMTPAuthenticationError:
-        print("\n" + "=" * 60)
-        print("❌ ERROR DE AUTENTICACIÓN")
-        print("=" * 60)
-        print("La contraseña de Gmail es incorrecta.")
-        print("\nSoluciones:")
-        print("1. Verifica que la verificación en 2 pasos esté activa")
-        print("2. Genera una nueva contraseña de aplicación")
-        print("3. Actualiza el archivo .env con la nueva contraseña")
-        print("4. Lee: CONFIGURAR_EMAIL_GMAIL.md")
-        print("=" * 60 + "\n")
-        return False
+        return success
         
     except Exception as e:
-        print("\n" + "=" * 60)
-        print("❌ ERROR AL ENVIAR EMAIL")
-        print("=" * 60)
-        print(f"Error: {e}")
+        print(f"❌ ERROR AL ENVIAR EMAIL: {e}")
         print("\nEl mensaje se guardó en la base de datos.")
-        print("Puedes verlo en: http://localhost:5000/admin")
-        print("=" * 60 + "\n")
+        import traceback
+        traceback.print_exc()
         return False
 
 def enviar_email_recuperacion(email, nombre, link_recuperacion):
@@ -1538,20 +1591,12 @@ def enviar_email_recuperacion(email, nombre, link_recuperacion):
         return False
 
 def enviar_email_cita(first_name, last_name, email, phone, appointment_date, appointment_time, appointment_type, medical_insurance, emergency_datetime, reason):
-    """Enviar email de notificación de cita a la doctora"""
+    """Enviar email de notificación de cita a la doctora usando SendGrid API"""
     try:
-        # Verificar si hay contraseña configurada
-        if not EMAIL_PASSWORD:
+        # Verificar configuración
+        if not EMAIL_CONFIGURED:
             print("\n⚠️  Email no configurado. La cita se guardó en la base de datos.")
             return False
-        
-        # Crear mensaje usando template estándar
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = f'📅 Nueva Solicitud de Cita - {first_name} {last_name}'
-        msg['From'] = EMAIL_USERNAME
-        msg['To'] = EMAIL_DESTINATARIO
-        if email:
-            msg['Reply-To'] = email
         
         # Preparar datos para el template
         fecha = emergency_datetime if appointment_type == "emergencia" else appointment_date
@@ -1567,35 +1612,23 @@ def enviar_email_cita(first_name, last_name, email, phone, appointment_date, app
             seguro, emergency_datetime if appointment_type == "emergencia" else None, motivo
         )
         
-        # Adjuntar HTML
-        part = MIMEText(html, 'html')
-        msg.attach(part)
+        # Enviar usando SendGrid API
+        success = send_email_sendgrid(
+            to_email=EMAIL_DESTINATARIO,
+            subject=f'📅 Nueva Solicitud de Cita - {first_name} {last_name}',
+            html_content=html
+        )
         
-        # Enviar email con configuración desde variables de entorno
-        with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=30) as server:
-            if EMAIL_USE_TLS:
-                server.starttls()
-            server.login(EMAIL_USERNAME, EMAIL_PASSWORD)
-            server.send_message(msg)
+        if success:
+            print(f"✅ Notificación de cita enviada a {EMAIL_DESTINATARIO}")
         
-        print("\n" + "=" * 60)
-        print("✅ EMAIL DE CITA ENVIADO EXITOSAMENTE")
-        print("=" * 60)
-        print(f"📧 Destinatario: {EMAIL_DESTINATARIO}")
-        print(f"👤 Paciente: {first_name} {last_name} ({phone})")
-        print(f"🩺 Tipo: {appointment_type}")
-        print("=" * 60 + "\n")
-        
-        return True
+        return success
         
     except Exception as e:
-        print("\n" + "=" * 60)
-        print("❌ ERROR AL ENVIAR EMAIL DE CITA")
-        print("=" * 60)
-        print(f"Error: {e}")
+        print(f"❌ ERROR AL ENVIAR EMAIL DE CITA: {e}")
         print("\nLa cita se guardó en la base de datos.")
-        print("Puedes verla en: http://localhost:5000/admin/appointments")
-        print("=" * 60 + "\n")
+        import traceback
+        traceback.print_exc()
         return False
 
 def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora, tipo, estatus, motivo=None):

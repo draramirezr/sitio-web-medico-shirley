@@ -27,6 +27,9 @@ gunicorn==21.2.0
 # Base de datos MySQL para Railway
 PyMySQL==1.1.0
 
+# SendGrid para envío de emails (usa API en lugar de SMTP bloqueado)
+sendgrid==6.11.0
+
 # ============================================
 # NOTAS IMPORTANTES
 # ============================================
