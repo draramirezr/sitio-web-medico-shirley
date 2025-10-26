@@ -225,9 +225,6 @@
                 <a href="{{ url_for('facturacion_pacientes_pendientes_pdf', medico_id=medico_id_filtro, ars_id=ars_id_filtro, estado=estado_filtro) }}" class="btn btn-pdf" {% if pendientes|length == 0 %}style="pointer-events: none; opacity: 0.5;"{% endif %}>
                     <i class="fas fa-file-pdf me-2"></i>Descargar PDF
                 </a>
-                <a href="{{ url_for('facturacion_generar') }}" class="btn btn-generar" {% if estado_filtro == 'facturado' %}style="pointer-events: none; opacity: 0.4; cursor: not-allowed;" title="No disponible para registros facturados"{% endif %}>
-                    <i class="fas fa-file-invoice-dollar me-2"></i>Generar Factura
-                </a>
                 <a href="{{ url_for('facturacion_menu') }}" class="btn btn-volver">
                     <i class="fas fa-arrow-left me-2"></i>Volver
                 </a>
