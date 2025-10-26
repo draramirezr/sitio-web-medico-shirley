@@ -9,7 +9,8 @@
     })(window,document,'script','dataLayer','GTM-TW8956LR');</script>
     <!-- End Google Tag Manager -->
     
-    <!-- Google tag (gtag.js) - Google Ads -->
+    {% if not current_user.is_authenticated %}
+    <!-- Google tag (gtag.js) - Google Ads - Solo páginas públicas -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-11017749694"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -18,6 +19,7 @@
       gtag('config', 'AW-11017749694');
     </script>
     <!-- End Google Ads -->
+    {% endif %}
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
