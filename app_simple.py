@@ -4092,7 +4092,8 @@ def facturacion_generar():
                 flash('El médico seleccionado no está habilitado para facturar', 'error')
                 return redirect(url_for('facturacion_generar'))
             
-            # Obtener TODOS los pacientes pendientes de esta ARS filtrados por médico de consulta
+            # Obtener TODOS los pacientes pendientes de esta ARS (sin filtrar por médico aquí)
+            # El filtro por médico se hace visualmente en el frontend
             pendientes = conn.execute('''
                 SELECT fd.*, m.nombre as medico_nombre, a.nombre_ars, 
                        COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
@@ -4100,9 +4101,9 @@ def facturacion_generar():
                 JOIN medicos m ON fd.medico_consulta = m.id
                 JOIN ars a ON fd.ars_id = a.id
                 LEFT JOIN pacientes p ON fd.paciente_id = p.id
-                WHERE fd.estado = 'pendiente' AND fd.activo = 1 AND fd.ars_id = %s AND fd.medico_consulta = %s
+                WHERE fd.estado = 'pendiente' AND fd.activo = 1 AND fd.ars_id = %s
                 ORDER BY fd.fecha_servicio DESC
-            ''', (ars_id, medico_id)).fetchall()
+            ''', (ars_id,)).fetchall()
             
             # Obtener info de ARS, NCF y Médico para facturar
             ars = conn.execute('SELECT * FROM ars WHERE id = %s', (ars_id,)).fetchone()
