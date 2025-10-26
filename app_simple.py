@@ -1208,8 +1208,9 @@ def index():
     except:
         pass  # No detener la página si falla la limpieza
     
-    # Incrementar contador de visitas
-    increment_visit_counter()
+    # Incrementar contador de visitas (solo visitantes públicos, NO usuarios logueados)
+    if not current_user.is_authenticated:
+        increment_visit_counter()
     
     # Usar cache para datos (reduce consultas DB)
     services, all_testimonials = get_cached_homepage_data()
