@@ -2852,7 +2852,7 @@ def facturacion_pacientes():
     if search:
         pacientes_list = conn.execute('''
             SELECT p.*, a.nombre_ars,
-                   (SELECT COUNT(*) FROM facturas_detalle fd WHERE fd.paciente_id = p.id AND fd.activo = 1) as total_registros
+                   (SELECT COUNT(*) FROM facturas_detalle fd WHERE fd.paciente_id = p.id) as total_registros
             FROM pacientes p
             LEFT JOIN ars a ON p.ars_id = a.id
             WHERE (p.nss LIKE %s OR p.nombre LIKE %s) AND p.activo = 1
@@ -2861,7 +2861,7 @@ def facturacion_pacientes():
     else:
         pacientes_list = conn.execute('''
             SELECT p.*, a.nombre_ars,
-                   (SELECT COUNT(*) FROM facturas_detalle fd WHERE fd.paciente_id = p.id AND fd.activo = 1) as total_registros
+                   (SELECT COUNT(*) FROM facturas_detalle fd WHERE fd.paciente_id = p.id) as total_registros
             FROM pacientes p
             LEFT JOIN ars a ON p.ars_id = a.id
             WHERE p.activo = 1
@@ -2999,7 +2999,7 @@ def facturacion_pacientes_pendientes():
         JOIN medicos m ON fd.medico_id = m.id
         JOIN ars a ON fd.ars_id = a.id
         LEFT JOIN pacientes p ON fd.paciente_id = p.id
-        WHERE fd.activo = 1 AND fd.estado = %s
+        WHERE fd.estado = %s
     '''
     params = [estado]
     
@@ -3080,7 +3080,7 @@ def facturacion_pacientes_pendientes_pdf():
         JOIN medicos m ON fd.medico_id = m.id
         JOIN ars a ON fd.ars_id = a.id
         LEFT JOIN pacientes p ON fd.paciente_id = p.id
-        WHERE fd.activo = 1 AND fd.estado = %s
+        WHERE fd.estado = %s
     '''
     params = [estado]
     
@@ -3381,7 +3381,7 @@ def facturacion_pacientes_agregados_pdf():
         JOIN medicos m ON fd.medico_id = m.id
         JOIN ars a ON fd.ars_id = a.id
         LEFT JOIN pacientes p ON fd.paciente_id = p.id
-        WHERE fd.id IN ({placeholders}) AND fd.activo = 1
+        WHERE fd.id IN ({placeholders})
         ORDER BY fd.id DESC
     ''', ids_agregados).fetchall()
     
@@ -3634,7 +3634,7 @@ def facturacion_facturas_nueva():
                 # VALIDACIÓN: Verificar si ya existe el mismo registro (NSS + FECHA + AUTORIZACIÓN + ARS)
                 duplicado = conn.execute('''
                     SELECT * FROM facturas_detalle 
-                    WHERE nss = %s AND fecha_servicio = %s AND autorizacion = %s AND ars_id = %s AND activo = 1
+                    WHERE nss = %s AND fecha_servicio = %s AND autorizacion = %s AND ars_id = %s
                 ''', (nss, fecha_servicio, autorizacion, ars_id)).fetchone()
                 
                 if duplicado:
@@ -4103,7 +4103,7 @@ def facturacion_generar():
                 LEFT JOIN medicos m ON fd.medico_consulta = m.id
                 JOIN ars a ON fd.ars_id = a.id
                 LEFT JOIN pacientes p ON fd.paciente_id = p.id
-                WHERE fd.estado = 'pendiente' AND fd.activo = 1 AND fd.ars_id = %s
+                WHERE fd.estado = 'pendiente' AND fd.ars_id = %s
                 ORDER BY fd.fecha_servicio DESC
             ''', (ars_id,)).fetchall()
             
@@ -4128,7 +4128,7 @@ def facturacion_generar():
                 SELECT DISTINCT m.id, m.nombre 
                 FROM facturas_detalle fd
                 LEFT JOIN medicos m ON fd.medico_consulta = m.id
-                WHERE fd.estado = 'pendiente' AND fd.ars_id = %s AND fd.activo = 1 AND m.id IS NOT NULL
+                WHERE fd.estado = 'pendiente' AND fd.ars_id = %s AND m.id IS NOT NULL
                 ORDER BY m.nombre
             ''', (ars_id,)).fetchall()
             
@@ -4790,7 +4790,7 @@ def facturacion_dashboard():
     total_facturado = conn.execute(query_monto, params_monto).fetchone()['total']
     
     # Pacientes pendientes (siempre actual, pero con filtros de ARS/Médico)
-    query_pendientes = "SELECT COUNT(*) as total FROM facturas_detalle WHERE estado = 'pendiente' AND activo = 1"
+    query_pendientes = "SELECT COUNT(*) as total FROM facturas_detalle WHERE estado = 'pendiente'"
     params_pendientes = []
     
     if ars_id:
@@ -4811,7 +4811,7 @@ def facturacion_dashboard():
     query_monto_pendiente = '''
         SELECT COALESCE(SUM(fd.monto), 0) as total 
         FROM facturas_detalle fd
-        WHERE fd.estado = 'pendiente' AND fd.activo = 1
+        WHERE fd.estado = 'pendiente'
     '''
     params_monto_pendiente = []
     
@@ -4833,7 +4833,7 @@ def facturacion_dashboard():
     query_facturados = '''
         SELECT COUNT(*) as total FROM facturas_detalle fd
         JOIN facturas f ON fd.factura_id = f.id
-        WHERE fd.estado = 'facturado' AND fd.activo = 1
+        WHERE fd.estado = 'facturado'
         AND f.fecha_factura BETWEEN %s AND %s
     '''
     params_facturados = [fecha_desde, fecha_hasta]
@@ -5127,7 +5127,7 @@ def facturacion_ver_factura(factura_id):
         SELECT fd.*, m.nombre as medico_nombre
         FROM facturas_detalle fd
         JOIN medicos m ON fd.medico_id = m.id
-        WHERE fd.factura_id = %s AND fd.activo = 1
+        WHERE fd.factura_id = %s
         ORDER BY fd.id
     ''', (factura_id,)).fetchall()
     
@@ -5187,7 +5187,7 @@ def facturacion_enviar_email(factura_id):
             JOIN medicos m ON fd.medico_id = m.id
             JOIN ars a ON fd.ars_id = a.id
             LEFT JOIN codigo_ars ca ON ca.medico_id = m.id AND ca.ars_id = a.id
-            WHERE fd.factura_id = %s AND fd.activo = 1
+            WHERE fd.factura_id = %s
             ORDER BY fd.id
         ''', (factura_id,)).fetchall()
         
@@ -5265,7 +5265,7 @@ def facturacion_descargar_pdf(factura_id):
             JOIN medicos m ON fd.medico_id = m.id
             JOIN ars a ON fd.ars_id = a.id
             LEFT JOIN codigo_ars ca ON ca.medico_id = m.id AND ca.ars_id = a.id
-            WHERE fd.factura_id = %s AND fd.activo = 1
+            WHERE fd.factura_id = %s
             ORDER BY fd.id
         ''', (factura_id,)).fetchall()
         
@@ -5314,7 +5314,7 @@ def facturacion_paciente_editar(paciente_id):
     
     # Verificar que el paciente existe y está pendiente
     paciente = conn.execute('''
-        SELECT * FROM facturas_detalle WHERE id = %s AND activo = 1
+        SELECT * FROM facturas_detalle WHERE id = %s
     ''', (paciente_id,)).fetchone()
     
     if not paciente:
@@ -5344,7 +5344,7 @@ def facturacion_paciente_editar(paciente_id):
             # Verificar autorización única (excepto el mismo registro)
             existe_autorizacion = conn.execute('''
                 SELECT id FROM facturas_detalle 
-                WHERE autorizacion = %s AND id != %s AND activo = 1
+                WHERE autorizacion = %s AND id != %s
             ''', (autorizacion, paciente_id)).fetchone()
             
             if existe_autorizacion:
@@ -5385,28 +5385,35 @@ def facturacion_paciente_editar(paciente_id):
 @app.route('/facturacion/paciente/<int:paciente_id>/eliminar')
 @login_required
 def facturacion_paciente_eliminar(paciente_id):
-    """Eliminar (soft delete) un paciente pendiente de facturación"""
+    """Eliminar (DELETE real) un paciente pendiente de facturación"""
     conn = get_db_connection()
     
-    # Verificar que el paciente existe y está pendiente
+    # Verificar que el paciente existe
     paciente = conn.execute('''
-        SELECT * FROM facturas_detalle WHERE id = %s AND activo = 1
+        SELECT * FROM facturas_detalle WHERE id = %s
     ''', (paciente_id,)).fetchone()
     
     if not paciente:
-        flash('Paciente no encontrado', 'error')
+        flash('❌ Paciente no encontrado', 'error')
         conn.close()
         return redirect(url_for('facturacion_pacientes_pendientes'))
     
+    # Verificar que NO esté facturado (no tiene factura_id)
+    if paciente['factura_id'] is not None:
+        flash('❌ No se puede eliminar un registro que ya está en una factura', 'error')
+        conn.close()
+        return redirect(url_for('facturacion_pacientes_pendientes'))
+    
+    # Verificar que esté pendiente
     if paciente['estado'] != 'pendiente':
-        flash('❌ No se puede eliminar un registro facturado', 'error')
+        flash('❌ Solo se pueden eliminar registros pendientes', 'error')
         conn.close()
         return redirect(url_for('facturacion_pacientes_pendientes'))
     
     try:
-        # Soft delete
+        # ELIMINACIÓN FÍSICA (DELETE real)
         conn.execute('''
-            UPDATE facturas_detalle SET activo = 0 WHERE id = %s
+            DELETE FROM facturas_detalle WHERE id = %s
         ''', (paciente_id,))
         
         conn.commit()
@@ -5415,7 +5422,7 @@ def facturacion_paciente_eliminar(paciente_id):
         flash('✅ Registro eliminado exitosamente', 'success')
     except Exception as e:
         conn.close()
-        flash(f'Error al eliminar: {str(e)}', 'error')
+        flash(f'❌ Error al eliminar: {str(e)}', 'error')
     
     return redirect(url_for('facturacion_pacientes_pendientes'))
 
