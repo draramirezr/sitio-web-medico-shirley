@@ -22,7 +22,7 @@ import threading
 # SendGrid para envío de emails (API en lugar de SMTP bloqueado por Railway)
 try:
     from sendgrid import SendGridAPIClient
-    from sendgrid.helpers.mail import Mail, Email, To, Content, Attachment, FileContent, FileName, FileType, Disposition
+    from sendgrid.helpers.mail import Mail, Email, To, Content, Attachment, FileContent, FileName, FileType, Disposition, TrackingSettings, ClickTracking
     import base64
     SENDGRID_AVAILABLE = True
     print("✅ SendGrid API disponible")
@@ -1472,6 +1472,10 @@ def send_email_sendgrid(to_email, subject, html_content, attachment_data=None, a
         
         # Configurar Reply-To para mejorar deliverability
         message.reply_to = Email(EMAIL_FROM, "Dra. Shirley Ramírez")
+        
+        # Desactivar click tracking de SendGrid (evita URLs reescritas)
+        message.tracking_settings = TrackingSettings()
+        message.tracking_settings.click_tracking = ClickTracking(False, False)
         
         # Agregar adjunto si existe
         if attachment_data and attachment_filename:
