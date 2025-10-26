@@ -2993,11 +2993,12 @@ def facturacion_pacientes_pendientes():
     
     # Construir query con filtros opcionales
     query = '''
-        SELECT fd.*, m.nombre as medico_nombre, a.nombre_ars, p.nombre as paciente_nombre_completo
+        SELECT fd.*, m.nombre as medico_nombre, a.nombre_ars, 
+               COALESCE(p.nombre, CONCAT(fd.nombre_paciente, ' ', fd.apellido_paciente)) as paciente_nombre_completo
         FROM facturas_detalle fd
         JOIN medicos m ON fd.medico_id = m.id
         JOIN ars a ON fd.ars_id = a.id
-        JOIN pacientes p ON fd.paciente_id = p.id
+        LEFT JOIN pacientes p ON fd.paciente_id = p.id
         WHERE fd.activo = 1 AND fd.estado = %s
     '''
     params = [estado]
@@ -3073,11 +3074,12 @@ def facturacion_pacientes_pendientes_pdf():
     
     # Construir query con filtros opcionales (mismo que la vista)
     query = '''
-        SELECT fd.*, m.nombre as medico_nombre, a.nombre_ars, p.nombre as paciente_nombre_completo
+        SELECT fd.*, m.nombre as medico_nombre, a.nombre_ars, 
+               COALESCE(p.nombre, CONCAT(fd.nombre_paciente, ' ', fd.apellido_paciente)) as paciente_nombre_completo
         FROM facturas_detalle fd
         JOIN medicos m ON fd.medico_id = m.id
         JOIN ars a ON fd.ars_id = a.id
-        JOIN pacientes p ON fd.paciente_id = p.id
+        LEFT JOIN pacientes p ON fd.paciente_id = p.id
         WHERE fd.activo = 1 AND fd.estado = %s
     '''
     params = [estado]
@@ -3374,11 +3376,11 @@ def facturacion_pacientes_agregados_pdf():
     placeholders = ','.join(['%s' for _ in ids_agregados])
     pendientes = conn.execute(f'''
         SELECT fd.*, m.nombre as medico_nombre, m.email as medico_email, m.especialidad as medico_especialidad, 
-               a.nombre_ars, p.nombre as paciente_nombre_completo
+               a.nombre_ars, COALESCE(p.nombre, CONCAT(fd.nombre_paciente, ' ', fd.apellido_paciente)) as paciente_nombre_completo
         FROM facturas_detalle fd
         JOIN medicos m ON fd.medico_id = m.id
         JOIN ars a ON fd.ars_id = a.id
-        JOIN pacientes p ON fd.paciente_id = p.id
+        LEFT JOIN pacientes p ON fd.paciente_id = p.id
         WHERE fd.id IN ({placeholders}) AND fd.activo = 1
         ORDER BY fd.id DESC
     ''', ids_agregados).fetchall()
@@ -4092,11 +4094,12 @@ def facturacion_generar():
             
             # Obtener TODOS los pacientes pendientes de esta ARS (sin filtrar por quién los agregó)
             pendientes = conn.execute('''
-                SELECT fd.*, m.nombre as medico_nombre, a.nombre_ars, p.nombre as paciente_nombre_completo
+                SELECT fd.*, m.nombre as medico_nombre, a.nombre_ars, 
+                       COALESCE(p.nombre, CONCAT(fd.nombre_paciente, ' ', fd.apellido_paciente)) as paciente_nombre_completo
                 FROM facturas_detalle fd
                 JOIN medicos m ON fd.medico_id = m.id
                 JOIN ars a ON fd.ars_id = a.id
-                JOIN pacientes p ON fd.paciente_id = p.id
+                LEFT JOIN pacientes p ON fd.paciente_id = p.id
                 WHERE fd.estado = 'pendiente' AND fd.activo = 1 AND fd.ars_id = %s
                 ORDER BY fd.fecha_servicio DESC
             ''', (ars_id,)).fetchall()
