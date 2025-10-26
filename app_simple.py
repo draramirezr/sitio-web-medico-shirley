@@ -501,21 +501,41 @@ def load_user(user_id):
         conn = get_db_connection()
         cursor = conn.cursor()
         # Verificar que el usuario existe Y está activo (MySQL)
-        cursor.execute('SELECT id, nombre, email, perfil, activo FROM usuarios WHERE id = %s AND activo = 1', (user_id,))
+        cursor.execute('SELECT id, nombre, email, perfil, activo, password_temporal FROM usuarios WHERE id = %s AND activo = 1', (user_id,))
         user_data = cursor.fetchone()
         conn.close()
         
         if user_data:
-            return User(
+            # Si tiene password_temporal=1, significa que su contraseña fue cambiada
+            # y debe cambiarla en su próxima petición
+            user = User(
                 id=user_data['id'], 
                 nombre=user_data['nombre'], 
                 email=user_data['email'], 
                 perfil=user_data['perfil']
             )
+            # Guardar flag para verificar en cada petición
+            user.password_temporal = user_data.get('password_temporal', 0)
+            return user
         return None
     except Exception as e:
         print(f"Error en load_user: {e}")
         return None
+
+@app.before_request
+def check_password_temporal():
+    """Verificar si el usuario tiene contraseña temporal y forzar cambio"""
+    # Solo para usuarios autenticados
+    if current_user.is_authenticated:
+        # Excluir rutas de cambio de contraseña y logout para evitar loops
+        if request.endpoint not in ['cambiar_password_obligatorio', 'logout', 'static']:
+            # Verificar si tiene password_temporal
+            if hasattr(current_user, 'password_temporal') and current_user.password_temporal:
+                # Redirigir a cambio de contraseña obligatorio
+                from flask import session
+                session['cambio_password_usuario_id'] = current_user.id
+                session['cambio_password_email'] = current_user.email
+                return redirect(url_for('cambiar_password_obligatorio'))
 
 def init_db():
     """Inicializar la base de datos"""
@@ -5726,6 +5746,23 @@ def admin_usuarios_editar(usuario_id):
                 SET nombre = %s, email = %s, password_hash = %s, perfil = %s, activo = %s, password_temporal = 1
                 WHERE id = %s
             ''', (nombre, email, password_hash, perfil, activo, usuario_id))
+            
+            # IMPORTANTE: Si el usuario tiene sesión activa, cerrarla automáticamente
+            # Esto fuerza que use la nueva contraseña temporal
+            from flask import session as flask_session
+            from flask_login import logout_user
+            
+            # Si es el mismo usuario que está editando, cerrar su sesión
+            if usuario_id == current_user.id:
+                conn.commit()
+                conn.close()
+                logout_user()
+                flash('Tu contraseña ha sido cambiada. Inicia sesión con la nueva contraseña temporal.', 'warning')
+                return redirect(url_for('login'))
+            
+            # Si es otro usuario, invalidar su sesión (si existe)
+            # Nota: Flask-Login no tiene una forma directa de cerrar sesiones de otros usuarios
+            # Pero al marcar password_temporal=1, el sistema le pedirá cambiar contraseña en su próximo login
             
             # Enviar email con nueva contraseña si está marcado
             if enviar_email and EMAIL_CONFIGURED:
