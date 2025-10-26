@@ -4092,29 +4092,43 @@ def facturacion_generar():
                 flash('El médico seleccionado no está habilitado para facturar', 'error')
                 return redirect(url_for('facturacion_generar'))
             
-            # Obtener TODOS los pacientes pendientes de esta ARS (sin filtrar por médico aquí)
-            # El filtro por médico se hace visualmente en el frontend
+            # Obtener TODOS los pacientes pendientes de esta ARS
+            # Usar LEFT JOIN para medicos en caso de que medico_consulta sea NULL o inválido
             pendientes = conn.execute('''
-                SELECT fd.*, m.nombre as medico_nombre, a.nombre_ars, 
+                SELECT fd.*, 
+                       COALESCE(m.nombre, 'Sin médico asignado') as medico_nombre, 
+                       a.nombre_ars, 
                        COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
                 FROM facturas_detalle fd
-                JOIN medicos m ON fd.medico_consulta = m.id
+                LEFT JOIN medicos m ON fd.medico_consulta = m.id
                 JOIN ars a ON fd.ars_id = a.id
                 LEFT JOIN pacientes p ON fd.paciente_id = p.id
                 WHERE fd.estado = 'pendiente' AND fd.activo = 1 AND fd.ars_id = %s
                 ORDER BY fd.fecha_servicio DESC
             ''', (ars_id,)).fetchall()
             
+            # DEBUG: Registrar cuántos pacientes se encontraron
+            print(f"\n{'='*60}")
+            print(f"DEBUG - PACIENTES PENDIENTES ENCONTRADOS")
+            print(f"{'='*60}")
+            print(f"ARS ID: {ars_id}")
+            print(f"Total pacientes: {len(pendientes)}")
+            print(f"IDs de pacientes: {[p['id'] for p in pendientes]}")
+            if pendientes:
+                print(f"Nombres: {[p['nombre_paciente'] for p in pendientes]}")
+            print(f"{'='*60}\n")
+            
             # Obtener info de ARS, NCF y Médico para facturar
             ars = conn.execute('SELECT * FROM ars WHERE id = %s', (ars_id,)).fetchone()
             ncf = conn.execute('SELECT * FROM ncf WHERE id = %s', (ncf_id,)).fetchone()
             
-            # Obtener lista de médicos únicos en los pendientes (para filtro visual) - por médico de consulta
+            # Obtener lista de médicos únicos en los pendientes (para filtro visual)
+            # Usar LEFT JOIN para incluir registros sin médico asignado
             medicos = conn.execute('''
                 SELECT DISTINCT m.id, m.nombre 
                 FROM facturas_detalle fd
-                JOIN medicos m ON fd.medico_consulta = m.id
-                WHERE fd.estado = 'pendiente' AND fd.ars_id = %s AND fd.activo = 1
+                LEFT JOIN medicos m ON fd.medico_consulta = m.id
+                WHERE fd.estado = 'pendiente' AND fd.ars_id = %s AND fd.activo = 1 AND m.id IS NOT NULL
                 ORDER BY m.nombre
             ''', (ars_id,)).fetchall()
             

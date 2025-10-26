@@ -347,12 +347,16 @@
                         <th style="width: 12%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Autorización</th>
                         <th style="width: 18%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Servicio</th>
                         <th style="width: 10%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Monto</th>
-                        <th style="width: 15%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Médico</th>
+                        <th style="width: 15%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important; cursor: pointer; user-select: none;" onclick="ordenarPorMedico()" title="Click para ordenar">
+                            Médico Paciente 
+                            <i class="fas fa-sort" style="font-size: 0.8rem; margin-left: 5px;" id="iconoOrdenMedico"></i>
+                        </th>
                     </tr>
                 </thead>
                 <tbody id="tablaBody">
                     {% for paciente in pendientes %}
                     <tr data-medico="{{ paciente['medico_consulta'] }}" 
+                        data-medico-nombre="{{ paciente['medico_nombre'] }}"
                         data-fecha="{{ paciente['fecha_servicio'] }}">
                         <td>
                             <input type="checkbox" class="checkbox-custom paciente-check" 
@@ -410,6 +414,7 @@
 
 <script>
 let todasLasFilas = [];
+let ordenMedicoAscendente = true; // Para alternar entre ascendente y descendente
 
 document.addEventListener('DOMContentLoaded', function() {
     // Guardar todas las filas originales
@@ -443,6 +448,45 @@ function limpiarFiltros() {
     });
     
     calcularTotal();
+}
+
+function ordenarPorMedico() {
+    const tbody = document.getElementById('tablaBody');
+    const icono = document.getElementById('iconoOrdenMedico');
+    
+    // Obtener todas las filas visibles
+    const filas = Array.from(tbody.querySelectorAll('tr[data-medico-nombre]'));
+    
+    // Ordenar las filas
+    filas.sort((a, b) => {
+        const medicoA = (a.dataset.medicoNombre || '').toLowerCase();
+        const medicoB = (b.dataset.medicoNombre || '').toLowerCase();
+        
+        if (ordenMedicoAscendente) {
+            return medicoA.localeCompare(medicoB);
+        } else {
+            return medicoB.localeCompare(medicoA);
+        }
+    });
+    
+    // Limpiar tbody
+    tbody.innerHTML = '';
+    
+    // Agregar filas ordenadas
+    filas.forEach(fila => tbody.appendChild(fila));
+    
+    // Actualizar icono y estado
+    if (ordenMedicoAscendente) {
+        icono.className = 'fas fa-sort-up';
+    } else {
+        icono.className = 'fas fa-sort-down';
+    }
+    
+    // Alternar orden para el próximo click
+    ordenMedicoAscendente = !ordenMedicoAscendente;
+    
+    // Actualizar array global
+    todasLasFilas = Array.from(tbody.querySelectorAll('tr[data-medico]'));
 }
 
 function toggleSelectAll() {
