@@ -605,6 +605,113 @@ def template_bienvenida_facturacion(nombre, email, password_temporal, link_admin
     
     return get_base_template("🎉", f"Bienvenido al Sistema de Facturación - {nombre}", content)
 
+def template_nueva_contrasena(nombre, email, password_temporal):
+    """
+    Template para notificar al usuario que su contraseña ha sido cambiada
+    Args:
+        nombre: Nombre completo del usuario
+        email: Email del usuario
+        password_temporal: Nueva contraseña temporal generada
+    """
+    content = f"""
+    <div style="text-align: center; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #FFC107 0%, #FF9800 100%); width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);">
+            <span style="font-size: 40px;">🔐</span>
+        </div>
+        <h2 style="color: #282828; font-size: 24px; margin: 15px 0;">
+            Tu contraseña ha sido actualizada
+        </h2>
+        <p style="color: #666; font-size: 16px; margin: 10px 0;">
+            Hola <strong>{nombre}</strong>, tu contraseña en el sistema ha sido cambiada.
+        </p>
+    </div>
+    
+    <div style="background: linear-gradient(135deg, #F5F5F5 0%, #EEEEEE 100%); padding: 25px; border-radius: 12px; margin: 25px 0; border: 2px solid #E0E0E0;">
+        <p style="margin: 0 0 15px 0; color: #666; font-size: 14px; text-align: center;">
+            📧 <strong>Usuario:</strong>
+        </p>
+        <div style="background-color: white; padding: 15px; border-radius: 8px; text-align: center; font-family: 'Courier New', monospace; font-size: 16px; color: #424242; margin-bottom: 20px; border: 2px dashed #CEB0B7;">
+            {email}
+        </div>
+        
+        <p style="margin: 0 0 15px 0; color: #666; font-size: 14px; text-align: center;">
+            🔑 <strong>Nueva Contraseña Temporal:</strong>
+        </p>
+        <div style="background: linear-gradient(135deg, #FFECB3 0%, #FFE082 100%); padding: 20px; border-radius: 10px; text-align: center; font-family: 'Courier New', monospace; font-size: 20px; font-weight: 700; color: #F57C00; border: 3px solid #FFA726; box-shadow: 0 4px 10px rgba(255, 152, 0, 0.2);">
+            {password_temporal}
+        </div>
+    </div>
+    
+    <div style="background-color: #FFF3E0; padding: 20px; border-radius: 10px; margin: 25px 0; border-left: 4px solid #FF9800;">
+        <p style="margin: 0 0 10px 0; color: #E65100; font-weight: 600; font-size: 15px;">⚠️ Importante - Cambia tu contraseña:</p>
+        <p style="margin: 8px 0; color: #EF6C00; font-size: 14px; line-height: 1.7;">
+            <strong>1.</strong> Esta es una contraseña <strong>TEMPORAL</strong><br>
+            <strong>2.</strong> Debes cambiarla en tu primer inicio de sesión<br>
+            <strong>3.</strong> Elige una contraseña segura y personal<br>
+            <strong>4.</strong> No compartas tu contraseña con nadie
+        </p>
+    </div>
+    
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="https://sitio-web-medico-shirley-production.up.railway.app/login" 
+           style="display: inline-block; background: linear-gradient(135deg, #CEB0B7 0%, #B89CA3 100%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 30px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 15px rgba(206, 176, 183, 0.3); transition: all 0.3s ease;">
+            🔓 Iniciar Sesión Ahora
+        </a>
+    </div>
+    
+    <div style="background-color: #E3F2FD; padding: 20px; border-radius: 10px; margin: 25px 0; border-left: 4px solid #2196F3;">
+        <p style="margin: 0 0 10px 0; color: #1565C0; font-weight: 600; font-size: 15px;">🔒 Pasos para tu Primera Sesión:</p>
+        <p style="margin: 8px 0; color: #1976D2; font-size: 14px; line-height: 1.7;">
+            <strong>Paso 1:</strong> Haz clic en "Iniciar Sesión Ahora"<br>
+            <strong>Paso 2:</strong> Ingresa tu email y la contraseña temporal<br>
+            <strong>Paso 3:</strong> El sistema te pedirá cambiar la contraseña<br>
+            <strong>Paso 4:</strong> Elige una contraseña nueva y segura (mínimo 8 caracteres)<br>
+            <strong>Paso 5:</strong> ¡Listo! Ya puedes usar el sistema normalmente
+        </p>
+    </div>
+    
+    <div style="background-color: #FFEBEE; padding: 20px; border-radius: 10px; margin: 25px 0; border-left: 4px solid #F44336;">
+        <p style="margin: 0 0 10px 0; color: #C62828; font-weight: 600; font-size: 15px;">🛡️ Consejos de Seguridad:</p>
+        <p style="margin: 8px 0; color: #D32F2F; font-size: 14px; line-height: 1.7;">
+            ✅ Usa una contraseña única y fuerte<br>
+            ✅ Combina letras mayúsculas, minúsculas, números y símbolos<br>
+            ✅ No uses información personal (nombres, fechas de nacimiento, etc.)<br>
+            ✅ No compartas tu contraseña con nadie<br>
+            ✅ Cambia tu contraseña periódicamente
+        </p>
+    </div>
+    
+    <div style="background-color: #E8F5E9; padding: 20px; border-radius: 10px; margin: 25px 0; border-left: 4px solid #4CAF50;">
+        <p style="margin: 0 0 10px 0; color: #2E7D32; font-weight: 600; font-size: 15px;">📞 ¿Necesitas Ayuda?</p>
+        <p style="margin: 8px 0; color: #388E3C; font-size: 14px;">
+            Si tienes problemas para acceder o necesitas asistencia técnica:
+        </p>
+        <p style="margin: 8px 0; color: #388E3C; font-size: 14px;">
+            • Teléfono: <a href="tel:+18297405073" style="color: #4CAF50; text-decoration: none; font-weight: 600;">829-740-5073</a>
+        </p>
+        <p style="margin: 8px 0; color: #388E3C; font-size: 14px;">
+            • Email: <a href="mailto:dra.ramirezr@gmail.com" style="color: #4CAF50; text-decoration: none; font-weight: 600;">dra.ramirezr@gmail.com</a>
+        </p>
+    </div>
+    
+    <div style="margin-top: 25px; padding: 20px; background-color: #F5F5F5; border-radius: 10px;">
+        <p style="color: #999; font-size: 13px; line-height: 1.5; margin: 0; text-align: center;">
+            ⚠️ <strong>Si no solicitaste este cambio:</strong><br>
+            Contacta inmediatamente al administrador del sistema<br>
+            Tu cuenta podría estar en riesgo
+        </p>
+    </div>
+    
+    <div style="margin-top: 25px; padding-top: 20px; border-top: 2px solid #F2E2E6;">
+        <p style="color: #999; font-size: 13px; line-height: 1.5; margin: 0;">
+            <strong>Enlace directo al sistema:</strong><br>
+            <a href="https://sitio-web-medico-shirley-production.up.railway.app/login" style="color: #CEB0B7; word-break: break-all; font-size: 13px; font-weight: 600;">https://sitio-web-medico-shirley-production.up.railway.app/login</a>
+        </p>
+    </div>
+    """
+    
+    return get_base_template("🔐", f"Nueva Contraseña Temporal - {nombre}", content)
+
 # Exportar funciones
 __all__ = [
     'template_contacto',
@@ -613,6 +720,7 @@ __all__ = [
     'template_constancia_pdf',
     'template_factura',
     'template_confirmacion_cita',
-    'template_bienvenida_facturacion'
+    'template_bienvenida_facturacion',
+    'template_nueva_contrasena'
 ]
 

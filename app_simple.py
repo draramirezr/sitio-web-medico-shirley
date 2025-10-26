@@ -91,7 +91,8 @@ try:
         template_recuperacion,
         template_constancia_pdf,
         template_factura,
-        template_confirmacion_cita
+        template_confirmacion_cita,
+        template_nueva_contrasena
     )
     EMAIL_TEMPLATES_AVAILABLE = True
 except ImportError as e:
@@ -105,6 +106,7 @@ except ImportError as e:
     def template_constancia_pdf(*args): return "Email template no disponible"
     def template_factura(*args): return "Email template no disponible"
     def template_confirmacion_cita(*args): return "Email template no disponible"
+    def template_nueva_contrasena(*args): return "Email template no disponible"
 
 # Importar Flask-Compress de forma opcional
 try:
@@ -5551,7 +5553,7 @@ def admin_usuarios_nuevo():
     if request.method == 'POST':
         nombre = sanitize_input(request.form.get('nombre', ''), 100)
         email = request.form.get('email', '').strip().lower()
-        password = request.form.get('password', '')
+        password = request.form.get('password_nuevo', '')  # Campo diferente para nuevo usuario
         perfil = request.form.get('perfil', '')
         
         # Validaciones
@@ -5653,6 +5655,7 @@ def admin_usuarios_editar(usuario_id):
         activo = request.form.get('activo') == '1'
         cambiar_password = request.form.get('cambiar_password') == '1'
         password = request.form.get('password', '')
+        enviar_email = request.form.get('enviar_email') == '1'
         
         # Validaciones
         if not nombre or not email or not perfil:
@@ -5673,7 +5676,7 @@ def admin_usuarios_editar(usuario_id):
             return redirect(url_for('admin_usuarios_editar', usuario_id=usuario_id))
         
         # Verificar que el email no exista en otro usuario
-        existe = conn.execute('SELECT id FROM usuarios WHERE email = %s AND id != %s', 
+        existe = conn.execute('SELECT id FROM usuarios WHERE email = %s AND id != %s',
                              (email, usuario_id)).fetchone()
         
         if existe:
@@ -5693,17 +5696,39 @@ def admin_usuarios_editar(usuario_id):
                 SET nombre = %s, email = %s, password_hash = %s, perfil = %s, activo = %s
                 WHERE id = %s
             ''', (nombre, email, password_hash, perfil, activo, usuario_id))
+            
+            # Enviar email con nueva contraseña si está marcado
+            if enviar_email and EMAIL_CONFIGURED:
+                def enviar_email_async():
+                    try:
+                        html = template_nueva_contrasena(nombre, email, password)
+                        send_email_sendgrid(
+                            to_email=email,
+                            subject='🔐 Nueva Contraseña Temporal - Panel Administrativo',
+                            html_content=html
+                        )
+                    except Exception as e:
+                        print(f"Error al enviar email de nueva contraseña: {e}")
+                
+                # Enviar en segundo plano
+                email_thread = threading.Thread(target=enviar_email_async)
+                email_thread.start()
+                
+                flash(f'Usuario {nombre} actualizado exitosamente. Se ha enviado un email con la nueva contraseña.', 'success')
+            else:
+                flash(f'Usuario {nombre} actualizado exitosamente. Nueva contraseña configurada.', 'success')
         else:
             conn.execute('''
                 UPDATE usuarios 
                 SET nombre = %s, email = %s, perfil = %s, activo = %s
                 WHERE id = %s
             ''', (nombre, email, perfil, activo, usuario_id))
+            
+            flash(f'Usuario {nombre} actualizado exitosamente', 'success')
         
         conn.commit()
         conn.close()
         
-        flash(f'Usuario {nombre} actualizado exitosamente', 'success')
         return redirect(url_for('admin_usuarios'))
     
     conn.close()

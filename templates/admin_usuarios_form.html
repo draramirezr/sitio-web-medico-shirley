@@ -321,19 +321,63 @@
             
             <div class="password-section" id="passwordSection">
                 <input type="hidden" name="cambiar_password" id="cambiar_password" value="0">
+                
+                <div class="form-group">
+                    <label for="password">
+                        🔒 Nueva Contraseña Temporal <span class="required">*</span>
+                    </label>
+                    <div style="display: flex; gap: 10px; align-items: start;">
+                        <div style="flex: 1;">
+                            <input 
+                                type="text" 
+                                id="password" 
+                                name="password" 
+                                minlength="8"
+                                placeholder="Mínimo 8 caracteres"
+                                autocomplete="new-password"
+                                readonly
+                                style="background-color: #F8F9FA; font-family: 'Courier New', monospace; font-weight: 600; font-size: 16px;"
+                            >
+                            <small id="password-hint">Haz clic en "Generar Contraseña" para crear una contraseña temporal segura</small>
+                        </div>
+                        <button type="button" class="btn btn-secondary" onclick="generarPasswordTemporal()" style="white-space: nowrap; padding: 12px 20px;">
+                            🔑 Generar Contraseña
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="info-box" id="password-info" style="display: none;">
+                    <strong>📋 Contraseña Temporal Generada:</strong><br>
+                    <div style="font-family: 'Courier New', monospace; font-size: 18px; font-weight: 700; color: #0D47A1; margin: 10px 0; padding: 10px; background: white; border-radius: 5px; border: 2px dashed #2196F3;">
+                        <span id="password-display"></span>
+                    </div>
+                    <small>⚠️ <strong>IMPORTANTE:</strong> Esta contraseña se enviará automáticamente al usuario por email. El usuario deberá cambiarla en su primer inicio de sesión.</small>
+                </div>
+                
+                <div class="checkbox-group" style="margin-top: 15px;">
+                    <input 
+                        type="checkbox" 
+                        id="enviar_email" 
+                        name="enviar_email" 
+                        value="1"
+                        checked
+                    >
+                    <label for="enviar_email">✉️ Enviar nueva contraseña por email al usuario</label>
+                </div>
+            </div>
         {% endif %}
         
         {% if not usuario or True %}
-            <div class="form-group">
-                <label for="password">
+            <div class="form-group" {% if usuario %}style="display: none;"{% endif %}>
+                <label for="password_nuevo">
                     🔒 Contraseña Temporal {% if usuario %} Nueva {% endif %} <span class="required">*</span>
                 </label>
                 <div style="display: flex; gap: 10px; align-items: start;">
                     <div style="flex: 1;">
                         <input 
                             type="text" 
-                            id="password" 
-                            name="password" 
+                            id="password_nuevo" 
+                            name="password_nuevo" 
                             minlength="8"
                             {% if not usuario %}required{% endif %}
                             placeholder="Mínimo 8 caracteres"
@@ -341,10 +385,10 @@
                             readonly
                             style="background-color: #F8F9FA; font-family: 'Courier New', monospace; font-weight: 600; font-size: 16px;"
                         >
-                        <small id="password-hint">{% if usuario %}Dejar vacío para mantener la contraseña actual{% else %}Haz clic en "Generar Contraseña" para crear una contraseña temporal segura{% endif %}</small>
+                        <small id="password-hint-nuevo">{% if usuario %}Dejar vacío para mantener la contraseña actual{% else %}Haz clic en "Generar Contraseña" para crear una contraseña temporal segura{% endif %}</small>
                     </div>
                     {% if not usuario %}
-                    <button type="button" class="btn btn-secondary" onclick="generarPasswordTemporal()" style="white-space: nowrap; padding: 12px 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="generarPasswordTemporalNuevo()" style="white-space: nowrap; padding: 12px 20px;">
                         🔑 Generar Contraseña
                     </button>
                     {% endif %}
@@ -352,10 +396,10 @@
             </div>
             
             {% if not usuario %}
-                <div class="info-box" id="password-info" style="display: none;">
+                <div class="info-box" id="password-info-nuevo" style="display: none;">
                     <strong>📋 Contraseña Temporal Generada:</strong><br>
                     <div style="font-family: 'Courier New', monospace; font-size: 18px; font-weight: 700; color: #0D47A1; margin: 10px 0; padding: 10px; background: white; border-radius: 5px; border: 2px dashed #2196F3;">
-                        <span id="password-display"></span>
+                        <span id="password-display-nuevo"></span>
                     </div>
                     <small>⚠️ <strong>IMPORTANTE:</strong> Guarda esta contraseña y envíala al usuario de forma segura. El usuario deberá cambiarla en su primer inicio de sesión.</small>
                 </div>
@@ -382,7 +426,7 @@
 </div>
 
 <script>
-    // Generar contraseña temporal segura automáticamente
+    // Generar contraseña temporal segura (para modo editar)
     function generarPasswordTemporal() {
         const mayusculas = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // Sin I, O para evitar confusión
         const minusculas = 'abcdefghjkmnpqrstuvwxyz'; // Sin i, l, o para evitar confusión
@@ -417,6 +461,36 @@
         document.getElementById('password-hint').innerHTML = '<span style="color: #28A745;">✅ Contraseña temporal generada correctamente</span>';
     }
     
+    // Generar contraseña temporal segura (para modo nuevo usuario)
+    function generarPasswordTemporalNuevo() {
+        const mayusculas = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+        const minusculas = 'abcdefghjkmnpqrstuvwxyz';
+        const numeros = '23456789';
+        const especiales = '!@#$%&*+=-';
+        
+        let password = '';
+        password += mayusculas[Math.floor(Math.random() * mayusculas.length)];
+        password += mayusculas[Math.floor(Math.random() * mayusculas.length)];
+        password += minusculas[Math.floor(Math.random() * minusculas.length)];
+        password += minusculas[Math.floor(Math.random() * minusculas.length)];
+        password += numeros[Math.floor(Math.random() * numeros.length)];
+        password += numeros[Math.floor(Math.random() * numeros.length)];
+        password += especiales[Math.floor(Math.random() * especiales.length)];
+        password += especiales[Math.floor(Math.random() * especiales.length)];
+        
+        const todosCaracteres = mayusculas + minusculas + numeros + especiales;
+        for (let i = 0; i < 4; i++) {
+            password += todosCaracteres[Math.floor(Math.random() * todosCaracteres.length)];
+        }
+        
+        password = password.split('').sort(() => Math.random() - 0.5).join('');
+        
+        document.getElementById('password_nuevo').value = password;
+        document.getElementById('password-display-nuevo').textContent = password;
+        document.getElementById('password-info-nuevo').style.display = 'block';
+        document.getElementById('password-hint-nuevo').innerHTML = '<span style="color: #28A745;">✅ Contraseña temporal generada correctamente</span>';
+    }
+    
     {% if usuario %}
     function togglePasswordSection() {
         const checkbox = document.getElementById('cambiar_password_toggle');
@@ -433,6 +507,8 @@
             hiddenInput.value = '0';
             passwordInput.required = false;
             passwordInput.value = '';
+            document.getElementById('password-info').style.display = 'none';
+            document.getElementById('password-hint').textContent = 'Haz clic en "Generar Contraseña" para crear una contraseña temporal segura';
         }
     }
     {% endif %}
@@ -460,35 +536,28 @@
         return errores;
     }
     
-    // Validar formulario (para nuevo usuario y cuando se cambia contraseña)
+    // Validar formulario
     document.getElementById('userForm').addEventListener('submit', function(e) {
-        const password = document.getElementById('password').value;
-        
-        {% if not usuario %}
-        // Para nuevo usuario, validar siempre
+        {% if usuario %}
+        // Para editar: validar solo si se marcó cambiar contraseña
+        const cambiarPassword = document.getElementById('cambiar_password').value === '1';
+        if (cambiarPassword) {
+            const password = document.getElementById('password').value;
+            if (!password) {
+                e.preventDefault();
+                alert('❌ Debes generar una contraseña temporal para el usuario.');
+                return;
+            }
+        }
+        {% else %}
+        // Para nuevo usuario: validar siempre
+        const password = document.getElementById('password_nuevo').value;
         if (!password) {
             e.preventDefault();
             alert('❌ Debes generar una contraseña temporal para el nuevo usuario.');
             return;
         }
-        {% else %}
-        const cambiarPassword = document.getElementById('cambiar_password_toggle');
-        if (!cambiarPassword || !cambiarPassword.checked) {
-            return; // No validar si no se está cambiando la contraseña
-        }
         {% endif %}
-        
-        // Solo validar si hay contraseña
-        if (password) {
-            const errores = validarPassword(password);
-            
-            if (errores.length > 0) {
-                e.preventDefault();
-                alert('❌ La contraseña no cumple con los requisitos:\n\n' + errores.join('\n'));
-                document.getElementById('password').focus();
-                return;
-            }
-        }
     });
 </script>
 {% endblock %}
