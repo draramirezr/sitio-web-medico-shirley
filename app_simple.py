@@ -4092,27 +4092,27 @@ def facturacion_generar():
                 flash('El médico seleccionado no está habilitado para facturar', 'error')
                 return redirect(url_for('facturacion_generar'))
             
-            # Obtener TODOS los pacientes pendientes de esta ARS (sin filtrar por quién los agregó)
+            # Obtener TODOS los pacientes pendientes de esta ARS filtrados por médico de consulta
             pendientes = conn.execute('''
                 SELECT fd.*, m.nombre as medico_nombre, a.nombre_ars, 
                        COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
                 FROM facturas_detalle fd
-                JOIN medicos m ON fd.medico_id = m.id
+                JOIN medicos m ON fd.medico_consulta = m.id
                 JOIN ars a ON fd.ars_id = a.id
                 LEFT JOIN pacientes p ON fd.paciente_id = p.id
-                WHERE fd.estado = 'pendiente' AND fd.activo = 1 AND fd.ars_id = %s
+                WHERE fd.estado = 'pendiente' AND fd.activo = 1 AND fd.ars_id = %s AND fd.medico_consulta = %s
                 ORDER BY fd.fecha_servicio DESC
-            ''', (ars_id,)).fetchall()
+            ''', (ars_id, medico_id)).fetchall()
             
             # Obtener info de ARS, NCF y Médico para facturar
             ars = conn.execute('SELECT * FROM ars WHERE id = %s', (ars_id,)).fetchone()
             ncf = conn.execute('SELECT * FROM ncf WHERE id = %s', (ncf_id,)).fetchone()
             
-            # Obtener lista de médicos únicos en los pendientes (para filtro visual)
+            # Obtener lista de médicos únicos en los pendientes (para filtro visual) - por médico de consulta
             medicos = conn.execute('''
                 SELECT DISTINCT m.id, m.nombre 
                 FROM facturas_detalle fd
-                JOIN medicos m ON fd.medico_id = m.id
+                JOIN medicos m ON fd.medico_consulta = m.id
                 WHERE fd.estado = 'pendiente' AND fd.ars_id = %s AND fd.activo = 1
                 ORDER BY m.nombre
             ''', (ars_id,)).fetchall()

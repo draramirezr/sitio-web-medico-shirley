@@ -352,7 +352,7 @@
                 </thead>
                 <tbody id="tablaBody">
                     {% for paciente in pendientes %}
-                    <tr data-medico="{{ paciente['medico_id'] }}" 
+                    <tr data-medico="{{ paciente['medico_consulta'] }}" 
                         data-fecha="{{ paciente['fecha_servicio'] }}">
                         <td>
                             <input type="checkbox" class="checkbox-custom paciente-check" 
