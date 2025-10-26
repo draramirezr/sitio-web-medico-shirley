@@ -30,6 +30,9 @@ PyMySQL==1.1.0
 # SendGrid para envío de emails (usa API en lugar de SMTP bloqueado)
 sendgrid==6.11.0
 
+# Excel/Pandas para exportación de datos
+openpyxl==3.1.2
+
 # ============================================
 # NOTAS IMPORTANTES
 # ============================================
