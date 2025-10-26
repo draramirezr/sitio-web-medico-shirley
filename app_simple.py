@@ -2994,7 +2994,7 @@ def facturacion_pacientes_pendientes():
     # Construir query con filtros opcionales
     query = '''
         SELECT fd.*, m.nombre as medico_nombre, a.nombre_ars, 
-               COALESCE(p.nombre, CONCAT(fd.nombre_paciente, ' ', fd.apellido_paciente)) as paciente_nombre_completo
+               COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
         FROM facturas_detalle fd
         JOIN medicos m ON fd.medico_id = m.id
         JOIN ars a ON fd.ars_id = a.id
@@ -3075,7 +3075,7 @@ def facturacion_pacientes_pendientes_pdf():
     # Construir query con filtros opcionales (mismo que la vista)
     query = '''
         SELECT fd.*, m.nombre as medico_nombre, a.nombre_ars, 
-               COALESCE(p.nombre, CONCAT(fd.nombre_paciente, ' ', fd.apellido_paciente)) as paciente_nombre_completo
+               COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
         FROM facturas_detalle fd
         JOIN medicos m ON fd.medico_id = m.id
         JOIN ars a ON fd.ars_id = a.id
@@ -3376,7 +3376,7 @@ def facturacion_pacientes_agregados_pdf():
     placeholders = ','.join(['%s' for _ in ids_agregados])
     pendientes = conn.execute(f'''
         SELECT fd.*, m.nombre as medico_nombre, m.email as medico_email, m.especialidad as medico_especialidad, 
-               a.nombre_ars, COALESCE(p.nombre, CONCAT(fd.nombre_paciente, ' ', fd.apellido_paciente)) as paciente_nombre_completo
+               a.nombre_ars, COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
         FROM facturas_detalle fd
         JOIN medicos m ON fd.medico_id = m.id
         JOIN ars a ON fd.ars_id = a.id
@@ -4095,7 +4095,7 @@ def facturacion_generar():
             # Obtener TODOS los pacientes pendientes de esta ARS (sin filtrar por quién los agregó)
             pendientes = conn.execute('''
                 SELECT fd.*, m.nombre as medico_nombre, a.nombre_ars, 
-                       COALESCE(p.nombre, CONCAT(fd.nombre_paciente, ' ', fd.apellido_paciente)) as paciente_nombre_completo
+                       COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
                 FROM facturas_detalle fd
                 JOIN medicos m ON fd.medico_id = m.id
                 JOIN ars a ON fd.ars_id = a.id
