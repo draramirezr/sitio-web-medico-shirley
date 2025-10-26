@@ -5693,7 +5693,7 @@ def admin_usuarios_editar(usuario_id):
             password_hash = generate_password_hash(password)
             conn.execute('''
                 UPDATE usuarios 
-                SET nombre = %s, email = %s, password_hash = %s, perfil = %s, activo = %s
+                SET nombre = %s, email = %s, password_hash = %s, perfil = %s, activo = %s, password_temporal = 1
                 WHERE id = %s
             ''', (nombre, email, password_hash, perfil, activo, usuario_id))
             

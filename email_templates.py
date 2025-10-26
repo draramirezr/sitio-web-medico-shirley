@@ -619,37 +619,27 @@ def template_nueva_contrasena(nombre, email, password_temporal):
             <span style="font-size: 40px;">🔐</span>
         </div>
         <h2 style="color: #282828; font-size: 24px; margin: 15px 0;">
-            Tu contraseña ha sido actualizada
+            Nueva Contraseña Temporal Asignada
         </h2>
         <p style="color: #666; font-size: 16px; margin: 10px 0;">
-            Hola <strong>{nombre}</strong>, tu contraseña en el sistema ha sido cambiada.
+            Hola <strong>{nombre}</strong>, tu contraseña en el sistema ha sido cambiada por un administrador.
         </p>
     </div>
     
-    <div style="background: linear-gradient(135deg, #F5F5F5 0%, #EEEEEE 100%); padding: 25px; border-radius: 12px; margin: 25px 0; border: 2px solid #E0E0E0;">
+    <div style="background: linear-gradient(135deg, #F5F5F5 0%, #EEEEEE 100%); padding: 30px; border-radius: 12px; margin: 25px 0; border: 2px solid #E0E0E0;">
         <p style="margin: 0 0 15px 0; color: #666; font-size: 14px; text-align: center;">
-            📧 <strong>Usuario:</strong>
+            📧 <strong>Usuario (Email):</strong>
         </p>
-        <div style="background-color: white; padding: 15px; border-radius: 8px; text-align: center; font-family: 'Courier New', monospace; font-size: 16px; color: #424242; margin-bottom: 20px; border: 2px dashed #CEB0B7;">
+        <div style="background-color: white; padding: 15px; border-radius: 8px; text-align: center; font-family: 'Courier New', monospace; font-size: 16px; color: #424242; margin-bottom: 25px; border: 2px dashed #CEB0B7;">
             {email}
         </div>
         
         <p style="margin: 0 0 15px 0; color: #666; font-size: 14px; text-align: center;">
-            🔑 <strong>Nueva Contraseña Temporal:</strong>
+            🔑 <strong>Contraseña Temporal:</strong>
         </p>
-        <div style="background: linear-gradient(135deg, #FFECB3 0%, #FFE082 100%); padding: 20px; border-radius: 10px; text-align: center; font-family: 'Courier New', monospace; font-size: 20px; font-weight: 700; color: #F57C00; border: 3px solid #FFA726; box-shadow: 0 4px 10px rgba(255, 152, 0, 0.2);">
+        <div style="background: linear-gradient(135deg, #FFECB3 0%, #FFE082 100%); padding: 20px; border-radius: 10px; text-align: center; font-family: 'Courier New', monospace; font-size: 22px; font-weight: 700; color: #F57C00; border: 3px solid #FFA726; box-shadow: 0 4px 10px rgba(255, 152, 0, 0.2);">
             {password_temporal}
         </div>
-    </div>
-    
-    <div style="background-color: #FFF3E0; padding: 20px; border-radius: 10px; margin: 25px 0; border-left: 4px solid #FF9800;">
-        <p style="margin: 0 0 10px 0; color: #E65100; font-weight: 600; font-size: 15px;">⚠️ Importante - Cambia tu contraseña:</p>
-        <p style="margin: 8px 0; color: #EF6C00; font-size: 14px; line-height: 1.7;">
-            <strong>1.</strong> Esta es una contraseña <strong>TEMPORAL</strong><br>
-            <strong>2.</strong> Debes cambiarla en tu primer inicio de sesión<br>
-            <strong>3.</strong> Elige una contraseña segura y personal<br>
-            <strong>4.</strong> No compartas tu contraseña con nadie
-        </p>
     </div>
     
     <div style="text-align: center; margin: 30px 0;">
@@ -659,46 +649,66 @@ def template_nueva_contrasena(nombre, email, password_temporal):
         </a>
     </div>
     
-    <div style="background-color: #E3F2FD; padding: 20px; border-radius: 10px; margin: 25px 0; border-left: 4px solid #2196F3;">
-        <p style="margin: 0 0 10px 0; color: #1565C0; font-weight: 600; font-size: 15px;">🔒 Pasos para tu Primera Sesión:</p>
-        <p style="margin: 8px 0; color: #1976D2; font-size: 14px; line-height: 1.7;">
-            <strong>Paso 1:</strong> Haz clic en "Iniciar Sesión Ahora"<br>
-            <strong>Paso 2:</strong> Ingresa tu email y la contraseña temporal<br>
-            <strong>Paso 3:</strong> El sistema te pedirá cambiar la contraseña<br>
-            <strong>Paso 4:</strong> Elige una contraseña nueva y segura (mínimo 8 caracteres)<br>
-            <strong>Paso 5:</strong> ¡Listo! Ya puedes usar el sistema normalmente
+    <div style="background-color: #E8F5E9; padding: 20px; border-radius: 10px; margin: 25px 0; border-left: 4px solid #4CAF50;">
+        <p style="margin: 0 0 10px 0; color: #2E7D32; font-weight: 600; font-size: 15px;">🎯 Pasos para Iniciar Sesión:</p>
+        <ol style="margin: 10px 0; padding-left: 25px; color: #282828; line-height: 2; font-size: 14px;">
+            <li><strong>Haz clic</strong> en el botón "Iniciar Sesión Ahora"</li>
+            <li><strong>Ingresa tu email</strong> y la contraseña temporal de arriba</li>
+            <li>El sistema te pedirá <strong>cambiar la contraseña</strong></li>
+            <li>Elige una contraseña nueva y segura (mínimo 8 caracteres)</li>
+            <li>¡Listo! Ya puedes usar el sistema normalmente</li>
+        </ol>
+    </div>
+    
+    <div style="background-color: #FFF3E0; padding: 20px; border-radius: 10px; margin: 25px 0; border-left: 4px solid #FF9800;">
+        <p style="margin: 0 0 10px 0; color: #E65100; font-weight: 600; font-size: 15px;">⚠️ Importante:</p>
+        <p style="margin: 8px 0; color: #EF6C00; font-size: 14px; line-height: 1.7;">
+            • Esta es una contraseña <strong>TEMPORAL</strong><br>
+            • Debes cambiarla en tu primer inicio de sesión<br>
+            • El sistema te lo pedirá automáticamente<br>
+            • Elige una contraseña segura y personal
+        </p>
+    </div>
+    
+    <div style="background-color: #fff; padding: 20px; border-left: 4px solid #CEB0B7; margin: 20px 0; border-radius: 5px;">
+        <p style="margin: 0 0 15px 0; color: #ACACAD; font-weight: 600; font-size: 15px;">🛡️ Crea una Contraseña Segura:</p>
+        <p style="margin: 8px 0; color: #282828; font-size: 14px; line-height: 1.7;">
+            • Mínimo 8 caracteres (recomendado 12+)<br>
+            • Combina letras mayúsculas y minúsculas<br>
+            • Incluye números y símbolos (@, #, $, %, etc.)<br>
+            • No uses información personal (nombres, fechas, etc.)<br>
+            • No la compartas con nadie
         </p>
     </div>
     
     <div style="background-color: #FFEBEE; padding: 20px; border-radius: 10px; margin: 25px 0; border-left: 4px solid #F44336;">
-        <p style="margin: 0 0 10px 0; color: #C62828; font-weight: 600; font-size: 15px;">🛡️ Consejos de Seguridad:</p>
+        <p style="margin: 0 0 10px 0; color: #C62828; font-weight: 600; font-size: 15px;">🔒 Seguridad y Privacidad:</p>
         <p style="margin: 8px 0; color: #D32F2F; font-size: 14px; line-height: 1.7;">
-            ✅ Usa una contraseña única y fuerte<br>
-            ✅ Combina letras mayúsculas, minúsculas, números y símbolos<br>
-            ✅ No uses información personal (nombres, fechas de nacimiento, etc.)<br>
-            ✅ No compartas tu contraseña con nadie<br>
-            ✅ Cambia tu contraseña periódicamente
+            • Toda la información está <strong>encriptada</strong> y protegida<br>
+            • Solo usuarios autorizados tienen acceso<br>
+            • Cumplimos con estándares de privacidad médica<br>
+            • Tu sesión expira automáticamente por seguridad
         </p>
     </div>
     
-    <div style="background-color: #E8F5E9; padding: 20px; border-radius: 10px; margin: 25px 0; border-left: 4px solid #4CAF50;">
-        <p style="margin: 0 0 10px 0; color: #2E7D32; font-weight: 600; font-size: 15px;">📞 ¿Necesitas Ayuda?</p>
-        <p style="margin: 8px 0; color: #388E3C; font-size: 14px;">
+    <div style="background-color: #E3F2FD; padding: 20px; border-radius: 10px; margin: 25px 0; border-left: 4px solid #2196F3;">
+        <p style="margin: 0 0 10px 0; color: #1565C0; font-weight: 600; font-size: 15px;">📞 ¿Necesitas Ayuda?</p>
+        <p style="margin: 8px 0; color: #1976D2; font-size: 14px;">
             Si tienes problemas para acceder o necesitas asistencia técnica:
         </p>
-        <p style="margin: 8px 0; color: #388E3C; font-size: 14px;">
-            • Teléfono: <a href="tel:+18297405073" style="color: #4CAF50; text-decoration: none; font-weight: 600;">829-740-5073</a>
+        <p style="margin: 8px 0; color: #1976D2; font-size: 14px;">
+            • Teléfono: <a href="tel:+18297405073" style="color: #2196F3; text-decoration: none; font-weight: 600;">829-740-5073</a>
         </p>
-        <p style="margin: 8px 0; color: #388E3C; font-size: 14px;">
-            • Email: <a href="mailto:dra.ramirezr@gmail.com" style="color: #4CAF50; text-decoration: none; font-weight: 600;">dra.ramirezr@gmail.com</a>
+        <p style="margin: 8px 0; color: #1976D2; font-size: 14px;">
+            • Email: <a href="mailto:dra.ramirezr@gmail.com" style="color: #2196F3; text-decoration: none; font-weight: 600;">dra.ramirezr@gmail.com</a>
         </p>
     </div>
     
-    <div style="margin-top: 25px; padding: 20px; background-color: #F5F5F5; border-radius: 10px;">
-        <p style="color: #999; font-size: 13px; line-height: 1.5; margin: 0; text-align: center;">
+    <div style="margin-top: 25px; padding: 20px; background-color: #FFF9E6; border-radius: 10px; border-left: 4px solid #FFC107;">
+        <p style="color: #F57C00; font-size: 13px; line-height: 1.5; margin: 0; text-align: center;">
             ⚠️ <strong>Si no solicitaste este cambio:</strong><br>
-            Contacta inmediatamente al administrador del sistema<br>
-            Tu cuenta podría estar en riesgo
+            Contacta inmediatamente al administrador del sistema.<br>
+            Tu cuenta podría estar en riesgo.
         </p>
     </div>
     
