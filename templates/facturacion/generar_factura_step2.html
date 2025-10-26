@@ -192,6 +192,38 @@
         background: #ACACAD;
         color: white;
     }
+    
+    .table-responsive {
+        max-height: 600px;
+        overflow-y: auto;
+        overflow-x: auto;
+        position: relative;
+    }
+    
+    .table-responsive::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+    
+    .table-responsive::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: #CEB0B7;
+        border-radius: 10px;
+    }
+    
+    .table-responsive::-webkit-scrollbar-thumb:hover {
+        background: #B89BA3;
+    }
+    
+    .tabla-pacientes thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
 </style>
 
 <div class="container-fluid mt-4">
