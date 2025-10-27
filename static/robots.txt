@@ -22,7 +22,7 @@ Disallow: /requirements.txt
 Disallow: /Procfile
 
 # Sitemap
-Sitemap: https://tu-dominio.railway.app/sitemap.xml
+Sitemap: https://drashirleyramirez.com/sitemap.xml
 
 # Crawl-delay para ser respetuosos
 Crawl-delay: 1
