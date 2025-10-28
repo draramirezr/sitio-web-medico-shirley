@@ -602,6 +602,17 @@ def init_db():
         )
     '''))
     
+    # Tabla de lista negra de emails (blacklist)
+    cursor.execute(adapt_sql_for_database('''
+        CREATE TABLE IF NOT EXISTS email_blacklist (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email VARCHAR(255) UNIQUE NOT NULL,
+            blocked_by VARCHAR(255) NOT NULL,
+            reason TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    '''))
+    
     # Tabla de citas
     cursor.execute(adapt_sql_for_database('''
         CREATE TABLE IF NOT EXISTS appointments (
@@ -1815,7 +1826,7 @@ def contact():
                 request_counts[f'{client_ip}_contact'].append(current_time)
             
             name = request.form['name']
-            email = request.form['email']
+            email = request.form['email'].strip().lower()  # Normalizar email
             phone = request.form.get('phone', '')
             subject = request.form['subject']
             message = request.form['message']
@@ -1825,8 +1836,22 @@ def contact():
                 flash('Por favor, completa todos los campos obligatorios.', 'danger')
                 return redirect(url_for('contact'))
             
-            # Guardar en base de datos
+            # Verificar si el email está en la lista negra (SILENCIOSAMENTE)
             conn = get_db_connection()
+            blacklist_check = conn.execute(
+                'SELECT id FROM email_blacklist WHERE email = %s', 
+                (email,)
+            ).fetchone()
+            
+            if blacklist_check:
+                # Email bloqueado - mostrar mensaje de éxito pero NO guardar ni enviar
+                conn.close()
+                print(f"🚫 Email bloqueado rechazado silenciosamente: {email}")
+                flash('¡Mensaje enviado correctamente! Te contactaremos pronto.', 'success')
+                return redirect(url_for('contact'))
+            
+            # Email válido - procesar normalmente
+            # Guardar en base de datos
             conn.execute('''
                 INSERT INTO contact_messages (name, email, phone, subject, message)
                 VALUES (%s, %s, %s, %s, %s)
@@ -2392,6 +2417,100 @@ def mark_message_read(message_id):
         return jsonify({'success': True})
     except Exception as e:
         print(f"❌ Error al marcar mensaje como leído: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/admin/messages/<int:message_id>/block-sender', methods=['POST'])
+@login_required
+def block_sender(message_id):
+    """Bloquear remitente de un mensaje (agregar a lista negra)"""
+    try:
+        conn = get_db_connection()
+        
+        # Obtener el email del mensaje
+        message = conn.execute(
+            'SELECT email, name FROM contact_messages WHERE id = %s',
+            (message_id,)
+        ).fetchone()
+        
+        if not message:
+            conn.close()
+            return jsonify({'success': False, 'error': 'Mensaje no encontrado'}), 404
+        
+        email = message['email'].strip().lower()
+        name = message['name']
+        
+        # Verificar si ya está bloqueado
+        existing = conn.execute(
+            'SELECT id FROM email_blacklist WHERE email = %s',
+            (email,)
+        ).fetchone()
+        
+        if existing:
+            conn.close()
+            return jsonify({'success': False, 'error': 'Este email ya está bloqueado'}), 400
+        
+        # Agregar a lista negra
+        conn.execute('''
+            INSERT INTO email_blacklist (email, blocked_by, reason)
+            VALUES (%s, %s, %s)
+        ''', (email, current_user.email, f'Bloqueado desde mensaje de {name}'))
+        
+        conn.commit()
+        conn.close()
+        
+        print(f"🚫 Email bloqueado: {email} por {current_user.email}")
+        return jsonify({'success': True, 'email': email})
+        
+    except Exception as e:
+        print(f"❌ Error al bloquear remitente: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/admin/blacklist')
+@login_required
+def admin_blacklist():
+    """Ver lista negra de emails"""
+    conn = get_db_connection()
+    blacklist = conn.execute('''
+        SELECT * FROM email_blacklist 
+        ORDER BY created_at DESC
+    ''').fetchall()
+    conn.close()
+    
+    return render_template('admin_blacklist.html', blacklist=blacklist)
+
+@app.route('/admin/blacklist/<int:blacklist_id>/unblock', methods=['POST'])
+@login_required
+def unblock_email(blacklist_id):
+    """Desbloquear un email de la lista negra"""
+    try:
+        conn = get_db_connection()
+        
+        # Obtener el email antes de eliminarlo
+        entry = conn.execute(
+            'SELECT email FROM email_blacklist WHERE id = %s',
+            (blacklist_id,)
+        ).fetchone()
+        
+        if not entry:
+            conn.close()
+            return jsonify({'success': False, 'error': 'Entrada no encontrada'}), 404
+        
+        email = entry['email']
+        
+        # Eliminar de la lista negra
+        conn.execute('DELETE FROM email_blacklist WHERE id = %s', (blacklist_id,))
+        conn.commit()
+        conn.close()
+        
+        print(f"✅ Email desbloqueado: {email}")
+        return jsonify({'success': True, 'email': email})
+        
+    except Exception as e:
+        print(f"❌ Error al desbloquear email: {e}")
         import traceback
         traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500

@@ -737,6 +737,9 @@
                         <i class="fas fa-check me-2"></i>Marcar como Leído
                     </button>
                     {% endif %}
+                    <button class="btn btn-danger block-sender-btn" data-message-id="{{ message['id'] }}" data-email="{{ message['email'] }}">
+                        <i class="fas fa-ban me-2"></i>Bloquear Remitente
+                    </button>
                     <a href="{{ url_for('admin_messages') }}" class="btn btn-info">
                         <i class="fas fa-eye me-2"></i>Ver Todos los Mensajes
                     </a>
@@ -788,6 +791,55 @@ document.querySelectorAll('.mark-read-btn-modal').forEach(button => {
             alert('Error al procesar la solicitud. Por favor, intenta de nuevo.');
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-check me-2"></i>Marcar como Leído';
+        });
+    });
+});
+
+// Bloquear remitentes desde los modales
+document.querySelectorAll('.block-sender-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        const messageId = this.getAttribute('data-message-id');
+        const email = this.getAttribute('data-email');
+        const btn = this;
+        
+        // Confirmar acción
+        if (!confirm(`¿Estás seguro de que quieres bloquear a ${email}?\n\nEste remitente no podrá enviar más mensajes desde el formulario de contacto.`)) {
+            return;
+        }
+        
+        // Deshabilitar botón
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Bloqueando...';
+        
+        fetch(`/admin/messages/${messageId}/block-sender`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la respuesta del servidor');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alert(`✅ Remitente bloqueado: ${data.email}\n\nEste email ya no podrá enviar mensajes.`);
+                location.reload();
+            } else {
+                alert(`Error: ${data.error}`);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-ban me-2"></i>Bloquear Remitente';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al procesar la solicitud. Por favor, intenta de nuevo.');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-ban me-2"></i>Bloquear Remitente';
         });
     });
 });
