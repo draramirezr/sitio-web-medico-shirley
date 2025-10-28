@@ -370,7 +370,8 @@
                 <div class="card-body" style="min-height: 200px; max-height: 450px; overflow-y: auto;">
                     {% if recent_appointments %}
                                 {% for appointment in recent_appointments %}
-                        <div class="appointment-card mb-3" style="background: rgba(242, 226, 230, 0.1); 
+                        <div class="appointment-card mb-3" data-bs-toggle="modal" data-bs-target="#appointmentModal{{ appointment['id'] }}" 
+                                    style="background: rgba(242, 226, 230, 0.1); 
                                     border-left: 4px solid {{ '#B89BA3' if appointment['status'] == 'completed' else '#CEB0B7' if appointment['status'] == 'pending' else '#ACACAD' }}; 
                                     border-radius: 10px; padding: 1rem; transition: all 0.3s ease; cursor: pointer;">
                             <div class="d-flex justify-content-between align-items-start">
@@ -444,7 +445,8 @@
                 <div class="card-body" style="min-height: 200px; max-height: 450px; overflow-y: auto;">
                     {% if recent_messages %}
                                 {% for message in recent_messages %}
-                        <div class="message-card mb-3" style="background: {{ 'rgba(242, 226, 230, 0.25)' if not message['read'] else 'rgba(248, 249, 250, 0.5)' }}; 
+                        <div class="message-card mb-3" data-bs-toggle="modal" data-bs-target="#messageModal{{ message['id'] }}" 
+                                    style="background: {{ 'rgba(242, 226, 230, 0.25)' if not message['read'] else 'rgba(248, 249, 250, 0.5)' }}; 
                                     border-left: 4px solid {{ 'var(--primary-color)' if not message['read'] else '#dee2e6' }}; 
                                     border-radius: 10px; padding: 1rem; transition: all 0.3s ease; cursor: pointer;
                                     {{ 'border: 2px solid var(--primary-color);' if not message['read'] else '' }}">
@@ -552,4 +554,243 @@
         </div>
     </div>
 </div>
+
+<!-- Modales para Citas -->
+{% if recent_appointments %}
+    {% for appointment in recent_appointments %}
+    <div class="modal fade" id="appointmentModal{{ appointment['id'] }}" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #CEB0B7 0%, #B89CA3 100%); color: white;">
+                    <h5 class="modal-title">
+                        <i class="fas fa-calendar-check me-2"></i>
+                        Detalles de la Cita
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Información del Paciente -->
+                    <div class="mb-4 p-3" style="background: linear-gradient(135deg, rgba(206, 176, 183, 0.1) 0%, rgba(242, 226, 230, 0.2) 100%); border-radius: 10px;">
+                        <h6 class="mb-3" style="color: #CEB0B7; font-weight: 700;">
+                            <i class="fas fa-user me-2"></i>Información del Paciente
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <strong><i class="fas fa-user-circle me-2"></i>Nombre:</strong><br>
+                                {{ appointment['first_name'] }} {{ appointment['last_name'] }}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong><i class="fas fa-envelope me-2"></i>Email:</strong><br>
+                                <a href="mailto:{{ appointment['email'] }}">{{ appointment['email'] }}</a>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong><i class="fas fa-phone me-2"></i>Teléfono:</strong><br>
+                                <a href="tel:{{ appointment['phone'] }}">{{ appointment['phone'] }}</a>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong><i class="fas fa-calendar-alt me-2"></i>Fecha Solicitud:</strong><br>
+                                {{ appointment['created_at'] }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detalles de la Cita -->
+                    <div class="mb-4 p-3" style="background: #FFF9E6; border-radius: 10px; border-left: 4px solid #FFC107;">
+                        <h6 class="mb-3" style="color: #F57C00; font-weight: 700;">
+                            <i class="fas fa-calendar-day me-2"></i>Detalles de la Cita
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <strong><i class="fas fa-calendar me-2"></i>Fecha:</strong><br>
+                                {{ appointment['appointment_date'] if appointment['appointment_date'] else 'Por definir' }}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong><i class="fas fa-clock me-2"></i>Hora:</strong><br>
+                                {{ appointment['appointment_time'] if appointment['appointment_time'] else 'Por definir' }}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong><i class="fas fa-stethoscope me-2"></i>Tipo:</strong><br>
+                                {{ appointment['appointment_type'] }}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong><i class="fas fa-heartbeat me-2"></i>Seguro:</strong><br>
+                                {{ appointment['medical_insurance'] if appointment['medical_insurance'] else 'No especificado' }}
+                            </div>
+                            {% if appointment['emergency_datetime'] %}
+                            <div class="col-12 mb-2">
+                                <strong style="color: #D32F2F;"><i class="fas fa-exclamation-triangle me-2"></i>Emergencia:</strong><br>
+                                <span style="color: #D32F2F;">{{ appointment['emergency_datetime'] }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Motivo -->
+                    {% if appointment['reason'] %}
+                    <div class="mb-3 p-3" style="background: #E8F5E9; border-radius: 10px; border-left: 4px solid #4CAF50;">
+                        <strong><i class="fas fa-comment-medical me-2"></i>Motivo de la Cita:</strong><br>
+                        <p class="mt-2 mb-0">{{ appointment['reason'] }}</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Estado Actual -->
+                    <div class="p-3" style="background: rgba(242, 226, 230, 0.2); border-radius: 10px;">
+                        <strong><i class="fas fa-info-circle me-2"></i>Estado:</strong>
+                        <span class="badge ms-2" style="background: {{ '#B89BA3' if appointment['status'] == 'completed' else '#CEB0B7' if appointment['status'] == 'pending' else '#ACACAD' }}; 
+                                    color: white; padding: 0.5rem 1rem; font-size: 0.9rem;">
+                            {{ 'Completada' if appointment['status'] == 'completed' else 'Pendiente' if appointment['status'] == 'pending' else 'Cancelada' }}
+                        </span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="tel:{{ appointment['phone'] }}" class="btn btn-success">
+                        <i class="fas fa-phone me-2"></i>Llamar
+                    </a>
+                    <a href="https://wa.me/{{ appointment['phone'].replace('+', '').replace('-', '').replace(' ', '').replace('(', '').replace(')', '') }}?text=Hola%20{{ appointment['first_name'] }}%20{{ appointment['last_name'] }},%20te%20contacto%20desde%20el%20consultorio%20de%20la%20Dra.%20Shirley%20Ram%C3%ADrez%20sobre%20tu%20cita" 
+                       class="btn" style="background: #25D366; color: white;" target="_blank">
+                        <i class="fab fa-whatsapp me-2"></i>WhatsApp
+                    </a>
+                    <a href="{{ url_for('admin_appointments') }}" class="btn btn-primary">
+                        <i class="fas fa-eye me-2"></i>Ver Todas las Citas
+                    </a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% endif %}
+
+<!-- Modales para Mensajes -->
+{% if recent_messages %}
+    {% for message in recent_messages %}
+    <div class="modal fade" id="messageModal{{ message['id'] }}" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #CEB0B7 0%, #B89CA3 100%); color: white;">
+                    <h5 class="modal-title">
+                        <i class="fas fa-envelope-open me-2"></i>
+                        Mensaje de {{ message['name'] }}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Información del Remitente -->
+                    <div class="mb-4 p-3" style="background: linear-gradient(135deg, rgba(206, 176, 183, 0.1) 0%, rgba(242, 226, 230, 0.2) 100%); border-radius: 10px;">
+                        <h6 class="mb-3" style="color: #CEB0B7; font-weight: 700;">
+                            <i class="fas fa-user me-2"></i>Información del Contacto
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <strong><i class="fas fa-user-circle me-2"></i>Nombre:</strong><br>
+                                {{ message['name'] }}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong><i class="fas fa-envelope me-2"></i>Email:</strong><br>
+                                <a href="mailto:{{ message['email'] }}">{{ message['email'] }}</a>
+                            </div>
+                            {% if message['phone'] %}
+                            <div class="col-md-6 mb-2">
+                                <strong><i class="fas fa-phone me-2"></i>Teléfono:</strong><br>
+                                <a href="tel:{{ message['phone'] }}">{{ message['phone'] }}</a>
+                            </div>
+                            {% endif %}
+                            <div class="col-md-6 mb-2">
+                                <strong><i class="fas fa-calendar-alt me-2"></i>Fecha:</strong><br>
+                                {{ message['created_at'] }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Asunto -->
+                    <div class="mb-3 p-3" style="background: #E3F2FD; border-radius: 10px; border-left: 4px solid #2196F3;">
+                        <strong><i class="fas fa-tag me-2"></i>Asunto:</strong><br>
+                        <p class="mt-2 mb-0">{{ message['subject'] }}</p>
+                    </div>
+
+                    <!-- Mensaje -->
+                    <div class="mb-3 p-3" style="background: #F8F9FA; border-radius: 10px; border-left: 4px solid #CEB0B7;">
+                        <strong><i class="fas fa-comment-dots me-2"></i>Mensaje Completo:</strong><br>
+                        <p class="mt-2 mb-0" style="white-space: pre-wrap;">{{ message['message'] }}</p>
+                    </div>
+
+                    <!-- Estado -->
+                    <div class="p-3" style="background: {{ 'rgba(255, 243, 205, 0.5)' if not message['read'] else 'rgba(232, 245, 233, 0.5)' }}; border-radius: 10px;">
+                        <strong><i class="fas fa-info-circle me-2"></i>Estado:</strong>
+                        <span class="badge ms-2" style="background: {{ '#dc3545' if not message['read'] else '#4CAF50' }}; color: white; padding: 0.5rem 1rem; font-size: 0.9rem;">
+                            {{ 'Sin Leer' if not message['read'] else 'Leído' }}
+                        </span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    {% if message['phone'] %}
+                    <a href="https://wa.me/{{ message['phone'].replace('(', '').replace(')', '').replace('-', '').replace(' ', '') }}?text=Hola%20{{ message['name'].replace(' ', '%20') }},%20te%20contacto%20desde%20el%20consultorio%20de%20la%20Dra.%20Shirley%20Ram%C3%ADrez" 
+                       class="btn" style="background: #25D366; color: white;" target="_blank">
+                        <i class="fab fa-whatsapp me-2"></i>WhatsApp
+                    </a>
+                    {% endif %}
+                    <a href="mailto:{{ message['email'] }}?subject=Re: {{ message['subject'] }}" class="btn btn-primary">
+                        <i class="fas fa-reply me-2"></i>Responder
+                    </a>
+                    {% if not message['read'] %}
+                    <button class="btn btn-success mark-read-btn-modal" data-message-id="{{ message['id'] }}">
+                        <i class="fas fa-check me-2"></i>Marcar como Leído
+                    </button>
+                    {% endif %}
+                    <a href="{{ url_for('admin_messages') }}" class="btn btn-info">
+                        <i class="fas fa-eye me-2"></i>Ver Todos los Mensajes
+                    </a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% endif %}
+
+<script>
+// Marcar mensajes como leídos desde los modales
+document.querySelectorAll('.mark-read-btn-modal').forEach(button => {
+    button.addEventListener('click', function() {
+        const messageId = this.getAttribute('data-message-id');
+        const btn = this;
+        
+        // Deshabilitar botón para evitar clicks múltiples
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
+        
+        fetch(`/admin/messages/${messageId}/mark-read`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la respuesta del servidor');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Recargar la página para mostrar el cambio
+                location.reload();
+            } else {
+                alert('Error al marcar como leído');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check me-2"></i>Marcar como Leído';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al procesar la solicitud. Por favor, intenta de nuevo.');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check me-2"></i>Marcar como Leído';
+        });
+    });
+});
+</script>
+
 {% endblock %}
