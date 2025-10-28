@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Centro x Médico - Sistema de Facturación{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 style="color: var(--primary-color); font-weight: 700;">
+            <i class="fas fa-link me-2"></i>
+            Relación Centro x Médico
+        </h2>
+        <div>
+            <a href="{{ url_for('facturacion_medico_centro_nuevo') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Agregar Relación
+            </a>
+            <a href="{{ url_for('facturacion_menu') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Volver
+            </a>
+        </div>
+    </div>
+
+    <!-- Búsqueda -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-10">
+                    <input type="text" class="form-control" name="search" placeholder="Buscar por nombre de médico o centro..." value="{{ search }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-2"></i>Buscar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla -->
+    {% if relaciones_list %}
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead style="background: var(--primary-color); color: white;">
+                        <tr>
+                            <th>Médico</th>
+                            <th>Especialidad</th>
+                            <th>Centro Médico</th>
+                            <th>Fecha Registro</th>
+                            <th style="width: 100px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for relacion in relaciones_list %}
+                        <tr>
+                            <td><strong>{{ relacion['medico_nombre'] }}</strong></td>
+                            <td>{{ relacion['especialidad'] }}</td>
+                            <td>
+                                <i class="fas fa-hospital-alt me-2" style="color: var(--primary-color);"></i>
+                                {{ relacion['centro_nombre'] }}
+                            </td>
+                            <td>{{ relacion['created_at'].strftime('%d/%m/%Y') if relacion['created_at'] else '-' }}</td>
+                            <td>
+                                <form method="POST" action="{{ url_for('facturacion_medico_centro_eliminar', relacion_id=relacion['id']) }}" 
+                                      style="display: inline;" onsubmit="return confirm('¿Está seguro de eliminar esta relación?');">
+                                    <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>
+        No hay relaciones registradas entre médicos y centros médicos.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

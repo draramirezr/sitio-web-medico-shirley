@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Editar' if centro else 'Nuevo' }} Centro Médico - Sistema de Facturación{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header" style="background: var(--primary-color); color: white;">
+                    <h4 class="mb-0">
+                        <i class="fas fa-hospital-alt me-2"></i>
+                        {{ 'Editar' if centro else 'Nuevo' }} Centro Médico
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="nombre" class="form-label">
+                                <i class="fas fa-hospital me-2"></i>Nombre del Centro Médico *
+                            </label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" 
+                                   value="{{ centro['nombre'] if centro else '' }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="direccion" class="form-label">
+                                <i class="fas fa-map-marker-alt me-2"></i>Dirección *
+                            </label>
+                            <textarea class="form-control" id="direccion" name="direccion" rows="3" required>{{ centro['direccion'] if centro else '' }}</textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="rnc" class="form-label">
+                                    <i class="fas fa-id-card me-2"></i>RNC *
+                                </label>
+                                <input type="text" class="form-control" id="rnc" name="rnc" 
+                                       value="{{ centro['rnc'] if centro else '' }}" required>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="telefono" class="form-label">
+                                    <i class="fas fa-phone me-2"></i>Teléfono
+                                </label>
+                                <input type="text" class="form-control" id="telefono" name="telefono" 
+                                       value="{{ centro['telefono'] if centro else '' }}">
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('facturacion_centros_medicos') }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Guardar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

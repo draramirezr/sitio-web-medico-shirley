@@ -723,6 +723,33 @@ def init_db():
         cursor.execute("ALTER TABLE medicos ADD COLUMN factura BOOLEAN DEFAULT 0")
         print("✅ Columna 'factura' agregada a la tabla medicos")
     
+    # Tabla de Centros Médicos
+    cursor.execute(adapt_sql_for_database('''
+        CREATE TABLE IF NOT EXISTS centros_medicos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre VARCHAR(255) NOT NULL,
+            direccion TEXT NOT NULL,
+            rnc VARCHAR(50) NOT NULL,
+            telefono VARCHAR(50),
+            activo BOOLEAN DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    '''))
+    
+    # Tabla de Relación Médico-Centro (muchos a muchos)
+    cursor.execute(adapt_sql_for_database('''
+        CREATE TABLE IF NOT EXISTS medico_centro (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            medico_id INTEGER NOT NULL,
+            centro_id INTEGER NOT NULL,
+            activo BOOLEAN DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (medico_id) REFERENCES medicos(id),
+            FOREIGN KEY (centro_id) REFERENCES centros_medicos(id),
+            UNIQUE(medico_id, centro_id)
+        )
+    '''))
+    
     # Agregar columnas ncf_id y ncf_numero a facturas si no existen
     try:
         cursor.execute("SELECT ncf_id FROM facturas LIMIT 1")
@@ -3019,6 +3046,193 @@ def facturacion_codigo_ars_eliminar(codigo_id):
     
     flash('Código ARS eliminado exitosamente', 'success')
     return redirect(url_for('facturacion_codigo_ars'))
+
+# ========== MAESTRA DE CENTROS MÉDICOS ==========
+@app.route('/facturacion/centros-medicos')
+@login_required
+def facturacion_centros_medicos():
+    """Lista de Centros Médicos"""
+    search = request.args.get('search', '')
+    conn = get_db_connection()
+    
+    if search:
+        search_pattern = f"%{search}%"
+        centros_list = conn.execute("""
+            SELECT * FROM centros_medicos 
+            WHERE (nombre LIKE %s OR rnc LIKE %s) AND activo = 1
+            ORDER BY nombre
+        """, (search_pattern, search_pattern)).fetchall()
+    else:
+        centros_list = conn.execute('''
+            SELECT * FROM centros_medicos 
+            WHERE activo = 1
+            ORDER BY nombre
+        ''').fetchall()
+    
+    conn.close()
+    return render_template('facturacion/centros_medicos.html', centros_list=centros_list, search=search)
+
+@app.route('/facturacion/centros-medicos/nuevo', methods=['GET', 'POST'])
+@login_required
+def facturacion_centros_medicos_nuevo():
+    """Crear Centro Médico"""
+    if request.method == 'POST':
+        nombre = sanitize_input(request.form['nombre'], 255)
+        direccion = sanitize_input(request.form['direccion'], 500)
+        rnc = sanitize_input(request.form['rnc'], 50)
+        telefono = sanitize_input(request.form.get('telefono', ''), 50)
+        
+        if not nombre or not direccion or not rnc:
+            flash('Nombre, dirección y RNC son obligatorios', 'error')
+            return redirect(url_for('facturacion_centros_medicos_nuevo'))
+        
+        conn = get_db_connection()
+        
+        # Verificar si ya existe el RNC
+        existe = conn.execute('SELECT id FROM centros_medicos WHERE rnc = %s AND activo = 1', (rnc,)).fetchone()
+        if existe:
+            conn.close()
+            flash('Ya existe un centro médico con ese RNC', 'error')
+            return redirect(url_for('facturacion_centros_medicos_nuevo'))
+        
+        conn.execute('INSERT INTO centros_medicos (nombre, direccion, rnc, telefono) VALUES (%s, %s, %s, %s)', 
+                    (nombre, direccion, rnc, telefono))
+        conn.commit()
+        conn.close()
+        
+        flash('Centro Médico creado exitosamente', 'success')
+        return redirect(url_for('facturacion_centros_medicos'))
+    
+    return render_template('facturacion/centro_medico_form.html', centro=None)
+
+@app.route('/facturacion/centros-medicos/<int:centro_id>/editar', methods=['GET', 'POST'])
+@login_required
+def facturacion_centros_medicos_editar(centro_id):
+    """Editar Centro Médico"""
+    conn = get_db_connection()
+    
+    if request.method == 'POST':
+        nombre = sanitize_input(request.form['nombre'], 255)
+        direccion = sanitize_input(request.form['direccion'], 500)
+        rnc = sanitize_input(request.form['rnc'], 50)
+        telefono = sanitize_input(request.form.get('telefono', ''), 50)
+        
+        if not nombre or not direccion or not rnc:
+            flash('Nombre, dirección y RNC son obligatorios', 'error')
+            return redirect(url_for('facturacion_centros_medicos_editar', centro_id=centro_id))
+        
+        # Verificar si ya existe el RNC en otro registro
+        existe = conn.execute('SELECT id FROM centros_medicos WHERE rnc = %s AND id != %s AND activo = 1', 
+                             (rnc, centro_id)).fetchone()
+        if existe:
+            conn.close()
+            flash('Ya existe un centro médico con ese RNC', 'error')
+            return redirect(url_for('facturacion_centros_medicos_editar', centro_id=centro_id))
+        
+        conn.execute('UPDATE centros_medicos SET nombre = %s, direccion = %s, rnc = %s, telefono = %s WHERE id = %s', 
+                    (nombre, direccion, rnc, telefono, centro_id))
+        conn.commit()
+        conn.close()
+        
+        flash('Centro Médico actualizado exitosamente', 'success')
+        return redirect(url_for('facturacion_centros_medicos'))
+    
+    centro = conn.execute('SELECT * FROM centros_medicos WHERE id = %s', (centro_id,)).fetchone()
+    conn.close()
+    
+    return render_template('facturacion/centro_medico_form.html', centro=centro)
+
+@app.route('/facturacion/centros-medicos/<int:centro_id>/eliminar', methods=['POST'])
+@login_required
+def facturacion_centros_medicos_eliminar(centro_id):
+    """Eliminar Centro Médico (soft delete)"""
+    conn = get_db_connection()
+    conn.execute('UPDATE centros_medicos SET activo = 0 WHERE id = %s', (centro_id,))
+    conn.commit()
+    conn.close()
+    
+    flash('Centro Médico eliminado exitosamente', 'success')
+    return redirect(url_for('facturacion_centros_medicos'))
+
+# ========== MAESTRA DE CENTRO x MÉDICO ==========
+@app.route('/facturacion/medico-centro')
+@login_required
+def facturacion_medico_centro():
+    """Lista de Relación Médico-Centro"""
+    search = request.args.get('search', '')
+    conn = get_db_connection()
+    
+    if search:
+        search_pattern = f"%{search}%"
+        relaciones_list = conn.execute("""
+            SELECT mc.*, m.nombre as medico_nombre, m.especialidad, c.nombre as centro_nombre 
+            FROM medico_centro mc
+            JOIN medicos m ON mc.medico_id = m.id
+            JOIN centros_medicos c ON mc.centro_id = c.id
+            WHERE (m.nombre LIKE %s OR c.nombre LIKE %s) AND mc.activo = 1
+            ORDER BY m.nombre, c.nombre
+        """, (search_pattern, search_pattern)).fetchall()
+    else:
+        relaciones_list = conn.execute('''
+            SELECT mc.*, m.nombre as medico_nombre, m.especialidad, c.nombre as centro_nombre 
+            FROM medico_centro mc
+            JOIN medicos m ON mc.medico_id = m.id
+            JOIN centros_medicos c ON mc.centro_id = c.id
+            WHERE mc.activo = 1
+            ORDER BY m.nombre, c.nombre
+        ''').fetchall()
+    
+    conn.close()
+    return render_template('facturacion/medico_centro.html', relaciones_list=relaciones_list, search=search)
+
+@app.route('/facturacion/medico-centro/nuevo', methods=['GET', 'POST'])
+@login_required
+def facturacion_medico_centro_nuevo():
+    """Crear Relación Médico-Centro"""
+    conn = get_db_connection()
+    
+    if request.method == 'POST':
+        medico_id = request.form.get('medico_id')
+        centro_id = request.form.get('centro_id')
+        
+        if not medico_id or not centro_id:
+            flash('Debe seleccionar médico y centro médico', 'error')
+            return redirect(url_for('facturacion_medico_centro_nuevo'))
+        
+        # Verificar si ya existe la relación
+        existe = conn.execute('SELECT id FROM medico_centro WHERE medico_id = %s AND centro_id = %s AND activo = 1', 
+                             (medico_id, centro_id)).fetchone()
+        if existe:
+            conn.close()
+            flash('Ya existe esa relación entre el médico y el centro médico', 'error')
+            return redirect(url_for('facturacion_medico_centro_nuevo'))
+        
+        conn.execute('INSERT INTO medico_centro (medico_id, centro_id) VALUES (%s, %s)', 
+                    (medico_id, centro_id))
+        conn.commit()
+        conn.close()
+        
+        flash('Relación Médico-Centro creada exitosamente', 'success')
+        return redirect(url_for('facturacion_medico_centro'))
+    
+    # Obtener listas para los select
+    medicos = conn.execute('SELECT id, nombre, especialidad FROM medicos WHERE activo = 1 ORDER BY nombre').fetchall()
+    centros = conn.execute('SELECT id, nombre FROM centros_medicos WHERE activo = 1 ORDER BY nombre').fetchall()
+    conn.close()
+    
+    return render_template('facturacion/medico_centro_form.html', relacion=None, medicos=medicos, centros=centros)
+
+@app.route('/facturacion/medico-centro/<int:relacion_id>/eliminar', methods=['POST'])
+@login_required
+def facturacion_medico_centro_eliminar(relacion_id):
+    """Eliminar Relación Médico-Centro (soft delete)"""
+    conn = get_db_connection()
+    conn.execute('UPDATE medico_centro SET activo = 0 WHERE id = %s', (relacion_id,))
+    conn.commit()
+    conn.close()
+    
+    flash('Relación eliminada exitosamente', 'success')
+    return redirect(url_for('facturacion_medico_centro'))
 
 # ========== MAESTRA DE TIPOS DE SERVICIOS ==========
 @app.route('/facturacion/servicios')

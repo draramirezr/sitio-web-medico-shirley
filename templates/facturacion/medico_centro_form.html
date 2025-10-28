@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Nueva Relación Centro x Médico - Sistema de Facturación{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header" style="background: var(--primary-color); color: white;">
+                    <h4 class="mb-0">
+                        <i class="fas fa-link me-2"></i>
+                        Nueva Relación Centro x Médico
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Nota:</strong> Un médico no puede tener el mismo centro registrado dos veces.
+                    </div>
+
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="medico_id" class="form-label">
+                                <i class="fas fa-user-md me-2"></i>Médico *
+                            </label>
+                            <select class="form-select" id="medico_id" name="medico_id" required>
+                                <option value="">Seleccione un médico...</option>
+                                {% for medico in medicos %}
+                                <option value="{{ medico['id'] }}">
+                                    {{ medico['nombre'] }} - {{ medico['especialidad'] }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="centro_id" class="form-label">
+                                <i class="fas fa-hospital-alt me-2"></i>Centro Médico *
+                            </label>
+                            <select class="form-select" id="centro_id" name="centro_id" required>
+                                <option value="">Seleccione un centro médico...</option>
+                                {% for centro in centros %}
+                                <option value="{{ centro['id'] }}">
+                                    {{ centro['nombre'] }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('facturacion_medico_centro') }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Guardar Relación
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
