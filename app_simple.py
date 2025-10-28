@@ -2427,6 +2427,22 @@ def block_sender(message_id):
     """Bloquear remitente de un mensaje (agregar a lista negra)"""
     try:
         conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Crear tabla si no existe (por si acaso)
+        try:
+            cursor.execute(adapt_sql_for_database('''
+                CREATE TABLE IF NOT EXISTS email_blacklist (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    email VARCHAR(255) UNIQUE NOT NULL,
+                    blocked_by VARCHAR(255) NOT NULL,
+                    reason TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            '''))
+            conn.commit()
+        except Exception as table_error:
+            print(f"⚠️ Advertencia al crear tabla: {table_error}")
         
         # Obtener el email del mensaje
         message = conn.execute(
@@ -4989,7 +5005,6 @@ def facturacion_dashboard():
         if ars_id:
             query_facturas += ' AND f.ars_id = %s'
             params_facturas.append(ars_id)
-    else:
         # Contar facturas normalmente
         query_facturas = '''
             SELECT COUNT(*) as total FROM facturas 
