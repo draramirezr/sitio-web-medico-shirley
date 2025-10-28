@@ -2515,6 +2515,108 @@ def unblock_email(blacklist_id):
         traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@app.route('/admin/messages/<int:message_id>/reply', methods=['POST'])
+@login_required
+def reply_to_message(message_id):
+    """Enviar respuesta a un mensaje desde el dashboard"""
+    try:
+        data = request.get_json()
+        to_email = data.get('to_email')
+        subject = data.get('subject')
+        message_text = data.get('message')
+        
+        if not all([to_email, subject, message_text]):
+            return jsonify({'success': False, 'error': 'Faltan campos requeridos'}), 400
+        
+        # Verificar configuración de email
+        if not EMAIL_CONFIGURED:
+            return jsonify({'success': False, 'error': 'Email no configurado en el servidor'}), 500
+        
+        # Crear HTML profesional para el email
+        html_content = f"""
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #F8F4F5;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F8F4F5; padding: 30px 15px;">
+                <tr>
+                    <td align="center">
+                        <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%; background-color: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                            <tr>
+                                <td>
+                                    <!-- Header -->
+                                    <div style="background: linear-gradient(135deg, #CEB0B7 0%, #B89CA3 100%); padding: 30px; text-align: center; border-radius: 15px 15px 0 0;">
+                                        <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700;">
+                                            Dra. Shirley Ramírez
+                                        </h1>
+                                        <p style="color: rgba(255,255,255,0.95); margin: 8px 0 0 0; font-size: 14px;">
+                                            Ginecóloga • Obstetra • Salud Femenina
+                                        </p>
+                                    </div>
+                                    
+                                    <!-- Content -->
+                                    <div style="padding: 35px 30px;">
+                                        <div style="color: #282828; line-height: 1.8; font-size: 15px; white-space: pre-wrap;">
+                                            {message_text}
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Footer -->
+                                    <div style="background-color: #F2E2E6; padding: 25px; text-align: center; border-radius: 0 0 15px 15px; margin-top: 20px;">
+                                        <div style="border-top: 2px solid #CEB0B7; padding-top: 20px; margin-bottom: 15px;">
+                                            <p style="color: #ACACAD; font-size: 14px; margin: 8px 0; font-weight: 600;">
+                                                📞 829-740-5073 | 📧 dra.ramirezr@gmail.com
+                                            </p>
+                                            <p style="color: #ACACAD; font-size: 13px; margin: 8px 0;">
+                                                📍 Santo Domingo | República Dominicana
+                                            </p>
+                                        </div>
+                                        <div style="margin-top: 15px;">
+                                            <a href="https://www.linkedin.com/in/shirley-ramirez-montero-a10964168/" 
+                                               style="display: inline-block; margin: 0 8px; color: #CEB0B7; text-decoration: none; font-size: 20px;">
+                                                🔗 LinkedIn
+                                            </a>
+                                            <a href="https://www.instagram.com/dra.ramirezr/" 
+                                               style="display: inline-block; margin: 0 8px; color: #CEB0B7; text-decoration: none; font-size: 20px;">
+                                                📷 Instagram
+                                            </a>
+                                        </div>
+                                        <p style="color: #999; font-size: 11px; margin: 15px 0 0 0;">
+                                            &copy; 2025 Dra. Shirley Ramírez • Todos los derechos reservados
+                                        </p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>
+        """
+        
+        # Enviar email usando SendGrid
+        success = send_email_sendgrid(
+            to_email=to_email,
+            subject=subject,
+            html_content=html_content
+        )
+        
+        if success:
+            print(f"✅ Respuesta enviada a {to_email} desde dashboard por {current_user.email}")
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'error': 'Error al enviar el email'}), 500
+        
+    except Exception as e:
+        print(f"❌ Error al responder mensaje: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 # ==================== FACTURACIÓN ROUTES ====================
 @app.route('/facturacion')
 @login_required
