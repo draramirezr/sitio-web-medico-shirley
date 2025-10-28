@@ -2381,12 +2381,20 @@ def update_appointment_status(appointment_id):
 @login_required
 def mark_message_read(message_id):
     """Marcar mensaje como leído"""
-    conn = get_db_connection()
-    conn.execute('UPDATE contact_messages SET read = 1 WHERE id = %s', (message_id,))
-    conn.commit()
-    conn.close()
-    
-    return jsonify({'success': True})
+    try:
+        conn = get_db_connection()
+        # Usar backticks para escapar la palabra reservada 'read' en MySQL
+        conn.execute('UPDATE contact_messages SET `read` = 1 WHERE id = %s', (message_id,))
+        conn.commit()
+        conn.close()
+        
+        print(f"✅ Mensaje {message_id} marcado como leído")
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"❌ Error al marcar mensaje como leído: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 # ==================== FACTURACIÓN ROUTES ====================
 @app.route('/facturacion')
