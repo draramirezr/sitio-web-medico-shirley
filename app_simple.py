@@ -3052,8 +3052,39 @@ def facturacion_codigo_ars_eliminar(codigo_id):
 @login_required
 def facturacion_centros_medicos():
     """Lista de Centros Médicos"""
-    search = request.args.get('search', '')
     conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Crear tablas si no existen (por si acaso)
+    try:
+        cursor.execute(adapt_sql_for_database('''
+            CREATE TABLE IF NOT EXISTS centros_medicos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nombre VARCHAR(255) NOT NULL,
+                direccion TEXT NOT NULL,
+                rnc VARCHAR(50) NOT NULL,
+                telefono VARCHAR(50),
+                activo BOOLEAN DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        '''))
+        cursor.execute(adapt_sql_for_database('''
+            CREATE TABLE IF NOT EXISTS medico_centro (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                medico_id INTEGER NOT NULL,
+                centro_id INTEGER NOT NULL,
+                activo BOOLEAN DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (medico_id) REFERENCES medicos(id),
+                FOREIGN KEY (centro_id) REFERENCES centros_medicos(id),
+                UNIQUE(medico_id, centro_id)
+            )
+        '''))
+        conn.commit()
+    except Exception as table_error:
+        print(f"⚠️ Advertencia al crear tablas: {table_error}")
+    
+    search = request.args.get('search', '')
     
     if search:
         search_pattern = f"%{search}%"
@@ -3159,8 +3190,39 @@ def facturacion_centros_medicos_eliminar(centro_id):
 @login_required
 def facturacion_medico_centro():
     """Lista de Relación Médico-Centro"""
-    search = request.args.get('search', '')
     conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Crear tablas si no existen (por si acaso)
+    try:
+        cursor.execute(adapt_sql_for_database('''
+            CREATE TABLE IF NOT EXISTS centros_medicos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nombre VARCHAR(255) NOT NULL,
+                direccion TEXT NOT NULL,
+                rnc VARCHAR(50) NOT NULL,
+                telefono VARCHAR(50),
+                activo BOOLEAN DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        '''))
+        cursor.execute(adapt_sql_for_database('''
+            CREATE TABLE IF NOT EXISTS medico_centro (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                medico_id INTEGER NOT NULL,
+                centro_id INTEGER NOT NULL,
+                activo BOOLEAN DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (medico_id) REFERENCES medicos(id),
+                FOREIGN KEY (centro_id) REFERENCES centros_medicos(id),
+                UNIQUE(medico_id, centro_id)
+            )
+        '''))
+        conn.commit()
+    except Exception as table_error:
+        print(f"⚠️ Advertencia al crear tablas: {table_error}")
+    
+    search = request.args.get('search', '')
     
     if search:
         search_pattern = f"%{search}%"
