@@ -362,10 +362,10 @@
             <div class="admin-section-card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
-                        <i class="fas fa-calendar me-2"></i>
-                        Citas Recientes
+                        <i class="fas fa-clock me-2"></i>
+                        Citas Pendientes
                     </h5>
-                    <span class="badge" style="background: #ACACAD; color: white; font-size: 0.9rem;">{{ stats.total_appointments }} Total</span>
+                    <span class="badge" style="background: #FF9800; color: white; font-size: 0.9rem;">{{ stats.pending_appointments }} Pendientes</span>
                 </div>
                 <div class="card-body" style="min-height: 200px; max-height: 450px; overflow-y: auto;">
                     {% if recent_appointments %}
@@ -436,10 +436,10 @@
             <div class="admin-section-card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
-                        <i class="fas fa-envelope me-2"></i>
-                        Mensajes Recientes
+                        <i class="fas fa-envelope-open me-2"></i>
+                        Mensajes Sin Leer
                     </h5>
-                    <span class="badge" style="background: #ACACAD; color: white; font-size: 0.9rem;">{{ stats.unread_messages }} Sin Leer</span>
+                    <span class="badge" style="background: #dc3545; color: white; font-size: 0.9rem;">{{ stats.unread_messages }} Sin Leer</span>
                 </div>
                 <div class="card-body" style="min-height: 200px; max-height: 450px; overflow-y: auto;">
                     {% if recent_messages %}

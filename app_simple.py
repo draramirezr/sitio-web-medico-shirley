@@ -2296,9 +2296,9 @@ def admin():
         'total_visits': get_visit_count()
     }
     
-    # Datos recientes
-    recent_appointments = conn.execute('SELECT * FROM appointments ORDER BY created_at DESC LIMIT 5').fetchall()
-    recent_messages = conn.execute('SELECT * FROM contact_messages ORDER BY created_at DESC LIMIT 5').fetchall()
+    # Datos recientes (solo citas pendientes y mensajes sin leer)
+    recent_appointments = conn.execute('SELECT * FROM appointments WHERE status = "pending" ORDER BY created_at DESC LIMIT 5').fetchall()
+    recent_messages = conn.execute('SELECT * FROM contact_messages WHERE `read` = 0 ORDER BY created_at DESC LIMIT 5').fetchall()
     
     conn.close()
     

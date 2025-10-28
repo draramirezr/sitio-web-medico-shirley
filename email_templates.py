@@ -111,8 +111,12 @@ def template_contacto(nombre, email, telefono, asunto, mensaje):
     
     <div style="text-align: center; margin-top: 30px;">
         <a href="mailto:{email}" 
-           style="display: inline-block; padding: 14px 35px; background: linear-gradient(135deg, #ACACAD 0%, #949495 100%); color: white !important; text-decoration: none; border-radius: 25px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 12px rgba(172, 172, 173, 0.3);">
+           style="display: inline-block; padding: 14px 35px; background: linear-gradient(135deg, #ACACAD 0%, #949495 100%); color: white !important; text-decoration: none; border-radius: 25px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 12px rgba(172, 172, 173, 0.3); margin: 5px;">
             📧 Responder a {nombre}
+        </a>
+        <a href="https://wa.me/{telefono.replace('+', '').replace('-', '').replace(' ', '').replace('(', '').replace(')', '')}?text=Hola%20{nombre.replace(' ', '%20')},%20te%20contacto%20desde%20el%20consultorio%20de%20la%20Dra.%20Shirley%20Ram%C3%ADrez" 
+           style="display: inline-block; padding: 14px 35px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white !important; text-decoration: none; border-radius: 25px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4); margin: 5px;">
+            💬 Contactar vía WhatsApp
         </a>
     </div>
     """
@@ -163,6 +167,10 @@ def template_cita(nombre, apellido, email, telefono, fecha, hora, tipo, seguro, 
         <a href="mailto:{email}" 
            style="display: inline-block; padding: 14px 35px; background: linear-gradient(135deg, #ACACAD 0%, #949495 100%); color: white !important; text-decoration: none; border-radius: 25px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 12px rgba(172, 172, 173, 0.3); margin: 5px;">
             📧 Enviar Email
+        </a>
+        <a href="https://wa.me/{telefono.replace('+', '').replace('-', '').replace(' ', '').replace('(', '').replace(')', '')}?text=Hola%20{nombre}%20{apellido},%20te%20contacto%20desde%20el%20consultorio%20de%20la%20Dra.%20Shirley%20Ram%C3%ADrez%20sobre%20tu%20cita" 
+           style="display: inline-block; padding: 14px 35px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white !important; text-decoration: none; border-radius: 25px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4); margin: 5px;">
+            💬 Contactar vía WhatsApp
         </a>
     </div>
     """
