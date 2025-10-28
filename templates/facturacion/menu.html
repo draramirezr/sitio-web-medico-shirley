@@ -107,6 +107,100 @@
     .animate-card {
         animation: fadeInUp 0.5s ease-out;
     }
+    
+    /* ========== RESPONSIVE MOBILE ========== */
+    @media (max-width: 768px) {
+        .facturacion-hero {
+            padding: 1.5rem;
+            border-radius: 15px;
+        }
+        
+        .facturacion-hero h1 {
+            font-size: 1.5rem !important;
+        }
+        
+        .facturacion-hero .d-flex {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 1rem;
+        }
+        
+        .btn-volver {
+            text-align: center;
+            width: 100%;
+            display: block;
+        }
+        
+        .maestra-card {
+            padding: 1.5rem;
+        }
+        
+        .maestra-card i {
+            font-size: 2.5rem;
+        }
+        
+        .maestra-card h4 {
+            font-size: 1.1rem;
+        }
+        
+        .maestra-card p {
+            font-size: 0.85rem;
+        }
+        
+        .row.g-4 {
+            gap: 1rem !important;
+        }
+        
+        .col-lg-3, .col-lg-4, .col-lg-6 {
+            margin-bottom: 1rem;
+        }
+        
+        h3 {
+            font-size: 1.3rem !important;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .facturacion-hero {
+            padding: 1rem;
+        }
+        
+        .facturacion-hero h1 {
+            font-size: 1.3rem !important;
+        }
+        
+        .facturacion-hero h1 i {
+            display: none;
+        }
+        
+        .btn-volver i {
+            display: none;
+        }
+        
+        .maestra-card {
+            padding: 1.25rem;
+        }
+        
+        .maestra-card i {
+            font-size: 2rem;
+        }
+        
+        .maestra-card h4 {
+            font-size: 1rem;
+        }
+        
+        .maestra-card p {
+            font-size: 0.8rem;
+        }
+        
+        h3 {
+            font-size: 1.2rem !important;
+        }
+        
+        h3 i {
+            display: none;
+        }
+    }
 </style>
 
 <div class="container py-5">
