@@ -3540,15 +3540,27 @@ def facturacion_pacientes_pendientes():
     conn = get_db_connection()
     
     # Construir query con filtros opcionales
-    query = '''
-        SELECT fd.*, m.nombre as medico_nombre, a.nombre_ars, 
-               COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
-        FROM facturas_detalle fd
-        JOIN medicos m ON fd.medico_id = m.id
-        JOIN ars a ON fd.ars_id = a.id
-        LEFT JOIN pacientes p ON fd.paciente_id = p.id
-        WHERE fd.estado = %s
-    '''
+    # NOTA: Para pendientes usamos medico_consulta, para facturados usamos medico_id
+    if estado == 'pendiente':
+        query = '''
+            SELECT fd.*, m.nombre as medico_nombre, a.nombre_ars, 
+                   COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
+            FROM facturas_detalle fd
+            LEFT JOIN medicos m ON fd.medico_consulta = m.id
+            JOIN ars a ON fd.ars_id = a.id
+            LEFT JOIN pacientes p ON fd.paciente_id = p.id
+            WHERE fd.estado = %s
+        '''
+    else:
+        query = '''
+            SELECT fd.*, m.nombre as medico_nombre, a.nombre_ars, 
+                   COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
+            FROM facturas_detalle fd
+            LEFT JOIN medicos m ON fd.medico_id = m.id
+            JOIN ars a ON fd.ars_id = a.id
+            LEFT JOIN pacientes p ON fd.paciente_id = p.id
+            WHERE fd.estado = %s
+        '''
     params = [estado]
     
     # Si el usuario tiene rol "Registro de Facturas", filtrar solo sus pacientes
@@ -3557,7 +3569,11 @@ def facturacion_pacientes_pendientes():
         params.append(current_user.email)
     
     if medico_id:
-        query += ' AND fd.medico_id = %s'
+        # Filtrar por el campo correspondiente según el estado
+        if estado == 'pendiente':
+            query += ' AND fd.medico_consulta = %s'
+        else:
+            query += ' AND fd.medico_id = %s'
         params.append(medico_id)
     
     if ars_id:
@@ -3621,15 +3637,27 @@ def facturacion_pacientes_pendientes_pdf():
     conn = get_db_connection()
     
     # Construir query con filtros opcionales (mismo que la vista)
-    query = '''
-        SELECT fd.*, m.nombre as medico_nombre, a.nombre_ars, 
-               COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
-        FROM facturas_detalle fd
-        JOIN medicos m ON fd.medico_id = m.id
-        JOIN ars a ON fd.ars_id = a.id
-        LEFT JOIN pacientes p ON fd.paciente_id = p.id
-        WHERE fd.estado = %s
-    '''
+    # NOTA: Para pendientes usamos medico_consulta, para facturados usamos medico_id
+    if estado == 'pendiente':
+        query = '''
+            SELECT fd.*, m.nombre as medico_nombre, a.nombre_ars, 
+                   COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
+            FROM facturas_detalle fd
+            LEFT JOIN medicos m ON fd.medico_consulta = m.id
+            JOIN ars a ON fd.ars_id = a.id
+            LEFT JOIN pacientes p ON fd.paciente_id = p.id
+            WHERE fd.estado = %s
+        '''
+    else:
+        query = '''
+            SELECT fd.*, m.nombre as medico_nombre, a.nombre_ars, 
+                   COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
+            FROM facturas_detalle fd
+            LEFT JOIN medicos m ON fd.medico_id = m.id
+            JOIN ars a ON fd.ars_id = a.id
+            LEFT JOIN pacientes p ON fd.paciente_id = p.id
+            WHERE fd.estado = %s
+        '''
     params = [estado]
     
     # Si el usuario tiene rol "Registro de Facturas", filtrar solo sus pacientes
@@ -3638,7 +3666,11 @@ def facturacion_pacientes_pendientes_pdf():
         params.append(current_user.email)
     
     if medico_id:
-        query += ' AND fd.medico_id = %s'
+        # Filtrar por el campo correspondiente según el estado
+        if estado == 'pendiente':
+            query += ' AND fd.medico_consulta = %s'
+        else:
+            query += ' AND fd.medico_id = %s'
         params.append(medico_id)
     
     if ars_id:
@@ -3926,7 +3958,7 @@ def facturacion_pacientes_agregados_pdf():
         SELECT fd.*, m.nombre as medico_nombre, m.email as medico_email, m.especialidad as medico_especialidad, 
                a.nombre_ars, COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
         FROM facturas_detalle fd
-        JOIN medicos m ON fd.medico_id = m.id
+        LEFT JOIN medicos m ON fd.medico_consulta = m.id
         JOIN ars a ON fd.ars_id = a.id
         LEFT JOIN pacientes p ON fd.paciente_id = p.id
         WHERE fd.id IN ({placeholders})
@@ -3939,7 +3971,7 @@ def facturacion_pacientes_agregados_pdf():
         return redirect(url_for('facturacion_pacientes_pendientes'))
     
     # Obtener datos del médico ANTES de cerrar la conexión
-    medico_id = pendientes[0]['medico_id']
+    medico_consulta_id = pendientes[0]['medico_consulta']
     medico_nombre = pendientes[0]['medico_nombre']
     medico_email = pendientes[0]['medico_email']
     medico_especialidad = pendientes[0]['medico_especialidad']
