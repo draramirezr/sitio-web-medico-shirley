@@ -4953,6 +4953,11 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None)
     elements = []
     styles = getSampleStyleSheet()
     
+    # Definir constante de paginación
+    REGISTROS_POR_PAGINA = 20
+    total_pacientes = len(pacientes)
+    total_paginas_estimadas = (total_pacientes + REGISTROS_POR_PAGINA - 1) // REGISTROS_POR_PAGINA if total_pacientes > 0 else 1
+    
     # Preparar datos del footer para el callback
     footer_data = {}
     if pacientes and len(pacientes) > 0:
@@ -4961,8 +4966,12 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None)
         footer_data['medico_cedula'] = pacientes[0]['medico_cedula'] if 'medico_cedula' in pacientes[0].keys() and pacientes[0]['medico_cedula'] else ''
         footer_data['medico_exequatur'] = pacientes[0]['medico_exequatur'] if 'medico_exequatur' in pacientes[0].keys() and pacientes[0]['medico_exequatur'] else ''
     
-    # Función para dibujar el footer en cada página
+    # Función para dibujar el footer solo en la última página
     def agregar_footer(canvas, doc):
+        # Solo dibujar en la última página
+        if doc.page != total_paginas_estimadas:
+            return
+        
         canvas.saveState()
         
         # Línea de firma a la izquierda (arriba del footer)
