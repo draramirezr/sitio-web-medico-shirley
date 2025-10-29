@@ -4213,15 +4213,15 @@ def facturacion_facturas_nueva():
                     servicio_id = cursor.lastrowid
                 
                 # Insertar registro PENDIENTE (sin factura_id)
-                # medico_id: Médico que FACTURA (se asignará al generar la factura)
+                # medico_id: Médico que FACTURA (NULL - se asignará al generar la factura)
                 # medico_consulta: Médico que ATENDIÓ al paciente (el seleccionado en el formulario)
                 cursor.execute('''
                     INSERT INTO facturas_detalle 
                     (paciente_id, nss, nombre_paciente, fecha_servicio, autorizacion, 
                      servicio_id, descripcion_servicio, monto, medico_id, medico_consulta, ars_id, estado)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pendiente')
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NULL, %s, %s, 'pendiente')
                 ''', (paciente_id, nss, nombre, fecha_servicio, autorizacion, 
-                     servicio_id, servicio_desc, monto, medico_id, medico_id, ars_id))
+                     servicio_id, servicio_desc, monto, medico_id, ars_id))
                 
                 # Guardar el ID del registro creado
                 ids_creados.append(cursor.lastrowid)
@@ -4874,12 +4874,12 @@ def facturacion_generar_final():
             UPDATE ncf SET ultimo_numero = %s WHERE id = %s
         ''', (proximo_numero, ncf_id))
         
-        # Actualizar pacientes a facturados
+        # Actualizar pacientes a facturados y asignar el médico que factura
         cursor.execute(f'''
             UPDATE facturas_detalle 
-            SET factura_id = %s, estado = 'facturado'
+            SET factura_id = %s, estado = 'facturado', medico_id = %s
             WHERE id IN ({placeholders})
-        ''', [factura_id] + ids_list)
+        ''', [factura_id, medico_id] + ids_list)
         
         conn.commit()
         
