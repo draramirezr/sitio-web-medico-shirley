@@ -5329,6 +5329,7 @@ def facturacion_dashboard():
         if ars_id:
             query_facturas += ' AND f.ars_id = %s'
             params_facturas.append(ars_id)
+    else:
         # Contar facturas normalmente
         query_facturas = '''
             SELECT COUNT(*) as total FROM facturas 
