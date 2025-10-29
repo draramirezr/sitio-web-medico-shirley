@@ -940,6 +940,47 @@ window.addEventListener('DOMContentLoaded', function() {
     }, 500);
 });
 {% endif %}
+
+// ========== PREVENIR ENTER NORMAL, PERMITIR CTRL+ENTER ==========
+document.addEventListener('keydown', function(e) {
+    // Si es Enter dentro de la tabla de pacientes
+    if (e.key === 'Enter' && e.target.closest('#tbody-lineas')) {
+        // Si es SOLO Enter (sin Ctrl/Cmd) -> PREVENIR envío del formulario
+        if (!e.ctrlKey && !e.metaKey) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Si es Ctrl+Enter o Cmd+Enter -> Agregar línea
+        if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            agregarLinea();
+            
+            // Mostrar feedback visual
+            const btnAgregar = document.querySelector('.btn-agregar-linea');
+            if (btnAgregar) {
+                btnAgregar.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    btnAgregar.style.transform = '';
+                }, 150);
+            }
+            return false;
+        }
+    }
+});
+
+// Prevenir que Enter en campos del formulario envíe el formulario
+document.querySelectorAll('#formFactura input, #formFactura select').forEach(input => {
+    input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
+            e.preventDefault();
+            return false;
+        }
+    });
+});
+
+// Agregar primera línea al cargar la página
+window.addEventListener('DOMContentLoaded', agregarLinea);
 </script>
 {% endblock %}
 
