@@ -5,16 +5,225 @@
 
 {% block content %}
 <style>
+    /* ========== ESTILOS DE IMPRESIÓN ========== */
     @media print {
-        .no-print {
+        /* Ocultar elementos no imprimibles */
+        .no-print, 
+        nav, 
+        .navbar,
+        footer,
+        .btn,
+        button,
+        a.btn-accion,
+        a.btn-volver,
+        .btn-email {
             display: none !important;
         }
+        
+        /* Reset de página */
+        @page {
+            size: letter;
+            margin: 0.5in;
+        }
+        
+        body {
+            background: white !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        /* Container de factura optimizado para impresión */
         .factura-container {
             box-shadow: none !important;
             border: none !important;
+            border-radius: 0 !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            page-break-after: auto;
+        }
+        
+        /* Header de la factura */
+        .factura-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #CEB0B7;
+        }
+        
+        .factura-logo {
+            max-width: 100px !important;
+            height: auto;
+        }
+        
+        .factura-title {
+            font-size: 1.8rem !important;
+            color: #000 !important;
+        }
+        
+        .factura-title-small {
+            font-size: 0.65rem !important;
+            color: #666 !important;
+        }
+        
+        /* Info boxes para impresión */
+        .factura-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            page-break-inside: avoid;
+        }
+        
+        .info-box {
+            background: white !important;
+            border: 1px solid #CEB0B7 !important;
+            border-radius: 5px;
+            padding: 0.6rem;
+        }
+        
+        .info-box h6 {
+            color: #000 !important;
+            font-size: 0.75rem !important;
+            margin-bottom: 0.3rem !important;
+        }
+        
+        .info-box p {
+            font-size: 0.75rem !important;
+            color: #000 !important;
+            margin: 0.15rem 0 !important;
+        }
+        
+        .info-box .highlight {
+            color: #000 !important;
+            font-size: 0.9rem !important;
+        }
+        
+        /* Tabla optimizada para impresión */
+        .tabla-factura {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.75rem !important;
+            page-break-inside: auto;
+        }
+        
+        .tabla-factura thead {
+            background: #CEB0B7 !important;
+            color: white !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        
+        .tabla-factura th {
+            padding: 0.5rem 0.3rem !important;
+            font-size: 0.7rem !important;
+            font-weight: 700 !important;
+            border: 1px solid #999 !important;
+        }
+        
+        .tabla-factura td {
+            padding: 0.4rem 0.3rem !important;
+            font-size: 0.7rem !important;
+            border: 1px solid #ddd !important;
+            page-break-inside: avoid;
+        }
+        
+        .tabla-factura tbody tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+        
+        .tabla-factura tbody tr:hover {
+            background-color: transparent !important;
+        }
+        
+        /* Totales para impresión */
+        .totales-section {
+            margin-top: 1rem;
+            border-top: 2px solid #000;
+            padding-top: 0.5rem;
+            page-break-inside: avoid;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: flex-end;
+            padding: 0.3rem 0;
+            font-size: 0.85rem !important;
+        }
+        
+        .total-row.total {
+            font-size: 1.1rem !important;
+            font-weight: 800 !important;
+            color: #000 !important;
+            border-top: 2px solid #000;
+            padding-top: 0.5rem;
+            margin-top: 0.3rem;
+        }
+        
+        .total-label {
+            width: 120px;
+            text-align: right;
+            margin-right: 1.5rem;
+            font-weight: 700 !important;
+        }
+        
+        .total-value {
+            width: 120px;
+            text-align: right;
+            font-weight: 600 !important;
+        }
+        
+        /* Footer para impresión */
+        .footer-factura {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #ddd;
+            font-size: 0.7rem !important;
+            page-break-inside: avoid;
+        }
+        
+        .footer-factura p {
+            margin: 0.2rem 0;
+            color: #666 !important;
+        }
+        
+        .footer-factura strong {
+            color: #000 !important;
+        }
+        
+        /* Firma */
+        .firma-section {
+            display: block !important;
+            margin-top: 3rem;
+            margin-left: 1rem;
+            page-break-inside: avoid;
+        }
+        
+        .firma-linea {
+            width: 200px;
+            border-top: 1px solid #000;
+            margin-bottom: 0.3rem;
+        }
+        
+        .firma-nombre {
+            font-size: 0.75rem;
+            color: #000;
+            font-weight: 600;
+        }
+        
+        /* Forzar colores en impresión */
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
     }
     
+    /* ========== ESTILOS NORMALES (PANTALLA) ========== */
     .factura-container {
         background: white;
         max-width: 900px;
@@ -384,6 +593,12 @@
                 <div class="total-label">TOTAL:</div>
                 <div class="total-value">{{ total|formato_moneda }}</div>
             </div>
+        </div>
+
+        <!-- Firma (solo visible en impresión) -->
+        <div class="firma-section" style="display: none;">
+            <div class="firma-linea"></div>
+            <div class="firma-nombre">Dra. Shirley Ramírez</div>
         </div>
 
         <!-- Footer -->
