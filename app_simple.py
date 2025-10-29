@@ -878,7 +878,8 @@ def init_db():
             servicio_id INTEGER NOT NULL,
             descripcion_servicio TEXT NOT NULL,
             monto REAL NOT NULL,
-            medico_id INTEGER NOT NULL,
+            medico_id INTEGER,
+            medico_consulta INTEGER NOT NULL,
             ars_id INTEGER NOT NULL,
             estado VARCHAR(50) DEFAULT 'pendiente',
             activo BOOLEAN DEFAULT 1,
@@ -887,6 +888,7 @@ def init_db():
             FOREIGN KEY (paciente_id) REFERENCES pacientes(id),
             FOREIGN KEY (servicio_id) REFERENCES tipos_servicios(id),
             FOREIGN KEY (medico_id) REFERENCES medicos(id),
+            FOREIGN KEY (medico_consulta) REFERENCES medicos(id),
             FOREIGN KEY (ars_id) REFERENCES ars(id)
         )
     '''))
