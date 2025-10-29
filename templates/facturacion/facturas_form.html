@@ -139,6 +139,27 @@
         color: white;
     }
     
+    .btn-agregar-linea-mini {
+        background: white;
+        border: 2px solid #CEB0B7;
+        color: #CEB0B7;
+        border-radius: 5px;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.75rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-agregar-linea-mini:hover {
+        background: #CEB0B7;
+        color: white;
+        transform: translateY(-1px);
+    }
+    
+    /* Gap para espaciado entre botones */
+    .gap-2 {
+        gap: 0.5rem;
+    }
+    
     .btn-guardar-factura {
         background: white;
         border: 2px solid var(--primary-color);
@@ -451,9 +472,14 @@ function agregarLinea() {
                    onchange="calcularTotal()">
         </td>
         <td class="text-center">
-            <button type="button" class="btn btn-eliminar-linea" onclick="eliminarLinea(${numeroLinea})">
-                <i class="fas fa-trash"></i>
-            </button>
+            <div class="d-flex justify-content-center gap-2">
+                <button type="button" class="btn btn-agregar-linea-mini" onclick="agregarLinea()" title="Agregar línea nueva (Ctrl+Enter)">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button type="button" class="btn btn-eliminar-linea" onclick="eliminarLinea(${numeroLinea})" title="Eliminar línea">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
         </td>
     `;
     
@@ -773,9 +799,14 @@ async function procesarExcel(input) {
                            onchange="calcularTotal()">
                 </td>
                 <td class="text-center">
-                    <button type="button" class="btn btn-eliminar-linea" onclick="eliminarLinea(${numeroLinea})">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-agregar-linea-mini" onclick="agregarLinea()" title="Agregar línea nueva (Ctrl+Enter)">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button type="button" class="btn btn-eliminar-linea" onclick="eliminarLinea(${numeroLinea})" title="Eliminar línea">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </td>
             `;
             
