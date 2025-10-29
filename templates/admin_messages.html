@@ -1,6 +1,6 @@
-{% extends "base.html" %}
+ï»¿{% extends "base.html" %}
 
-{% block title %}Gestión de Mensajes - Panel Admin | Dra. Shirley Ramírez{% endblock %}
+{% block title %}Gestiï¿½n de Mensajes - Panel Admin | Dra. Shirley Ramï¿½rez{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
@@ -161,7 +161,7 @@
             <div>
                 <h1 class="admin-page-title mb-2">
                     <i class="fas fa-envelope-open-text me-2"></i>
-                    Gestión de Mensajes
+                    Gestiï¿½n de Mensajes
                 </h1>
                 <p class="text-muted mb-0">Responde a consultas y contactos de pacientes</p>
             </div>
@@ -179,7 +179,7 @@
             <div class="card message-card {% if not message['read'] %}message-unread{% endif %}">
                 <div class="card-body">
                     <div class="row align-items-center">
-                        <!-- Información del Remitente -->
+                        <!-- Informaciï¿½n del Remitente -->
                         <div class="col-lg-4 mb-3 mb-lg-0">
                             <h5 class="mb-2">
                                 <i class="fas fa-user me-2"></i>
@@ -196,7 +196,7 @@
                                 {% if message['phone'] %}
                                 <div class="mb-1">
                                     <i class="fas fa-phone me-2"></i>
-                                    <strong>Teléfono:</strong> {{ message['phone'] }}
+                                    <strong>Telï¿½fono:</strong> {{ message['phone'] }}
                                 </div>
                                 {% endif %}
                             </div>
@@ -221,7 +221,7 @@
                         <!-- Acciones -->
                         <div class="col-lg-3">
                             <div class="d-grid gap-2">
-                                <!-- Botón de WhatsApp (si tiene teléfono) -->
+                                <!-- Botï¿½n de WhatsApp (si tiene telï¿½fono) -->
                                 {% if message['phone'] %}
                                 <a href="https://wa.me/{{ message['phone']|replace('(', '')|replace(')', '')|replace('-', '')|replace(' ', '') }}?text=Hola%20{{ message['name']|replace(' ', '%20') }},%20soy%20la%20Dra.%20Shirley%20Ram%C3%ADrez.%20Te%20contacto%20en%20relaci%C3%B3n%20a%20tu%20mensaje." 
                                    class="btn whatsapp-btn btn-sm" 
@@ -232,7 +232,7 @@
                                 </a>
                                 {% endif %}
 
-                                <!-- Botón de Email -->
+                                <!-- Botï¿½n de Email -->
                                 <a href="mailto:{{ message['email'] }}?subject=Re: {{ message['subject'] }}" 
                                    class="btn btn-sm btn-outline-primary"
                                    title="Responder por Email">
@@ -240,17 +240,17 @@
                                     Responder Email
                                 </a>
 
-                                <!-- Botón Ver Detalles -->
+                                <!-- Botï¿½n Ver Detalles -->
                                 <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#messageModal{{ message['id'] }}">
                                     <i class="fas fa-eye me-2"></i>
                                     Ver Completo
                                 </button>
 
-                                <!-- Marcar como leído -->
+                                <!-- Marcar como leï¿½do -->
                                 {% if not message['read'] %}
                                 <button class="btn btn-sm btn-outline-success mark-read-btn" data-message-id="{{ message['id'] }}">
                                     <i class="fas fa-check me-2"></i>
-                                    Marcar como Leído
+                                    Marcar como Leï¿½do
                                 </button>
                                 {% endif %}
                             </div>
@@ -282,7 +282,7 @@
                         </div>
                         {% if message['phone'] %}
                         <div class="mb-3">
-                            <strong><i class="fas fa-phone me-2"></i>Teléfono:</strong><br>
+                            <strong><i class="fas fa-phone me-2"></i>Telï¿½fono:</strong><br>
                             {{ message['phone'] }}
                         </div>
                         {% endif %}
@@ -297,7 +297,7 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            <strong><i class="fas fa-calendar-alt me-2"></i>Fecha de Recepción:</strong><br>
+                            <strong><i class="fas fa-calendar-alt me-2"></i>Fecha de Recepciï¿½n:</strong><br>
                             {{ message['created_at'] }}
                         </div>
                     </div>
@@ -340,7 +340,7 @@
                         </div>
                         <div class="col-md-6">
                             <h4 class="text-success">{{ messages|selectattr('6')|list|length }}</h4>
-                            <p>Leídos</p>
+                            <p>Leï¿½dos</p>
                         </div>
                     </div>
                 </div>
@@ -350,19 +350,19 @@
     {% else %}
     <div class="alert alert-info">
         <i class="fas fa-info-circle me-2"></i>
-        No hay mensajes todavía.
+        No hay mensajes todavï¿½a.
     </div>
     {% endif %}
 </div>
 
 <script>
-// Marcar mensajes como leídos
+// Marcar mensajes como leï¿½dos
 document.querySelectorAll('.mark-read-btn').forEach(button => {
     button.addEventListener('click', function() {
         const messageId = this.getAttribute('data-message-id');
         const btn = this;
         
-        // Deshabilitar botón para evitar clicks múltiples
+        // Deshabilitar botï¿½n para evitar clicks mï¿½ltiples
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
         
@@ -382,19 +382,19 @@ document.querySelectorAll('.mark-read-btn').forEach(button => {
         })
         .then(data => {
             if (data.success) {
-                // Recargar la página para mostrar el cambio
+                // Recargar la pï¿½gina para mostrar el cambio
                 location.reload();
             } else {
-                alert('Error al marcar como leído');
+                alert('Error al marcar como leï¿½do');
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-check me-2"></i>Marcar como Leído';
+                btn.innerHTML = '<i class="fas fa-check me-2"></i>Marcar como Leï¿½do';
             }
         })
         .catch(error => {
             console.error('Error:', error);
             alert('Error al procesar la solicitud. Por favor, intenta de nuevo.');
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-check me-2"></i>Marcar como Leído';
+            btn.innerHTML = '<i class="fas fa-check me-2"></i>Marcar como Leï¿½do';
         });
     });
 });

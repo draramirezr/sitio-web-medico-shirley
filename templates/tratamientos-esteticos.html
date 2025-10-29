@@ -1,16 +1,16 @@
-{% extends "base.html" %}
+ï»¿{% extends "base.html" %}
 
-{% block title %}Tratamientos Estéticos Ginecológicos en Santo Domingo | Dra. Shirley Ramírez{% endblock %}
+{% block title %}Tratamientos Estï¿½ticos Ginecolï¿½gicos en Santo Domingo | Dra. Shirley Ramï¿½rez{% endblock %}
 
-{% block description %}Tratamientos estéticos ginecológicos en Santo Domingo: Rejuvenecimiento íntimo, láser vaginal CO2, bioestimuladores, rellenos faciales y corporales, hilos tensores. Tecnología avanzada, resultados naturales. Dra. Shirley Ramírez - Especialista certificada.{% endblock %}
+{% block description %}Tratamientos estï¿½ticos ginecolï¿½gicos en Santo Domingo: Rejuvenecimiento ï¿½ntimo, lï¿½ser vaginal CO2, bioestimuladores, rellenos faciales y corporales, hilos tensores. Tecnologï¿½a avanzada, resultados naturales. Dra. Shirley Ramï¿½rez - Especialista certificada.{% endblock %}
 
-{% block og_title %}Tratamientos Estéticos Ginecológicos - Dra. Shirley Ramírez | Santo Domingo{% endblock %}
-{% block og_description %}Especialista en ginecología estética en Santo Domingo. Rejuvenecimiento íntimo, láser vaginal CO2, bioestimuladores, rellenos. Tecnología de vanguardia y resultados naturales.{% endblock %}
+{% block og_title %}Tratamientos Estï¿½ticos Ginecolï¿½gicos - Dra. Shirley Ramï¿½rez | Santo Domingo{% endblock %}
+{% block og_description %}Especialista en ginecologï¿½a estï¿½tica en Santo Domingo. Rejuvenecimiento ï¿½ntimo, lï¿½ser vaginal CO2, bioestimuladores, rellenos. Tecnologï¿½a de vanguardia y resultados naturales.{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/admin-responsive.css') }}">
 <style>
-    /* Iconos de marca decorativos - Tratamientos Estéticos */
+    /* Iconos de marca decorativos - Tratamientos Estï¿½ticos */
     .container.py-5 {
         position: relative;
     }
@@ -64,10 +64,10 @@
     <div class="row mb-5">
         <div class="col-lg-10 mx-auto text-center">
             <h1 class="display-4 fw-bold mb-4" style="color: var(--title-color);">
-                Tratamientos Estéticos Ginecológicos
+                Tratamientos Estï¿½ticos Ginecolï¿½gicos
             </h1>
             <p class="lead text-muted fs-5">
-                Tecnología láser de última generación para tu bienestar íntimo
+                Tecnologï¿½a lï¿½ser de ï¿½ltima generaciï¿½n para tu bienestar ï¿½ntimo
             </p>
             <div class="mt-4">
                 <a href="{{ url_for('services') }}" class="btn btn-outline-secondary btn-lg px-5">
@@ -87,12 +87,12 @@
                     <!-- Barra decorativa superior -->
                     <div class="treatment-bar"></div>
                     
-                    <!-- Título -->
+                    <!-- Tï¿½tulo -->
                     <h5 class="card-title mb-3" style="color: var(--title-color); font-weight: 600; min-height: 60px; line-height: 1.3;">
                         {{ treatment.name }}
                     </h5>
                     
-                    <!-- Descripción con bullets elegantes -->
+                    <!-- Descripciï¿½n con bullets elegantes -->
                     <div class="treatment-description text-muted">
                         {% set benefits = treatment.description.split('\n') %}
                         <ul class="list-unstyled">
@@ -115,9 +115,9 @@
         <div class="col-lg-8 mx-auto text-center">
             <div class="card shadow-lg" style="background: var(--gradient-primary); border: none;">
                 <div class="card-body p-5">
-                    <h3 class="text-white mb-3">¿Interesada en algún tratamiento?</h3>
+                    <h3 class="text-white mb-3">ï¿½Interesada en algï¿½n tratamiento?</h3>
                     <p class="text-white mb-4">
-                        Agenda tu consulta personalizada y descubre la mejor opción para ti.
+                        Agenda tu consulta personalizada y descubre la mejor opciï¿½n para ti.
                     </p>
                     <a href="{{ url_for('request_appointment') }}" class="btn btn-light btn-lg px-5">
                         <i class="fas fa-calendar-check me-2"></i>
@@ -159,7 +159,7 @@
         z-index: 10;
     }
     
-    /* Número decorativo */
+    /* Nï¿½mero decorativo */
     .treatment-number {
         position: absolute;
         top: 15px;

@@ -1,6 +1,6 @@
-{% extends "base.html" %}
+ï»¿{% extends "base.html" %}
 
-{% block title %}Maestra de Código ARS - Facturación{% endblock %}
+{% block title %}Maestra de Cï¿½digo ARS - Facturaciï¿½n{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
@@ -170,13 +170,13 @@
             <div>
                 <h1 style="color: var(--primary-color); font-weight: 800; font-size: 2rem; margin-bottom: 0.5rem;">
                     <i class="fas fa-barcode me-2"></i>
-                    Maestra de Código ARS
+                    Maestra de Cï¿½digo ARS
                 </h1>
-                <p class="text-muted mb-0">Códigos de médicos por cada ARS</p>
+                <p class="text-muted mb-0">Cï¿½digos de mï¿½dicos por cada ARS</p>
             </div>
             <div class="d-flex gap-2">
                 <a href="{{ url_for('facturacion_codigo_ars_nuevo') }}" class="btn btn-nuevo">
-                    <i class="fas fa-plus me-2"></i>Nuevo Código
+                    <i class="fas fa-plus me-2"></i>Nuevo Cï¿½digo
                 </a>
                 <a href="{{ url_for('facturacion_menu') }}" class="btn btn-volver">
                     <i class="fas fa-arrow-left me-2"></i>Volver
@@ -185,12 +185,12 @@
         </div>
     </div>
 
-    <!-- Búsqueda -->
+    <!-- Bï¿½squeda -->
     <div class="search-box">
         <form method="GET" action="{{ url_for('facturacion_codigo_ars') }}">
             <div class="row">
                 <div class="col-md-10">
-                    <input type="text" name="search" class="form-control" placeholder="Buscar por médico, ARS o código..." value="{{ search }}" style="border-radius: 10px;">
+                    <input type="text" name="search" class="form-control" placeholder="Buscar por mï¿½dico, ARS o cï¿½digo..." value="{{ search }}" style="border-radius: 10px;">
                 </div>
                 <div class="col-md-2">
                     <button type="submit" class="btn btn-primary w-100" style="border-radius: 10px; background: var(--primary-color); border: none;">
@@ -209,7 +209,7 @@
                 <thead>
                     <tr>
                         <th style="width: 50%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">ARS</th>
-                        <th style="width: 25%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Código</th>
+                        <th style="width: 25%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Cï¿½digo</th>
                         <th style="width: 25%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Acciones</th>
                     </tr>
                 </thead>
@@ -223,7 +223,7 @@
                                 <i class="fas fa-edit"></i> Editar
                             </a>
                             <form method="POST" action="{{ url_for('facturacion_codigo_ars_eliminar', codigo_id=codigo['id']) }}" style="display: inline;" 
-                                  onsubmit="return confirm('¿Estás segura de eliminar este código?');">
+                                  onsubmit="return confirm('ï¿½Estï¿½s segura de eliminar este cï¿½digo?');">
                                 <button type="submit" class="btn btn-action btn-eliminar">
                                     <i class="fas fa-trash"></i> Eliminar
                                 </button>
@@ -239,7 +239,7 @@
             <i class="fas fa-inbox" style="font-size: 3rem; color: var(--text-muted); opacity: 0.5;"></i>
             <p class="text-muted mt-3">No se encontraron registros</p>
             <a href="{{ url_for('facturacion_codigo_ars_nuevo') }}" class="btn btn-nuevo mt-2">
-                <i class="fas fa-plus me-2"></i>Crear primer código
+                <i class="fas fa-plus me-2"></i>Crear primer cï¿½digo
             </a>
         </div>
         {% endif %}

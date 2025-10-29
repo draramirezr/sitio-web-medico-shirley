@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+ï»¿{% extends "base.html" %}
 
 {% block title %}Factura #{{ factura['id'] }}{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
@@ -307,15 +307,15 @@
             <img src="{{ url_for('static', filename='logos/logo-dra-shirley.png') }}" alt="Logo" class="factura-logo">
             <div class="factura-title-center">
                 <h1 class="factura-title">FACTURA</h1>
-                <div class="factura-title-small">CRÉDITO FISCAL #{{ factura['id'] }}</div>
+                <div class="factura-title-small">CRï¿½DITO FISCAL #{{ factura['id'] }}</div>
             </div>
             <div style="width: 120px;"></div>
         </div>
 
-        <!-- Información Principal en 3 Columnas -->
+        <!-- Informaciï¿½n Principal en 3 Columnas -->
         <div class="factura-info">
             <div class="info-box">
-                <h6>Información de Factura</h6>
+                <h6>Informaciï¿½n de Factura</h6>
                 <p><strong>Fecha:</strong> {{ factura['fecha_factura'] }}</p>
                 <p><strong>Cliente (ARS):</strong> {{ factura['nombre_ars'] }}</p>
                 {% if factura['ars_rnc'] %}
@@ -329,16 +329,16 @@
                 <p><strong>Tipo:</strong> {{ factura['ncf_tipo'] }}</p>
                 {% endif %}
                 {% if factura['ncf_fecha_fin'] %}
-                <p><strong>Válido hasta:</strong> {{ factura['ncf_fecha_fin'] }}</p>
+                <p><strong>Vï¿½lido hasta:</strong> {{ factura['ncf_fecha_fin'] }}</p>
                 {% endif %}
             </div>
             <div class="info-box">
-                <h6>Información del Médico</h6>
-                <p style="margin-bottom: 0.1rem;"><strong>Médico:</strong> {{ factura['medico_nombre'] }}</p>
+                <h6>Informaciï¿½n del Mï¿½dico</h6>
+                <p style="margin-bottom: 0.1rem;"><strong>Mï¿½dico:</strong> {{ factura['medico_nombre'] }}</p>
                 <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem; color: #666;">{{ factura['medico_especialidad'] }}</p>
-                <p><strong>Cédula:</strong> {{ factura['medico_cedula'] }}</p>
+                <p><strong>Cï¿½dula:</strong> {{ factura['medico_cedula'] }}</p>
                 {% if factura['medico_exequatur'] %}
-                <p><strong>Exequátur:</strong> {{ factura['medico_exequatur'] }}</p>
+                <p><strong>Exequï¿½tur:</strong> {{ factura['medico_exequatur'] }}</p>
                 {% endif %}
             </div>
         </div>
@@ -351,7 +351,7 @@
                     <th style="width: 20%;">NOMBRES PACIENTE</th>
                     <th style="width: 12%;">NSS/CONTRATO</th>
                     <th style="width: 10%;">FECHA</th>
-                    <th style="width: 13%;">AUTORIZACIÓN</th>
+                    <th style="width: 13%;">AUTORIZACIï¿½N</th>
                     <th style="width: 25%;">SERVICIO</th>
                     <th style="width: 15%;" class="text-right">V/UNITARIO</th>
                 </tr>
@@ -371,7 +371,7 @@
             </tbody>
         </table>
 
-        <!-- Sección de Totales -->
+        <!-- Secciï¿½n de Totales -->
         <div class="totales-section">
             <div class="total-row subtotal">
                 <div class="total-label">SUB-TOTAL:</div>
@@ -389,17 +389,17 @@
 
         <!-- Footer -->
         <div class="footer-factura">
-            <p><strong>Dra. Shirley Scarlett Ramírez Montero</strong></p>
-            <p>Ginecóloga/Obstetra | Cédula: 10240 | EXEQUATUR: 014-0020410-1</p>
-            <p>Centro Oriental de Ginecología y Obstetricia, Zona Oriental, República Dominicana</p>
+            <p><strong>Dra. Shirley Scarlett Ramï¿½rez Montero</strong></p>
+            <p>Ginecï¿½loga/Obstetra | Cï¿½dula: 10240 | EXEQUATUR: 014-0020410-1</p>
+            <p>Centro Oriental de Ginecologï¿½a y Obstetricia, Zona Oriental, Repï¿½blica Dominicana</p>
         </div>
     </div>
 
-    <!-- Botones de Acción -->
+    <!-- Botones de Acciï¿½n -->
     <div class="no-print" style="max-width: 900px; margin: 2rem auto; text-align: center;">
         <a href="{{ url_for('facturacion_historico') }}" class="btn-volver">
             <i class="fas fa-arrow-left me-2"></i>
-            Volver al Histórico
+            Volver al Histï¿½rico
         </a>
         <a href="{{ url_for('facturacion_descargar_pdf', factura_id=factura['id']) }}" class="btn-accion">
             <i class="fas fa-file-pdf me-2"></i>
@@ -439,16 +439,16 @@
                                placeholder="correo@ejemplo.com">
                         <div class="form-text">
                             <i class="fas fa-info-circle me-1"></i>
-                            Por defecto se enviará al email del médico. Puedes cambiarlo si lo deseas.
+                            Por defecto se enviarï¿½ al email del mï¿½dico. Puedes cambiarlo si lo deseas.
                         </div>
                     </div>
                     
                     <div class="alert alert-info mb-0" style="background-color: rgba(206, 176, 183, 0.1); border-color: #CEB0B7; color: #666;">
-                        <strong><i class="fas fa-file-pdf me-1"></i> Se adjuntará:</strong><br>
+                        <strong><i class="fas fa-file-pdf me-1"></i> Se adjuntarï¿½:</strong><br>
                         <small>
-                            • Factura #{{ factura['id'] }}<br>
-                            • NCF: {{ factura['ncf_numero'] if factura['ncf_numero'] else factura['ncf'] }}<br>
-                            • Total: {{ total|formato_moneda }}
+                            ï¿½ Factura #{{ factura['id'] }}<br>
+                            ï¿½ NCF: {{ factura['ncf_numero'] if factura['ncf_numero'] else factura['ncf'] }}<br>
+                            ï¿½ Total: {{ total|formato_moneda }}
                         </small>
                     </div>
                 </div>

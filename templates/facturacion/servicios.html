@@ -1,6 +1,6 @@
-{% extends "base.html" %}
+ï»¿{% extends "base.html" %}
 
-{% block title %}Maestra de Tipos de Servicios - Facturación{% endblock %}
+{% block title %}Maestra de Tipos de Servicios - Facturaciï¿½n{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
@@ -54,7 +54,7 @@
     }
     
     .table-facturacion table {
-        min-width: 800px; /* Ancho mínimo para servicios */
+        min-width: 800px; /* Ancho mï¿½nimo para servicios */
     }
     
     .table-facturacion th {
@@ -166,7 +166,7 @@
                     <i class="fas fa-clipboard-list me-2"></i>
                     Maestra de Tipos de Servicios
                 </h1>
-                <p class="text-muted mb-0">Catálogo de servicios médicos del consultorio</p>
+                <p class="text-muted mb-0">Catï¿½logo de servicios mï¿½dicos del consultorio</p>
             </div>
             <div class="d-flex gap-2">
                 <a href="{{ url_for('facturacion_servicios_nuevo') }}" class="btn btn-nuevo">
@@ -179,12 +179,12 @@
         </div>
     </div>
 
-    <!-- Búsqueda -->
+    <!-- Bï¿½squeda -->
     <div class="search-box">
         <form method="GET" action="{{ url_for('facturacion_servicios') }}">
             <div class="row">
                 <div class="col-md-10">
-                    <input type="text" name="search" class="form-control" placeholder="Buscar por descripción..." value="{{ search }}" style="border-radius: 10px;">
+                    <input type="text" name="search" class="form-control" placeholder="Buscar por descripciï¿½n..." value="{{ search }}" style="border-radius: 10px;">
                 </div>
                 <div class="col-md-2">
                     <button type="submit" class="btn btn-primary w-100" style="border-radius: 10px; background: var(--primary-color); border: none;">
@@ -203,7 +203,7 @@
             <thead>
                 <tr>
                     <th style="width: 10%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">ID</th>
-                    <th style="width: 60%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Descripción</th>
+                    <th style="width: 60%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Descripciï¿½n</th>
                     <th style="width: 15%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Precio Base</th>
                     <th style="width: 15%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Acciones</th>
                 </tr>
@@ -224,7 +224,7 @@
                                 <i class="fas fa-edit"></i> Editar
                             </a>
                             <form method="POST" action="{{ url_for('facturacion_servicios_eliminar', servicio_id=servicio['id']) }}" style="display: inline; margin: 0;" 
-                                  onsubmit="return confirm('¿Estás segura de eliminar este servicio?');">
+                                  onsubmit="return confirm('ï¿½Estï¿½s segura de eliminar este servicio?');">
                                 <button type="submit" class="btn btn-action btn-eliminar">
                                     <i class="fas fa-trash"></i> Eliminar
                                 </button>

@@ -1,11 +1,11 @@
-{% extends "base.html" %}
+ï»¿{% extends "base.html" %}
 
-{% block title %}Servicios Médicos - Dra. Shirley Ramírez | Ginecología y Obstetricia en Santo Domingo{% endblock %}
+{% block title %}Servicios Mï¿½dicos - Dra. Shirley Ramï¿½rez | Ginecologï¿½a y Obstetricia en Santo Domingo{% endblock %}
 
-{% block description %}Servicios de ginecología y obstetricia en Santo Domingo: Control prenatal, ultrasonido 4D, ginecología general, medicina reproductiva, planificación familiar y más. Tecnología de vanguardia y atención personalizada.{% endblock %}
+{% block description %}Servicios de ginecologï¿½a y obstetricia en Santo Domingo: Control prenatal, ultrasonido 4D, ginecologï¿½a general, medicina reproductiva, planificaciï¿½n familiar y mï¿½s. Tecnologï¿½a de vanguardia y atenciï¿½n personalizada.{% endblock %}
 
-{% block og_title %}Servicios de Ginecología y Obstetricia en Santo Domingo - Dra. Shirley Ramírez{% endblock %}
-{% block og_description %}Servicios especializados: Control prenatal, ultrasonido 4D, medicina reproductiva, ginecología general. Tecnología avanzada y atención humanizada en Santo Domingo.{% endblock %}
+{% block og_title %}Servicios de Ginecologï¿½a y Obstetricia en Santo Domingo - Dra. Shirley Ramï¿½rez{% endblock %}
+{% block og_description %}Servicios especializados: Control prenatal, ultrasonido 4D, medicina reproductiva, ginecologï¿½a general. Tecnologï¿½a avanzada y atenciï¿½n humanizada en Santo Domingo.{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/admin-responsive.css') }}">
@@ -194,7 +194,7 @@
         height: 100%;
     }
     
-    /* Estilos para viñetas en consultas */
+    /* Estilos para viï¿½etas en consultas */
     .service-description {
         font-size: 0.9rem;
         line-height: 1.6;
@@ -232,7 +232,7 @@
         flex-shrink: 0;
     }
     
-    /* Tarjetas Principales (Consultas) - Más destacadas */
+    /* Tarjetas Principales (Consultas) - Mï¿½s destacadas */
     .service-card-main {
         border-left: 5px solid var(--primary-color);
         padding: 2rem !important;
@@ -299,7 +299,7 @@
         color: inherit !important;
     }
     
-    /* Iconos específicos para tarjetas principales */
+    /* Iconos especï¿½ficos para tarjetas principales */
     .service-card-main .service-icon {
         width: 90px !important;
         height: 90px !important;
@@ -332,7 +332,7 @@
         overflow: visible !important;
     }
     
-    /* Tarjetas Secundarias - Más pequeñas y simples */
+    /* Tarjetas Secundarias - Mï¿½s pequeï¿½as y simples */
     .service-card-secondary {
         padding: 1.5rem !important;
         text-align: center;
@@ -379,7 +379,7 @@
         transform: scale(1.15) !important;
     }
     
-    /* Divisor de sección */
+    /* Divisor de secciï¿½n */
     .section-divider {
         width: 80px;
         height: 4px;
@@ -389,7 +389,7 @@
         margin-bottom: 2rem;
     }
     
-    /* Ajustes para tarjeta destacada más grande */
+    /* Ajustes para tarjeta destacada mï¿½s grande */
     .service-card-featured {
         padding: 3rem 2.5rem !important;
     }
@@ -401,7 +401,7 @@
         min-height: 320px;
     }
     
-    /* Ajuste de columnas en viñetas */
+    /* Ajuste de columnas en viï¿½etas */
     .service-bullets {
         margin-bottom: 0.5rem;
     }
@@ -523,8 +523,8 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-10 mx-auto text-center mb-5">
-                <h1 class="display-4 fw-bold mb-3" style="color: var(--title-color);">Servicios Médicos Especializados</h1>
-                <p class="lead text-muted fs-5">Atención integral y personalizada para tu salud y bienestar</p>
+                <h1 class="display-4 fw-bold mb-3" style="color: var(--title-color);">Servicios Mï¿½dicos Especializados</h1>
+                <p class="lead text-muted fs-5">Atenciï¿½n integral y personalizada para tu salud y bienestar</p>
             </div>
         </div>
     </div>
@@ -533,7 +533,7 @@
     <div class="container mb-5">
         <div class="row g-4">
             {% for service in services %}
-                {% if service['name'] == 'Consulta Ginecológica' or service['name'] == 'Consulta Obstétrica' %}
+                {% if service['name'] == 'Consulta Ginecolï¿½gica' or service['name'] == 'Consulta Obstï¿½trica' %}
                 <div class="col-lg-6">
                     <div class="service-card service-card-main">
                         <div class="service-icon">
@@ -541,7 +541,7 @@
                         </div>
                         <h4>{{ service['name'] }}</h4>
                         
-                    <!-- Descripción con viñetas en 2 columnas -->
+                    <!-- Descripciï¿½n con viï¿½etas en 2 columnas -->
                     <div class="service-description text-muted">
                         {% set items = service['description'].split('\n') %}
                         <div class="row">
@@ -574,10 +574,10 @@
         </div>
     </div>
     
-    <!-- Sección Destacada: Tratamientos Estéticos (DESPUÉS) -->
+    <!-- Secciï¿½n Destacada: Tratamientos Estï¿½ticos (DESPUï¿½S) -->
     <div class="container mb-5">
         {% for service in services %}
-            {% if service['name'] == 'Tratamientos Estéticos Ginecológicos' %}
+            {% if service['name'] == 'Tratamientos Estï¿½ticos Ginecolï¿½gicos' %}
             <div class="row">
                 <div class="col-lg-8 mx-auto">
                     <a href="{{ url_for('aesthetic_treatments') }}" class="text-decoration-none service-card-link">
@@ -605,7 +605,7 @@
     <div class="container">
         <div class="row g-4 justify-content-center">
             {% for service in services %}
-                {% if service['name'] != 'Tratamientos Estéticos Ginecológicos' and service['name'] != 'Consulta Ginecológica' and service['name'] != 'Consulta Obstétrica' %}
+                {% if service['name'] != 'Tratamientos Estï¿½ticos Ginecolï¿½gicos' and service['name'] != 'Consulta Ginecolï¿½gica' and service['name'] != 'Consulta Obstï¿½trica' %}
                 <div class="col-lg-4 col-md-6">
                     <div class="service-card service-card-secondary">
                         <div class="service-icon service-icon-small">
