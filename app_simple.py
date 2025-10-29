@@ -4515,27 +4515,35 @@ def procesar_excel():
                 from datetime import datetime
                 fecha = datetime.now().strftime('%Y-%m-%d')
             
-            # ========== VALIDACIÓN 5: AUTORIZACIÓN (Solo números y única) ==========
+            # ========== VALIDACIÓN 5: AUTORIZACIÓN (Alfanumérico y única) ==========
             autorizacion = ''
             if autorizacion_raw:
+                # Convertir a string y limpiar (eliminar espacios en blanco)
+                autorizacion = str(autorizacion_raw).strip().upper()
+                
+                # Si viene como número decimal (ej: 123.0), convertir a entero primero
                 try:
-                    # Convertir a número y luego a string (elimina decimales)
-                    autorizacion = str(int(float(autorizacion_raw)))
-                    
-                    # Validar que solo contenga números
-                    if not autorizacion.isdigit():
-                        errores.append(f'❌ Fila {row_num}: AUTORIZACIÓN "{autorizacion}" solo debe contener números')
-                        continue
-                    
-                    # Validar que sea única
-                    if autorizacion in autorizaciones_usadas:
-                        errores.append(f'❌ Fila {row_num}: AUTORIZACIÓN "{autorizacion}" está duplicada en el Excel')
-                        continue
-                    
-                    autorizaciones_usadas.add(autorizacion)
+                    if '.' in autorizacion and autorizacion.replace('.', '').replace('-', '').isdigit():
+                        autorizacion = str(int(float(autorizacion_raw)))
                 except:
-                    errores.append(f'❌ Fila {row_num}: AUTORIZACIÓN "{autorizacion_raw}" no es un número válido')
+                    pass
+                
+                # Validar que no esté vacío después de limpiar
+                if not autorizacion:
+                    errores.append(f'❌ Fila {row_num}: AUTORIZACIÓN no puede estar vacía')
                     continue
+                
+                # Validar longitud máxima
+                if len(autorizacion) > 50:
+                    errores.append(f'❌ Fila {row_num}: AUTORIZACIÓN "{autorizacion}" supera los 50 caracteres')
+                    continue
+                
+                # Validar que sea única
+                if autorizacion in autorizaciones_usadas:
+                    errores.append(f'❌ Fila {row_num}: AUTORIZACIÓN "{autorizacion}" está duplicada en el Excel')
+                    continue
+                
+                autorizaciones_usadas.add(autorizacion)
             
             # ========== VALIDACIÓN 6: SERVICIO (Sin números) ==========
             servicio = str(servicio_raw).strip().upper() if servicio_raw else 'CONSULTA'
