@@ -5076,53 +5076,93 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None)
         elements.append(info_table)
         elements.append(Spacer(1, 0.2*inch))
     
-    # Tabla de pacientes
-    data = [['No.', 'NOMBRES PACIENTE', 'NSS/CONTRATO', 'FECHA', 'AUTORIZACIÓN', 'SERVICIO', 'V/UNITARIO']]
+    # Tabla de pacientes con paginación (20 registros por página)
+    REGISTROS_POR_PAGINA = 20
+    total_pacientes = len(pacientes)
+    total_paginas = (total_pacientes + REGISTROS_POR_PAGINA - 1) // REGISTROS_POR_PAGINA  # Redondear hacia arriba
     
-    for idx, p in enumerate(pacientes, 1):
-        data.append([
-            str(idx),
-            p['nombre_paciente'],
-            p['nss'],
-            p['fecha_servicio'],
-            p['autorizacion'],
-            p['descripcion_servicio'],
-            formato_moneda(p['monto'])
-        ])
-    
-    # Agregar totales (ITBIS simbólico)
-    subtotal = total
-    total_final = subtotal
-    
-    data.append(['', '', '', '', '', 'SUB-TOTAL:', formato_moneda(subtotal)])
-    data.append(['', '', '', '', '', 'ITBIS:', '*E'])
-    data.append(['', '', '', '', '', 'TOTAL:', formato_moneda(total_final)])
-    
-    table = Table(data, colWidths=[0.5*inch, 2*inch, 1.3*inch, 0.8*inch, 1*inch, 1.5*inch, 1*inch])
-    table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#CEB0B7')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 9),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -4), colors.white),
-        ('GRID', (0, 0), (-1, -4), 0.5, colors.grey),
-        ('FONTSIZE', (0, 1), (-1, -1), 8),
-        # Alineaciones específicas por columna
-        ('ALIGN', (0, 1), (0, -1), 'CENTER'),  # No. centrado
-        ('ALIGN', (1, 1), (1, -4), 'LEFT'),    # NOMBRES PACIENTE a la izquierda
-        ('ALIGN', (2, 1), (2, -4), 'LEFT'),    # NSS/CONTRATO a la izquierda
-        ('ALIGN', (3, 1), (3, -4), 'CENTER'),  # FECHA centrado
-        ('ALIGN', (4, 1), (4, -4), 'CENTER'),  # AUTORIZACIÓN centrado
-        ('ALIGN', (5, 1), (5, -4), 'LEFT'),    # SERVICIO a la izquierda
-        ('ALIGN', (6, 1), (6, -1), 'RIGHT'),   # V/UNITARIO a la derecha
-        ('BACKGROUND', (0, -3), (-1, -1), colors.white),
-        ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, -1), (-1, -1), 10),
-    ]))
-    
-    elements.append(table)
+    for pagina in range(total_paginas):
+        inicio = pagina * REGISTROS_POR_PAGINA
+        fin = min(inicio + REGISTROS_POR_PAGINA, total_pacientes)
+        pacientes_pagina = pacientes[inicio:fin]
+        
+        # Encabezado de la tabla
+        data = [['No.', 'NOMBRES PACIENTE', 'NSS/CONTRATO', 'FECHA', 'AUTORIZACIÓN', 'SERVICIO', 'V/UNITARIO']]
+        
+        # Agregar pacientes de esta página
+        for idx, p in enumerate(pacientes_pagina, inicio + 1):
+            data.append([
+                str(idx),
+                p['nombre_paciente'],
+                p['nss'],
+                p['fecha_servicio'],
+                p['autorizacion'],
+                p['descripcion_servicio'],
+                formato_moneda(p['monto'])
+            ])
+        
+        # Solo agregar totales en la última página
+        if pagina == total_paginas - 1:
+            subtotal = total
+            total_final = subtotal
+            
+            data.append(['', '', '', '', '', 'SUB-TOTAL:', formato_moneda(subtotal)])
+            data.append(['', '', '', '', '', 'ITBIS:', '*E'])
+            data.append(['', '', '', '', '', 'TOTAL:', formato_moneda(total_final)])
+            
+            num_filas_datos = len(data) - 4  # Todas las filas excepto encabezado y 3 filas de totales
+        else:
+            num_filas_datos = len(data) - 1  # Todas las filas excepto encabezado
+        
+        table = Table(data, colWidths=[0.5*inch, 2*inch, 1.3*inch, 0.8*inch, 1*inch, 1.5*inch, 1*inch])
+        
+        # Estilos base de la tabla
+        table_style = [
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#CEB0B7')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 9),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            # Alineaciones específicas por columna
+            ('ALIGN', (0, 1), (0, -1), 'CENTER'),  # No. centrado
+            ('ALIGN', (1, 1), (1, -1), 'LEFT'),    # NOMBRES PACIENTE a la izquierda
+            ('ALIGN', (2, 1), (2, -1), 'LEFT'),    # NSS/CONTRATO a la izquierda
+            ('ALIGN', (3, 1), (3, -1), 'CENTER'),  # FECHA centrado
+            ('ALIGN', (4, 1), (4, -1), 'CENTER'),  # AUTORIZACIÓN centrado
+            ('ALIGN', (5, 1), (5, -1), 'LEFT'),    # SERVICIO a la izquierda
+            ('ALIGN', (6, 1), (6, -1), 'RIGHT'),   # V/UNITARIO a la derecha
+        ]
+        
+        # Agregar grid solo para las filas de datos
+        if pagina == total_paginas - 1:
+            # Última página: grid para datos (sin incluir totales)
+            table_style.append(('GRID', (0, 0), (-1, num_filas_datos), 0.5, colors.grey))
+            # Estilos especiales para filas de totales
+            table_style.extend([
+                ('BACKGROUND', (0, -3), (-1, -1), colors.white),
+                ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, -1), (-1, -1), 10),
+            ])
+        else:
+            # Páginas intermedias: grid para todas las filas
+            table_style.append(('GRID', (0, 0), (-1, -1), 0.5, colors.grey))
+        
+        table.setStyle(TableStyle(table_style))
+        elements.append(table)
+        
+        # Agregar página nueva si no es la última página
+        if pagina < total_paginas - 1:
+            from reportlab.platypus import PageBreak
+            elements.append(PageBreak())
+            # Repetir el encabezado de la factura en la siguiente página
+            elements.append(Spacer(1, 0.3*inch))
+            continue_style = ParagraphStyle('Continue', parent=styles['Normal'], fontSize=10,
+                                          textColor=colors.HexColor('#CEB0B7'), alignment=TA_CENTER, fontName='Helvetica-Bold')
+            elements.append(Paragraph(f"FACTURA {ncf} - Página {pagina + 2} de {total_paginas}", continue_style))
+            elements.append(Spacer(1, 0.2*inch))
     
     # El footer ahora se dibuja automáticamente al final de cada página mediante el callback
     doc.build(elements, onFirstPage=agregar_footer, onLaterPages=agregar_footer)
