@@ -1,10 +1,9 @@
-{% extends "base.html" %}
+Ôªø{% extends "base.html" %}
 
-{% block title %}Maestra de MÈdicos - FacturaciÛn{% endblock %}
+{% block title %}Maestra de M√©dicos - Facturaci√≥n{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/facturacion-responsive.css') }}">
 <style>
     .facturacion-hero {
         background: linear-gradient(135deg, rgba(206, 176, 183, 0.1) 0%, rgba(242, 226, 230, 0.3) 100%);
@@ -54,7 +53,7 @@
     }
     
     .table-facturacion table {
-        min-width: 1000px; /* Ancho mÌnimo para mÈdicos (m·s columnas) */
+        min-width: 1000px; /* Ancho m√≠nimo para m√©dicos (m√°s columnas) */
     }
     
     .table-facturacion th {
@@ -164,13 +163,13 @@
             <div>
                 <h1 style="color: var(--primary-color); font-weight: 800; font-size: 2rem; margin-bottom: 0.5rem;">
                     <i class="fas fa-user-md me-2"></i>
-                    Maestra de MÈdicos
+                    Maestra de M√©dicos
                 </h1>
-                <p class="text-muted mb-0">Registro de mÈdicos del consultorio</p>
+                <p class="text-muted mb-0">Registro de m√©dicos del consultorio</p>
             </div>
             <div class="d-flex gap-2">
                 <a href="{{ url_for('facturacion_medicos_nuevo') }}" class="btn btn-nuevo">
-                    <i class="fas fa-plus me-2"></i>Nuevo MÈdico
+                    <i class="fas fa-plus me-2"></i>Nuevo M√©dico
                 </a>
                 <a href="{{ url_for('facturacion_menu') }}" class="btn btn-volver">
                     <i class="fas fa-arrow-left me-2"></i>Volver
@@ -179,12 +178,12 @@
         </div>
     </div>
 
-    <!-- B˙squeda -->
+    <!-- B√∫squeda -->
     <div class="search-box">
         <form method="GET" action="{{ url_for('facturacion_medicos') }}">
             <div class="row">
                 <div class="col-md-10">
-                    <input type="text" name="search" class="form-control" placeholder="Buscar por nombre, cÈdula o especialidad..." value="{{ search }}" style="border-radius: 10px;">
+                    <input type="text" name="search" class="form-control" placeholder="Buscar por nombre, c√©dula o especialidad..." value="{{ search }}" style="border-radius: 10px;">
                 </div>
                 <div class="col-md-2">
                     <button type="submit" class="btn btn-primary w-100" style="border-radius: 10px; background: var(--primary-color); border: none;">
@@ -205,8 +204,8 @@
                     <th style="width: 5%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">ID</th>
                     <th style="width: 25%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Nombre</th>
                     <th style="width: 15%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Especialidad</th>
-                    <th style="width: 12%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">CÈdula</th>
-                    <th style="width: 10%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Exequ·tur</th>
+                    <th style="width: 12%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">C√©dula</th>
+                    <th style="width: 10%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Exequ√°tur</th>
                     <th style="width: 18%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Email</th>
                     <th style="width: 15%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Acciones</th>
                 </tr>
@@ -238,7 +237,7 @@
                                 <i class="fas fa-edit"></i> Editar
                             </a>
                             <form method="POST" action="{{ url_for('facturacion_medicos_eliminar', medico_id=medico['id']) }}" style="display: inline; margin: 0;" 
-                                  onsubmit="return confirm('øEst·s segura de eliminar este mÈdico?');">
+                                  onsubmit="return confirm('¬øEst√°s segura de eliminar este m√©dico?');">
                                 <button type="submit" class="btn btn-action btn-eliminar">
                                     <i class="fas fa-trash"></i> Eliminar
                                 </button>
@@ -255,7 +254,7 @@
             <i class="fas fa-inbox" style="font-size: 3rem; color: var(--text-muted); opacity: 0.5;"></i>
             <p class="text-muted mt-3">No se encontraron registros</p>
             <a href="{{ url_for('facturacion_medicos_nuevo') }}" class="btn btn-nuevo mt-2">
-                <i class="fas fa-plus me-2"></i>Crear primer mÈdico
+                <i class="fas fa-plus me-2"></i>Crear primer m√©dico
             </a>
         </div>
         {% endif %}

@@ -4,7 +4,6 @@
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/facturacion-responsive.css') }}">
 <style>
     .facturacion-hero {
         background: linear-gradient(135deg, rgba(206, 176, 183, 0.1) 0%, rgba(242, 226, 230, 0.3) 100%);
@@ -129,120 +128,6 @@
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(206, 176, 183, 0.4);
         color: white;
-    }
-    
-    /* ========== RESPONSIVE MOBILE ========== */
-    @media (max-width: 768px) {
-        .facturacion-hero {
-            padding: 1.5rem;
-            border-radius: 15px;
-        }
-        
-        .facturacion-hero h2 {
-            font-size: 1.5rem !important;
-            margin-bottom: 1rem !important;
-        }
-        
-        .facturacion-hero .d-flex {
-            flex-direction: column;
-            align-items: stretch !important;
-        }
-        
-        .facturacion-hero .d-flex > div {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-        
-        .btn-agregar, .btn-volver {
-            flex: 1;
-            padding: 0.7rem 1rem;
-            font-size: 0.9rem;
-            text-align: center;
-        }
-        
-        .search-box {
-            padding: 1rem;
-            border-radius: 12px;
-        }
-        
-        .search-box .col-md-10,
-        .search-box .col-md-2 {
-            width: 100%;
-        }
-        
-        .search-box .col-md-2 {
-            margin-top: 0.5rem;
-        }
-        
-        .table-facturacion {
-            border-radius: 12px;
-            margin: 0 -15px;
-        }
-        
-        .table-responsive-wrapper {
-            padding: 0 15px;
-        }
-        
-        .table-facturacion th,
-        .table-facturacion td {
-            padding: 0.75rem 0.5rem;
-            font-size: 0.85rem;
-        }
-        
-        .table-facturacion th {
-            white-space: nowrap;
-        }
-        
-        .btn-action {
-            padding: 0.35rem 0.6rem;
-            font-size: 0.8rem;
-            margin: 0.1rem;
-        }
-        
-        .btn-action i {
-            font-size: 0.9rem;
-        }
-        
-        .container {
-            padding-left: 15px;
-            padding-right: 15px;
-        }
-        
-        .alert {
-            font-size: 0.9rem;
-            padding: 1rem;
-        }
-    }
-    
-    @media (max-width: 480px) {
-        .facturacion-hero h2 {
-            font-size: 1.3rem !important;
-        }
-        
-        .facturacion-hero h2 i {
-            display: none;
-        }
-        
-        .btn-agregar, .btn-volver {
-            font-size: 0.85rem;
-            padding: 0.6rem 0.8rem;
-        }
-        
-        .btn-agregar i, .btn-volver i {
-            display: none;
-        }
-        
-        .table-facturacion th,
-        .table-facturacion td {
-            padding: 0.6rem 0.4rem;
-            font-size: 0.8rem;
-        }
-        
-        .btn-action {
-            padding: 0.3rem 0.5rem;
-            margin: 0;
-        }
     }
 </style>
 

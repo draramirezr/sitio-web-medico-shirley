@@ -1,10 +1,9 @@
-{% extends "base.html" %}
+Ôªø{% extends "base.html" %}
 
-{% block title %}Pacientes Pendientes - FacturaciÛn{% endblock %}
+{% block title %}Pacientes Pendientes - Facturaci√≥n{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/facturacion-responsive.css') }}">
 <style>
     .facturacion-hero {
         background: rgba(242, 226, 230, 0.3);
@@ -215,9 +214,9 @@
             <div>
                 <h1 style="color: var(--primary-color); font-weight: 800; font-size: 2rem; margin-bottom: 0.5rem;">
                     <i class="fas fa-clipboard-list me-2"></i>
-                    Estado de FacturaciÛn
+                    Estado de Facturaci√≥n
                 </h1>
-                <p style="color: #666; margin: 0;">GestiÛn y seguimiento de pacientes pendientes y facturados</p>
+                <p style="color: #666; margin: 0;">Gesti√≥n y seguimiento de pacientes pendientes y facturados</p>
             </div>
             <div class="d-flex gap-2 flex-wrap">
                 <a href="{{ url_for('facturacion_facturas_nueva') }}" class="btn btn-agregar" {% if estado_filtro == 'facturado' %}style="pointer-events: none; opacity: 0.4; cursor: not-allowed;" title="No disponible para registros facturados"{% endif %}>
@@ -245,13 +244,13 @@
                         <i class="fas fa-clipboard-check me-1" style="color: var(--primary-color);"></i>Estado
                     </label>
                     <select name="estado" id="estado" class="form-select" style="border: 2px solid rgba(206, 176, 183, 0.3); border-radius: 10px; font-weight: 600;">
-                        <option value="pendiente" {% if estado_filtro == 'pendiente' %}selected{% endif %}>?? Pendientes</option>
-                        <option value="facturado" {% if estado_filtro == 'facturado' %}selected{% endif %}>? Facturadas</option>
+                        <option value="pendiente" {% if estado_filtro == 'pendiente' %}selected{% endif %}>üïê Pendientes</option>
+                        <option value="facturado" {% if estado_filtro == 'facturado' %}selected{% endif %}>‚úÖ Facturadas</option>
                     </select>
                 </div>
                 <div class="col-md-3">
                     <label for="medico_id" class="form-label" style="font-weight: 600; color: #666;">
-                        <i class="fas fa-user-md me-1" style="color: var(--primary-color);"></i>MÈdico
+                        <i class="fas fa-user-md me-1" style="color: var(--primary-color);"></i>M√©dico
                     </label>
                     <select name="medico_id" id="medico_id" class="form-select" style="border: 2px solid rgba(206, 176, 183, 0.3); border-radius: 10px;">
                         <option value="">-- Todos --</option>
@@ -295,7 +294,7 @@
                 </span>
                 {% if medico_seleccionado %}
                 <span class="badge" style="background: var(--primary-color); color: white; padding: 0.4rem 0.8rem; border-radius: 8px; margin-left: 0.5rem;">
-                    MÈdico: {{ medico_seleccionado }}
+                    M√©dico: {{ medico_seleccionado }}
                 </span>
                 {% endif %}
                 {% if ars_seleccionada %}
@@ -320,7 +319,7 @@
                     <th style="width: 9%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Fecha de Consulta</th>
                     <th style="width: 13%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Servicio</th>
                     <th style="width: 8%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Monto</th>
-                    <th style="width: 13%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">MÈdico</th>
+                    <th style="width: 13%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">M√©dico</th>
                     <th style="width: 9%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">ARS</th>
                     <th style="width: 8%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Estado</th>
                     <th style="width: 10%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Acciones</th>
@@ -356,7 +355,7 @@
                         </a>
                         <a href="{{ url_for('facturacion_paciente_eliminar', paciente_id=paciente['id']) }}" 
                            class="btn-accion-eliminar" 
-                           onclick="return confirm('øEst· seguro de eliminar este registro?')"
+                           onclick="return confirm('¬øEst√° seguro de eliminar este registro?')"
                            title="Eliminar">
                             <i class="fas fa-trash-alt"></i>
                         </a>

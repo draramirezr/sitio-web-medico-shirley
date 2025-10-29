@@ -1,10 +1,9 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
-{% block title %}{{ 'Editar' if ars else 'Nuevo' }} ARS - Facturaci�n{% endblock %}
+{% block title %}{{ 'Editar' if ars else 'Nuevo' }} ARS - Facturación{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/facturacion-responsive.css') }}">
 <style>
     .form-container {
         max-width: 800px;

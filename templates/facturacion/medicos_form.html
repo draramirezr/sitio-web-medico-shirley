@@ -1,10 +1,9 @@
-{% extends "base.html" %}
+Ôªø{% extends "base.html" %}
 
-{% block title %}{{ 'Editar' if medico else 'Nuevo' }} MÈdico - FacturaciÛn{% endblock %}
+{% block title %}{{ 'Editar' if medico else 'Nuevo' }} M√©dico - Facturaci√≥n{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/facturacion-responsive.css') }}">
 <style>
     .form-container {
         max-width: 800px;
@@ -74,9 +73,9 @@
         <div class="mb-4">
             <h1 style="color: var(--primary-color); font-weight: 800; font-size: 2rem;">
                 <i class="fas fa-user-md me-2"></i>
-                {{ 'Editar MÈdico' if medico else 'Nuevo MÈdico' }}
+                {{ 'Editar M√©dico' if medico else 'Nuevo M√©dico' }}
             </h1>
-            <p class="text-muted">Complete los datos del mÈdico</p>
+            <p class="text-muted">Complete los datos del m√©dico</p>
         </div>
 
         <div class="form-card">
@@ -91,7 +90,7 @@
                            name="nombre" 
                            value="{{ medico['nombre'] if medico else '' }}" 
                            required 
-                           placeholder="Ej: Dra. Shirley RamÌrez"
+                           placeholder="Ej: Dra. Shirley Ram√≠rez"
                            maxlength="200">
                 </div>
 
@@ -111,7 +110,7 @@
 
                 <div class="mb-4">
                     <label for="cedula" class="form-label">
-                        <i class="fas fa-id-card me-2 text-primary"></i>CÈdula *
+                        <i class="fas fa-id-card me-2 text-primary"></i>C√©dula *
                     </label>
                     <input type="text" 
                            class="form-control" 
@@ -125,7 +124,7 @@
 
                 <div class="mb-4">
                     <label for="exequatur" class="form-label">
-                        <i class="fas fa-certificate me-2 text-primary"></i>Exequ·tur
+                        <i class="fas fa-certificate me-2 text-primary"></i>Exequ√°tur
                     </label>
                     <input type="text" 
                            class="form-control" 
@@ -136,13 +135,13 @@
                            maxlength="50">
                     <small class="text-muted">
                         <i class="fas fa-info-circle me-1"></i>
-                        N˙mero de licencia mÈdica (Exequ·tur)
+                        N√∫mero de licencia m√©dica (Exequ√°tur)
                     </small>
                 </div>
 
                 <div class="mb-4">
                     <label for="email" class="form-label">
-                        <i class="fas fa-envelope me-2 text-primary"></i>Correo ElectrÛnico
+                        <i class="fas fa-envelope me-2 text-primary"></i>Correo Electr√≥nico
                     </label>
                     <input type="email" 
                            class="form-control" 
@@ -153,7 +152,7 @@
                            maxlength="100">
                     <small class="text-muted">
                         <i class="fas fa-info-circle me-1"></i>
-                        Se enviar· autom·ticamente el PDF de pacientes pendientes a este correo
+                        Se enviar√° autom√°ticamente el PDF de pacientes pendientes a este correo
                     </small>
                 </div>
 
@@ -171,7 +170,7 @@
                         </label>
                         <small class="d-block text-muted mt-2" style="margin-left: 30px;">
                             <i class="fas fa-info-circle me-1"></i>
-                            Este mÈdico podr· generar facturas en el sistema
+                            Este m√©dico podr√° generar facturas en el sistema
                         </small>
                     </div>
                 </div>

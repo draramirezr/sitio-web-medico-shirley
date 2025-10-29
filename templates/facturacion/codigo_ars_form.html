@@ -1,10 +1,9 @@
-{% extends "base.html" %}
+ï»¿{% extends "base.html" %}
 
-{% block title %}{{ 'Editar' if codigo else 'Nuevo' }} Código ARS - Facturación{% endblock %}
+{% block title %}{{ 'Editar' if codigo else 'Nuevo' }} CÃ³digo ARS - FacturaciÃ³n{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/facturacion-responsive.css') }}">
 <style>
     .form-container {
         max-width: 800px;
@@ -82,24 +81,24 @@
         <div class="mb-4">
             <h1 style="color: var(--primary-color); font-weight: 800; font-size: 2rem;">
                 <i class="fas fa-barcode me-2"></i>
-                {{ 'Editar Código ARS' if codigo else 'Nuevo Código ARS' }}
+                {{ 'Editar CÃ³digo ARS' if codigo else 'Nuevo CÃ³digo ARS' }}
             </h1>
-            <p class="text-muted">Asigna un código ARS a un médico específico</p>
+            <p class="text-muted">Asigna un cÃ³digo ARS a un mÃ©dico especÃ­fico</p>
         </div>
 
         <div class="alert-info-custom">
             <i class="fas fa-info-circle me-2" style="color: var(--primary-color);"></i>
-            <strong>Nota:</strong> Cada médico debe tener un código único por cada ARS con la que trabaje.
+            <strong>Nota:</strong> Cada mÃ©dico debe tener un cÃ³digo Ãºnico por cada ARS con la que trabaje.
         </div>
 
         <div class="form-card">
             <form method="POST">
                 <div class="mb-4">
                     <label for="medico_id" class="form-label">
-                        <i class="fas fa-user-md me-2 text-primary"></i>Médico *
+                        <i class="fas fa-user-md me-2 text-primary"></i>MÃ©dico *
                     </label>
                     <select class="form-select" id="medico_id" name="medico_id" required>
-                        <option value="">-- Seleccione un médico --</option>
+                        <option value="">-- Seleccione un mÃ©dico --</option>
                         {% for medico in medicos %}
                         <option value="{{ medico['id'] }}" {% if codigo and codigo['medico_id'] == medico['id'] %}selected{% endif %}>
                             {{ medico['nombre'] }} ({{ medico['especialidad'] }})
@@ -109,7 +108,7 @@
                     {% if not medicos %}
                     <small class="text-danger">
                         <i class="fas fa-exclamation-circle me-1"></i>
-                        No hay médicos disponibles. <a href="{{ url_for('facturacion_medicos_nuevo') }}">Crear uno aquí</a>
+                        No hay mÃ©dicos disponibles. <a href="{{ url_for('facturacion_medicos_nuevo') }}">Crear uno aquÃ­</a>
                     </small>
                     {% endif %}
                 </div>
@@ -129,14 +128,14 @@
                     {% if not ars_list %}
                     <small class="text-danger">
                         <i class="fas fa-exclamation-circle me-1"></i>
-                        No hay ARS disponibles. <a href="{{ url_for('facturacion_ars_nuevo') }}">Crear uno aquí</a>
+                        No hay ARS disponibles. <a href="{{ url_for('facturacion_ars_nuevo') }}">Crear uno aquÃ­</a>
                     </small>
                     {% endif %}
                 </div>
 
                 <div class="mb-4">
                     <label for="codigo_ars" class="form-label">
-                        <i class="fas fa-barcode me-2 text-primary"></i>Código ARS *
+                        <i class="fas fa-barcode me-2 text-primary"></i>CÃ³digo ARS *
                     </label>
                     <input type="text" 
                            class="form-control" 
@@ -149,7 +148,7 @@
                            style="font-family: 'Courier New', monospace; font-size: 1.1rem; font-weight: bold;">
                     <small class="text-muted">
                         <i class="fas fa-lightbulb me-1"></i>
-                        El código único que identifica al médico en este ARS
+                        El cÃ³digo Ãºnico que identifica al mÃ©dico en este ARS
                     </small>
                 </div>
 
