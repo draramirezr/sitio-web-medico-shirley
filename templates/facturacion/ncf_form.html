@@ -1,9 +1,10 @@
-ï»¿{% extends "base.html" %}
+{% extends "base.html" %}
 
-{% block title %}{{ 'Editar NCF' if ncf else 'Nuevo NCF' }} - FacturaciÃ³n{% endblock %}
+{% block title %}{{ 'Editar NCF' if ncf else 'Nuevo NCF' }} - Facturación{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/facturacion-responsive.css') }}">
 <style>
     .form-container {
         max-width: 800px;
@@ -57,7 +58,7 @@
                 <i class="fas fa-file-invoice me-2"></i>
                 {{ 'Editar NCF' if ncf else 'Nuevo NCF' }}
             </h1>
-            <p style="color: #666; margin: 0;">Complete los campos del NÃºmero de Comprobante Fiscal</p>
+            <p style="color: #666; margin: 0;">Complete los campos del Número de Comprobante Fiscal</p>
         </div>
 
         <form method="POST">
@@ -72,7 +73,7 @@
                            name="tipo" 
                            value="{{ ncf['tipo'] if ncf else '' }}" 
                            required
-                           placeholder="Ej: Factura de CrÃ©dito Fiscal">
+                           placeholder="Ej: Factura de Crédito Fiscal">
                 </div>
 
                 <div class="col-md-6 mb-3">
@@ -92,23 +93,23 @@
 
             <div class="row">
                 <div class="col-md-4 mb-3">
-                    <label class="form-label" for="tamaÃ±o">
-                        <i class="fas fa-ruler-horizontal me-2"></i>TamaÃ±o <span class="text-danger">*</span>
+                    <label class="form-label" for="tamaño">
+                        <i class="fas fa-ruler-horizontal me-2"></i>Tamaño <span class="text-danger">*</span>
                     </label>
                     <input type="number" 
                            class="form-control" 
-                           id="tamaÃ±o" 
-                           name="tamaÃ±o" 
-                           value="{{ ncf['tamaÃ±o'] if ncf else '' }}" 
+                           id="tamaño" 
+                           name="tamaño" 
+                           value="{{ ncf['tamaño'] if ncf else '' }}" 
                            required
                            min="1"
                            placeholder="Ej: 8">
-                    <small class="text-muted">Cantidad de dÃ­gitos del nÃºmero</small>
+                    <small class="text-muted">Cantidad de dígitos del número</small>
                 </div>
 
                 <div class="col-md-4 mb-3">
                     <label class="form-label" for="ultimo_numero">
-                        <i class="fas fa-sort-numeric-up me-2"></i>Ãšltimo NÃºmero
+                        <i class="fas fa-sort-numeric-up me-2"></i>Último Número
                     </label>
                     <input type="number" 
                            class="form-control" 
@@ -118,12 +119,12 @@
                            min="0"
                            placeholder="0"
                            onchange="calcularProximo()">
-                    <small class="text-muted">Ãšltimo nÃºmero utilizado</small>
+                    <small class="text-muted">Último número utilizado</small>
                 </div>
 
                 <div class="col-md-4 mb-3">
                     <label class="form-label">
-                        <i class="fas fa-calculator me-2"></i>PrÃ³ximo NÃºmero
+                        <i class="fas fa-calculator me-2"></i>Próximo Número
                     </label>
                     <input type="number" 
                            class="form-control" 
@@ -131,7 +132,7 @@
                            value="{{ (ncf['ultimo_numero'] + 1) if ncf else '1' }}" 
                            disabled
                            style="background-color: #f5f5f5; cursor: not-allowed; font-family: 'Courier New', monospace; font-weight: 600;">
-                    <small class="text-muted">Calculado automÃ¡ticamente</small>
+                    <small class="text-muted">Calculado automáticamente</small>
                 </div>
             </div>
 
@@ -168,7 +169,7 @@ function calcularProximo() {
     document.getElementById('proximo_numero').value = proximoNumero;
 }
 
-// Actualizar en tiempo real cuando se cambia el Ãºltimo nÃºmero
+// Actualizar en tiempo real cuando se cambia el último número
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('ultimo_numero').addEventListener('input', calcularProximo);
 });

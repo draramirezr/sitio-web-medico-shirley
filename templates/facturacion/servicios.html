@@ -1,9 +1,10 @@
-Ôªø{% extends "base.html" %}
+{% extends "base.html" %}
 
-{% block title %}Maestra de Tipos de Servicios - Facturaci√≥n{% endblock %}
+{% block title %}Maestra de Tipos de Servicios - FacturaciÛn{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/facturacion-responsive.css') }}">
 <style>
     .facturacion-hero {
         background: linear-gradient(135deg, rgba(206, 176, 183, 0.1) 0%, rgba(242, 226, 230, 0.3) 100%);
@@ -53,7 +54,7 @@
     }
     
     .table-facturacion table {
-        min-width: 800px; /* Ancho m√≠nimo para servicios */
+        min-width: 800px; /* Ancho mÌnimo para servicios */
     }
     
     .table-facturacion th {
@@ -165,7 +166,7 @@
                     <i class="fas fa-clipboard-list me-2"></i>
                     Maestra de Tipos de Servicios
                 </h1>
-                <p class="text-muted mb-0">Cat√°logo de servicios m√©dicos del consultorio</p>
+                <p class="text-muted mb-0">Cat·logo de servicios mÈdicos del consultorio</p>
             </div>
             <div class="d-flex gap-2">
                 <a href="{{ url_for('facturacion_servicios_nuevo') }}" class="btn btn-nuevo">
@@ -178,12 +179,12 @@
         </div>
     </div>
 
-    <!-- B√∫squeda -->
+    <!-- B˙squeda -->
     <div class="search-box">
         <form method="GET" action="{{ url_for('facturacion_servicios') }}">
             <div class="row">
                 <div class="col-md-10">
-                    <input type="text" name="search" class="form-control" placeholder="Buscar por descripci√≥n..." value="{{ search }}" style="border-radius: 10px;">
+                    <input type="text" name="search" class="form-control" placeholder="Buscar por descripciÛn..." value="{{ search }}" style="border-radius: 10px;">
                 </div>
                 <div class="col-md-2">
                     <button type="submit" class="btn btn-primary w-100" style="border-radius: 10px; background: var(--primary-color); border: none;">
@@ -202,7 +203,7 @@
             <thead>
                 <tr>
                     <th style="width: 10%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">ID</th>
-                    <th style="width: 60%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Descripci√≥n</th>
+                    <th style="width: 60%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">DescripciÛn</th>
                     <th style="width: 15%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Precio Base</th>
                     <th style="width: 15%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Acciones</th>
                 </tr>
@@ -223,7 +224,7 @@
                                 <i class="fas fa-edit"></i> Editar
                             </a>
                             <form method="POST" action="{{ url_for('facturacion_servicios_eliminar', servicio_id=servicio['id']) }}" style="display: inline; margin: 0;" 
-                                  onsubmit="return confirm('¬øEst√°s segura de eliminar este servicio?');">
+                                  onsubmit="return confirm('øEst·s segura de eliminar este servicio?');">
                                 <button type="submit" class="btn btn-action btn-eliminar">
                                     <i class="fas fa-trash"></i> Eliminar
                                 </button>

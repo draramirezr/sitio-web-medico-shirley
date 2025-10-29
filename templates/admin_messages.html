@@ -1,9 +1,10 @@
-Ôªø{% extends "base.html" %}
+{% extends "base.html" %}
 
-{% block title %}Gesti√≥n de Mensajes - Panel Admin | Dra. Shirley Ram√≠rez{% endblock %}
+{% block title %}GestiÛn de Mensajes - Panel Admin | Dra. Shirley RamÌrez{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin-responsive.css') }}">
 <style>
     /* Paleta de colores Dra. Shirley para Admin */
     .messages-hero {
@@ -51,7 +52,7 @@
     }
     
     .message-unread::before {
-        content: '‚óè';
+        content: '?';
         position: absolute;
         top: 1rem;
         left: -1rem;
@@ -160,7 +161,7 @@
             <div>
                 <h1 class="admin-page-title mb-2">
                     <i class="fas fa-envelope-open-text me-2"></i>
-                    Gesti√≥n de Mensajes
+                    GestiÛn de Mensajes
                 </h1>
                 <p class="text-muted mb-0">Responde a consultas y contactos de pacientes</p>
             </div>
@@ -178,7 +179,7 @@
             <div class="card message-card {% if not message['read'] %}message-unread{% endif %}">
                 <div class="card-body">
                     <div class="row align-items-center">
-                        <!-- Informaci√≥n del Remitente -->
+                        <!-- InformaciÛn del Remitente -->
                         <div class="col-lg-4 mb-3 mb-lg-0">
                             <h5 class="mb-2">
                                 <i class="fas fa-user me-2"></i>
@@ -195,7 +196,7 @@
                                 {% if message['phone'] %}
                                 <div class="mb-1">
                                     <i class="fas fa-phone me-2"></i>
-                                    <strong>Tel√©fono:</strong> {{ message['phone'] }}
+                                    <strong>TelÈfono:</strong> {{ message['phone'] }}
                                 </div>
                                 {% endif %}
                             </div>
@@ -220,7 +221,7 @@
                         <!-- Acciones -->
                         <div class="col-lg-3">
                             <div class="d-grid gap-2">
-                                <!-- Bot√≥n de WhatsApp (si tiene tel√©fono) -->
+                                <!-- BotÛn de WhatsApp (si tiene telÈfono) -->
                                 {% if message['phone'] %}
                                 <a href="https://wa.me/{{ message['phone']|replace('(', '')|replace(')', '')|replace('-', '')|replace(' ', '') }}?text=Hola%20{{ message['name']|replace(' ', '%20') }},%20soy%20la%20Dra.%20Shirley%20Ram%C3%ADrez.%20Te%20contacto%20en%20relaci%C3%B3n%20a%20tu%20mensaje." 
                                    class="btn whatsapp-btn btn-sm" 
@@ -231,7 +232,7 @@
                                 </a>
                                 {% endif %}
 
-                                <!-- Bot√≥n de Email -->
+                                <!-- BotÛn de Email -->
                                 <a href="mailto:{{ message['email'] }}?subject=Re: {{ message['subject'] }}" 
                                    class="btn btn-sm btn-outline-primary"
                                    title="Responder por Email">
@@ -239,17 +240,17 @@
                                     Responder Email
                                 </a>
 
-                                <!-- Bot√≥n Ver Detalles -->
+                                <!-- BotÛn Ver Detalles -->
                                 <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#messageModal{{ message['id'] }}">
                                     <i class="fas fa-eye me-2"></i>
                                     Ver Completo
                                 </button>
 
-                                <!-- Marcar como le√≠do -->
+                                <!-- Marcar como leÌdo -->
                                 {% if not message['read'] %}
                                 <button class="btn btn-sm btn-outline-success mark-read-btn" data-message-id="{{ message['id'] }}">
                                     <i class="fas fa-check me-2"></i>
-                                    Marcar como Le√≠do
+                                    Marcar como LeÌdo
                                 </button>
                                 {% endif %}
                             </div>
@@ -281,7 +282,7 @@
                         </div>
                         {% if message['phone'] %}
                         <div class="mb-3">
-                            <strong><i class="fas fa-phone me-2"></i>Tel√©fono:</strong><br>
+                            <strong><i class="fas fa-phone me-2"></i>TelÈfono:</strong><br>
                             {{ message['phone'] }}
                         </div>
                         {% endif %}
@@ -296,7 +297,7 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            <strong><i class="fas fa-calendar-alt me-2"></i>Fecha de Recepci√≥n:</strong><br>
+                            <strong><i class="fas fa-calendar-alt me-2"></i>Fecha de RecepciÛn:</strong><br>
                             {{ message['created_at'] }}
                         </div>
                     </div>
@@ -339,7 +340,7 @@
                         </div>
                         <div class="col-md-6">
                             <h4 class="text-success">{{ messages|selectattr('6')|list|length }}</h4>
-                            <p>Le√≠dos</p>
+                            <p>LeÌdos</p>
                         </div>
                     </div>
                 </div>
@@ -349,19 +350,19 @@
     {% else %}
     <div class="alert alert-info">
         <i class="fas fa-info-circle me-2"></i>
-        No hay mensajes todav√≠a.
+        No hay mensajes todavÌa.
     </div>
     {% endif %}
 </div>
 
 <script>
-// Marcar mensajes como le√≠dos
+// Marcar mensajes como leÌdos
 document.querySelectorAll('.mark-read-btn').forEach(button => {
     button.addEventListener('click', function() {
         const messageId = this.getAttribute('data-message-id');
         const btn = this;
         
-        // Deshabilitar bot√≥n para evitar clicks m√∫ltiples
+        // Deshabilitar botÛn para evitar clicks m˙ltiples
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
         
@@ -381,19 +382,19 @@ document.querySelectorAll('.mark-read-btn').forEach(button => {
         })
         .then(data => {
             if (data.success) {
-                // Recargar la p√°gina para mostrar el cambio
+                // Recargar la p·gina para mostrar el cambio
                 location.reload();
             } else {
-                alert('Error al marcar como le√≠do');
+                alert('Error al marcar como leÌdo');
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-check me-2"></i>Marcar como Le√≠do';
+                btn.innerHTML = '<i class="fas fa-check me-2"></i>Marcar como LeÌdo';
             }
         })
         .catch(error => {
             console.error('Error:', error);
             alert('Error al procesar la solicitud. Por favor, intenta de nuevo.');
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-check me-2"></i>Marcar como Le√≠do';
+            btn.innerHTML = '<i class="fas fa-check me-2"></i>Marcar como LeÌdo';
         });
     });
 });

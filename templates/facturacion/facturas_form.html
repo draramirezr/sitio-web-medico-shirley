@@ -1,9 +1,10 @@
-Ôªø{% extends "base.html" %}
+{% extends "base.html" %}
 
-{% block title %}Nueva Factura - Facturaci√≥n{% endblock %}
+{% block title %}Nueva Factura - FacturaciÛn{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/facturacion-responsive.css') }}">
 <style>
     /* Ocultar flechas de incremento/decremento en campos number */
     input[type="number"].no-spinner::-webkit-outer-spin-button,
@@ -181,7 +182,7 @@
         font-size: 0.85rem;
     }
     
-    /* üì± RESPONSIVIDAD */
+    /* ?? RESPONSIVIDAD */
     @media (max-width: 768px) {
         .form-container {
             padding: 1rem;
@@ -247,10 +248,10 @@
                 <i class="fas fa-users me-2"></i>
                 Pacientes a Facturar
             </h1>
-            <p style="color: #666; margin: 0;">Agregue todos los pacientes que formar√°n parte de la factura</p>
+            <p style="color: #666; margin: 0;">Agregue todos los pacientes que formar·n parte de la factura</p>
         </div>
         <a href="{{ url_for('facturacion_menu') }}" class="btn" style="background: #ACACAD !important; color: white !important; padding: 0.75rem 1.5rem; border-radius: 15px; text-decoration: none;">
-            <i class="fas fa-arrow-left me-2" style="color: white !important;"></i>Volver al Men√∫
+            <i class="fas fa-arrow-left me-2" style="color: white !important;"></i>Volver al Men˙
         </a>
     </div>
 
@@ -258,22 +259,22 @@
         <!-- Encabezado de Factura -->
         <div class="form-container">
             <h4 style="color: var(--primary-color); margin-bottom: 1.5rem;">
-                <i class="fas fa-info-circle me-2"></i>Informaci√≥n General
+                <i class="fas fa-info-circle me-2"></i>InformaciÛn General
             </h4>
             
             <div class="alert alert-info" style="border-left: 4px solid #CEB0B7; background: linear-gradient(135deg, rgba(206, 176, 183, 0.1) 0%, rgba(242, 226, 230, 0.2) 100%); color: #666;">
                 <i class="fas fa-info-circle me-2"></i>
-                Los pacientes se agregar√°n con estado <strong>"PENDIENTE DE FACTURACI√ìN"</strong>. 
-                Luego podr√°s generar la factura seleccionando los pacientes pendientes.
+                Los pacientes se agregar·n con estado <strong>"PENDIENTE DE FACTURACI”N"</strong>. 
+                Luego podr·s generar la factura seleccionando los pacientes pendientes.
             </div>
             
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label" for="medico_id">
-                        M√©dico <span class="text-danger">*</span>
+                        MÈdico <span class="text-danger">*</span>
                     </label>
                     <select class="form-select" id="medico_id" name="medico_id" required>
-                        <option value="">Seleccione un m√©dico</option>
+                        <option value="">Seleccione un mÈdico</option>
                         {% for medico in medicos %}
                         <option value="{{ medico['id'] }}">{{ medico['nombre'] }} - {{ medico['especialidad'] }}</option>
                         {% endfor %}
@@ -313,12 +314,12 @@
                 </div>
                 <small style="color: #666; display: block; margin-top: 0.5rem;">
                     <i class="fas fa-info-circle me-1"></i>
-                    Primero seleccione <strong>M√©dico y ARS</strong>, luego cargue el Excel. Los pacientes se agregar√°n autom√°ticamente a la tabla.
+                    Primero seleccione <strong>MÈdico y ARS</strong>, luego cargue el Excel. Los pacientes se agregar·n autom·ticamente a la tabla.
                 </small>
             </div>
         </div>
 
-        <!-- Bot√≥n para agregar l√≠nea manual -->
+        <!-- BotÛn para agregar lÌnea manual -->
         <div class="text-center my-3">
             <button type="button" class="btn btn-agregar-linea" onclick="agregarLinea()">
                 <i class="fas fa-plus-circle me-2"></i>Agregar Paciente Manualmente
@@ -340,7 +341,7 @@
                                 <th style="width: 10%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">NSS</th>
                                 <th style="width: 15%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Nombre</th>
                                 <th style="width: 10%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Fecha de Consulta</th>
-                                <th style="width: 10%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Autorizaci√≥n</th>
+                                <th style="width: 10%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">AutorizaciÛn</th>
                                 <th style="width: 20%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Servicio</th>
                                 <th style="width: 10%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Monto</th>
                                 <th style="width: 5%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Acciones</th>
@@ -362,10 +363,10 @@
         <div class="total-factura">
             <p style="color: #666; margin: 0; font-size: 1.1rem; font-weight: 600;">TOTAL PENDIENTE</p>
             <p class="total-factura-valor"> <span id="total-valor">0.00</span></p>
-            <p style="color: #999; margin: 0; font-size: 0.85rem;"><i class="fas fa-clock me-1"></i>Estos pacientes quedar√°n pendientes hasta generar la factura</p>
+            <p style="color: #999; margin: 0; font-size: 0.85rem;"><i class="fas fa-clock me-1"></i>Estos pacientes quedar·n pendientes hasta generar la factura</p>
         </div>
 
-        <!-- Campo oculto con JSON de l√≠neas -->
+        <!-- Campo oculto con JSON de lÌneas -->
         <input type="hidden" id="lineas_json" name="lineas_json">
 
         <!-- Datalist de servicios disponibles -->
@@ -395,7 +396,7 @@
 let numeroLinea = 0;
 let lineas = [];
 
-// La fecha se establece autom√°ticamente al generar la factura
+// La fecha se establece autom·ticamente al generar la factura
 
 function agregarLinea() {
     numeroLinea++;
@@ -426,7 +427,7 @@ function agregarLinea() {
             <input type="number" 
                    class="form-control form-control-sm no-spinner" 
                    data-campo="autorizacion" 
-                   placeholder="AUTORIZACI√ìN" 
+                   placeholder="AUTORIZACI”N" 
                    min="0" 
                    oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                    onblur="validarAutorizacionUnica(this)">
@@ -466,7 +467,7 @@ function eliminarLinea(numero) {
         tr.remove();
         calcularTotal();
         
-        // Si no quedan l√≠neas, mostrar mensaje
+        // Si no quedan lÌneas, mostrar mensaje
         const tbody = document.getElementById('tbody-lineas');
         if (tbody.children.length === 0) {
             tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No hay pacientes agregados.</td></tr>';
@@ -476,7 +477,7 @@ function eliminarLinea(numero) {
 
 async function buscarPaciente(input, numero) {
     const nss = input.value.trim().toUpperCase();
-    input.value = nss; // Actualizar el campo con may√∫sculas
+    input.value = nss; // Actualizar el campo con may˙sculas
     
     if (!nss) return;
     
@@ -489,7 +490,7 @@ async function buscarPaciente(input, numero) {
     if (!arsId) {
         sugerenciaDiv.innerHTML = `
             <div class="autocomplete-sugerencia" style="background: rgba(242, 226, 230, 0.3); border-left-color: #CEB0B7;">
-                ‚ö†Ô∏è Seleccione primero un ARS para buscar el paciente
+                ?? Seleccione primero un ARS para buscar el paciente
             </div>
         `;
         setTimeout(() => sugerenciaDiv.innerHTML = '', 3000);
@@ -497,19 +498,19 @@ async function buscarPaciente(input, numero) {
     }
     
     try {
-        // Buscar por NSS + ARS (llave √∫nica)
+        // Buscar por NSS + ARS (llave ˙nica)
         const response = await fetch(`/api/facturacion/buscar-paciente/${nss}/${arsId}`);
         const data = await response.json();
         
         if (data.encontrado) {
-            // Autocompletar nombre en MAY√öSCULAS
+            // Autocompletar nombre en MAY⁄SCULAS
             const tr = input.closest('tr');
             tr.querySelector('[data-campo="nombre"]').value = data.nombre.toUpperCase();
             
             // Mostrar sugerencia
             sugerenciaDiv.innerHTML = `
                 <div class="autocomplete-sugerencia">
-                    ‚úì Paciente encontrado: ${data.nombre.toUpperCase()} - ${data.ars_nombre || 'Sin ARS'}
+                    ? Paciente encontrado: ${data.nombre.toUpperCase()} - ${data.ars_nombre || 'Sin ARS'}
                 </div>
             `;
             
@@ -524,7 +525,7 @@ async function buscarPaciente(input, numero) {
             if (dataOtroArs.encontrado) {
                 sugerenciaDiv.innerHTML = `
                     <div class="autocomplete-sugerencia" style="background: rgba(242, 226, 230, 0.3); border-left-color: #CEB0B7;">
-                        ‚ö†Ô∏è Este NSS existe con otro ARS (${dataOtroArs.ars_nombre}). Se crear√° un nuevo registro.
+                        ?? Este NSS existe con otro ARS (${dataOtroArs.ars_nombre}). Se crear· un nuevo registro.
                     </div>
                 `;
                 setTimeout(() => {
@@ -553,7 +554,7 @@ function calcularTotal() {
     document.getElementById('total-valor').textContent = totalFormateado;
 }
 
-// Convertir a may√∫sculas mientras se escribe
+// Convertir a may˙sculas mientras se escribe
 document.addEventListener('input', function(e) {
     if (e.target.matches('.form-control[type="text"]')) {
         e.target.value = e.target.value.toUpperCase();
@@ -565,7 +566,7 @@ async function procesarExcel(input) {
     const medicoId = document.getElementById('medico_id').value;
     const arsId = document.getElementById('ars_id').value;
     
-    // Validar que se haya seleccionado m√©dico y ARS
+    // Validar que se haya seleccionado mÈdico y ARS
     if (!medicoId || !arsId) {
         // Mostrar modal de advertencia grande y visible
         const alertaHTML = `
@@ -578,10 +579,10 @@ async function procesarExcel(input) {
                     <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: white;"></i>
                 </div>
                 <h3 style="color: #B89BA3; font-weight: 800; margin-bottom: 1rem; font-size: 1.5rem;">
-                    ¬°Atenci√≥n!
+                    °AtenciÛn!
                 </h3>
                 <p style="color: #666; font-size: 1.1rem; line-height: 1.6; margin-bottom: 1.5rem;">
-                    Por favor, seleccione primero el <strong>M√©dico</strong> y <strong>ARS</strong> antes de cargar el Excel.
+                    Por favor, seleccione primero el <strong>MÈdico</strong> y <strong>ARS</strong> antes de cargar el Excel.
                 </p>
                 <div style="background: rgba(242, 226, 230, 0.4); padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem; border: 1px solid #F2E2E6;">
                     <p style="margin: 0; color: #666; font-size: 0.9rem;">
@@ -661,7 +662,7 @@ async function procesarExcel(input) {
                             <i class="fas fa-times-circle" style="font-size: 3rem; color: white;"></i>
                         </div>
                         <h4 style="color: #dc3545; font-weight: 800; margin-bottom: 0.5rem;">
-                            ‚ùå No se Carg√≥ Ning√∫n Paciente
+                            ? No se CargÛ Ning˙n Paciente
                         </h4>
                         <p style="color: #666; font-size: 1rem;">
                             Debe corregir TODOS los errores en la plantilla Excel antes de cargar
@@ -746,7 +747,7 @@ async function procesarExcel(input) {
                     <input type="number" 
                            class="form-control form-control-sm no-spinner" 
                            data-campo="autorizacion" 
-                           placeholder="AUTORIZACI√ìN" 
+                           placeholder="AUTORIZACI”N" 
                            value="${paciente.autorizacion}"
                            min="0" 
                            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
@@ -786,10 +787,10 @@ async function procesarExcel(input) {
         // Recalcular total
         calcularTotal();
         
-        // Mostrar mensaje de √©xito (solo si NO hay errores)
+        // Mostrar mensaje de Èxito (solo si NO hay errores)
         document.getElementById('loading-excel').remove();
         
-        // Crear modal de √©xito
+        // Crear modal de Èxito
         let mensajeHTML = `
             <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
                         background: white; padding: 2.5rem; border-radius: 15px; box-shadow: 0 4px 30px rgba(0,0,0,0.3); 
@@ -800,7 +801,7 @@ async function procesarExcel(input) {
                     <i class="fas fa-check-circle" style="font-size: 3rem; color: white;"></i>
                 </div>
                 <h4 style="color: #CEB0B7; margin-bottom: 1rem; font-weight: 800;">
-                    ‚úÖ ¬°Carga Exitosa!
+                    ? °Carga Exitosa!
                 </h4>
                 <div style="background: linear-gradient(135deg, rgba(206, 176, 183, 0.1) 0%, rgba(242, 226, 230, 0.2) 100%); 
                             padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem;">
@@ -812,7 +813,7 @@ async function procesarExcel(input) {
                     </p>
                 </div>
                 <p style="color: #666; font-size: 0.9rem; margin-bottom: 1.5rem;">
-                    Los pacientes est√°n listos para ser agregados como pendientes de facturaci√≥n.
+                    Los pacientes est·n listos para ser agregados como pendientes de facturaciÛn.
                 </p>
                 <button onclick="cerrarModal()" 
                         style="background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%); 
@@ -840,17 +841,17 @@ async function procesarExcel(input) {
         
     } catch (error) {
         console.error('Error al procesar Excel:', error);
-        alert('‚ùå Error al procesar el archivo Excel: ' + error.message);
+        alert('? Error al procesar el archivo Excel: ' + error.message);
         document.getElementById('loading-excel').remove();
         input.value = '';
     }
 }
 
-// Validar que la autorizaci√≥n sea √∫nica en toda la factura
+// Validar que la autorizaciÛn sea ˙nica en toda la factura
 function validarAutorizacionUnica(input) {
     const autorizacion = input.value.trim();
     
-    // Si est√° vac√≠o, no validar
+    // Si est· vacÌo, no validar
     if (!autorizacion) {
         return;
     }
@@ -858,7 +859,7 @@ function validarAutorizacionUnica(input) {
     const filaActual = input.closest('tr');
     const errorElement = filaActual.querySelector('.error-autorizacion');
     
-    // Buscar si existe otra fila con la misma autorizaci√≥n
+    // Buscar si existe otra fila con la misma autorizaciÛn
     let autorizacionDuplicada = false;
     
     document.querySelectorAll('#tbody-lineas tr[id^="linea-"]').forEach(tr => {
@@ -876,10 +877,10 @@ function validarAutorizacionUnica(input) {
         // Mostrar error
         input.style.borderColor = '#dc3545';
         input.style.backgroundColor = '#ffe6e6';
-        errorElement.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i>Esta autorizaci√≥n ya existe. Debe ser √∫nica.';
+        errorElement.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i>Esta autorizaciÛn ya existe. Debe ser ˙nica.';
         errorElement.style.display = 'block';
         
-        // Limpiar el campo despu√©s de 2 segundos
+        // Limpiar el campo despuÈs de 2 segundos
         setTimeout(() => {
             input.value = '';
             input.style.borderColor = '';
@@ -897,7 +898,7 @@ function validarAutorizacionUnica(input) {
 document.getElementById('formFactura').addEventListener('submit', function(e) {
     e.preventDefault();
     
-    // Recolectar todas las l√≠neas
+    // Recolectar todas las lÌneas
     lineas = [];
     document.querySelectorAll('#tbody-lineas tr[id^="linea-"]').forEach(tr => {
         const linea = {
@@ -916,10 +917,10 @@ document.getElementById('formFactura').addEventListener('submit', function(e) {
         return false;
     }
     
-    // Validar que todas las l√≠neas tengan datos m√≠nimos
+    // Validar que todas las lÌneas tengan datos mÌnimos
     for (let i = 0; i < lineas.length; i++) {
         if (!lineas[i].nss || !lineas[i].nombre || !lineas[i].servicio || !lineas[i].monto) {
-            alert(`La l√≠nea ${i + 1} tiene campos vac√≠os. Complete NSS, Nombre, Servicio y Monto.`);
+            alert(`La lÌnea ${i + 1} tiene campos vacÌos. Complete NSS, Nombre, Servicio y Monto.`);
             return false;
         }
     }
@@ -931,7 +932,7 @@ document.getElementById('formFactura').addEventListener('submit', function(e) {
     this.submit();
 });
 
-// Descargar PDF autom√°ticamente si se acaba de agregar pacientes
+// Descargar PDF autom·ticamente si se acaba de agregar pacientes
 {% if descargar_pdf %}
 window.addEventListener('DOMContentLoaded', function() {
     // Esperar un momento para que se muestre el flash message

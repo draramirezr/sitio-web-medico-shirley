@@ -4,6 +4,7 @@
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/facturacion-responsive.css') }}">
 <style>
     .facturacion-hero {
         background: linear-gradient(135deg, rgba(206, 176, 183, 0.1) 0%, rgba(242, 226, 230, 0.3) 100%);

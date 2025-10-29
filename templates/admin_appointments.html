@@ -1,9 +1,10 @@
-锘縶% extends "base.html" %}
+{% extends "base.html" %}
 
-{% block title %}Gesti贸n de Citas - Panel Admin | Dra. Shirley Ram铆rez{% endblock %}
+{% block title %}Gesti髇 de Citas - Panel Admin | Dra. Shirley Ram韗ez{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin-responsive.css') }}">
 <style>
     /* Paleta de colores Dra. Shirley para Admin */
     .appointments-hero {
@@ -167,9 +168,9 @@
             <div>
                 <h1 class="admin-page-title mb-2">
                     <i class="fas fa-calendar-alt me-2"></i>
-                    Gesti贸n de Citas
+                    Gesti髇 de Citas
                 </h1>
-                <p class="text-muted mb-0">Administra y da seguimiento a todas las citas m茅dicas</p>
+                <p class="text-muted mb-0">Administra y da seguimiento a todas las citas m閐icas</p>
             </div>
             <a href="{{ url_for('admin') }}" class="btn-back">
                 <i class="fas fa-arrow-left me-2"></i>
@@ -185,7 +186,7 @@
             <div class="card appointment-card">
                 <div class="card-body">
                     <div class="row align-items-center">
-                        <!-- Informaci贸n del Paciente -->
+                        <!-- Informaci髇 del Paciente -->
                         <div class="col-lg-4 mb-3 mb-lg-0">
                             <h5 class="mb-2">
                                 <i class="fas fa-user-circle me-2 text-primary"></i>
@@ -194,7 +195,7 @@
                             <div class="patient-info">
                                 <div class="mb-1">
                                     <i class="fas fa-phone"></i>
-                                    <strong>Tel茅fono:</strong> {{ appointment['phone'] }}
+                                    <strong>Tel閒ono:</strong> {{ appointment['phone'] }}
                                 </div>
                                 {% if appointment['email'] %}
                                 <div class="mb-1">
@@ -251,7 +252,7 @@
                         <!-- Acciones -->
                         <div class="col-lg-4">
                             <div class="d-grid gap-2">
-                                <!-- Bot贸n de WhatsApp -->
+                                <!-- Bot髇 de WhatsApp -->
                                 <a href="https://wa.me/{{ appointment['phone']|replace('(', '')|replace(')', '')|replace('-', '')|replace(' ', '') }}?text=Hola%20{{ appointment['first_name'] }},%20soy%20la%20Dra.%20Shirley%20Ram%C3%ADrez.%20Te%20contacto%20en%20relaci%C3%B3n%20a%20tu%20solicitud%20de%20cita.%0A%0A%F0%9F%93%85%20Tipo:%20{{ appointment['appointment_type']|replace(' ', '%20') }}%0A%0A%C2%BFPodemos%20confirmar%20la%20cita?" 
                                    class="btn whatsapp-btn" 
                                    target="_blank"
@@ -273,7 +274,7 @@
                                     </button>
                                 </form>
 
-                                <!-- Bot贸n para ver detalles completos -->
+                                <!-- Bot髇 para ver detalles completos -->
                                 <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#detailsModal{{ appointment['id'] }}">
                                     <i class="fas fa-eye me-2"></i>
                                     Ver Detalles Completos
@@ -307,7 +308,7 @@
                                 {{ appointment['first_name'] }} {{ appointment['last_name'] }}
                             </div>
                             <div class="col-md-6 mb-3">
-                                <strong><i class="fas fa-phone me-2"></i>Tel茅fono:</strong><br>
+                                <strong><i class="fas fa-phone me-2"></i>Tel閒ono:</strong><br>
                                 {{ appointment['phone'] }}
                             </div>
                             {% if appointment['email'] %}
@@ -317,7 +318,7 @@
                             </div>
                             {% endif %}
                             <div class="col-md-6 mb-3">
-                                <strong><i class="fas fa-shield-alt me-2"></i>Seguro M茅dico:</strong><br>
+                                <strong><i class="fas fa-shield-alt me-2"></i>Seguro M閐ico:</strong><br>
                                 {{ appointment['medical_insurance'] }}
                             </div>
                             <div class="col-md-6 mb-3">
@@ -411,7 +412,7 @@
     {% else %}
     <div class="alert alert-info">
         <i class="fas fa-info-circle me-2"></i>
-        No hay citas registradas todav铆a.
+        No hay citas registradas todav韆.
     </div>
     {% endif %}
 </div>

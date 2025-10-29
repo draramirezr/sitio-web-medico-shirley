@@ -1,9 +1,10 @@
-ï»¿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}{% if usuario %}Editar Usuario{% else %}Nuevo Usuario{% endif %} - Panel Administrativo{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin-responsive.css') }}">
 <style>
     .form-container {
         max-width: 800px;
@@ -201,9 +202,9 @@
     <div class="form-header">
         <h1>
             {% if usuario %}
-                âœï¸ Editar Usuario
+                ?? Editar Usuario
             {% else %}
-                â• Nuevo Usuario
+                ? Nuevo Usuario
             {% endif %}
         </h1>
         <p>
@@ -225,8 +226,8 @@
     
     {% if not usuario %}
         <div class="info-box">
-            <strong>â„¹ï¸ InformaciÃ³n:</strong><br>
-            Los usuarios podrÃ¡n acceder al panel administrativo con sus credenciales.<br>
+            <strong>?? Información:</strong><br>
+            Los usuarios podrán acceder al panel administrativo con sus credenciales.<br>
             Recuerda enviar las credenciales de forma segura al usuario.
         </div>
     {% endif %}
@@ -234,7 +235,7 @@
     <form method="POST" id="userForm">
         <div class="form-group">
             <label for="nombre">
-                ğŸ‘¤ Nombre Completo <span class="required">*</span>
+                ?? Nombre Completo <span class="required">*</span>
             </label>
             <input 
                 type="text" 
@@ -243,13 +244,13 @@
                 required
                 maxlength="100"
                 value="{{ usuario.nombre if usuario else '' }}"
-                placeholder="Ej: Juan PÃ©rez"
+                placeholder="Ej: Juan Pérez"
             >
         </div>
         
         <div class="form-group">
             <label for="email">
-                ğŸ“§ Correo ElectrÃ³nico <span class="required">*</span>
+                ?? Correo Electrónico <span class="required">*</span>
             </label>
             <input 
                 type="email" 
@@ -259,28 +260,28 @@
                 value="{{ usuario.email if usuario else '' }}"
                 placeholder="correo@ejemplo.com"
             >
-            <small>Este serÃ¡ el usuario para iniciar sesiÃ³n</small>
+            <small>Este será el usuario para iniciar sesión</small>
         </div>
         
         <div class="form-group">
             <label for="perfil">
-                ğŸ”‘ Perfil de Usuario <span class="required">*</span>
+                ?? Perfil de Usuario <span class="required">*</span>
             </label>
             <select id="perfil" name="perfil" required>
                 <option value="">-- Selecciona un perfil --</option>
                 <option value="Administrador" {% if usuario and usuario.perfil == 'Administrador' %}selected{% endif %}>
-                    ğŸ”‘ Administrador (Acceso total)
+                    ?? Administrador (Acceso total)
                 </option>
                 <option value="Nivel 2" {% if usuario and usuario.perfil == 'Nivel 2' %}selected{% endif %}>
-                    â­ Nivel 2 (FacturaciÃ³n completa + Generar facturas finales)
+                    ? Nivel 2 (Facturación completa + Generar facturas finales)
                 </option>
                 <option value="Registro de Facturas" {% if usuario and usuario.perfil == 'Registro de Facturas' %}selected{% endif %}>
-                    ğŸ“ Registro de Facturas (Solo registro, sin generaciÃ³n final)
+                    ?? Registro de Facturas (Solo registro, sin generación final)
                 </option>
             </select>
             <small>
                 <strong>Administrador:</strong> Acceso completo a todas las funciones<br>
-                <strong>Nivel 2:</strong> Acceso completo a facturaciÃ³n + Puede generar facturas finales con NCF â­<br>
+                <strong>Nivel 2:</strong> Acceso completo a facturación + Puede generar facturas finales con NCF ?<br>
                 <strong>Registro de Facturas:</strong> Solo registro de facturas, no puede generar facturas finales
             </small>
         </div>
@@ -288,7 +289,7 @@
         {% if usuario %}
             <div class="form-group">
                 <label>
-                    ğŸ“Š Estado del Usuario
+                    ?? Estado del Usuario
                 </label>
                 <div class="checkbox-group">
                     <input 
@@ -298,13 +299,13 @@
                         value="1"
                         {% if usuario.activo %}checked{% endif %}
                     >
-                    <label for="activo">Usuario activo (puede iniciar sesiÃ³n)</label>
+                    <label for="activo">Usuario activo (puede iniciar sesión)</label>
                 </div>
             </div>
             
             <div class="warning-box">
-                <strong>âš ï¸ Cambio de contraseÃ±a:</strong><br>
-                Por defecto, la contraseÃ±a actual se mantiene. Solo ingresa una nueva contraseÃ±a si deseas cambiarla.
+                <strong>?? Cambio de contraseña:</strong><br>
+                Por defecto, la contraseña actual se mantiene. Solo ingresa una nueva contraseña si deseas cambiarla.
             </div>
             
             <div class="form-group">
@@ -315,7 +316,7 @@
                         name="cambiar_password_toggle"
                         onchange="togglePasswordSection()"
                     >
-                    <label for="cambiar_password_toggle">ğŸ” Cambiar contraseÃ±a</label>
+                    <label for="cambiar_password_toggle">?? Cambiar contraseña</label>
                 </div>
             </div>
             
@@ -324,7 +325,7 @@
                 
                 <div class="form-group">
                     <label for="password">
-                        ğŸ”’ Nueva ContraseÃ±a Temporal <span class="required">*</span>
+                        ?? Nueva Contraseña Temporal <span class="required">*</span>
                     </label>
                     <div style="display: flex; gap: 10px; align-items: start;">
                         <div style="flex: 1;">
@@ -333,25 +334,25 @@
                                 id="password" 
                                 name="password" 
                                 minlength="8"
-                                placeholder="MÃ­nimo 8 caracteres"
+                                placeholder="Mínimo 8 caracteres"
                                 autocomplete="new-password"
                                 readonly
                                 style="background-color: #F8F9FA; font-family: 'Courier New', monospace; font-weight: 600; font-size: 16px;"
                             >
-                            <small id="password-hint">Haz clic en "Generar ContraseÃ±a" para crear una contraseÃ±a temporal segura</small>
+                            <small id="password-hint">Haz clic en "Generar Contraseña" para crear una contraseña temporal segura</small>
                         </div>
                         <button type="button" class="btn btn-secondary" onclick="generarPasswordTemporal()" style="white-space: nowrap; padding: 12px 20px;">
-                            ğŸ”‘ Generar ContraseÃ±a
+                            ?? Generar Contraseña
                         </button>
                     </div>
                 </div>
                 
                 <div class="info-box" id="password-info" style="display: none;">
-                    <strong>ğŸ“‹ ContraseÃ±a Temporal Generada:</strong><br>
+                    <strong>?? Contraseña Temporal Generada:</strong><br>
                     <div style="font-family: 'Courier New', monospace; font-size: 18px; font-weight: 700; color: #0D47A1; margin: 10px 0; padding: 10px; background: white; border-radius: 5px; border: 2px dashed #2196F3;">
                         <span id="password-display"></span>
                     </div>
-                    <small>âš ï¸ <strong>IMPORTANTE:</strong> Esta contraseÃ±a se enviarÃ¡ automÃ¡ticamente al usuario por email. El usuario deberÃ¡ cambiarla en su primer inicio de sesiÃ³n.</small>
+                    <small>?? <strong>IMPORTANTE:</strong> Esta contraseña se enviará automáticamente al usuario por email. El usuario deberá cambiarla en su primer inicio de sesión.</small>
                 </div>
                 
                 <div class="checkbox-group" style="margin-top: 15px;">
@@ -362,7 +363,7 @@
                         value="1"
                         checked
                     >
-                    <label for="enviar_email">âœ‰ï¸ Enviar nueva contraseÃ±a por email al usuario</label>
+                    <label for="enviar_email">?? Enviar nueva contraseña por email al usuario</label>
                 </div>
             </div>
         {% endif %}
@@ -370,7 +371,7 @@
         {% if not usuario or True %}
             <div class="form-group" {% if usuario %}style="display: none;"{% endif %}>
                 <label for="password_nuevo">
-                    ğŸ”’ ContraseÃ±a Temporal {% if usuario %} Nueva {% endif %} <span class="required">*</span>
+                    ?? Contraseña Temporal {% if usuario %} Nueva {% endif %} <span class="required">*</span>
                 </label>
                 <div style="display: flex; gap: 10px; align-items: start;">
                     <div style="flex: 1;">
@@ -380,16 +381,16 @@
                             name="password_nuevo" 
                             minlength="8"
                             {% if not usuario %}required{% endif %}
-                            placeholder="MÃ­nimo 8 caracteres"
+                            placeholder="Mínimo 8 caracteres"
                             autocomplete="new-password"
                             readonly
                             style="background-color: #F8F9FA; font-family: 'Courier New', monospace; font-weight: 600; font-size: 16px;"
                         >
-                        <small id="password-hint-nuevo">{% if usuario %}Dejar vacÃ­o para mantener la contraseÃ±a actual{% else %}Haz clic en "Generar ContraseÃ±a" para crear una contraseÃ±a temporal segura{% endif %}</small>
+                        <small id="password-hint-nuevo">{% if usuario %}Dejar vacío para mantener la contraseña actual{% else %}Haz clic en "Generar Contraseña" para crear una contraseña temporal segura{% endif %}</small>
                     </div>
                     {% if not usuario %}
                     <button type="button" class="btn btn-secondary" onclick="generarPasswordTemporalNuevo()" style="white-space: nowrap; padding: 12px 20px;">
-                        ğŸ”‘ Generar ContraseÃ±a
+                        ?? Generar Contraseña
                     </button>
                     {% endif %}
                 </div>
@@ -397,11 +398,11 @@
             
             {% if not usuario %}
                 <div class="info-box" id="password-info-nuevo" style="display: none;">
-                    <strong>ğŸ“‹ ContraseÃ±a Temporal Generada:</strong><br>
+                    <strong>?? Contraseña Temporal Generada:</strong><br>
                     <div style="font-family: 'Courier New', monospace; font-size: 18px; font-weight: 700; color: #0D47A1; margin: 10px 0; padding: 10px; background: white; border-radius: 5px; border: 2px dashed #2196F3;">
                         <span id="password-display-nuevo"></span>
                     </div>
-                    <small>âš ï¸ <strong>IMPORTANTE:</strong> Guarda esta contraseÃ±a y envÃ­ala al usuario de forma segura. El usuario deberÃ¡ cambiarla en su primer inicio de sesiÃ³n.</small>
+                    <small>?? <strong>IMPORTANTE:</strong> Guarda esta contraseña y envíala al usuario de forma segura. El usuario deberá cambiarla en su primer inicio de sesión.</small>
                 </div>
             {% endif %}
         {% endif %}
@@ -413,24 +414,24 @@
         <div class="btn-container">
             <button type="submit" class="btn btn-primary">
                 {% if usuario %}
-                    ğŸ’¾ Guardar Cambios
+                    ?? Guardar Cambios
                 {% else %}
-                    âœ… Crear Usuario
+                    ? Crear Usuario
                 {% endif %}
             </button>
             <a href="{{ url_for('admin_usuarios') }}" class="btn btn-secondary">
-                âŒ Cancelar
+                ? Cancelar
             </a>
         </div>
     </form>
 </div>
 
 <script>
-    // Generar contraseÃ±a temporal segura (para modo editar)
+    // Generar contraseña temporal segura (para modo editar)
     function generarPasswordTemporal() {
-        const mayusculas = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // Sin I, O para evitar confusiÃ³n
-        const minusculas = 'abcdefghjkmnpqrstuvwxyz'; // Sin i, l, o para evitar confusiÃ³n
-        const numeros = '23456789'; // Sin 0, 1 para evitar confusiÃ³n
+        const mayusculas = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // Sin I, O para evitar confusión
+        const minusculas = 'abcdefghjkmnpqrstuvwxyz'; // Sin i, l, o para evitar confusión
+        const numeros = '23456789'; // Sin 0, 1 para evitar confusión
         const especiales = '!@#$%&*+=-';
         
         let password = '';
@@ -445,7 +446,7 @@
         password += especiales[Math.floor(Math.random() * especiales.length)];
         password += especiales[Math.floor(Math.random() * especiales.length)];
         
-        // Agregar 4 caracteres aleatorios mÃ¡s para tener 12 caracteres
+        // Agregar 4 caracteres aleatorios más para tener 12 caracteres
         const todosCaracteres = mayusculas + minusculas + numeros + especiales;
         for (let i = 0; i < 4; i++) {
             password += todosCaracteres[Math.floor(Math.random() * todosCaracteres.length)];
@@ -458,10 +459,10 @@
         document.getElementById('password').value = password;
         document.getElementById('password-display').textContent = password;
         document.getElementById('password-info').style.display = 'block';
-        document.getElementById('password-hint').innerHTML = '<span style="color: #28A745;">âœ… ContraseÃ±a temporal generada correctamente</span>';
+        document.getElementById('password-hint').innerHTML = '<span style="color: #28A745;">? Contraseña temporal generada correctamente</span>';
     }
     
-    // Generar contraseÃ±a temporal segura (para modo nuevo usuario)
+    // Generar contraseña temporal segura (para modo nuevo usuario)
     function generarPasswordTemporalNuevo() {
         const mayusculas = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
         const minusculas = 'abcdefghjkmnpqrstuvwxyz';
@@ -488,7 +489,7 @@
         document.getElementById('password_nuevo').value = password;
         document.getElementById('password-display-nuevo').textContent = password;
         document.getElementById('password-info-nuevo').style.display = 'block';
-        document.getElementById('password-hint-nuevo').innerHTML = '<span style="color: #28A745;">âœ… ContraseÃ±a temporal generada correctamente</span>';
+        document.getElementById('password-hint-nuevo').innerHTML = '<span style="color: #28A745;">? Contraseña temporal generada correctamente</span>';
     }
     
     {% if usuario %}
@@ -508,29 +509,29 @@
             passwordInput.required = false;
             passwordInput.value = '';
             document.getElementById('password-info').style.display = 'none';
-            document.getElementById('password-hint').textContent = 'Haz clic en "Generar ContraseÃ±a" para crear una contraseÃ±a temporal segura';
+            document.getElementById('password-hint').textContent = 'Haz clic en "Generar Contraseña" para crear una contraseña temporal segura';
         }
     }
     {% endif %}
     
-    // Validar contraseÃ±a
+    // Validar contraseña
     function validarPassword(password) {
         const errores = [];
         
         if (password.length < 8) {
-            errores.push('â€¢ MÃ­nimo 8 caracteres');
+            errores.push('• Mínimo 8 caracteres');
         }
         if (!/[A-Z]/.test(password)) {
-            errores.push('â€¢ Al menos una letra mayÃºscula');
+            errores.push('• Al menos una letra mayúscula');
         }
         if (!/[a-z]/.test(password)) {
-            errores.push('â€¢ Al menos una letra minÃºscula');
+            errores.push('• Al menos una letra minúscula');
         }
         if (!/[0-9]/.test(password)) {
-            errores.push('â€¢ Al menos un nÃºmero');
+            errores.push('• Al menos un número');
         }
         if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-            errores.push('â€¢ Al menos un carÃ¡cter especial (!@#$%^&*()_+-=[]{};\':"|,.<>/?)');
+            errores.push('• Al menos un carácter especial (!@#$%^&*()_+-=[]{};\':"|,.<>/?)');
         }
         
         return errores;
@@ -539,13 +540,13 @@
     // Validar formulario
     document.getElementById('userForm').addEventListener('submit', function(e) {
         {% if usuario %}
-        // Para editar: validar solo si se marcÃ³ cambiar contraseÃ±a
+        // Para editar: validar solo si se marcó cambiar contraseña
         const cambiarPassword = document.getElementById('cambiar_password').value === '1';
         if (cambiarPassword) {
             const password = document.getElementById('password').value;
             if (!password) {
                 e.preventDefault();
-                alert('âŒ Debes generar una contraseÃ±a temporal para el usuario.');
+                alert('? Debes generar una contraseña temporal para el usuario.');
                 return;
             }
         }
@@ -554,7 +555,7 @@
         const password = document.getElementById('password_nuevo').value;
         if (!password) {
             e.preventDefault();
-            alert('âŒ Debes generar una contraseÃ±a temporal para el nuevo usuario.');
+            alert('? Debes generar una contraseña temporal para el nuevo usuario.');
             return;
         }
         {% endif %}
