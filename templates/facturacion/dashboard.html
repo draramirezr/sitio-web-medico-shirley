@@ -876,33 +876,52 @@
         return fecha.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
     });
     
-    // Colores para cada mes
-    const coloresMeses = [
-        '#28a745', '#2ecc71', '#27ae60', '#16a085', '#1abc9c',
-        '#3498db', '#2980b9', '#9b59b6', '#8e44ad', '#e74c3c',
-        '#c0392b', '#e67e22'
+    // Colores para cada médico (líneas)
+    const coloresMedicos = [
+        '#CEB0B7', // Rosa principal
+        '#28a745', // Verde
+        '#3498db', // Azul
+        '#e74c3c', // Rojo
+        '#9b59b6', // Morado
+        '#f39c12', // Naranja
+        '#1abc9c', // Turquesa
+        '#e67e22', // Naranja oscuro
+        '#2ecc71', // Verde claro
+        '#34495e', // Gris azulado
+        '#16a085', // Verde azulado
+        '#d35400'  // Naranja quemado
     ];
     
-    // Crear datasets (un grupo de barras por cada médico)
+    // Crear datasets (una línea por cada médico)
     const datasetsMedicos = medicosUnicos.map((medico, indexMedico) => {
         const datosMedico = mesesMedicosUnicos.map(mes => {
             const registro = facturacionMedicoMes.find(item => item.nombre === medico && item.mes === mes);
             return registro ? registro.total_monto : 0;
         });
         
+        const color = coloresMedicos[indexMedico % coloresMedicos.length];
+        
         return {
             label: medico,
             data: datosMedico,
-            backgroundColor: coloresMeses[indexMedico % coloresMeses.length] + 'CC',
-            borderColor: coloresMeses[indexMedico % coloresMeses.length],
-            borderWidth: 2,
-            borderRadius: 6,
-            hoverBackgroundColor: coloresMeses[indexMedico % coloresMeses.length],
+            borderColor: color,
+            backgroundColor: color + '20', // 20 = 12.5% de opacidad en hex
+            borderWidth: 3,
+            fill: false,
+            tension: 0.4, // Curva suave
+            pointBackgroundColor: color,
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            pointHoverBackgroundColor: color,
+            pointHoverBorderColor: '#fff',
+            pointHoverBorderWidth: 3
         };
     });
     
     new Chart(ctxMedico, {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: mesesMedicosFormateados,
             datasets: datasetsMedicos
@@ -953,7 +972,6 @@
             scales: {
                 y: {
                     beginAtZero: true,
-                    stacked: false,
                     grid: {
                         color: 'rgba(0, 0, 0, 0.05)'
                     },
@@ -968,7 +986,6 @@
                     }
                 },
                 x: {
-                    stacked: false,
                     grid: {
                         display: false
                     },
