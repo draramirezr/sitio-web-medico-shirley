@@ -4915,14 +4915,9 @@ def facturacion_generar_final():
             
             conn.close()
             
-            # Descargar PDF
-            pdf_buffer.seek(0)
-            return send_file(
-                pdf_buffer,
-                as_attachment=True,
-                download_name=f'Factura_{ncf_completo}_{factura_id}.pdf',
-                mimetype='application/pdf'
-            )
+            # En lugar de descargar directamente, redirigir a ver factura con parámetro para mostrar modal de impresión
+            flash(f'✅ Factura #{factura_id} generada exitosamente con NCF {ncf_completo} | {len(ids_list)} paciente(s) facturado(s)', 'success')
+            return redirect(url_for('facturacion_ver_factura', factura_id=factura_id, mostrar_modal_imprimir=1))
         else:
             conn.close()
             flash(f'✅ Factura #{factura_id} generada exitosamente con NCF {ncf_completo} | {len(ids_list)} paciente(s) facturado(s)', 'success')

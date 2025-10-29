@@ -470,11 +470,81 @@
     </div>
 </div>
 
+<!-- Modal para Preguntar si Desea Imprimir -->
+<div class="modal fade" id="modalImprimir" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 20px; overflow: hidden; border: none;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%); border: none;">
+                <h5 class="modal-title text-white">
+                    <i class="fas fa-print me-2"></i>
+                    ¿Desea Imprimir la Factura?
+                </h5>
+            </div>
+            <div class="modal-body" style="padding: 2rem;">
+                <div class="text-center mb-3">
+                    <i class="fas fa-file-invoice" style="font-size: 4rem; color: #CEB0B7;"></i>
+                </div>
+                <p class="text-center mb-3" style="font-size: 1.1rem; color: #333;">
+                    La factura ha sido generada exitosamente.<br>
+                    <strong>¿Desea imprimirla ahora?</strong>
+                </p>
+                <div class="alert" style="background-color: rgba(206, 176, 183, 0.1); border-color: #CEB0B7; color: #666; text-align: center;">
+                    <small>
+                        <i class="fas fa-info-circle me-1"></i>
+                        También puede imprimir más tarde desde el botón "Imprimir"
+                    </small>
+                </div>
+            </div>
+            <div class="modal-footer" style="background-color: #f8f9fa; border: none; justify-content: center; gap: 1rem;">
+                <button type="button" class="btn btn-secondary" onclick="cerrarModalImprimir()" style="min-width: 120px; padding: 0.7rem 1.5rem; border-radius: 12px; font-weight: 600;">
+                    <i class="fas fa-times me-2"></i>
+                    No
+                </button>
+                <button type="button" class="btn" onclick="imprimirFactura()" style="background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%); color: white; border: none; font-weight: 600; min-width: 120px; padding: 0.7rem 1.5rem; border-radius: 12px;">
+                    <i class="fas fa-print me-2"></i>
+                    Sí, Imprimir
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 function abrirModalEmail() {
     var modal = new bootstrap.Modal(document.getElementById('modalEnviarEmail'));
     modal.show();
 }
+
+function imprimirFactura() {
+    // Cerrar el modal
+    var modal = bootstrap.Modal.getInstance(document.getElementById('modalImprimir'));
+    if (modal) {
+        modal.hide();
+    }
+    // Esperar un momento para que el modal se cierre antes de imprimir
+    setTimeout(function() {
+        window.print();
+    }, 300);
+}
+
+function cerrarModalImprimir() {
+    var modal = bootstrap.Modal.getInstance(document.getElementById('modalImprimir'));
+    if (modal) {
+        modal.hide();
+    }
+}
+
+// Mostrar modal de impresión si viene el parámetro en la URL
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('mostrar_modal_imprimir') === '1') {
+        // Mostrar el modal después de un pequeño delay para asegurar que la página esté cargada
+        setTimeout(function() {
+            var modal = new bootstrap.Modal(document.getElementById('modalImprimir'));
+            modal.show();
+        }, 500);
+    }
+});
 </script>
 
 {% endblock %}
