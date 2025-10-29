@@ -616,7 +616,7 @@
         <!-- Facturación por Médico -->
         <div class="col-lg-12 animate-card" style="animation-delay: 0.8s">
             <div class="chart-card">
-                <h3><i class="fas fa-user-md"></i>Facturación por Médico</h3>
+                <h3><i class="fas fa-user-md"></i>Cantidad de Pacientes por Médico (por Mes)</h3>
                 <canvas id="chartPorMedico"></canvas>
             </div>
         </div>
@@ -896,7 +896,7 @@
     const datasetsMedicos = medicosUnicos.map((medico, indexMedico) => {
         const datosMedico = mesesMedicosUnicos.map(mes => {
             const registro = facturacionMedicoMes.find(item => item.nombre === medico && item.mes === mes);
-            return registro ? registro.total_monto : 0;
+            return registro ? registro.total_pacientes : 0;
         });
         
         const color = coloresMedicos[indexMedico % coloresMedicos.length];
@@ -905,7 +905,7 @@
             label: medico,
             data: datosMedico,
             borderColor: color,
-            backgroundColor: color + '20', // 20 = 12.5% de opacidad en hex
+            backgroundColor: color,
             borderWidth: 3,
             fill: false,
             tension: 0.4, // Curva suave
@@ -944,16 +944,27 @@
                             weight: '600'
                         },
                         padding: 15,
-                        boxWidth: 15,
-                        boxHeight: 15,
-                        usePointStyle: true
+                        boxWidth: 40,
+                        boxHeight: 4,
+                        usePointStyle: false,
+                        generateLabels: function(chart) {
+                            const datasets = chart.data.datasets;
+                            return datasets.map((dataset, i) => ({
+                                text: dataset.label,
+                                fillStyle: dataset.borderColor,
+                                strokeStyle: dataset.borderColor,
+                                lineWidth: 3,
+                                hidden: false,
+                                index: i
+                            }));
+                        }
                     }
                 },
                 tooltip: {
                     backgroundColor: '#fff',
                     titleColor: '#282828',
                     bodyColor: '#666',
-                    borderColor: '#28a745',
+                    borderColor: '#CEB0B7',
                     borderWidth: 2,
                     padding: 12,
                     bodyFont: {
@@ -961,7 +972,7 @@
                     },
                     callbacks: {
                         label: function(context) {
-                            return context.dataset.label + ': $' + context.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                            return context.dataset.label + ': ' + context.parsed.y + ' pacientes';
                         }
                     }
                 },
@@ -972,6 +983,15 @@
             scales: {
                 y: {
                     beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Cantidad de Pacientes',
+                        color: '#666',
+                        font: {
+                            size: 12,
+                            weight: '600'
+                        }
+                    },
                     grid: {
                         color: 'rgba(0, 0, 0, 0.05)'
                     },
@@ -981,7 +1001,7 @@
                             size: 12
                         },
                         callback: function(value) {
-                            return '$' + value.toLocaleString('en-US', {minimumFractionDigits: 0});
+                            return value;
                         }
                     }
                 },
@@ -1006,7 +1026,7 @@
                     const mes = mesesMedicosFormateados[dataIndex];
                     const valor = datasetsMedicos[datasetIndex].data[dataIndex];
                     
-                    alert(`${medico}\n${mes}\nMonto: $${valor.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`);
+                    alert(`${medico}\n${mes}\nPacientes: ${valor}`);
                 }
             }
         }

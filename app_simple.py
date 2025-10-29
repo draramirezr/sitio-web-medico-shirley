@@ -5584,7 +5584,8 @@ def facturacion_dashboard():
             SELECT 
                 m.nombre,
                 DATE_FORMAT(f.fecha_factura, '%%Y-%%m') as mes,
-                COALESCE(SUM(fd.monto), 0) as total_monto
+                COALESCE(SUM(fd.monto), 0) as total_monto,
+                COUNT(DISTINCT fd.id) as total_pacientes
             FROM facturas_detalle fd
             JOIN facturas f ON fd.factura_id = f.id
             JOIN medicos m ON fd.medico_consulta = m.id
@@ -5600,12 +5601,13 @@ def facturacion_dashboard():
         
         query_medico_mes += ' GROUP BY m.id, m.nombre, DATE_FORMAT(f.fecha_factura, \'%%Y-%%m\') ORDER BY m.nombre, mes ASC'
     else:
-        # Si no hay filtro de médico consulta, usar facturas normal
+        # Si no hay filtro de médico consulta, usar facturas normal y contar pacientes
         query_medico_mes = '''
             SELECT 
                 m.nombre,
                 DATE_FORMAT(f.fecha_factura, '%%Y-%%m') as mes,
-                COALESCE(SUM(f.total), 0) as total_monto
+                COALESCE(SUM(f.total), 0) as total_monto,
+                COALESCE(SUM((SELECT COUNT(*) FROM facturas_detalle WHERE factura_id = f.id)), 0) as total_pacientes
             FROM facturas f
             JOIN medicos m ON f.medico_id = m.id
             WHERE f.activo = 1
