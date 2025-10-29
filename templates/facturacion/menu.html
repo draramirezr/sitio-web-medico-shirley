@@ -1,6 +1,6 @@
-ï»¿{% extends "base.html" %}
+{% extends "base.html" %}
 
-{% block title %}Sistema de Facturaciï¿½n - Dra. Shirley Ramï¿½rez{% endblock %}
+{% block title %}Sistema de Facturación - Dra. Shirley Ramírez{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
@@ -211,7 +211,7 @@
             <div>
                 <h1 style="color: var(--primary-color); font-weight: 800; font-size: 2.2rem; margin-bottom: 0;">
                     <i class="fas fa-file-invoice-dollar me-2"></i>
-                    Sistema de Facturaciï¿½n
+                    Sistema de Facturación
                 </h1>
             </div>
             <a href="{{ url_for('admin') }}" class="btn-volver">
@@ -235,46 +235,46 @@
             </a>
         </div>
 
-        <!-- Maestra de Mï¿½dicos -->
+        <!-- Maestra de Médicos -->
         <div class="col-lg-3 col-md-6 animate-card" style="animation-delay: 0.2s">
             <a href="{{ url_for('facturacion_medicos') }}" style="text-decoration: none;">
                 <div class="maestra-card">
                     <i class="fas fa-user-md"></i>
-                    <h4>Mï¿½dicos</h4>
-                    <p>Registro de mï¿½dicos del consultorio</p>
+                    <h4>Médicos</h4>
+                    <p>Registro de médicos del consultorio</p>
                 </div>
             </a>
         </div>
 
-        <!-- Maestra de Cï¿½digo ARS -->
+        <!-- Maestra de Código ARS -->
         <div class="col-lg-3 col-md-6 animate-card" style="animation-delay: 0.3s">
             <a href="{{ url_for('facturacion_codigo_ars') }}" style="text-decoration: none;">
                 <div class="maestra-card">
                     <i class="fas fa-barcode"></i>
-                    <h4>Cï¿½digo ARS</h4>
-                    <p>Cï¿½digos de mï¿½dicos por ARS</p>
+                    <h4>Código ARS</h4>
+                    <p>Códigos de médicos por ARS</p>
                 </div>
             </a>
         </div>
 
-        <!-- Maestra de Centros Mï¿½dicos -->
+        <!-- Maestra de Centros Médicos -->
         <div class="col-lg-3 col-md-6 animate-card" style="animation-delay: 0.35s">
             <a href="{{ url_for('facturacion_centros_medicos') }}" style="text-decoration: none;">
                 <div class="maestra-card">
                     <i class="fas fa-hospital-alt"></i>
-                    <h4>Centros Mï¿½dicos</h4>
-                    <p>Registro de centros mï¿½dicos</p>
+                    <h4>Centros Médicos</h4>
+                    <p>Registro de centros médicos</p>
                 </div>
             </a>
         </div>
 
-        <!-- Maestra de Centro x Mï¿½dico -->
+        <!-- Maestra de Centro x Médico -->
         <div class="col-lg-3 col-md-6 animate-card" style="animation-delay: 0.38s">
             <a href="{{ url_for('facturacion_medico_centro') }}" style="text-decoration: none;">
                 <div class="maestra-card">
                     <i class="fas fa-link"></i>
-                    <h4>Centro x Mï¿½dico</h4>
-                    <p>Relaciï¿½n centros y mï¿½dicos</p>
+                    <h4>Centro x Médico</h4>
+                    <p>Relación centros y médicos</p>
                 </div>
             </a>
         </div>
@@ -285,7 +285,7 @@
                 <div class="maestra-card">
                     <i class="fas fa-clipboard-list"></i>
                     <h4>Servicios</h4>
-                    <p>Tipos de servicios mï¿½dicos</p>
+                    <p>Tipos de servicios médicos</p>
                 </div>
             </a>
         </div>
@@ -296,7 +296,7 @@
                 <div class="maestra-card">
                     <i class="fas fa-file-invoice"></i>
                     <h4>NCF</h4>
-                    <p>Nï¿½meros de Comprobante Fiscal</p>
+                    <p>Números de Comprobante Fiscal</p>
                 </div>
             </a>
         </div>
@@ -307,17 +307,17 @@
                 <div class="maestra-card">
                     <i class="fas fa-users"></i>
                     <h4>Pacientes</h4>
-                    <p>Registro de pacientes ï¿½nicos</p>
+                    <p>Registro de pacientes únicos</p>
                 </div>
             </a>
         </div>
 
-        <!-- Histï¿½rico de Facturas -->
+        <!-- Histórico de Facturas -->
         <div class="col-lg-3 col-md-6 animate-card" style="animation-delay: 0.7s">
             <a href="{{ url_for('facturacion_historico') }}" style="text-decoration: none;">
                 <div class="maestra-card">
                     <i class="fas fa-history"></i>
-                    <h4>Histï¿½rico</h4>
+                    <h4>Histórico</h4>
                     <p>Consultar facturas generadas</p>
                 </div>
             </a>
@@ -330,7 +330,7 @@
                 <div class="maestra-card">
                     <i class="fas fa-chart-line"></i>
                     <h4>Dashboard</h4>
-                    <p>Indicadores y estadï¿½sticas</p>
+                    <p>Indicadores y estadísticas</p>
                 </div>
             </a>
         </div>
@@ -338,11 +338,11 @@
     </div>
     {% endif %}
 
-    <!-- Secciï¿½n de Facturaciï¿½n Principal -->
+    <!-- Sección de Facturación Principal -->
     <div class="row mt-5">
         <div class="col-12">
             <h3 style="color: var(--primary-color); font-weight: 700; margin-bottom: 1.5rem; text-align: center;">
-                <i class="fas fa-file-invoice-dollar me-2"></i>Sistema de Facturaciï¿½n
+                <i class="fas fa-file-invoice-dollar me-2"></i>Sistema de Facturación
             </h3>
         </div>
         
@@ -357,13 +357,13 @@
             </a>
         </div>
         
-        <!-- Estado de Facturaciï¿½n -->
+        <!-- Estado de Facturación -->
         <div class="{% if current_user.perfil == 'Registro de Facturas' %}col-lg-6{% else %}col-lg-4{% endif %} animate-card" style="animation-delay: 0.7s">
             <a href="{{ url_for('facturacion_pacientes_pendientes') }}" style="text-decoration: none;">
                 <div class="maestra-card" style="background: rgba(242, 226, 230, 0.2); border: 2px solid #CEB0B7; height: 100%;">
                     <i class="fas fa-clipboard-list" style="font-size: 3rem; color: #CEB0B7;"></i>
-                    <h4 style="color: #CEB0B7; font-size: 1.3rem;">ESTADO DE FACTURACIï¿½N</h4>
-                    <p style="color: #ACACAD; font-weight: 600;">Gestiï¿½n de pacientes pendientes y facturados</p>
+                    <h4 style="color: #CEB0B7; font-size: 1.3rem;">ESTADO DE FACTURACIÓN</h4>
+                    <p style="color: #ACACAD; font-weight: 600;">Gestión de pacientes pendientes y facturados</p>
                 </div>
             </a>
         </div>

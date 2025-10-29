@@ -1,6 +1,6 @@
 ﻿{% extends "base.html" %}
 
-{% block title %}Gesti�n de Usuarios - Panel Administrativo{% endblock %}
+{% block title %}Gestión de Usuarios - Panel Administrativo{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
@@ -233,13 +233,13 @@
 
 <div class="admin-container">
     <div class="admin-header">
-        <h1>?? Gesti�n de Usuarios</h1>
+        <h1>👥 Gestión de Usuarios</h1>
         <div class="btn-container">
             <a href="{{ url_for('admin_usuarios_nuevo') }}" class="btn btn-success">
-                ? Nuevo Usuario
+                ➕ Nuevo Usuario
             </a>
             <a href="{{ url_for('admin') }}" class="btn btn-secondary">
-                ? Volver al Panel
+                ← Volver al Panel
             </a>
         </div>
     </div>
@@ -261,8 +261,8 @@
                         <th>Email</th>
                         <th>Perfil</th>
                         <th>Estado</th>
-                        <th>�ltimo Acceso</th>
-                        <th>Fecha Creaci�n</th>
+                        <th>Último Acceso</th>
+                        <th>Fecha Creación</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -280,18 +280,18 @@
                         <td>{{ usuario.email }}</td>
                         <td>
                             {% if usuario.perfil == 'Administrador' %}
-                                <span class="badge badge-admin">?? Administrador</span>
+                                <span class="badge badge-admin">🔑 Administrador</span>
                             {% elif usuario.perfil == 'Nivel 2' %}
-                                <span class="badge badge-admin" style="background: #CEB0B7;">? Nivel 2</span>
+                                <span class="badge badge-admin" style="background: #CEB0B7;">⭐ Nivel 2</span>
                             {% else %}
-                                <span class="badge badge-user">?? {{ usuario.perfil }}</span>
+                                <span class="badge badge-user">📝 {{ usuario.perfil }}</span>
                             {% endif %}
                         </td>
                         <td>
                             {% if usuario.activo %}
-                                <span class="badge badge-success">? Activo</span>
+                                <span class="badge badge-success">✅ Activo</span>
                             {% else %}
-                                <span class="badge badge-danger">? Inactivo</span>
+                                <span class="badge badge-danger">❌ Inactivo</span>
                             {% endif %}
                         </td>
                         <td>
@@ -312,7 +312,7 @@
                             <div class="actions">
                                 <a href="{{ url_for('admin_usuarios_editar', usuario_id=usuario.id) }}" 
                                    class="btn btn-warning btn-sm">
-                                    ?? Editar
+                                    ✏️ Editar
                                 </a>
                             </div>
                         </td>
@@ -325,7 +325,7 @@
                 <h3>No hay usuarios registrados</h3>
                 <p>Crea el primer usuario para comenzar</p>
                 <a href="{{ url_for('admin_usuarios_nuevo') }}" class="btn btn-success" style="margin-top: 20px;">
-                    ? Crear Usuario
+                    ➕ Crear Usuario
                 </a>
             </div>
         {% endif %}

@@ -1,4 +1,4 @@
-ï»¿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Generar Factura - Paso 1{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
@@ -166,7 +166,7 @@
                 Generar Factura
             </h1>
             <p style="color: #ACACAD; margin: 0; font-size: 1.1rem; font-weight: 600;">
-                Sistema de facturaciï¿½n paso a paso
+                Sistema de facturación paso a paso
             </p>
         </div>
     </div>
@@ -175,31 +175,31 @@
     <div class="step-indicator">
         <div class="step">
             <div class="step-number">1</div>
-            <span style="color: #CEB0B7; font-weight: 600;">Configuraciï¿½n</span>
+            <span style="color: #CEB0B7; font-weight: 600;">Configuración</span>
         </div>
         <div class="step-arrow">
             <i class="fas fa-chevron-right"></i>
         </div>
         <div class="step">
             <div class="step-number inactive">2</div>
-            <span style="color: #999; font-weight: 600;">Selecciï¿½n de Pacientes</span>
+            <span style="color: #999; font-weight: 600;">Selección de Pacientes</span>
         </div>
         <div class="step-arrow">
             <i class="fas fa-chevron-right"></i>
         </div>
         <div class="step">
             <div class="step-number inactive">3</div>
-            <span style="color: #999; font-weight: 600;">Generaciï¿½n</span>
+            <span style="color: #999; font-weight: 600;">Generación</span>
         </div>
     </div>
 
-    <!-- Formulario de Configuraciï¿½n -->
+    <!-- Formulario de Configuración -->
     <form method="POST" id="formConfiguracion" class="form-config">
         <input type="hidden" name="step" value="1">
         
         <h3 style="color: #B89BA3; font-weight: 700; margin-bottom: 2rem; text-align: center;">
             <i class="fas fa-cog me-2"></i>
-            Configuraciï¿½n de la Factura
+            Configuración de la Factura
         </h3>
 
         <!-- ARS -->
@@ -220,7 +220,7 @@
             </div>
             <small class="text-muted">
                 <i class="fas fa-info-circle"></i>
-                Solo se mostrarï¿½n pacientes pendientes de esta ARS
+                Solo se mostrarán pacientes pendientes de esta ARS
             </small>
         </div>
 
@@ -228,7 +228,7 @@
         <div class="form-group mb-4">
             <label for="ncf_id">
                 <i class="fas fa-file-invoice"></i>
-                NCF (Nï¿½mero de Comprobante Fiscal)
+                NCF (Número de Comprobante Fiscal)
                 <span class="required">*</span>
             </label>
             <div class="select-wrapper">
@@ -241,25 +241,25 @@
                             data-ultimo="{{ ncf['ultimo_numero'] }}"
                             data-proximo="{{ ncf['ultimo_numero'] + 1 }}"
                             data-tipo="{{ ncf['tipo'] }}">
-                        {{ ncf['tipo'] }} - {{ ncf['prefijo'] }} (Prï¿½ximo: {{ '{:0{}d}'.format(ncf['ultimo_numero'] + 1, ncf['tamaï¿½o']) }})
+                        {{ ncf['tipo'] }} - {{ ncf['prefijo'] }} (Próximo: {{ '{:0{}d}'.format(ncf['ultimo_numero'] + 1, ncf['tamaño']) }})
                     </option>
                     {% endfor %}
                 </select>
             </div>
         </div>
 
-        <!-- Mï¿½dico para Facturar -->
+        <!-- Médico para Facturar -->
         <div class="form-group mb-4">
             <label for="medico_factura_id">
                 <i class="fas fa-user-md"></i>
-                Mï¿½dico que Factura
+                Médico que Factura
                 <span class="required">*</span>
             </label>
             <div class="select-wrapper">
                 <i class="fas fa-stethoscope select-icon"></i>
                 <select class="form-select with-icon" id="medico_factura_id" name="medico_factura_id" required onchange="checkForm()">
                     {% if medicos_habilitados|length != 1 %}
-                    <option value="">-- Seleccione el mï¿½dico --</option>
+                    <option value="">-- Seleccione el médico --</option>
                     {% endif %}
                     {% for medico in medicos_habilitados %}
                     <option value="{{ medico['id'] }}" {% if medicos_habilitados|length == 1 %}selected{% endif %}>{{ medico['nombre'] }} - {{ medico['especialidad'] }}</option>
@@ -269,18 +269,18 @@
             <small class="text-muted">
                 <i class="fas fa-info-circle"></i>
                 {% if medicos_habilitados|length == 0 %}
-                <span style="color: #dc3545; font-weight: 600;">?? No hay mï¿½dicos habilitados. Configure uno en Maestras > Mï¿½dicos</span>
+                <span style="color: #dc3545; font-weight: 600;">?? No hay médicos habilitados. Configure uno en Maestras > Médicos</span>
                 {% else %}
-                Solo mï¿½dicos habilitados para facturar
+                Solo médicos habilitados para facturar
                 {% endif %}
             </small>
         </div>
 
-        <!-- Fecha de Facturaciï¿½n -->
+        <!-- Fecha de Facturación -->
         <div class="form-group mb-4">
             <label for="fecha_factura">
                 <i class="fas fa-calendar-alt"></i>
-                Fecha de Facturaciï¿½n
+                Fecha de Facturación
                 <span class="required">*</span>
             </label>
             <input type="date" class="form-control" id="fecha_factura" name="fecha_factura" 
@@ -295,7 +295,7 @@
         <div class="row g-3">
             <div class="col-md-6">
                 <a href="{{ url_for('facturacion_menu') }}" class="btn w-100" style="background: #ACACAD !important; color: white !important; padding: 1rem; border-radius: 15px; font-weight: 700; font-size: 1.2rem; text-decoration: none; display: block; text-align: center; border: none;">
-                    <i class="fas fa-arrow-left me-2" style="color: white !important;"></i><span style="color: white !important;">Volver al Menï¿½</span>
+                    <i class="fas fa-arrow-left me-2" style="color: white !important;"></i><span style="color: white !important;">Volver al Menú</span>
                 </a>
             </div>
             <div class="col-md-6">
@@ -322,14 +322,14 @@ function checkForm() {
     }
 }
 
-// Funciï¿½n updateNCFInfo() eliminada - ya no es necesaria
+// Función updateNCFInfo() eliminada - ya no es necesaria
 
 function seleccionarNCFporARS() {
     const arsSelect = document.getElementById('ars_id');
     const arsOption = arsSelect.options[arsSelect.selectedIndex];
     const ncfSelect = document.getElementById('ncf_id');
     
-    // Si no hay ARS seleccionada o es la opciï¿½n por defecto, limpiar NCF
+    // Si no hay ARS seleccionada o es la opción por defecto, limpiar NCF
     if (!arsSelect.value || !arsOption.dataset.nombre) {
         ncfSelect.selectedIndex = 0;
         checkForm();
@@ -343,7 +343,7 @@ function seleccionarNCFporARS() {
     // Si es SENASA, seleccionar NCF GUBERNAMENTAL
     if (arsNombre.includes('SENASA')) {
         console.log('Buscando NCF GUBERNAMENTAL...');
-        // Buscar la opciï¿½n con tipo GUBERNAMENTAL
+        // Buscar la opción con tipo GUBERNAMENTAL
         for (let i = 0; i < ncfSelect.options.length; i++) {
             const option = ncfSelect.options[i];
             if (option.dataset.tipo) {
@@ -358,16 +358,16 @@ function seleccionarNCFporARS() {
             }
         }
     } else {
-        console.log('Buscando NCF CRï¿½DITO FISCAL...');
-        // Para todas las demï¿½s ARS, seleccionar NCF CRï¿½DITO FISCAL
+        console.log('Buscando NCF CRÉDITO FISCAL...');
+        // Para todas las demás ARS, seleccionar NCF CRÉDITO FISCAL
         for (let i = 0; i < ncfSelect.options.length; i++) {
             const option = ncfSelect.options[i];
             if (option.dataset.tipo) {
                 const tipo = option.dataset.tipo.toUpperCase();
                 console.log('Tipo encontrado:', tipo);
-                if (tipo.includes('CRï¿½DITO') || tipo.includes('CREDITO')) {
+                if (tipo.includes('CRÉDITO') || tipo.includes('CREDITO')) {
                     ncfSelect.selectedIndex = i;
-                    console.log('NCF CRï¿½DITO FISCAL seleccionado');
+                    console.log('NCF CRÉDITO FISCAL seleccionado');
                     checkForm();
                     return;
                 }
@@ -375,17 +375,17 @@ function seleccionarNCFporARS() {
         }
     }
     
-    console.log('No se encontrï¿½ NCF apropiado');
+    console.log('No se encontró NCF apropiado');
 }
 
-// Verificar al cargar la pï¿½gina
+// Verificar al cargar la página
 document.addEventListener('DOMContentLoaded', function() {
     checkForm();
     
-    // Si solo hay un mï¿½dico habilitado, actualizar info visual
+    // Si solo hay un médico habilitado, actualizar info visual
     const medicoSelect = document.getElementById('medico_factura_id');
     if (medicoSelect && medicoSelect.value) {
-        console.log('Mï¿½dico seleccionado automï¿½ticamente:', medicoSelect.options[medicoSelect.selectedIndex].text);
+        console.log('Médico seleccionado automáticamente:', medicoSelect.options[medicoSelect.selectedIndex].text);
     }
 });
 </script>

@@ -1,6 +1,6 @@
-ï»¿{% extends "base.html" %}
+{% extends "base.html" %}
 
-{% block title %}Pacientes Pendientes - Facturaciï¿½n{% endblock %}
+{% block title %}Pacientes Pendientes - Facturación{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
@@ -215,9 +215,9 @@
             <div>
                 <h1 style="color: var(--primary-color); font-weight: 800; font-size: 2rem; margin-bottom: 0.5rem;">
                     <i class="fas fa-clipboard-list me-2"></i>
-                    Estado de Facturaciï¿½n
+                    Estado de Facturación
                 </h1>
-                <p style="color: #666; margin: 0;">Gestiï¿½n y seguimiento de pacientes pendientes y facturados</p>
+                <p style="color: #666; margin: 0;">Gestión y seguimiento de pacientes pendientes y facturados</p>
             </div>
             <div class="d-flex gap-2 flex-wrap">
                 <a href="{{ url_for('facturacion_facturas_nueva') }}" class="btn btn-agregar" {% if estado_filtro == 'facturado' %}style="pointer-events: none; opacity: 0.4; cursor: not-allowed;" title="No disponible para registros facturados"{% endif %}>
@@ -251,7 +251,7 @@
                 </div>
                 <div class="col-md-3">
                     <label for="medico_id" class="form-label" style="font-weight: 600; color: #666;">
-                        <i class="fas fa-user-md me-1" style="color: var(--primary-color);"></i>Mï¿½dico
+                        <i class="fas fa-user-md me-1" style="color: var(--primary-color);"></i>Médico
                     </label>
                     <select name="medico_id" id="medico_id" class="form-select" style="border: 2px solid rgba(206, 176, 183, 0.3); border-radius: 10px;">
                         <option value="">-- Todos --</option>
@@ -295,7 +295,7 @@
                 </span>
                 {% if medico_seleccionado %}
                 <span class="badge" style="background: var(--primary-color); color: white; padding: 0.4rem 0.8rem; border-radius: 8px; margin-left: 0.5rem;">
-                    Mï¿½dico: {{ medico_seleccionado }}
+                    Médico: {{ medico_seleccionado }}
                 </span>
                 {% endif %}
                 {% if ars_seleccionada %}
@@ -320,7 +320,7 @@
                     <th style="width: 9%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Fecha de Consulta</th>
                     <th style="width: 13%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Servicio</th>
                     <th style="width: 8%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Monto</th>
-                    <th style="width: 13%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Mï¿½dico</th>
+                    <th style="width: 13%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Médico</th>
                     <th style="width: 9%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">ARS</th>
                     <th style="width: 8%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Estado</th>
                     <th style="width: 10%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Acciones</th>
@@ -356,7 +356,7 @@
                         </a>
                         <a href="{{ url_for('facturacion_paciente_eliminar', paciente_id=paciente['id']) }}" 
                            class="btn-accion-eliminar" 
-                           onclick="return confirm('ï¿½Estï¿½ seguro de eliminar este registro?')"
+                           onclick="return confirm('¿Está seguro de eliminar este registro?')"
                            title="Eliminar">
                             <i class="fas fa-trash-alt"></i>
                         </a>

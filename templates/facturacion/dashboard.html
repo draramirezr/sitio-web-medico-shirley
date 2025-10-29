@@ -1,9 +1,9 @@
-ï»¿{% extends "base.html" %}
+{% extends "base.html" %}
 
-{% block title %}Dashboard de Facturaciï¿½n - Indicadores en Tiempo Real | Dra. Shirley Ramï¿½rez{% endblock %}
+{% block title %}Dashboard de Facturación - Indicadores en Tiempo Real | Dra. Shirley Ramírez{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
-{% block description %}Dashboard administrativo con estadï¿½sticas e indicadores de facturaciï¿½n en tiempo real. Sistema de gestiï¿½n mï¿½dica profesional.{% endblock %}
+{% block description %}Dashboard administrativo con estadísticas e indicadores de facturación en tiempo real. Sistema de gestión médica profesional.{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/facturacion-responsive.css') }}">
@@ -175,7 +175,7 @@
         transform: translateY(-1px);
     }
     
-    /* Tarjetas Estadï¿½sticas Ultra Modernas */
+    /* Tarjetas Estadísticas Ultra Modernas */
     .stat-card {
         background: white;
         border-radius: 20px;
@@ -289,7 +289,7 @@
         z-index: 1;
     }
     
-    /* Grï¿½ficos Modernos */
+    /* Gráficos Modernos */
     .chart-card {
         background: white;
         border-radius: 20px;
@@ -325,7 +325,7 @@
         font-size: 1.5rem;
     }
     
-    /* Botï¿½n Volver Moderno */
+    /* Botón Volver Moderno */
     .btn-volver {
         background: rgba(255, 255, 255, 0.2);
         backdrop-filter: blur(10px);
@@ -484,19 +484,19 @@
             <div>
                 <h1 style="color: white !important; margin: 0; font-weight: 800; font-size: 2.2rem; position: relative; z-index: 1; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
                     <i class="fas fa-chart-line" style="color: white !important; margin-right: 0.5rem;"></i>
-                    <span style="color: white !important;">Dashboard de Facturaciï¿½n</span>
+                    <span style="color: white !important;">Dashboard de Facturación</span>
                 </h1>
-                <p style="color: white !important; margin: 0.5rem 0 0 0; opacity: 0.95; font-size: 1.05rem; position: relative; z-index: 1;">Indicadores y estadï¿½sticas en tiempo real</p>
+                <p style="color: white !important; margin: 0.5rem 0 0 0; opacity: 0.95; font-size: 1.05rem; position: relative; z-index: 1;">Indicadores y estadísticas en tiempo real</p>
             </div>
             <a href="{{ url_for('facturacion_menu') }}" class="btn-volver" style="color: white !important;">
-                <i class="fas fa-arrow-left" style="color: white !important;"></i><span style="color: white !important;">Volver al Menï¿½</span>
+                <i class="fas fa-arrow-left" style="color: white !important;"></i><span style="color: white !important;">Volver al Menú</span>
             </a>
         </div>
     </div>
     
     <!-- Filtros de Fecha -->
     <div class="filter-card animate-card" style="animation-delay: 0.1s">
-        <h3><i class="fas fa-filter me-2"></i>Filtrar por Perï¿½odo y Categorï¿½as</h3>
+        <h3><i class="fas fa-filter me-2"></i>Filtrar por Período y Categorías</h3>
         <form method="GET" action="{{ url_for('facturacion_dashboard') }}" class="filter-form">
             <div class="form-group">
                 <label for="fecha_desde">Fecha Desde:</label>
@@ -518,9 +518,9 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="medico_factura_id">Mï¿½dico Factura:</label>
+                <label for="medico_factura_id">Médico Factura:</label>
                 <select id="medico_factura_id" name="medico_factura_id" class="form-select">
-                    <option value="">-- Todos los Mï¿½dicos (habilitados para facturar) --</option>
+                    <option value="">-- Todos los Médicos (habilitados para facturar) --</option>
                     {% for medico in medicos_factura_list %}
                         <option value="{{ medico.id }}" {% if medico_factura_id_seleccionado == medico.id %}selected{% endif %}>
                             {{ medico.nombre }}
@@ -529,9 +529,9 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="medico_consulta_id">Mï¿½dico Paciente:</label>
+                <label for="medico_consulta_id">Médico Paciente:</label>
                 <select id="medico_consulta_id" name="medico_consulta_id" class="form-select">
-                    <option value="">-- Todos los Mï¿½dicos (que atendieron pacientes) --</option>
+                    <option value="">-- Todos los Médicos (que atendieron pacientes) --</option>
                     {% for medico in medicos_consulta_list %}
                         <option value="{{ medico.id }}" {% if medico_consulta_id_seleccionado == medico.id %}selected{% endif %}>
                             {{ medico.nombre }}
@@ -545,7 +545,7 @@
         </form>
     </div>
     
-    <!-- Tarjetas de Estadï¿½sticas Principales -->
+    <!-- Tarjetas de Estadísticas Principales -->
     <div class="row g-4 mb-4">
         <!-- Facturas Generadas -->
         <div class="col-lg-3 col-md-6 animate-card" style="animation-delay: 0.2s">
@@ -592,32 +592,32 @@
         </div>
     </div>
     
-    <!-- Grï¿½ficos -->
+    <!-- Gráficos -->
     <div class="row g-4 mb-4">
-        <!-- Facturaciï¿½n por Mes -->
+        <!-- Facturación por Mes -->
         <div class="col-lg-12 animate-card" style="animation-delay: 0.6s">
             <div class="chart-card">
-                <h3><i class="fas fa-chart-line"></i>Facturaciï¿½n por Mes</h3>
+                <h3><i class="fas fa-chart-line"></i>Facturación por Mes</h3>
                 <canvas id="chartPorMes" height="80"></canvas>
             </div>
         </div>
     </div>
     
     <div class="row g-4 mb-4">
-        <!-- Facturaciï¿½n por ARS y Mes (nuevo grï¿½fico) -->
+        <!-- Facturación por ARS y Mes (nuevo gráfico) -->
         <div class="col-lg-12 animate-card" style="animation-delay: 0.65s">
             <div class="chart-card">
-                <h3><i class="fas fa-calendar-alt"></i>Facturaciï¿½n por ARS y Mes</h3>
+                <h3><i class="fas fa-calendar-alt"></i>Facturación por ARS y Mes</h3>
                 <canvas id="chartARSporMes" height="100"></canvas>
             </div>
         </div>
     </div>
     
     <div class="row g-4 mb-4">
-        <!-- Facturaciï¿½n por Mï¿½dico -->
+        <!-- Facturación por Médico -->
         <div class="col-lg-12 animate-card" style="animation-delay: 0.8s">
             <div class="chart-card">
-                <h3><i class="fas fa-user-md"></i>Facturaciï¿½n por Mï¿½dico</h3>
+                <h3><i class="fas fa-user-md"></i>Facturación por Médico</h3>
                 <canvas id="chartPorMedico"></canvas>
             </div>
         </div>
@@ -641,7 +641,7 @@
     });
     
     function initCharts() {
-    // ==================== GRï¿½FICO: FACTURACIï¿½N POR MES ====================
+    // ==================== GRÁFICO: FACTURACIÓN POR MES ====================
     const ctxMes = document.getElementById('chartPorMes').getContext('2d');
     const facturacionPorMes = {{ facturacion_por_mes | tojson }};
     
@@ -733,14 +733,14 @@
         }
     });
     
-    // ==================== GRï¿½FICO: FACTURACIï¿½N POR ARS Y MES ====================
+    // ==================== GRÁFICO: FACTURACIÓN POR ARS Y MES ====================
     const ctxARSMes = document.getElementById('chartARSporMes').getContext('2d');
     const facturacionARSMes = {{ facturacion_ars_mes | tojson }};
     
-    // Obtener lista ï¿½nica de meses
+    // Obtener lista única de meses
     const mesesUnicos = [...new Set(facturacionARSMes.map(item => item.mes))].sort();
     
-    // Obtener lista ï¿½nica de ARS
+    // Obtener lista única de ARS
     const arsUnicos = [...new Set(facturacionARSMes.map(item => item.nombre_ars))];
     
     // Preparar meses con formato
@@ -764,7 +764,7 @@
         '#767677'
     ];
     
-    // Crear datasets (una lï¿½nea por cada ARS)
+    // Crear datasets (una línea por cada ARS)
     const datasetsARS = arsUnicos.map((ars, index) => {
         const datosARS = mesesUnicos.map(mes => {
             const registro = facturacionARSMes.find(item => item.nombre_ars === ars && item.mes === mes);
@@ -860,14 +860,14 @@
         }
     });
     
-    // ==================== GRï¿½FICO: FACTURACIï¿½N POR Mï¿½DICO Y MES ====================
+    // ==================== GRÁFICO: FACTURACIÓN POR MÉDICO Y MES ====================
     const ctxMedico = document.getElementById('chartPorMedico').getContext('2d');
     const facturacionMedicoMes = {{ facturacion_medico_mes | tojson }};
     
-    // Obtener lista ï¿½nica de mï¿½dicos
+    // Obtener lista única de médicos
     const medicosUnicos = [...new Set(facturacionMedicoMes.map(item => item.nombre))];
     
-    // Obtener lista ï¿½nica de meses
+    // Obtener lista única de meses
     const mesesMedicosUnicos = [...new Set(facturacionMedicoMes.map(item => item.mes))].sort();
     
     // Preparar meses con formato
@@ -884,7 +884,7 @@
         '#c0392b', '#e67e22'
     ];
     
-    // Crear datasets (un grupo de barras por cada mï¿½dico)
+    // Crear datasets (un grupo de barras por cada médico)
     const datasetsMedicos = medicosUnicos.map((medico, indexMedico) => {
         const datosMedico = mesesMedicosUnicos.map(mes => {
             const registro = facturacionMedicoMes.find(item => item.nombre === medico && item.mes === mes);

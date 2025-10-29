@@ -1,11 +1,11 @@
-ï»¿{% extends "base.html" %}
+{% extends "base.html" %}
 
-{% block title %}Solicitar Cita - Dra. Shirley Ramï¿½rez | Agenda tu Consulta Ginecolï¿½gica en Santo Domingo{% endblock %}
+{% block title %}Solicitar Cita - Dra. Shirley Ramírez | Agenda tu Consulta Ginecológica en Santo Domingo{% endblock %}
 
-{% block description %}Agenda tu cita con la Dra. Shirley Ramï¿½rez - Ginecï¿½loga en Santo Domingo. Reserva tu consulta en lï¿½nea de forma rï¿½pida y segura. Atenciï¿½n inmediata, horarios flexibles. Primera consulta disponible. ?? 829-740-5073{% endblock %}
+{% block description %}Agenda tu cita con la Dra. Shirley Ramírez - Ginecóloga en Santo Domingo. Reserva tu consulta en línea de forma rápida y segura. Atención inmediata, horarios flexibles. Primera consulta disponible. ?? 829-740-5073{% endblock %}
 
-{% block og_title %}Agenda tu Cita con Dra. Shirley Ramï¿½rez | Ginecï¿½loga en Santo Domingo{% endblock %}
-{% block og_description %}Reserva tu consulta ginecolï¿½gica en Santo Domingo. Proceso rï¿½pido y seguro. Horarios flexibles y atenciï¿½n personalizada. ï¿½Agenda ahora!{% endblock %}
+{% block og_title %}Agenda tu Cita con Dra. Shirley Ramírez | Ginecóloga en Santo Domingo{% endblock %}
+{% block og_description %}Reserva tu consulta ginecológica en Santo Domingo. Proceso rápido y seguro. Horarios flexibles y atención personalizada. ¡Agenda ahora!{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/admin-responsive.css') }}">
@@ -307,7 +307,7 @@
         <div class="col-lg-10">
             <div class="text-center mb-5">
                 <h1 class="display-5 fw-bold mb-3" style="color: #ACACAD;">
-                    <i class="fas fa-calendar-check me-3"></i>Solicitar Cita Mï¿½dica
+                    <i class="fas fa-calendar-check me-3"></i>Solicitar Cita Médica
                 </h1>
                 <p class="lead" style="color: #282828;">Completa el formulario para programar tu consulta. Te contactaremos para confirmar la disponibilidad.</p>
             </div>
@@ -315,7 +315,7 @@
             <div class="appointment-form">
                 <div class="p-5">
                     <form method="POST">
-                        <!-- Secciï¿½n: Datos Personales -->
+                        <!-- Sección: Datos Personales -->
                         <div class="card-header bg-primary text-white">
                             <h5 class="mb-0">
                                 <i class="fas fa-user me-2"></i>
@@ -341,24 +341,24 @@
                         <div class="row">
                             <div class="col-md-6 mb-4">
                                 <label class="form-label">
-                                    <i class="fas fa-envelope"></i>Correo Electrï¿½nico
+                                    <i class="fas fa-envelope"></i>Correo Electrónico
                                 </label>
                                 <input type="email" class="form-control" name="email" placeholder="correo@ejemplo.com">
                                 <small class="text-muted">Opcional</small>
                             </div>
                             <div class="col-md-6 mb-4">
                                 <label class="form-label">
-                                    <i class="fas fa-phone"></i>Telï¿½fono <span class="required-asterisk">*</span>
+                                    <i class="fas fa-phone"></i>Teléfono <span class="required-asterisk">*</span>
                                 </label>
                                 <input type="tel" class="form-control" name="phone" placeholder="(000) 000-0000" required>
                             </div>
                         </div>
                         
-                        <!-- Secciï¿½n: Informaciï¿½n de la Cita -->
+                        <!-- Sección: Información de la Cita -->
                         <div class="card-header bg-primary text-white mt-4">
                             <h5 class="mb-0">
                                 <i class="fas fa-calendar-alt me-2"></i>
-                                Informaciï¿½n de la Cita
+                                Información de la Cita
                             </h5>
                         </div>
                         
@@ -371,7 +371,7 @@
                                     <option value="">Seleccionar tipo de consulta...</option>
                                     <option value="emergencia" style="color: #dc3545; font-weight: 600;">Consulta de Emergencia</option>
                                     <option value="consulta">Consulta para Chequeo Rutinario</option>
-                                    <option value="estetico">Tratamiento Estï¿½tico</option>
+                                    <option value="estetico">Tratamiento Estético</option>
                                 </select>
                             </div>
                         </div>
@@ -400,7 +400,7 @@
                             <div class="col-md-12 mb-4">
                                 <div class="emergency-alert">
                                     <i class="fas fa-exclamation-triangle me-2"></i>
-                                    <strong>Cita de Emergencia:</strong> Seleccione la fecha y hora deseada (Lunes a Viernes, 8:00 AM ï¿½ 6:00 PM).<br>
+                                    <strong>Cita de Emergencia:</strong> Seleccione la fecha y hora deseada (Lunes a Viernes, 8:00 AM – 6:00 PM).<br>
                                     <strong>Aplica tarifa especial.</strong> El pago debe efectuarse antes de la consulta.
                                 </div>
                                 <label class="form-label">
@@ -410,21 +410,21 @@
                             </div>
                         </div>
                         
-                        <!-- Secciï¿½n: Informaciï¿½n Mï¿½dica -->
+                        <!-- Sección: Información Médica -->
                         <div class="card-header bg-primary text-white mt-4">
                             <h5 class="mb-0">
                                 <i class="fas fa-notes-medical me-2"></i>
-                                Informaciï¿½n Mï¿½dica
+                                Información Médica
                             </h5>
                         </div>
                         
                         <div class="row">
                             <div class="col-md-12 mb-4">
                                 <label class="form-label">
-                                    <i class="fas fa-shield-alt"></i>Seguro Mï¿½dico <span class="required-asterisk">*</span>
+                                    <i class="fas fa-shield-alt"></i>Seguro Médico <span class="required-asterisk">*</span>
                                 </label>
                                 <select class="form-select" name="medical_insurance" required>
-                                    <option value="">Seleccionar seguro mï¿½dico...</option>
+                                    <option value="">Seleccionar seguro médico...</option>
                                     <option value="APS">APS</option>
                                     <option value="Asemap">Asemap</option>
                                     <option value="Futuro">Futuro</option>
@@ -477,14 +477,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const emergencyDatetime = document.getElementById('emergency_datetime');
     const scheduleInfo = document.getElementById('schedule_info');
     
-    // Inicializar Flatpickr con restricciï¿½n de solo martes y jueves
+    // Inicializar Flatpickr con restricción de solo martes y jueves
     const datePicker = flatpickr(appointmentDateInput, {
         locale: "es",
         dateFormat: "Y-m-d",
         minDate: "today",
         disable: [
             function(date) {
-                // Deshabilitar todos los dï¿½as EXCEPTO martes (2) y jueves (4)
+                // Deshabilitar todos los días EXCEPTO martes (2) y jueves (4)
                 return (date.getDay() !== 2 && date.getDay() !== 4);
             }
         ],
@@ -505,7 +505,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Mostrar/ocultar campo de emergencia segï¿½n el tipo de consulta
+    // Mostrar/ocultar campo de emergencia según el tipo de consulta
     appointmentType.addEventListener('change', function() {
         if (this.value === 'emergencia') {
             emergencySection.style.display = 'block';
@@ -563,7 +563,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     appointmentTime.innerHTML = '<option value="">No hay horarios disponibles</option>';
                     appointmentTime.disabled = true;
-                    scheduleInfo.textContent = scheduleText + ' - ?? Todos los horarios estï¿½n ocupados';
+                    scheduleInfo.textContent = scheduleText + ' - ?? Todos los horarios están ocupados';
                     scheduleInfo.style.color = '#dc3545';
                 }
             })
@@ -585,12 +585,12 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Validar que sea lunes a viernes (1-5)
             if (dayOfWeek === 0 || dayOfWeek === 6) {
-                alert('Las citas de emergencia solo estï¿½n disponibles de lunes a viernes.');
+                alert('Las citas de emergencia solo están disponibles de lunes a viernes.');
                 this.value = '';
                 return;
             }
             
-            // Validar que la hora estï¿½ entre 8:00 AM y 6:00 PM
+            // Validar que la hora esté entre 8:00 AM y 6:00 PM
             if (hour < 8 || hour >= 18) {
                 alert('El horario de emergencia es de 8:00 AM a 6:00 PM.');
                 this.value = '';
@@ -598,7 +598,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Establecer lï¿½mites min y max para el campo datetime-local
+        // Establecer límites min y max para el campo datetime-local
         const today = new Date();
         const maxDate = new Date();
         maxDate.setMonth(maxDate.getMonth() + 3); // 3 meses adelante

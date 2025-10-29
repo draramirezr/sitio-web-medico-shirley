@@ -1,6 +1,6 @@
-ï»¿{% extends "base.html" %}
+{% extends "base.html" %}
 
-{% block title %}Maestra de ARS - FacturaciÃ³n{% endblock %}
+{% block title %}Maestra de ARS - Facturación{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
@@ -54,7 +54,7 @@
     }
     
     .table-facturacion table {
-        min-width: 800px; /* Ancho mÃ­nimo para evitar aplastamiento */
+        min-width: 800px; /* Ancho mínimo para evitar aplastamiento */
     }
     
     .table-facturacion th {
@@ -170,7 +170,7 @@
         </div>
     </div>
 
-    <!-- BÃºsqueda -->
+    <!-- Búsqueda -->
     <div class="search-box">
         <form method="GET" action="{{ url_for('facturacion_ars') }}">
             <div class="row">
@@ -211,7 +211,7 @@
                                 <i class="fas fa-edit"></i> Editar
                             </a>
                             <form method="POST" action="{{ url_for('facturacion_ars_eliminar', ars_id=ars['id']) }}" style="display: inline; margin: 0;" 
-                                  onsubmit="return confirm('Â¿EstÃ¡s segura de eliminar este ARS?');">
+                                  onsubmit="return confirm('¿Estás segura de eliminar este ARS?');">
                                 <button type="submit" class="btn btn-action btn-eliminar">
                                     <i class="fas fa-trash"></i> Eliminar
                                 </button>

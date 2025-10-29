@@ -1,4 +1,4 @@
-ï»¿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Generar Factura - Paso 2{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
@@ -247,29 +247,29 @@
             <div class="step-number completed">
                 <i class="fas fa-check"></i>
             </div>
-            <span style="color: #ACACAD; font-weight: 600;">Configuraciï¿½n</span>
+            <span style="color: #ACACAD; font-weight: 600;">Configuración</span>
         </div>
         <div class="step-arrow">
             <i class="fas fa-chevron-right"></i>
         </div>
         <div class="step">
             <div class="step-number">2</div>
-            <span style="color: #CEB0B7; font-weight: 600;">Selecciï¿½n de Pacientes</span>
+            <span style="color: #CEB0B7; font-weight: 600;">Selección de Pacientes</span>
         </div>
         <div class="step-arrow">
             <i class="fas fa-chevron-right"></i>
         </div>
         <div class="step">
             <div class="step-number inactive">3</div>
-            <span style="color: #999; font-weight: 600;">Generaciï¿½n</span>
+            <span style="color: #999; font-weight: 600;">Generación</span>
         </div>
     </div>
 
-    <!-- Resumen de Configuraciï¿½n -->
+    <!-- Resumen de Configuración -->
     <div class="config-summary">
         <h5 style="color: #B89BA3; font-weight: 700; margin-bottom: 1rem;">
             <i class="fas fa-info-circle me-2"></i>
-            Configuraciï¿½n Actual
+            Configuración Actual
         </h5>
         <div>
             <div class="config-item">
@@ -282,7 +282,7 @@
             </div>
             <div class="config-item">
                 <i class="fas fa-user-md"></i>
-                <span><strong>Mï¿½dico que Factura:</strong> {{ medico_factura_nombre }}</span>
+                <span><strong>Médico que Factura:</strong> {{ medico_factura_nombre }}</span>
             </div>
             <div class="config-item">
                 <i class="fas fa-calendar-alt"></i>
@@ -299,15 +299,15 @@
     <div class="filters-card">
         <h5 style="color: #B89BA3; font-weight: 700; margin-bottom: 1.5rem;">
             <i class="fas fa-filter me-2"></i>
-            Filtros de Bï¿½squeda
+            Filtros de Búsqueda
         </h5>
         <div class="row">
             <div class="col-md-12 mb-3">
                 <label style="color: #666; font-weight: 600; margin-bottom: 0.5rem;">
-                    <i class="fas fa-user-md"></i> Mï¿½dico
+                    <i class="fas fa-user-md"></i> Médico
                 </label>
                 <select class="form-select" id="filtroMedico" onchange="aplicarFiltros()">
-                    <option value="">Todos los mï¿½dicos</option>
+                    <option value="">Todos los médicos</option>
                     {% for medico in medicos %}
                     <option value="{{ medico['id'] }}">{{ medico['nombre'] }}</option>
                     {% endfor %}
@@ -345,11 +345,11 @@
                         <th style="width: 8%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">NSS</th>
                         <th style="width: 18%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Nombre</th>
                         <th style="width: 9%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Fecha de Consulta</th>
-                        <th style="width: 12%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Autorizaciï¿½n</th>
+                        <th style="width: 12%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Autorización</th>
                         <th style="width: 18%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Servicio</th>
                         <th style="width: 10%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Monto</th>
                         <th style="width: 15%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important; cursor: pointer; user-select: none;" onclick="ordenarPorMedico()" title="Click para ordenar">
-                            Mï¿½dico Paciente 
+                            Médico Paciente 
                             <i class="fas fa-sort" style="font-size: 0.8rem; margin-left: 5px;" id="iconoOrdenMedico"></i>
                         </th>
                     </tr>
@@ -378,7 +378,7 @@
                         <td colspan="8" class="text-center" style="padding: 3rem;">
                             <i class="fas fa-inbox" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
                             <p style="color: #999; margin: 0;">No hay pacientes pendientes para esta ARS</p>
-                            <p style="color: #999; font-size: 0.9rem;">Verifique que haya registros pendientes de facturaciï¿½n</p>
+                            <p style="color: #999; font-size: 0.9rem;">Verifique que haya registros pendientes de facturación</p>
                         </td>
                     </tr>
                     {% endfor %}
@@ -401,7 +401,7 @@
             <div class="col-md-6 mb-3">
                 <a href="{{ url_for('facturacion_menu') }}" class="btn w-100" 
                    style="background: #ACACAD !important; color: white !important; border-radius: 15px; padding: 1rem; font-weight: 700; font-size: 1.2rem; text-decoration: none; display: block; text-align: center; border: none;">
-                    <i class="fas fa-arrow-left me-2" style="color: white !important;"></i><span style="color: white !important;">Volver al Menï¿½</span>
+                    <i class="fas fa-arrow-left me-2" style="color: white !important;"></i><span style="color: white !important;">Volver al Menú</span>
                 </a>
             </div>
             <div class="col-md-6 mb-3">
@@ -429,7 +429,7 @@ function aplicarFiltros() {
     todasLasFilas.forEach(fila => {
         let mostrar = true;
         
-        // Filtro por mï¿½dico
+        // Filtro por médico
         if (medico && fila.dataset.medico !== medico) {
             mostrar = false;
         }
@@ -437,7 +437,7 @@ function aplicarFiltros() {
         fila.style.display = mostrar ? '' : 'none';
     });
     
-    // Recalcular total despuï¿½s de filtrar
+    // Recalcular total después de filtrar
     calcularTotal();
 }
 
@@ -483,7 +483,7 @@ function ordenarPorMedico() {
         icono.className = 'fas fa-sort-down';
     }
     
-    // Alternar orden para el prï¿½ximo click
+    // Alternar orden para el próximo click
     ordenMedicoAscendente = !ordenMedicoAscendente;
     
     // Actualizar array global
@@ -557,7 +557,7 @@ function calcularTotal() {
     document.getElementById('total-valor').textContent = totalFormateado;
     document.getElementById('num-pacientes').textContent = count;
     
-    // Habilitar/deshabilitar botï¿½n
+    // Habilitar/deshabilitar botón
     const btnGenerar = document.getElementById('btnGenerar');
     btnGenerar.disabled = count === 0;
 }

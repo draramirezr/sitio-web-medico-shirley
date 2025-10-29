@@ -1,6 +1,6 @@
-ï»¿{% extends "base.html" %}
+{% extends "base.html" %}
 
-{% block title %}Editar Paciente - Facturaciï¿½n{% endblock %}
+{% block title %}Editar Paciente - Facturación{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
@@ -101,7 +101,7 @@
                 Editar Paciente
             </h1>
             <p style="color: #ACACAD; margin: 0; font-size: 1.1rem; font-weight: 600;">
-                Modifica los datos del paciente pendiente de facturaciï¿½n
+                Modifica los datos del paciente pendiente de facturación
             </p>
         </div>
     </div>
@@ -123,7 +123,7 @@
                                name="nss" 
                                value="{{ paciente['nss'] }}"
                                pattern="[0-9\-]+"
-                               title="Solo nï¿½meros y guiones"
+                               title="Solo números y guiones"
                                required>
                     </div>
                 </div>
@@ -140,7 +140,7 @@
                                id="nombre" 
                                name="nombre" 
                                value="{{ paciente['nombre_paciente'] }}"
-                               pattern="[A-Za-zï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\s]+"
+                               pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+"
                                title="Solo letras y espacios"
                                required>
                     </div>
@@ -162,12 +162,12 @@
                     </div>
                 </div>
 
-                <!-- Autorizaciï¿½n -->
+                <!-- Autorización -->
                 <div class="col-md-6 mb-3">
                     <div class="form-group">
                         <label for="autorizacion">
                             <i class="fas fa-check-circle me-1"></i>
-                            Autorizaciï¿½n *
+                            Autorización *
                         </label>
                         <input type="text" 
                                class="form-control" 
@@ -175,7 +175,7 @@
                                name="autorizacion" 
                                value="{{ paciente['autorizacion'] }}"
                                pattern="[0-9]+"
-                               title="Solo nï¿½meros"
+                               title="Solo números"
                                required>
                     </div>
                 </div>
@@ -192,7 +192,7 @@
                                id="servicio" 
                                name="servicio" 
                                value="{{ paciente['descripcion_servicio'] }}"
-                               pattern="[A-Za-zï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\s]+"
+                               pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+"
                                title="Solo letras y espacios"
                                required>
                     </div>
@@ -216,15 +216,15 @@
                     </div>
                 </div>
 
-                <!-- Informaciï¿½n no editable -->
+                <!-- Información no editable -->
                 <div class="col-md-6 mb-3">
                     <div class="form-group">
                         <label>
                             <i class="fas fa-user-md me-1"></i>
-                            Mï¿½dico (no editable)
+                            Médico (no editable)
                         </label>
                         <div class="info-field">
-                            {{ paciente['medico_id'] }} - ID Mï¿½dico
+                            {{ paciente['medico_id'] }} - ID Médico
                         </div>
                     </div>
                 </div>
@@ -260,7 +260,7 @@
 </div>
 
 <script>
-// Convertir a mayï¿½sculas automï¿½ticamente
+// Convertir a mayúsculas automáticamente
 document.getElementById('nss').addEventListener('input', function() {
     this.value = this.value.toUpperCase();
 });

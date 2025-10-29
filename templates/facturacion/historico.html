@@ -1,6 +1,6 @@
-ï»¿{% extends "base.html" %}
+{% extends "base.html" %}
 
-{% block title %}Histï¿½rico de Facturas{% endblock %}
+{% block title %}Histórico de Facturas{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
@@ -156,7 +156,7 @@
             <div>
                 <h1 style="color: #ACACAD; font-weight: 800; font-size: 2.5rem; margin-bottom: 0.5rem;">
                     <i class="fas fa-history me-2"></i>
-                    Histï¿½rico de Facturas
+                    Histórico de Facturas
                 </h1>
                 <p style="color: #999; margin: 0; font-size: 1.1rem; font-weight: 600;">
                     Consulta y visualiza las facturas generadas
@@ -164,7 +164,7 @@
             </div>
             <a href="{{ url_for('facturacion_menu') }}" class="btn-limpiar">
                 <i class="fas fa-arrow-left me-2"></i>
-                Volver al Menï¿½
+                Volver al Menú
             </a>
         </div>
     </div>
@@ -173,7 +173,7 @@
     <div class="filtros-card">
         <h5 style="color: #ACACAD; font-weight: 700; margin-bottom: 1.5rem;">
             <i class="fas fa-filter me-2"></i>
-            Filtros de Bï¿½squeda
+            Filtros de Búsqueda
         </h5>
         <form method="GET" action="{{ url_for('facturacion_historico') }}">
             <div class="row">
@@ -192,10 +192,10 @@
                 </div>
                 <div class="col-md-3 mb-3">
                     <label style="color: #666; font-weight: 600; margin-bottom: 0.5rem;">
-                        <i class="fas fa-user-md"></i> Mï¿½dico
+                        <i class="fas fa-user-md"></i> Médico
                     </label>
                     <select class="form-select" name="medico_id">
-                        <option value="">Todos los Mï¿½dicos</option>
+                        <option value="">Todos los Médicos</option>
                         {% for medico in medicos_list %}
                         <option value="{{ medico['id'] }}" {% if medico_id_seleccionado == medico['id'] %}selected{% endif %}>
                             {{ medico['nombre'] }}
@@ -245,9 +245,9 @@
                         <th style="width: 15%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Fecha</th>
                         <th style="width: 25%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">NCF</th>
                         <th style="width: 25%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">ARS</th>
-                        <th style="width: 20%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Mï¿½dico</th>
+                        <th style="width: 20%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Médico</th>
                         <th style="width: 15%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Monto</th>
-                        <th style="width: 15%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Acciï¿½n</th>
+                        <th style="width: 15%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Acción</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -275,7 +275,7 @@
                     <td colspan="7" class="text-center" style="padding: 3rem;">
                         <i class="fas fa-inbox" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
                         <p style="color: #999; margin: 0;">No se encontraron facturas</p>
-                        <p style="color: #999; font-size: 0.9rem;">Intenta ajustar los filtros de bï¿½squeda</p>
+                        <p style="color: #999; font-size: 0.9rem;">Intenta ajustar los filtros de búsqueda</p>
                     </td>
                 </tr>
                 {% endfor %}
