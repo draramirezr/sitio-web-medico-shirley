@@ -486,6 +486,38 @@ def formato_moneda(valor):
     except (ValueError, TypeError):
         return "0.00"
 
+# Filtro personalizado para obtener el nombre del día de la semana en español
+@app.template_filter('nombre_dia')
+def nombre_dia(fecha_str):
+    """Convertir fecha a nombre del día en español
+    Ejemplo: '2025-10-30' -> 'Jueves'
+    """
+    try:
+        # Mapeo de días en español
+        dias_espanol = {
+            0: 'Lunes',
+            1: 'Martes',
+            2: 'Miércoles',
+            3: 'Jueves',
+            4: 'Viernes',
+            5: 'Sábado',
+            6: 'Domingo'
+        }
+        
+        # Convertir string a datetime
+        if isinstance(fecha_str, str):
+            fecha = datetime.strptime(fecha_str, '%Y-%m-%d')
+        else:
+            fecha = fecha_str
+        
+        # Obtener número del día (0=Lunes, 6=Domingo)
+        dia_numero = fecha.weekday()
+        
+        # Retornar nombre en español
+        return dias_espanol.get(dia_numero, '')
+    except (ValueError, TypeError, AttributeError):
+        return ''
+
 # Modelo de Usuario para Flask-Login
 class User(UserMixin):
     def __init__(self, id, nombre, email, perfil):
