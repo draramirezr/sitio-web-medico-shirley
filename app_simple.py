@@ -5925,7 +5925,7 @@ def facturacion_descargar_pdf(factura_id):
             return send_file(
                 pdf_buffer,
                 mimetype='application/pdf',
-                as_attachment=True,
+                as_attachment=False,
                 download_name=nombre_archivo
             )
         else:
