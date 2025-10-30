@@ -514,10 +514,10 @@
             <i class="fas fa-arrow-left me-2"></i>
             Volver al Histórico
         </a>
-        <button onclick="window.print()" class="btn-accion no-print">
+        <a href="{{ url_for('facturacion_descargar_pdf', factura_id=factura['id']) }}" target="_blank" class="btn-accion no-print">
             <i class="fas fa-print me-2"></i>
             Imprimir
-        </button>
+        </a>
         <a href="{{ url_for('facturacion_descargar_pdf', factura_id=factura['id']) }}" class="btn-accion no-print">
             <i class="fas fa-file-pdf me-2"></i>
             Descargar PDF
@@ -635,10 +635,10 @@
             <i class="fas fa-arrow-left me-2"></i>
             Volver al Histórico
         </a>
-        <button onclick="window.print()" class="btn-accion no-print">
+        <a href="{{ url_for('facturacion_descargar_pdf', factura_id=factura['id']) }}" target="_blank" class="btn-accion no-print">
             <i class="fas fa-print me-2"></i>
             Imprimir
-        </button>
+        </a>
         <a href="{{ url_for('facturacion_descargar_pdf', factura_id=factura['id']) }}" class="btn-accion no-print">
             <i class="fas fa-file-pdf me-2"></i>
             Descargar PDF
@@ -756,9 +756,9 @@ function imprimirFactura() {
     if (modal) {
         modal.hide();
     }
-    // Esperar un momento para que el modal se cierre antes de imprimir
+    // Abrir el PDF en una nueva ventana para imprimir
     setTimeout(function() {
-        window.print();
+        window.open('{{ url_for('facturacion_descargar_pdf', factura_id=factura['id']) }}', '_blank');
     }, 300);
 }
 
