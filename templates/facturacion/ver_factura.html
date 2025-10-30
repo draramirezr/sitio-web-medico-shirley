@@ -508,6 +508,26 @@
         </span>
     </div>
 
+    <!-- Botones de Acción ARRIBA (Header) -->
+    <div class="no-print" style="max-width: 900px; margin: 0 auto 2rem auto; text-align: center;">
+        <a href="{{ url_for('facturacion_historico') }}" class="btn-volver no-print">
+            <i class="fas fa-arrow-left me-2"></i>
+            Volver al Histórico
+        </a>
+        <button onclick="window.print()" class="btn-accion no-print">
+            <i class="fas fa-print me-2"></i>
+            Imprimir
+        </button>
+        <a href="{{ url_for('facturacion_descargar_pdf', factura_id=factura['id']) }}" class="btn-accion no-print">
+            <i class="fas fa-file-pdf me-2"></i>
+            Descargar PDF
+        </a>
+        <button onclick="abrirModalEmail()" class="btn-email no-print">
+            <i class="fas fa-envelope me-2"></i>
+            Enviar por Email
+        </button>
+    </div>
+
     <!-- Contenedor de la Factura -->
     <div class="factura-container">
         <!-- Header Compacto -->
@@ -609,7 +629,7 @@
         </div>
     </div>
 
-    <!-- Botones de Acción -->
+    <!-- Botones de Acción ABAJO (Pie de página) -->
     <div class="no-print" style="max-width: 900px; margin: 2rem auto; text-align: center;">
         <a href="{{ url_for('facturacion_historico') }}" class="btn-volver no-print">
             <i class="fas fa-arrow-left me-2"></i>
