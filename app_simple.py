@@ -2350,13 +2350,14 @@ def admin():
         'total_visits': get_visit_count()
     }
     
-    # Datos recientes (solo citas pendientes y mensajes sin leer)
+    # Datos recientes (citas pendientes, citas confirmadas, y mensajes sin leer)
     recent_appointments = conn.execute('SELECT * FROM appointments WHERE status = "pending" ORDER BY created_at DESC LIMIT 5').fetchall()
+    confirmed_appointments = conn.execute('SELECT * FROM appointments WHERE status = "confirmed" ORDER BY appointment_date DESC, appointment_time DESC LIMIT 5').fetchall()
     recent_messages = conn.execute('SELECT * FROM contact_messages WHERE `read` = 0 ORDER BY created_at DESC LIMIT 5').fetchall()
     
     conn.close()
     
-    return render_template('admin.html', stats=stats, recent_appointments=recent_appointments, recent_messages=recent_messages)
+    return render_template('admin.html', stats=stats, recent_appointments=recent_appointments, confirmed_appointments=confirmed_appointments, recent_messages=recent_messages)
 
 @app.route('/admin/appointments')
 @login_required

@@ -358,7 +358,7 @@
     </div>
     
     <div class="row g-4">
-        <!-- Citas Recientes -->
+        <!-- Citas Pendientes -->
         <div class="col-lg-6 animate-in" style="animation-delay: 0.6s">
             <div class="admin-section-card">
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -373,7 +373,7 @@
                                 {% for appointment in recent_appointments %}
                         <div class="appointment-card mb-3" data-bs-toggle="modal" data-bs-target="#appointmentModal{{ appointment['id'] }}" 
                                     style="background: rgba(242, 226, 230, 0.1); 
-                                    border-left: 4px solid {{ '#B89BA3' if appointment['status'] == 'completed' else '#CEB0B7' if appointment['status'] == 'pending' else '#ACACAD' }}; 
+                                    border-left: 4px solid #CEB0B7; 
                                     border-radius: 10px; padding: 1rem; transition: all 0.3s ease; cursor: pointer;">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div class="flex-grow-1">
@@ -409,10 +409,10 @@
                                     {% endif %}
                                 </div>
                                 <div class="ms-2">
-                                    <span class="badge" style="background: {{ '#B89BA3' if appointment['status'] == 'completed' else '#CEB0B7' if appointment['status'] == 'pending' else '#ACACAD' }}; 
+                                    <span class="badge" style="background: #CEB0B7; 
                                                 color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">
-                                        <i class="fas {{ 'fa-check-circle' if appointment['status'] == 'completed' else 'fa-clock' if appointment['status'] == 'pending' else 'fa-times-circle' }} me-1"></i>
-                                        {{ 'Completada' if appointment['status'] == 'completed' else 'Pendiente' if appointment['status'] == 'pending' else 'Cancelada' }}
+                                        <i class="fas fa-clock me-1"></i>
+                                        Pendiente
                                         </span>
                                 </div>
                             </div>
@@ -421,7 +421,7 @@
                     {% else %}
                         <div class="text-center py-5">
                             <i class="fas fa-calendar-times" style="font-size: 4rem; color: rgba(206, 176, 183, 0.3); margin-bottom: 1rem;"></i>
-                            <p style="color: var(--text-muted); font-size: 1.1rem; margin: 0;">No hay citas recientes</p>
+                            <p style="color: var(--text-muted); font-size: 1.1rem; margin: 0;">No hay citas pendientes</p>
                     </div>
                     {% endif %}
                 </div>
@@ -498,6 +498,83 @@
                 <div class="card-footer bg-white border-0 text-center" style="border-radius: 0 0 15px 15px; padding: 1rem;">
                     <a href="{{ url_for('admin_messages') }}" class="btn btn-sm btn-view-more">
                         <i class="fas fa-eye me-2"></i>Ver Todos los Mensajes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Segunda Fila: Citas Confirmadas -->
+    <div class="row g-4 mt-4">
+        <div class="col-lg-12 animate-in" style="animation-delay: 0.8s">
+            <div class="admin-section-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-check me-2"></i>
+                        Citas Confirmadas Recientes
+                    </h5>
+                    <span class="badge" style="background: #4CAF50; color: white; font-size: 0.9rem;">{{ stats.total_appointments }} Confirmadas</span>
+                </div>
+                <div class="card-body" style="min-height: 200px; max-height: 450px; overflow-y: auto;">
+                    {% if confirmed_appointments %}
+                                {% for appointment in confirmed_appointments %}
+                        <div class="appointment-card mb-3" data-bs-toggle="modal" data-bs-target="#confirmedAppointmentModal{{ appointment['id'] }}" 
+                                    style="background: rgba(76, 175, 80, 0.05); 
+                                    border-left: 4px solid #4CAF50; 
+                                    border-radius: 10px; padding: 1rem; transition: all 0.3s ease; cursor: pointer;">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="avatar-circle me-2" style="width: 40px; height: 40px; border-radius: 50%; 
+                                                    background: #4CAF50; 
+                                                    display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
+                                            {{ appointment['first_name'][0] }}{{ appointment['last_name'][0] }}
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0" style="color: var(--text-dark); font-weight: 700;">
+                                                {{ appointment['first_name'] }} {{ appointment['last_name'] }}
+                                            </h6>
+                                            <small class="text-muted">
+                                                <i class="fas fa-envelope me-1"></i>{{ appointment['email'] }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-3 mt-2">
+                                        <span style="color: var(--text-muted); font-size: 0.9rem;">
+                                            <i class="fas fa-calendar-day me-1" style="color: #4CAF50;"></i>
+                                            <strong>{{ appointment['appointment_date'] }}</strong>
+                                        </span>
+                                        <span style="color: var(--text-muted); font-size: 0.9rem;">
+                                            <i class="fas fa-clock me-1" style="color: #4CAF50;"></i>
+                                            {{ appointment['appointment_time'] if appointment['appointment_time'] else 'Por definir' }}
+                                        </span>
+                                    </div>
+                                    {% if appointment['appointment_type'] %}
+                                    <p class="mb-0 mt-2" style="font-size: 0.85rem; color: var(--text-muted); font-style: italic;">
+                                        "{{ appointment['appointment_type'][:60] }}{{ '...' if appointment['appointment_type']|length > 60 else '' }}"
+                                    </p>
+                                    {% endif %}
+                                </div>
+                                <div class="ms-2">
+                                    <span class="badge" style="background: #4CAF50; 
+                                                color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">
+                                        <i class="fas fa-check-circle me-1"></i>
+                                        Confirmada
+                                        </span>
+                                </div>
+                            </div>
+                        </div>
+                                {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-calendar-check" style="font-size: 4rem; color: rgba(76, 175, 80, 0.3); margin-bottom: 1rem;"></i>
+                            <p style="color: var(--text-muted); font-size: 1.1rem; margin: 0;">No hay citas confirmadas recientes</p>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-white border-0 text-center" style="border-radius: 0 0 15px 15px; padding: 1rem;">
+                    <a href="{{ url_for('admin_appointments') }}" class="btn btn-sm btn-view-more">
+                        <i class="fas fa-eye me-2"></i>Ver Todas las Citas
                     </a>
                 </div>
             </div>
@@ -640,6 +717,112 @@
                         <span class="badge ms-2" style="background: {{ '#B89BA3' if appointment['status'] == 'completed' else '#CEB0B7' if appointment['status'] == 'pending' else '#ACACAD' }}; 
                                     color: white; padding: 0.5rem 1rem; font-size: 0.9rem;">
                             {{ 'Completada' if appointment['status'] == 'completed' else 'Pendiente' if appointment['status'] == 'pending' else 'Cancelada' }}
+                        </span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="tel:{{ appointment['phone'] }}" class="btn btn-success">
+                        <i class="fas fa-phone me-2"></i>Llamar
+                    </a>
+                    <a href="https://wa.me/{{ appointment['phone'].replace('+', '').replace('-', '').replace(' ', '').replace('(', '').replace(')', '') }}?text=Hola%20{{ appointment['first_name'] }}%20{{ appointment['last_name'] }},%20te%20contacto%20desde%20el%20consultorio%20de%20la%20Dra.%20Shirley%20Ram%C3%ADrez%20sobre%20tu%20cita" 
+                       class="btn" style="background: #25D366; color: white;" target="_blank">
+                        <i class="fab fa-whatsapp me-2"></i>WhatsApp
+                    </a>
+                    <a href="{{ url_for('admin_appointments') }}" class="btn btn-primary">
+                        <i class="fas fa-eye me-2"></i>Ver Todas las Citas
+                    </a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% endif %}
+
+<!-- Modales para Citas Confirmadas -->
+{% if confirmed_appointments %}
+    {% for appointment in confirmed_appointments %}
+    <div class="modal fade" id="confirmedAppointmentModal{{ appointment['id'] }}" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white;">
+                    <h5 class="modal-title">
+                        <i class="fas fa-calendar-check me-2"></i>
+                        Detalles de la Cita Confirmada
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Información del Paciente -->
+                    <div class="mb-4 p-3" style="background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(129, 199, 132, 0.2) 100%); border-radius: 10px;">
+                        <h6 class="mb-3" style="color: #4CAF50; font-weight: 700;">
+                            <i class="fas fa-user me-2"></i>Información del Paciente
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <strong><i class="fas fa-user-circle me-2"></i>Nombre:</strong><br>
+                                {{ appointment['first_name'] }} {{ appointment['last_name'] }}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong><i class="fas fa-envelope me-2"></i>Email:</strong><br>
+                                <a href="mailto:{{ appointment['email'] }}">{{ appointment['email'] }}</a>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong><i class="fas fa-phone me-2"></i>Teléfono:</strong><br>
+                                <a href="tel:{{ appointment['phone'] }}">{{ appointment['phone'] }}</a>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong><i class="fas fa-calendar-alt me-2"></i>Fecha Solicitud:</strong><br>
+                                {{ appointment['created_at'] }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detalles de la Cita -->
+                    <div class="mb-4 p-3" style="background: #E8F5E9; border-radius: 10px; border-left: 4px solid #4CAF50;">
+                        <h6 class="mb-3" style="color: #2E7D32; font-weight: 700;">
+                            <i class="fas fa-calendar-day me-2"></i>Detalles de la Cita
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <strong><i class="fas fa-calendar me-2"></i>Fecha:</strong><br>
+                                {{ appointment['appointment_date'] if appointment['appointment_date'] else 'Por definir' }}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong><i class="fas fa-clock me-2"></i>Hora:</strong><br>
+                                {{ appointment['appointment_time'] if appointment['appointment_time'] else 'Por definir' }}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong><i class="fas fa-stethoscope me-2"></i>Tipo:</strong><br>
+                                {{ appointment['appointment_type'] }}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong><i class="fas fa-heartbeat me-2"></i>Seguro:</strong><br>
+                                {{ appointment['medical_insurance'] if appointment['medical_insurance'] else 'No especificado' }}
+                            </div>
+                            {% if appointment['emergency_datetime'] %}
+                            <div class="col-12 mb-2">
+                                <strong style="color: #D32F2F;"><i class="fas fa-exclamation-triangle me-2"></i>Emergencia:</strong><br>
+                                <span style="color: #D32F2F;">{{ appointment['emergency_datetime'] }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Motivo -->
+                    {% if appointment['reason'] %}
+                    <div class="mb-3 p-3" style="background: #F1F8E9; border-radius: 10px; border-left: 4px solid #8BC34A;">
+                        <strong><i class="fas fa-comment-medical me-2"></i>Motivo de la Cita:</strong><br>
+                        <p class="mt-2 mb-0">{{ appointment['reason'] }}</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Estado Actual -->
+                    <div class="p-3" style="background: rgba(76, 175, 80, 0.1); border-radius: 10px;">
+                        <strong><i class="fas fa-info-circle me-2"></i>Estado:</strong>
+                        <span class="badge ms-2" style="background: #4CAF50; color: white; padding: 0.5rem 1rem; font-size: 0.9rem;">
+                            <i class="fas fa-check-circle me-1"></i>
+                            Confirmada
                         </span>
                     </div>
                 </div>
