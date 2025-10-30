@@ -2343,7 +2343,7 @@ def admin():
         return result[0]
     
     stats = {
-        'total_appointments': get_count('SELECT COUNT(*) FROM appointments'),
+        'total_appointments': get_count('SELECT COUNT(*) FROM appointments WHERE status = "confirmed"'),
         'pending_appointments': get_count('SELECT COUNT(*) FROM appointments WHERE status = "pending"'),
         'unread_messages': get_count('SELECT COUNT(*) FROM contact_messages WHERE `read` = 0'),
         'total_testimonials': get_count('SELECT COUNT(*) FROM testimonials'),
