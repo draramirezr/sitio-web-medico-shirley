@@ -320,39 +320,32 @@
     {% if current_user.perfil == 'Administrador' %}
     <!-- Estadísticas -->
     <div class="row g-4 mb-5">
-        <div class="col-xl-2 col-lg-4 col-md-6 animate-in" style="animation-delay: 0.1s">
+        <div class="col-xl-3 col-lg-6 col-md-6 animate-in" style="animation-delay: 0.1s">
             <div class="stat-card">
                 <i class="fas fa-calendar-check"></i>
                     <h4>{{ stats.total_appointments }}</h4>
                 <p>Citas Confirmadas</p>
                 </div>
             </div>
-        <div class="col-xl-2 col-lg-4 col-md-6 animate-in" style="animation-delay: 0.2s">
+        <div class="col-xl-3 col-lg-6 col-md-6 animate-in" style="animation-delay: 0.2s">
             <div class="stat-card">
                 <i class="fas fa-clock"></i>
                     <h4>{{ stats.pending_appointments }}</h4>
                 <p>Citas Pendientes</p>
                 </div>
             </div>
-        <div class="col-xl-2 col-lg-4 col-md-6 animate-in" style="animation-delay: 0.3s">
+        <div class="col-xl-3 col-lg-6 col-md-6 animate-in" style="animation-delay: 0.3s">
             <div class="stat-card">
                 <i class="fas fa-envelope"></i>
                     <h4>{{ stats.unread_messages }}</h4>
                 <p>Sin Leer</p>
                 </div>
         </div>
-        <div class="col-xl-2 col-lg-4 col-md-6 animate-in" style="animation-delay: 0.4s">
+        <div class="col-xl-3 col-lg-6 col-md-6 animate-in" style="animation-delay: 0.4s">
             <div class="stat-card">
                 <i class="fas fa-star"></i>
                 <h4>{{ stats.total_testimonials }}</h4>
                 <p>Testimonios</p>
-            </div>
-        </div>
-        <div class="col-xl-4 col-lg-8 col-md-12 animate-in" style="animation-delay: 0.5s">
-            <div class="stat-card stat-card-visits">
-                <i class="fas fa-eye"></i>
-                <h4>{{ "{:,}".format(stats.total_visits) }}</h4>
-                <p>Visitas al Sitio Web</p>
             </div>
         </div>
     </div>
