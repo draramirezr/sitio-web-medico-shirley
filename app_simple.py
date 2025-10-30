@@ -2432,6 +2432,67 @@ def update_appointment_status(appointment_id):
     
     return redirect(url_for('admin_appointments'))
 
+@app.route('/admin/appointments/<int:appointment_id>/status', methods=['POST'])
+@login_required
+def update_appointment_status_ajax(appointment_id):
+    """Actualizar estado de cita via AJAX (JSON)"""
+    try:
+        data = request.get_json()
+        new_status = data.get('status')
+        
+        # Validar el estado
+        valid_statuses = ['pending', 'confirmed', 'completed', 'cancelled']
+        if new_status not in valid_statuses:
+            return jsonify({'success': False, 'error': 'Estado inválido'}), 400
+        
+        conn = get_db_connection()
+        
+        # Obtener datos de la cita antes de actualizar
+        appointment = conn.execute(
+            'SELECT * FROM appointments WHERE id = %s',
+            (appointment_id,)
+        ).fetchone()
+        
+        if not appointment:
+            conn.close()
+            return jsonify({'success': False, 'error': 'Cita no encontrada'}), 404
+        
+        # Actualizar estado
+        conn.execute('UPDATE appointments SET status = %s WHERE id = %s', (new_status, appointment_id))
+        conn.commit()
+        conn.close()
+        
+        # Enviar email de confirmación al paciente si tiene email (asíncrono)
+        if appointment['email']:
+            nombre = appointment['first_name']
+            apellido = appointment['last_name']
+            email_paciente = appointment['email']
+            fecha = appointment['appointment_date'] if appointment['appointment_date'] else appointment['emergency_datetime']
+            hora = appointment['appointment_time']
+            tipo = appointment['appointment_type']
+            motivo = appointment['reason'] if appointment['reason'] else None
+            
+            threading.Thread(target=enviar_email_confirmacion_cita, args=(
+                email_paciente,
+                nombre,
+                apellido,
+                fecha,
+                hora,
+                tipo,
+                new_status,
+                motivo
+            )).start()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Estado actualizado a: {new_status}',
+            'new_status': new_status
+        })
+        
+    except Exception as e:
+        print(f"Error al actualizar estado de cita: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @app.route('/admin/messages/<int:message_id>/mark-read', methods=['POST'])
 @login_required
 def mark_message_read(message_id):

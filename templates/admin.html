@@ -513,20 +513,20 @@
                         <i class="fas fa-calendar-check me-2"></i>
                         Citas Confirmadas Recientes
                     </h5>
-                    <span class="badge" style="background: #4CAF50; color: white; font-size: 0.9rem;">{{ stats.total_appointments }} Confirmadas</span>
+                    <span class="badge" style="background: #B89BA3; color: white; font-size: 0.9rem;">{{ stats.total_appointments }} Confirmadas</span>
                 </div>
                 <div class="card-body" style="min-height: 200px; max-height: 450px; overflow-y: auto;">
                     {% if confirmed_appointments %}
                                 {% for appointment in confirmed_appointments %}
                         <div class="appointment-card mb-3" data-bs-toggle="modal" data-bs-target="#confirmedAppointmentModal{{ appointment['id'] }}" 
-                                    style="background: rgba(76, 175, 80, 0.05); 
-                                    border-left: 4px solid #4CAF50; 
+                                    style="background: rgba(184, 155, 163, 0.05); 
+                                    border-left: 4px solid #B89BA3; 
                                     border-radius: 10px; padding: 1rem; transition: all 0.3s ease; cursor: pointer;">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div class="flex-grow-1">
                                     <div class="d-flex align-items-center mb-2">
                                         <div class="avatar-circle me-2" style="width: 40px; height: 40px; border-radius: 50%; 
-                                                    background: #4CAF50; 
+                                                    background: #B89BA3; 
                                                     display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
                                             {{ appointment['first_name'][0] }}{{ appointment['last_name'][0] }}
                                         </div>
@@ -541,11 +541,11 @@
                                     </div>
                                     <div class="d-flex align-items-center gap-3 mt-2">
                                         <span style="color: var(--text-muted); font-size: 0.9rem;">
-                                            <i class="fas fa-calendar-day me-1" style="color: #4CAF50;"></i>
+                                            <i class="fas fa-calendar-day me-1" style="color: var(--primary-color);"></i>
                                             <strong>{{ appointment['appointment_date'] }}</strong>
                                         </span>
                                         <span style="color: var(--text-muted); font-size: 0.9rem;">
-                                            <i class="fas fa-clock me-1" style="color: #4CAF50;"></i>
+                                            <i class="fas fa-clock me-1" style="color: var(--primary-color);"></i>
                                             {{ appointment['appointment_time'] if appointment['appointment_time'] else 'Por definir' }}
                                         </span>
                                     </div>
@@ -556,7 +556,7 @@
                                     {% endif %}
                                 </div>
                                 <div class="ms-2">
-                                    <span class="badge" style="background: #4CAF50; 
+                                    <span class="badge" style="background: #B89BA3; 
                                                 color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">
                                         <i class="fas fa-check-circle me-1"></i>
                                         Confirmada
@@ -567,7 +567,7 @@
                                 {% endfor %}
                     {% else %}
                         <div class="text-center py-5">
-                            <i class="fas fa-calendar-check" style="font-size: 4rem; color: rgba(76, 175, 80, 0.3); margin-bottom: 1rem;"></i>
+                            <i class="fas fa-calendar-check" style="font-size: 4rem; color: rgba(206, 176, 183, 0.3); margin-bottom: 1rem;"></i>
                             <p style="color: var(--text-muted); font-size: 1.1rem; margin: 0;">No hay citas confirmadas recientes</p>
                     </div>
                     {% endif %}
@@ -745,7 +745,7 @@
     <div class="modal fade" id="confirmedAppointmentModal{{ appointment['id'] }}" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white;">
+                <div class="modal-header" style="background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%); color: white;">
                     <h5 class="modal-title">
                         <i class="fas fa-calendar-check me-2"></i>
                         Detalles de la Cita Confirmada
@@ -754,8 +754,8 @@
                 </div>
                 <div class="modal-body">
                     <!-- Información del Paciente -->
-                    <div class="mb-4 p-3" style="background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(129, 199, 132, 0.2) 100%); border-radius: 10px;">
-                        <h6 class="mb-3" style="color: #4CAF50; font-weight: 700;">
+                    <div class="mb-4 p-3" style="background: linear-gradient(135deg, rgba(206, 176, 183, 0.1) 0%, rgba(242, 226, 230, 0.2) 100%); border-radius: 10px;">
+                        <h6 class="mb-3" style="color: #CEB0B7; font-weight: 700;">
                             <i class="fas fa-user me-2"></i>Información del Paciente
                         </h6>
                         <div class="row">
@@ -779,8 +779,8 @@
                     </div>
 
                     <!-- Detalles de la Cita -->
-                    <div class="mb-4 p-3" style="background: #E8F5E9; border-radius: 10px; border-left: 4px solid #4CAF50;">
-                        <h6 class="mb-3" style="color: #2E7D32; font-weight: 700;">
+                    <div class="mb-4 p-3" style="background: rgba(242, 226, 230, 0.3); border-radius: 10px; border-left: 4px solid #CEB0B7;">
+                        <h6 class="mb-3" style="color: #B89BA3; font-weight: 700;">
                             <i class="fas fa-calendar-day me-2"></i>Detalles de la Cita
                         </h6>
                         <div class="row">
@@ -811,19 +811,42 @@
 
                     <!-- Motivo -->
                     {% if appointment['reason'] %}
-                    <div class="mb-3 p-3" style="background: #F1F8E9; border-radius: 10px; border-left: 4px solid #8BC34A;">
+                    <div class="mb-3 p-3" style="background: rgba(242, 226, 230, 0.2); border-radius: 10px; border-left: 4px solid #B89BA3;">
                         <strong><i class="fas fa-comment-medical me-2"></i>Motivo de la Cita:</strong><br>
                         <p class="mt-2 mb-0">{{ appointment['reason'] }}</p>
                     </div>
                     {% endif %}
 
-                    <!-- Estado Actual -->
-                    <div class="p-3" style="background: rgba(76, 175, 80, 0.1); border-radius: 10px;">
-                        <strong><i class="fas fa-info-circle me-2"></i>Estado:</strong>
-                        <span class="badge ms-2" style="background: #4CAF50; color: white; padding: 0.5rem 1rem; font-size: 0.9rem;">
-                            <i class="fas fa-check-circle me-1"></i>
-                            Confirmada
-                        </span>
+                    <!-- Estado Actual y Cambiar Estado -->
+                    <div class="p-3" style="background: rgba(206, 176, 183, 0.1); border-radius: 10px;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <strong><i class="fas fa-info-circle me-2"></i>Estado Actual:</strong>
+                                <span class="badge ms-2" id="statusBadge{{ appointment['id'] }}" style="background: #B89BA3; color: white; padding: 0.5rem 1rem; font-size: 0.9rem;">
+                                    <i class="fas fa-check-circle me-1"></i>
+                                    Confirmada
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Botones para Cambiar Estado -->
+                        <div class="mt-3">
+                            <strong class="d-block mb-2"><i class="fas fa-sync-alt me-2"></i>Cambiar Estado de la Cita:</strong>
+                            <div class="d-flex flex-wrap gap-2">
+                                <button class="btn btn-sm change-status-btn" data-appointment-id="{{ appointment['id'] }}" data-new-status="pending" 
+                                        style="background: #FF9800; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px;">
+                                    <i class="fas fa-clock me-1"></i> Marcar como Pendiente
+                                </button>
+                                <button class="btn btn-sm change-status-btn" data-appointment-id="{{ appointment['id'] }}" data-new-status="completed" 
+                                        style="background: #4CAF50; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px;">
+                                    <i class="fas fa-check-double me-1"></i> Marcar como Completada
+                                </button>
+                                <button class="btn btn-sm change-status-btn" data-appointment-id="{{ appointment['id'] }}" data-new-status="cancelled" 
+                                        style="background: #ACACAD; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px;">
+                                    <i class="fas fa-times-circle me-1"></i> Marcar como Cancelada
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -1189,6 +1212,103 @@ document.getElementById('sendReplyBtn').addEventListener('click', function() {
         
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Enviar Respuesta';
+    });
+});
+
+// Cambiar estado de citas desde los modales
+document.querySelectorAll('.change-status-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        const appointmentId = this.getAttribute('data-appointment-id');
+        const newStatus = this.getAttribute('data-new-status');
+        const btn = this;
+        
+        // Mensajes según el estado
+        const statusMessages = {
+            'pending': 'Pendiente',
+            'confirmed': 'Confirmada',
+            'completed': 'Completada',
+            'cancelled': 'Cancelada'
+        };
+        
+        // Confirmar acción
+        if (!confirm(`¿Estás seguro de que quieres cambiar el estado de esta cita a "${statusMessages[newStatus]}"?`)) {
+            return;
+        }
+        
+        // Deshabilitar todos los botones de cambio de estado
+        const allButtons = document.querySelectorAll(`[data-appointment-id="${appointmentId}"].change-status-btn`);
+        allButtons.forEach(b => {
+            b.disabled = true;
+            b.style.opacity = '0.6';
+        });
+        
+        // Cambiar texto del botón actual
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Procesando...';
+        
+        // Hacer la petición
+        fetch(`/admin/appointments/${appointmentId}/status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({
+                status: newStatus
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la respuesta del servidor');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Actualizar el badge de estado
+                const statusBadge = document.getElementById(`statusBadge${appointmentId}`);
+                if (statusBadge) {
+                    // Colores y textos según estado
+                    const statusConfig = {
+                        'pending': { color: '#FF9800', icon: 'fa-clock', text: 'Pendiente' },
+                        'confirmed': { color: '#B89BA3', icon: 'fa-check-circle', text: 'Confirmada' },
+                        'completed': { color: '#4CAF50', icon: 'fa-check-double', text: 'Completada' },
+                        'cancelled': { color: '#ACACAD', icon: 'fa-times-circle', text: 'Cancelada' }
+                    };
+                    
+                    const config = statusConfig[newStatus];
+                    statusBadge.style.background = config.color;
+                    statusBadge.innerHTML = `<i class="fas ${config.icon} me-1"></i> ${config.text}`;
+                }
+                
+                // Mostrar mensaje de éxito
+                alert(`✅ Estado de la cita actualizado a: ${statusMessages[newStatus]}`);
+                
+                // Recargar la página para reflejar los cambios
+                location.reload();
+            } else {
+                alert(`❌ Error: ${data.error || 'No se pudo actualizar el estado'}`);
+                
+                // Re-habilitar botones
+                allButtons.forEach(b => {
+                    b.disabled = false;
+                    b.style.opacity = '1';
+                });
+                btn.innerHTML = originalHTML;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('❌ Error al procesar la solicitud. Por favor, intenta de nuevo.');
+            
+            // Re-habilitar botones
+            allButtons.forEach(b => {
+                b.disabled = false;
+                b.style.opacity = '1';
+            });
+            btn.innerHTML = originalHTML;
+        });
     });
 });
 </script>
