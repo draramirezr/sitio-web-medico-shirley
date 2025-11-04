@@ -316,14 +316,10 @@
                 <div class="col-md-4 mb-3">
                     <label class="form-label" for="centro_medico_id">
                         Centro Médico
-                        <i class="fas fa-star" style="color: #FFD700; font-size: 0.7rem;" title="Se preselecciona automáticamente el centro por defecto del médico"></i>
                     </label>
                     <select class="form-select" id="centro_medico_id" name="centro_medico_id">
                         <option value="">Seleccione primero un médico...</option>
                     </select>
-                    <small class="text-muted">
-                        <i class="fas fa-info-circle"></i> El centro por defecto se selecciona automáticamente
-                    </small>
                 </div>
             </div>
             
@@ -427,11 +423,7 @@
 
 <script>
 // Datos de centros médicos por médico (del backend)
-const centrosPorMedico = {
-    {% for centro in centros_medicos %}
-    {{ centro['medico_id'] }}: {{ centro['medico_id'] }} in centrosPorMedico ? centrosPorMedico[{{ centro['medico_id'] }}] : (centrosPorMedico[{{ centro['medico_id'] }}] = []),
-    {% endfor %}
-};
+const centrosPorMedico = {};
 
 // Llenar el objeto con los datos
 {% for centro in centros_medicos %}
@@ -445,10 +437,15 @@ centrosPorMedico[{{ centro['medico_id'] }}].push({
 });
 {% endfor %}
 
+console.log('📍 Centros por médico cargados:', centrosPorMedico);
+
 // Event listener para cambio de médico
 document.getElementById('medico_id').addEventListener('change', function() {
     const medicoId = parseInt(this.value);
     const centroSelect = document.getElementById('centro_medico_id');
+    
+    console.log('🔍 Médico seleccionado:', medicoId);
+    console.log('📋 Centros disponibles:', centrosPorMedico[medicoId]);
     
     // Limpiar opciones
     centroSelect.innerHTML = '<option value="">Seleccione un centro médico...</option>';
@@ -463,7 +460,7 @@ document.getElementById('medico_id').addEventListener('change', function() {
             option.textContent = centro.nombre;
             
             if (centro.es_defecto == 1) {
-                option.textContent += ' ⭐ (Por Defecto)';
+                option.textContent += ' ⭐';
                 centroDefectoId = centro.id;
             }
             
@@ -473,9 +470,11 @@ document.getElementById('medico_id').addEventListener('change', function() {
         // Preseleccionar el centro por defecto
         if (centroDefectoId) {
             centroSelect.value = centroDefectoId;
+            console.log('✅ Centro por defecto preseleccionado:', centroDefectoId);
         }
     } else {
         centroSelect.innerHTML = '<option value="">No hay centros médicos asociados</option>';
+        console.log('⚠️ No hay centros para este médico');
     }
 });
 

@@ -5131,8 +5131,27 @@ def facturacion_generar_final():
             # Obtener datos del NCF
             ncf_data = conn.execute('SELECT fecha_fin, tipo FROM ncf WHERE id = %s', (ncf_id,)).fetchone()
             
+            # Obtener centro médico por defecto del médico
+            centro_defecto = conn.execute('''
+                SELECT c.nombre, c.direccion
+                FROM medico_centro mc
+                JOIN centros_medicos c ON mc.centro_id = c.id
+                WHERE mc.medico_id = %s AND mc.es_defecto = 1 AND mc.activo = 1 AND c.activo = 1
+                LIMIT 1
+            ''', (medico_factura_id,)).fetchone()
+            
+            # Si no hay centro por defecto, buscar el primero disponible
+            if not centro_defecto:
+                centro_defecto = conn.execute('''
+                    SELECT c.nombre, c.direccion
+                    FROM medico_centro mc
+                    JOIN centros_medicos c ON mc.centro_id = c.id
+                    WHERE mc.medico_id = %s AND mc.activo = 1 AND c.activo = 1
+                    LIMIT 1
+                ''', (medico_factura_id,)).fetchone()
+            
             # Generar PDF
-            pdf_buffer = generar_pdf_factura(factura_id, ncf_completo, fecha_factura, pacientes_pdf, total, ncf_data)
+            pdf_buffer = generar_pdf_factura(factura_id, ncf_completo, fecha_factura, pacientes_pdf, total, ncf_data, centro_defecto)
             
             # Enviar por email si hay email del médico (de manera asíncrona)
             if medico_email:
@@ -5160,7 +5179,7 @@ def facturacion_generar_final():
         flash(f'Error al generar factura: {str(e)}', 'error')
         return redirect(url_for('facturacion_generar'))
 
-def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None):
+def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None, centro_medico=None):
     """Generar PDF de la factura con formato actualizado"""
     from io import BytesIO
     from reportlab.lib.pagesizes import letter
@@ -5187,6 +5206,15 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None)
         footer_data['medico_especialidad'] = pacientes[0]['medico_especialidad'] if 'medico_especialidad' in pacientes[0].keys() and pacientes[0]['medico_especialidad'] else ''
         footer_data['medico_cedula'] = pacientes[0]['medico_cedula'] if 'medico_cedula' in pacientes[0].keys() and pacientes[0]['medico_cedula'] else ''
         footer_data['medico_exequatur'] = pacientes[0]['medico_exequatur'] if 'medico_exequatur' in pacientes[0].keys() and pacientes[0]['medico_exequatur'] else ''
+    
+    # Agregar información del centro médico
+    if centro_medico:
+        footer_data['centro_nombre'] = centro_medico['nombre']
+        footer_data['centro_direccion'] = centro_medico['direccion']
+    else:
+        # Fallback al texto original
+        footer_data['centro_nombre'] = 'Centro Oriental de Ginecología y Obstetricia'
+        footer_data['centro_direccion'] = 'Zona Oriental, República Dominicana'
     
     # Función para dibujar el footer solo en la última página
     def agregar_footer(canvas, doc):
@@ -5229,8 +5257,9 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None)
                 linea2 += f" | EXEQUATUR: {footer_data['medico_exequatur']}"
             canvas.drawCentredString(letter[0]/2, footer_y + 10, linea2)
             
-            # Línea 3: Centro
-            canvas.drawCentredString(letter[0]/2, footer_y, "Centro Oriental de Ginecología y Obstetricia, Zona Oriental, República Dominicana")
+            # Línea 3: Centro Médico (dinámico)
+            centro_texto = f"{footer_data.get('centro_nombre', '')}, {footer_data.get('centro_direccion', '')}"
+            canvas.drawCentredString(letter[0]/2, footer_y, centro_texto)
         
         canvas.restoreState()
     
