@@ -1947,9 +1947,17 @@ def contact():
             
             # Validar Google reCAPTCHA
             recaptcha_response = request.form.get('g-recaptcha-response')
-            if not verificar_recaptcha(recaptcha_response):
-                flash('⚠️ Por favor, completa la verificación de seguridad (reCAPTCHA).', 'warning')
-                return redirect(url_for('contact'))
+            print(f"🔐 reCAPTCHA Token recibido: {recaptcha_response[:50] if recaptcha_response else 'NINGUNO'}")
+            print(f"🔑 RECAPTCHA_SITE_KEY configurada: {'Sí' if RECAPTCHA_SITE_KEY else 'No'}")
+            print(f"🔑 RECAPTCHA_SECRET_KEY configurada: {'Sí' if RECAPTCHA_SECRET_KEY else 'No'}")
+            
+            # Solo validar reCAPTCHA si está configurada
+            if RECAPTCHA_SITE_KEY and RECAPTCHA_SECRET_KEY:
+                if not verificar_recaptcha(recaptcha_response):
+                    flash('⚠️ Por favor, completa la verificación de seguridad (reCAPTCHA).', 'warning')
+                    return redirect(url_for('contact'))
+            else:
+                print("⚠️ reCAPTCHA no configurada, saltando validación")
             
             # Validar que todos los campos estén completos
             if not all([name, email, phone, subject, message]):
@@ -2084,9 +2092,17 @@ def request_appointment():
             
             # Validar Google reCAPTCHA
             recaptcha_response = request.form.get('g-recaptcha-response')
-            if not verificar_recaptcha(recaptcha_response):
-                flash('⚠️ Por favor, completa la verificación de seguridad (reCAPTCHA).', 'warning')
-                return redirect(url_for('request_appointment'))
+            print(f"🔐 reCAPTCHA Token recibido (citas): {recaptcha_response[:50] if recaptcha_response else 'NINGUNO'}")
+            print(f"🔑 RECAPTCHA_SITE_KEY configurada: {'Sí' if RECAPTCHA_SITE_KEY else 'No'}")
+            print(f"🔑 RECAPTCHA_SECRET_KEY configurada: {'Sí' if RECAPTCHA_SECRET_KEY else 'No'}")
+            
+            # Solo validar reCAPTCHA si está configurada
+            if RECAPTCHA_SITE_KEY and RECAPTCHA_SECRET_KEY:
+                if not verificar_recaptcha(recaptcha_response):
+                    flash('⚠️ Por favor, completa la verificación de seguridad (reCAPTCHA).', 'warning')
+                    return redirect(url_for('request_appointment'))
+            else:
+                print("⚠️ reCAPTCHA no configurada, saltando validación")
             
             # Validaciones críticas
             if not all([first_name, last_name, phone, appointment_type, medical_insurance]):

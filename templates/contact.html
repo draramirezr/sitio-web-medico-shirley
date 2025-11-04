@@ -433,13 +433,18 @@
 
 <script>
     // reCAPTCHA v3 para formulario de contacto
+    console.log('🔐 reCAPTCHA SITE_KEY:', '{{ RECAPTCHA_SITE_KEY }}');
+    
     {% if RECAPTCHA_SITE_KEY %}
     const contactForm = document.getElementById('contactForm');
     if (contactForm) {
+        console.log('✅ Formulario de contacto encontrado, agregando listener reCAPTCHA v3');
         contactForm.addEventListener('submit', function(e) {
             e.preventDefault();
             const form = this;
             const submitBtn = document.getElementById('submit-btn');
+            
+            console.log('📝 Formulario enviado, ejecutando reCAPTCHA v3...');
             
             // Deshabilitar botón mientras se procesa
             if (submitBtn) {
@@ -449,14 +454,17 @@
             
             // Ejecutar reCAPTCHA v3
             grecaptcha.ready(function() {
+                console.log('✅ grecaptcha.ready()');
                 grecaptcha.execute('{{ RECAPTCHA_SITE_KEY }}', {action: 'contact_form'}).then(function(token) {
+                    console.log('✅ Token generado:', token.substring(0, 50) + '...');
                     document.getElementById('recaptcha-token').value = token;
                     
                     // Enviar formulario con el token
                     form.removeEventListener('submit', arguments.callee);
+                    console.log('📤 Enviando formulario con token...');
                     form.submit();
                 }).catch(function(error) {
-                    console.error('Error reCAPTCHA:', error);
+                    console.error('❌ Error reCAPTCHA:', error);
                     alert('Error al verificar seguridad. Por favor, intenta de nuevo.');
                     if (submitBtn) {
                         submitBtn.disabled = false;
@@ -465,10 +473,11 @@
                 });
             });
         });
+    } else {
+        console.error('❌ Formulario #contactForm no encontrado');
     }
     {% else %}
-    // Si no hay reCAPTCHA configurada, enviar normalmente
-    console.log('⚠️ reCAPTCHA no configurada');
+    console.log('⚠️ reCAPTCHA no configurada - formulario se enviará sin validación');
     {% endif %}
 </script>
 {% endblock %}
