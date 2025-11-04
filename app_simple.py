@@ -5546,16 +5546,23 @@ def facturacion_editar_factura(factura_id):
                 WHERE factura_id = %s AND estado = 'facturado'
             ''', (factura_id,)).fetchone()
             
-            nuevo_total = total_result['total']
+            # Convertir a float para asegurar que se guarde correctamente
+            nuevo_total = float(total_result['total']) if total_result['total'] else 0.0
             
             print(f"📊 RECALCULAR TOTAL - Factura #{factura_id}")
-            print(f"   Nuevo total calculado: RD${nuevo_total:,.2f}")
+            print(f"   Total en DB (raw): {total_result['total']}")
+            print(f"   Nuevo total convertido: RD${nuevo_total:,.2f}")
             
             # Actualizar el total en la factura
             cursor.execute('''
                 UPDATE facturas SET total = %s WHERE id = %s
             ''', (nuevo_total, factura_id))
             
+            # Verificar que se actualizó correctamente
+            verificacion = cursor.execute('''
+                SELECT total FROM facturas WHERE id = %s
+            ''', (factura_id,)).fetchone()
+            print(f"   Total en facturas después del UPDATE: {verificacion['total']}")
             print(f"   ✅ Total actualizado en base de datos")
             
             # REGISTRO DE AUDITORÍA
