@@ -299,11 +299,7 @@
                         </a>
                         
                         <!-- Botón Editar (solo si tiene menos de 30 días) -->
-                        {% set fecha_factura = factura['fecha_factura']|string %}
-                        {% set dias_transcurridos = ((none|default(0, true))) %}
-                        {% set dias_desde_creacion = (now.strftime('%Y-%m-%d') | string) %}
-                        
-                        <!-- Calcular si es editable mediante JavaScript inline -->
+                        <!-- La validación de fecha se hace en JavaScript al final del archivo -->
                         <a href="{{ url_for('facturacion_editar_factura', factura_id=factura['id']) }}" 
                            class="btn-editar-factura"
                            id="btnEditar{{ factura['id'] }}"
