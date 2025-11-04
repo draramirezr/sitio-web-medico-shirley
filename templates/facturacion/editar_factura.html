@@ -104,13 +104,20 @@
     
     .btn-agregar-paciente,
     .btn-eliminar-paciente {
-        padding: 0.4rem 1rem;
-        border-radius: 8px;
+        padding: 0.25rem 0.6rem;
+        border-radius: 6px;
         font-weight: 600;
-        font-size: 0.85rem;
+        font-size: 0.75rem;
         border: none;
         transition: all 0.3s ease;
         cursor: pointer;
+        white-space: nowrap;
+    }
+    
+    .btn-agregar-paciente i,
+    .btn-eliminar-paciente i {
+        font-size: 0.7rem;
+        margin-right: 0.2rem;
     }
     
     .btn-agregar-paciente {
@@ -121,7 +128,7 @@
     .btn-agregar-paciente:hover {
         background: linear-gradient(135deg, #B89BA3 0%, #A88B8F 100%);
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(206, 176, 183, 0.4);
+        box-shadow: 0 3px 8px rgba(206, 176, 183, 0.3);
     }
     
     .btn-eliminar-paciente {
@@ -132,7 +139,7 @@
     .btn-eliminar-paciente:hover {
         background: linear-gradient(135deg, #9A9A9B 0%, #8A8A8B 100%);
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(172, 172, 173, 0.4);
+        box-shadow: 0 3px 8px rgba(172, 172, 173, 0.3);
     }
     
     .btn-agregar-paciente:disabled,
@@ -311,8 +318,13 @@
         
         .btn-agregar-paciente,
         .btn-eliminar-paciente {
-            padding: 0.3rem 0.8rem;
-            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+        }
+        
+        .btn-agregar-paciente i,
+        .btn-eliminar-paciente i {
+            font-size: 0.65rem;
         }
         
         .btn-guardar-cambios {
@@ -413,13 +425,14 @@
         
         .btn-agregar-paciente,
         .btn-eliminar-paciente {
-            padding: 0.25rem 0.6rem;
-            font-size: 0.7rem;
+            padding: 0.2rem 0.4rem;
+            font-size: 0.65rem;
         }
         
         .btn-agregar-paciente i,
         .btn-eliminar-paciente i {
-            font-size: 0.7rem;
+            font-size: 0.6rem;
+            margin-right: 0.1rem;
         }
         
         .btn-guardar-cambios {
@@ -475,8 +488,13 @@
         
         .btn-agregar-paciente,
         .btn-eliminar-paciente {
-            padding: 0.2rem 0.5rem;
-            font-size: 0.65rem;
+            padding: 0.15rem 0.35rem;
+            font-size: 0.6rem;
+        }
+        
+        .btn-agregar-paciente i,
+        .btn-eliminar-paciente i {
+            font-size: 0.55rem;
         }
     }
 </style>
