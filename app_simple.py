@@ -158,6 +158,10 @@ app = Flask(__name__)
 # Clave secreta segura (Railway proporcionará SECRET_KEY)
 app.secret_key = os.getenv('SECRET_KEY', secrets.token_hex(32))
 
+# Google reCAPTCHA v2 - Configuración
+RECAPTCHA_SITE_KEY = os.getenv('RECAPTCHA_SITE_KEY', '')
+RECAPTCHA_SECRET_KEY = os.getenv('RECAPTCHA_SECRET_KEY', '')
+
 # Configuración de seguridad y sesiones
 app.config['SESSION_COOKIE_SECURE'] = os.getenv('FLASK_ENV') == 'production'  # True en producción
 app.config['SESSION_COOKIE_HTTPONLY'] = True
@@ -180,7 +184,7 @@ def security_and_performance_headers(response):
     response.headers['X-Frame-Options'] = 'DENY'
     response.headers['X-XSS-Protection'] = '1; mode=block'
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
-    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.google-analytics.com https://www.googletagmanager.com; frame-src https://www.googletagmanager.com;"
+    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.googletagmanager.com https://www.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.google-analytics.com https://www.googletagmanager.com https://www.google.com; frame-src https://www.googletagmanager.com https://www.google.com;"
     
     # Headers de caché
     if response.content_type:
@@ -517,6 +521,43 @@ def nombre_dia(fecha_str):
         return dias_espanol.get(dia_numero, '')
     except (ValueError, TypeError, AttributeError):
         return ''
+
+# ============================================
+# FUNCIONES DE GOOGLE reCAPTCHA
+# ============================================
+
+def verificar_recaptcha(response_token):
+    """
+    Verificar el token de reCAPTCHA con Google
+    Retorna True si es válido, False si no
+    """
+    if not RECAPTCHA_SECRET_KEY or not response_token:
+        return False
+    
+    import requests
+    
+    try:
+        # Hacer petición a Google para verificar el token
+        verify_url = 'https://www.google.com/recaptcha/api/siteverify'
+        data = {
+            'secret': RECAPTCHA_SECRET_KEY,
+            'response': response_token
+        }
+        
+        response = requests.post(verify_url, data=data, timeout=5)
+        result = response.json()
+        
+        return result.get('success', False)
+    except Exception as e:
+        print(f"❌ Error al verificar reCAPTCHA: {e}")
+        return False
+
+@app.context_processor
+def inject_recaptcha():
+    """Inyectar la Site Key de reCAPTCHA en todos los templates"""
+    return {
+        'RECAPTCHA_SITE_KEY': RECAPTCHA_SITE_KEY
+    }
 
 # Modelo de Usuario para Flask-Login
 class User(UserMixin):
@@ -1892,6 +1933,12 @@ def contact():
             subject = request.form['subject']
             message = request.form['message']
             
+            # Validar Google reCAPTCHA
+            recaptcha_response = request.form.get('g-recaptcha-response')
+            if not verificar_recaptcha(recaptcha_response):
+                flash('⚠️ Por favor, completa la verificación de seguridad (reCAPTCHA).', 'warning')
+                return redirect(url_for('contact'))
+            
             # Validar que todos los campos estén completos
             if not all([name, email, phone, subject, message]):
                 flash('Por favor, completa todos los campos obligatorios.', 'danger')
@@ -2022,6 +2069,12 @@ def request_appointment():
             appointment_time = sanitize_input(request.form.get('appointment_time', ''))
             appointment_type = sanitize_input(request.form.get('appointment_type', ''))
             medical_insurance = sanitize_input(request.form.get('medical_insurance', ''))
+            
+            # Validar Google reCAPTCHA
+            recaptcha_response = request.form.get('g-recaptcha-response')
+            if not verificar_recaptcha(recaptcha_response):
+                flash('⚠️ Por favor, completa la verificación de seguridad (reCAPTCHA).', 'warning')
+                return redirect(url_for('request_appointment'))
             
             # Validaciones críticas
             if not all([first_name, last_name, phone, appointment_type, medical_insurance]):

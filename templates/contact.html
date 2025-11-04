@@ -7,6 +7,13 @@
 {% block og_title %}Contacto - Agenda tu Cita con Dra. Shirley Ramírez | Santo Domingo{% endblock %}
 {% block og_description %}Contacta a la mejor ginecóloga en Santo Domingo. Teléfono: 829-740-5073. Ubicación: República Dominicana. Agenda tu cita hoy y recibe atención personalizada.{% endblock %}
 
+{% block extra_head %}
+<!-- Google reCAPTCHA v2 -->
+{% if RECAPTCHA_SITE_KEY %}
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+{% endif %}
+{% endblock %}
+
 {% block content %}
 <style>
     /* ============================================
@@ -303,6 +310,13 @@
                             <label class="form-label">Mensaje *</label>
                             <textarea class="form-control" name="message" rows="5" required></textarea>
                         </div>
+                        
+                        <!-- Google reCAPTCHA v2 -->
+                        {% if RECAPTCHA_SITE_KEY %}
+                        <div class="mb-4 d-flex justify-content-center">
+                            <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_SITE_KEY }}"></div>
+                        </div>
+                        {% endif %}
                         
                         <div class="text-center">
                             <button type="submit" class="btn btn-primary btn-lg px-5">

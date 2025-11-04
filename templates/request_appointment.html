@@ -7,6 +7,13 @@
 {% block og_title %}Agenda tu Cita con Dra. Shirley Ramírez | Ginecóloga en Santo Domingo{% endblock %}
 {% block og_description %}Reserva tu consulta ginecológica en Santo Domingo. Proceso rápido y seguro. Horarios flexibles y atención personalizada. ¡Agenda ahora!{% endblock %}
 
+{% block extra_head %}
+<!-- Google reCAPTCHA v2 -->
+{% if RECAPTCHA_SITE_KEY %}
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+{% endif %}
+{% endblock %}
+
 {% block content %}
 <!-- Flatpickr CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -450,6 +457,13 @@
                                 <textarea class="form-control" name="reason" rows="4" placeholder="Describa brevemente el motivo de su consulta (opcional)..."></textarea>
                             </div>
                         </div>
+                        
+                        <!-- Google reCAPTCHA v2 -->
+                        {% if RECAPTCHA_SITE_KEY %}
+                        <div class="mb-4 d-flex justify-content-center">
+                            <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_SITE_KEY }}"></div>
+                        </div>
+                        {% endif %}
                         
                         <div class="text-center mt-5">
                             <button type="submit" class="btn btn-submit-appointment">
