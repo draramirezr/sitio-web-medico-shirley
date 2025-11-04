@@ -88,7 +88,7 @@
                     </label>
                     <select class="form-select" id="medico_id" name="medico_id" required>
                         <option value="">Seleccione un médico...</option>
-                        {% for medico in medicos_list %}
+                        {% for medico in medicos %}
                         <option value="{{ medico['id'] }}">
                             {{ medico['nombre'] }} - {{ medico['especialidad'] }}
                         </option>
@@ -104,7 +104,7 @@
                     </label>
                     <select class="form-select" id="centro_id" name="centro_id" required>
                         <option value="">Seleccione un centro médico...</option>
-                        {% for centro in centros_list %}
+                        {% for centro in centros %}
                         <option value="{{ centro['id'] }}">
                             {{ centro['nombre'] }}
                         </option>
