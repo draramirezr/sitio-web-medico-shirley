@@ -5401,69 +5401,78 @@ def enviar_email_factura(destinatario, factura_id, ncf, pdf_buffer, monto_total=
 @login_required
 def facturacion_historico():
     """Histórico de facturas generadas con filtros"""
-    conn = get_db_connection()
-    
-    # Obtener filtros
-    ars_id = request.args.get('ars_id', type=int)
-    medico_id = request.args.get('medico_id', type=int)
-    ncf = request.args.get('ncf', '').strip()
-    fecha_desde = request.args.get('fecha_desde')
-    fecha_hasta = request.args.get('fecha_hasta')
-    
-    # Construir query con filtros
-    query = '''
-        SELECT f.*, a.nombre_ars, m.nombre as medico_nombre,
-               (SELECT COUNT(*) FROM facturas_detalle WHERE factura_id = f.id) as num_pacientes
-        FROM facturas f
-        JOIN ars a ON f.ars_id = a.id
-        JOIN medicos m ON f.medico_id = m.id
-        WHERE f.activo = 1
-    '''
-    
-    params = []
-    
-    if ars_id:
-        query += ' AND f.ars_id = %s'
-        params.append(ars_id)
-    
-    if medico_id:
-        query += ' AND f.medico_id = %s'
-        params.append(medico_id)
-    
-    if ncf:
-        query += ' AND (f.ncf LIKE %s OR f.ncf_numero LIKE %s)'
-        params.append(f'%{ncf}%')
-        params.append(f'%{ncf}%')
-    
-    if fecha_desde:
-        query += ' AND f.fecha_factura >= %s'
-        params.append(fecha_desde)
-    
-    if fecha_hasta:
-        query += ' AND f.fecha_factura <= %s'
-        params.append(fecha_hasta)
-    
-    query += ' ORDER BY f.fecha_factura DESC, f.id DESC'
-    
-    facturas = conn.execute(query, params).fetchall()
-    
-    # Obtener lista de ARS para el filtro
-    ars_list = conn.execute('SELECT * FROM ars WHERE activo = 1 ORDER BY nombre_ars').fetchall()
-    
-    # Obtener lista de Médicos habilitados para facturar
-    medicos_list = conn.execute('SELECT * FROM medicos WHERE activo = 1 AND factura = 1 ORDER BY nombre').fetchall()
-    
-    conn.close()
-    
-    return render_template('facturacion/historico.html',
-                         facturas=facturas,
-                         ars_list=ars_list,
-                         medicos_list=medicos_list,
-                         ars_id_seleccionado=ars_id,
-                         medico_id_seleccionado=medico_id,
-                         ncf=ncf,
-                         fecha_desde=fecha_desde,
-                         fecha_hasta=fecha_hasta)
+    try:
+        conn = get_db_connection()
+        
+        # Obtener filtros
+        ars_id = request.args.get('ars_id', type=int)
+        medico_id = request.args.get('medico_id', type=int)
+        ncf = request.args.get('ncf', '').strip()
+        fecha_desde = request.args.get('fecha_desde')
+        fecha_hasta = request.args.get('fecha_hasta')
+        
+        # Construir query con filtros
+        query = '''
+            SELECT f.*, a.nombre_ars, m.nombre as medico_nombre,
+                   (SELECT COUNT(*) FROM facturas_detalle WHERE factura_id = f.id) as num_pacientes
+            FROM facturas f
+            JOIN ars a ON f.ars_id = a.id
+            JOIN medicos m ON f.medico_id = m.id
+            WHERE f.activo = 1
+        '''
+        
+        params = []
+        
+        if ars_id:
+            query += ' AND f.ars_id = %s'
+            params.append(ars_id)
+        
+        if medico_id:
+            query += ' AND f.medico_id = %s'
+            params.append(medico_id)
+        
+        if ncf:
+            query += ' AND (f.ncf LIKE %s OR f.ncf_numero LIKE %s)'
+            params.append(f'%{ncf}%')
+            params.append(f'%{ncf}%')
+        
+        if fecha_desde:
+            query += ' AND f.fecha_factura >= %s'
+            params.append(fecha_desde)
+        
+        if fecha_hasta:
+            query += ' AND f.fecha_factura <= %s'
+            params.append(fecha_hasta)
+        
+        query += ' ORDER BY f.fecha_factura DESC, f.id DESC'
+        
+        facturas = conn.execute(query, params).fetchall()
+        
+        # Obtener lista de ARS para el filtro
+        ars_list = conn.execute('SELECT * FROM ars WHERE activo = 1 ORDER BY nombre_ars').fetchall()
+        
+        # Obtener lista de Médicos habilitados para facturar
+        medicos_list = conn.execute('SELECT * FROM medicos WHERE activo = 1 AND factura = 1 ORDER BY nombre').fetchall()
+        
+        conn.close()
+        
+        return render_template('facturacion/historico.html',
+                             facturas=facturas,
+                             ars_list=ars_list,
+                             medicos_list=medicos_list,
+                             ars_id_seleccionado=ars_id,
+                             medico_id_seleccionado=medico_id,
+                             ncf=ncf,
+                             fecha_desde=fecha_desde,
+                             fecha_hasta=fecha_hasta)
+    except Exception as e:
+        import traceback
+        print(f"❌ ERROR EN HISTÓRICO DE FACTURAS:")
+        print(traceback.format_exc())
+        if 'conn' in locals():
+            conn.close()
+        flash(f'Error al cargar el histórico de facturas: {str(e)}', 'error')
+        return redirect(url_for('facturacion_menu'))
 
 @app.route('/facturacion/editar-factura/<int:factura_id>', methods=['GET', 'POST'])
 @login_required
