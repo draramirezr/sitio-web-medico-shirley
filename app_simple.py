@@ -5546,29 +5546,33 @@ def facturacion_editar_factura(factura_id):
             pacientes_eliminar_ids = request.form.get('pacientes_eliminar_ids', '[]')
             pacientes_eliminar_list = json.loads(pacientes_eliminar_ids)
             
-            cursor = conn.cursor()
+            print(f"📝 EDITAR FACTURA #{factura_id}")
+            print(f"   Pacientes a agregar: {pacientes_agregar_list}")
+            print(f"   Pacientes a eliminar: {pacientes_eliminar_list}")
             
             # AGREGAR PACIENTES NUEVOS
             if pacientes_agregar_list:
                 placeholders = ','.join(['%s' for _ in pacientes_agregar_list])
                 # Actualizar pacientes pendientes a facturados
-                cursor.execute(f'''
+                conn.execute(f'''
                     UPDATE facturas_detalle 
                     SET factura_id = %s, estado = 'facturado', medico_id = %s
                     WHERE id IN ({placeholders}) AND estado = 'pendiente'
                 ''', [factura_id, factura['medico_id']] + pacientes_agregar_list)
+                print(f"   ✅ {len(pacientes_agregar_list)} paciente(s) agregado(s)")
             
             # ELIMINAR PACIENTES DE LA FACTURA (regresar a pendiente)
             if pacientes_eliminar_list:
                 placeholders = ','.join(['%s' for _ in pacientes_eliminar_list])
-                cursor.execute(f'''
+                conn.execute(f'''
                     UPDATE facturas_detalle 
                     SET factura_id = NULL, estado = 'pendiente', medico_id = NULL
                     WHERE id IN ({placeholders}) AND factura_id = %s
                 ''', pacientes_eliminar_list + [factura_id])
+                print(f"   ✅ {len(pacientes_eliminar_list)} paciente(s) eliminado(s)")
             
             # RECALCULAR TOTAL DE LA FACTURA
-            total_result = cursor.execute('''
+            total_result = conn.execute('''
                 SELECT COALESCE(SUM(monto), 0) as total
                 FROM facturas_detalle
                 WHERE factura_id = %s AND estado = 'facturado'
@@ -5582,12 +5586,12 @@ def facturacion_editar_factura(factura_id):
             print(f"   Nuevo total convertido: RD${nuevo_total:,.2f}")
             
             # Actualizar el total en la factura
-            cursor.execute('''
+            conn.execute('''
                 UPDATE facturas SET total = %s WHERE id = %s
             ''', (nuevo_total, factura_id))
             
             # Verificar que se actualizó correctamente
-            verificacion = cursor.execute('''
+            verificacion = conn.execute('''
                 SELECT total FROM facturas WHERE id = %s
             ''', (factura_id,)).fetchone()
             print(f"   Total en facturas después del UPDATE: {verificacion['total']}")
@@ -5601,7 +5605,7 @@ def facturacion_editar_factura(factura_id):
                 observacion += f"Eliminados: {len(pacientes_eliminar_list)} paciente(s). "
             observacion += f"Nuevo total: RD${nuevo_total:,.2f}"
             
-            cursor.execute('''
+            conn.execute('''
                 UPDATE facturas 
                 SET observaciones = CONCAT(COALESCE(observaciones, ''), '\n[', NOW(), '] ', %s)
                 WHERE id = %s
@@ -5617,6 +5621,9 @@ def facturacion_editar_factura(factura_id):
             return redirect(url_for('facturacion_ver_factura', factura_id=factura_id))
             
         except Exception as e:
+            print(f"❌ ERROR al editar factura: {str(e)}")
+            import traceback
+            traceback.print_exc()
             conn.rollback()
             conn.close()
             flash(f'Error al actualizar factura: {str(e)}', 'error')
