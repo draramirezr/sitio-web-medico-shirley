@@ -528,8 +528,8 @@ def nombre_dia(fecha_str):
 
 def verificar_recaptcha(response_token):
     """
-    Verificar el token de reCAPTCHA con Google
-    Retorna True si es válido, False si no
+    Verificar el token de reCAPTCHA v3 con Google
+    Retorna True si es válido y el score >= 0.5, False si no
     """
     if not RECAPTCHA_SECRET_KEY or not response_token:
         return False
@@ -547,7 +547,19 @@ def verificar_recaptcha(response_token):
         response = requests.post(verify_url, data=data, timeout=5)
         result = response.json()
         
-        return result.get('success', False)
+        print(f"🔐 reCAPTCHA v3 Response: {result}")
+        
+        # Para reCAPTCHA v3, verificar success y score
+        if result.get('success'):
+            score = result.get('score', 0)
+            print(f"   Score: {score} | Action: {result.get('action')}")
+            # Score >= 0.5 se considera humano (ajustable según necesidad)
+            # 1.0 = muy probablemente humano, 0.0 = muy probablemente bot
+            return score >= 0.5
+        else:
+            print(f"   Error codes: {result.get('error-codes', [])}")
+            return False
+            
     except Exception as e:
         print(f"❌ Error al verificar reCAPTCHA: {e}")
         return False

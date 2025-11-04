@@ -8,9 +8,9 @@
 {% block og_description %}Contacta a la mejor ginecóloga en Santo Domingo. Teléfono: 829-740-5073. Ubicación: República Dominicana. Agenda tu cita hoy y recibe atención personalizada.{% endblock %}
 
 {% block extra_head %}
-<!-- Google reCAPTCHA v2 -->
+<!-- Google reCAPTCHA v3 -->
 {% if RECAPTCHA_SITE_KEY %}
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<script src="https://www.google.com/recaptcha/api.js?render={{ RECAPTCHA_SITE_KEY }}"></script>
 {% endif %}
 {% endblock %}
 
@@ -311,15 +311,11 @@
                             <textarea class="form-control" name="message" rows="5" required></textarea>
                         </div>
                         
-                        <!-- Google reCAPTCHA v2 -->
-                        {% if RECAPTCHA_SITE_KEY %}
-                        <div class="mb-4 d-flex justify-content-center">
-                            <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_SITE_KEY }}"></div>
-                        </div>
-                        {% endif %}
+                        <!-- reCAPTCHA v3 - Invisible -->
+                        <input type="hidden" id="recaptcha-token" name="g-recaptcha-response">
                         
                         <div class="text-center">
-                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                            <button type="submit" class="btn btn-primary btn-lg px-5" id="submit-btn">
                                 <i class="fas fa-paper-plane me-2"></i>
                                 Enviar Mensaje
                             </button>
@@ -434,4 +430,21 @@
         </div>
     </div>
 </div>
+
+<script>
+    // reCAPTCHA v3 para formulario de contacto
+    {% if RECAPTCHA_SITE_KEY %}
+    document.getElementById('contactForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var form = this;
+        
+        grecaptcha.ready(function() {
+            grecaptcha.execute('{{ RECAPTCHA_SITE_KEY }}', {action: 'contact_form'}).then(function(token) {
+                document.getElementById('recaptcha-token').value = token;
+                form.submit();
+            });
+        });
+    });
+    {% endif %}
+</script>
 {% endblock %}

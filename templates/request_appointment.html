@@ -8,9 +8,9 @@
 {% block og_description %}Reserva tu consulta ginecológica en Santo Domingo. Proceso rápido y seguro. Horarios flexibles y atención personalizada. ¡Agenda ahora!{% endblock %}
 
 {% block extra_head %}
-<!-- Google reCAPTCHA v2 -->
+<!-- Google reCAPTCHA v3 -->
 {% if RECAPTCHA_SITE_KEY %}
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<script src="https://www.google.com/recaptcha/api.js?render={{ RECAPTCHA_SITE_KEY }}"></script>
 {% endif %}
 {% endblock %}
 
@@ -458,15 +458,11 @@
                             </div>
                         </div>
                         
-                        <!-- Google reCAPTCHA v2 -->
-                        {% if RECAPTCHA_SITE_KEY %}
-                        <div class="mb-4 d-flex justify-content-center">
-                            <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_SITE_KEY }}"></div>
-                        </div>
-                        {% endif %}
+                        <!-- reCAPTCHA v3 - Invisible -->
+                        <input type="hidden" id="recaptcha-token" name="g-recaptcha-response">
                         
                         <div class="text-center mt-5">
-                            <button type="submit" class="btn btn-submit-appointment">
+                            <button type="submit" class="btn btn-submit-appointment" id="submit-btn">
                                 <i class="fas fa-calendar-check me-2"></i>
                                 Solicitar Mi Cita
                             </button>
@@ -621,6 +617,23 @@ document.addEventListener('DOMContentLoaded', function() {
         emergencyDatetime.max = maxDate.toISOString().slice(0, 16);
     }
 });
+</script>
+
+<script>
+    // reCAPTCHA v3 para formulario de citas
+    {% if RECAPTCHA_SITE_KEY %}
+    document.getElementById('appointmentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var form = this;
+        
+        grecaptcha.ready(function() {
+            grecaptcha.execute('{{ RECAPTCHA_SITE_KEY }}', {action: 'appointment_form'}).then(function(token) {
+                document.getElementById('recaptcha-token').value = token;
+                form.submit();
+            });
+        });
+    });
+    {% endif %}
 </script>
 
 {% endblock %}
