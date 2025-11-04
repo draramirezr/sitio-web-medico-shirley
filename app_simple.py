@@ -5548,10 +5548,15 @@ def facturacion_editar_factura(factura_id):
             
             nuevo_total = total_result['total']
             
+            print(f"📊 RECALCULAR TOTAL - Factura #{factura_id}")
+            print(f"   Nuevo total calculado: RD${nuevo_total:,.2f}")
+            
             # Actualizar el total en la factura
             cursor.execute('''
                 UPDATE facturas SET total = %s WHERE id = %s
             ''', (nuevo_total, factura_id))
+            
+            print(f"   ✅ Total actualizado en base de datos")
             
             # REGISTRO DE AUDITORÍA
             observacion = f"Factura editada por {current_user.nombre}. "
@@ -5567,7 +5572,10 @@ def facturacion_editar_factura(factura_id):
                 WHERE id = %s
             ''', (observacion, factura_id))
             
+            # Hacer commit ANTES de cerrar la conexión
             conn.commit()
+            print(f"   ✅ Commit realizado exitosamente")
+            
             conn.close()
             
             flash(f'✅ Factura #{factura_id} actualizada exitosamente. Nuevo total: RD${nuevo_total:,.2f}', 'success')
