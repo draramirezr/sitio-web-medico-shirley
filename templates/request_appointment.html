@@ -622,17 +622,41 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
     // reCAPTCHA v3 para formulario de citas
     {% if RECAPTCHA_SITE_KEY %}
-    document.getElementById('appointmentForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        var form = this;
-        
-        grecaptcha.ready(function() {
-            grecaptcha.execute('{{ RECAPTCHA_SITE_KEY }}', {action: 'appointment_form'}).then(function(token) {
-                document.getElementById('recaptcha-token').value = token;
-                form.submit();
+    const appointmentForm = document.getElementById('appointmentForm');
+    if (appointmentForm) {
+        appointmentForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = this;
+            const submitBtn = document.getElementById('submit-btn');
+            
+            // Deshabilitar botón mientras se procesa
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
+            }
+            
+            // Ejecutar reCAPTCHA v3
+            grecaptcha.ready(function() {
+                grecaptcha.execute('{{ RECAPTCHA_SITE_KEY }}', {action: 'appointment_form'}).then(function(token) {
+                    document.getElementById('recaptcha-token').value = token;
+                    
+                    // Enviar formulario con el token
+                    form.removeEventListener('submit', arguments.callee);
+                    form.submit();
+                }).catch(function(error) {
+                    console.error('Error reCAPTCHA:', error);
+                    alert('Error al verificar seguridad. Por favor, intenta de nuevo.');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="fas fa-calendar-check me-2"></i>Solicitar Mi Cita';
+                    }
+                });
             });
         });
-    });
+    }
+    {% else %}
+    // Si no hay reCAPTCHA configurada, enviar normalmente
+    console.log('⚠️ reCAPTCHA no configurada');
     {% endif %}
 </script>
 

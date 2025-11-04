@@ -434,17 +434,41 @@
 <script>
     // reCAPTCHA v3 para formulario de contacto
     {% if RECAPTCHA_SITE_KEY %}
-    document.getElementById('contactForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        var form = this;
-        
-        grecaptcha.ready(function() {
-            grecaptcha.execute('{{ RECAPTCHA_SITE_KEY }}', {action: 'contact_form'}).then(function(token) {
-                document.getElementById('recaptcha-token').value = token;
-                form.submit();
+    const contactForm = document.getElementById('contactForm');
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = this;
+            const submitBtn = document.getElementById('submit-btn');
+            
+            // Deshabilitar botón mientras se procesa
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+            }
+            
+            // Ejecutar reCAPTCHA v3
+            grecaptcha.ready(function() {
+                grecaptcha.execute('{{ RECAPTCHA_SITE_KEY }}', {action: 'contact_form'}).then(function(token) {
+                    document.getElementById('recaptcha-token').value = token;
+                    
+                    // Enviar formulario con el token
+                    form.removeEventListener('submit', arguments.callee);
+                    form.submit();
+                }).catch(function(error) {
+                    console.error('Error reCAPTCHA:', error);
+                    alert('Error al verificar seguridad. Por favor, intenta de nuevo.');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Enviar Mensaje';
+                    }
+                });
             });
         });
-    });
+    }
+    {% else %}
+    // Si no hay reCAPTCHA configurada, enviar normalmente
+    console.log('⚠️ reCAPTCHA no configurada');
     {% endif %}
 </script>
 {% endblock %}
