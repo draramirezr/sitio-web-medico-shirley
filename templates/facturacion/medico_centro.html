@@ -200,8 +200,14 @@
                         <td><strong style="color: var(--primary-color);">{{ relacion['medico_nombre'] }}</strong></td>
                         <td>{{ relacion['especialidad'] }}</td>
                         <td>
+                            {% if relacion['es_defecto'] == 1 %}
+                            <i class="fas fa-star me-2" style="color: #FFD700;" title="Centro por Defecto"></i>
+                            {% endif %}
                             <i class="fas fa-hospital-alt me-2" style="color: var(--primary-color);"></i>
                             {{ relacion['centro_nombre'] }}
+                            {% if relacion['es_defecto'] == 1 %}
+                            <span class="badge bg-warning text-dark ms-2">Por Defecto</span>
+                            {% endif %}
                         </td>
                         <td>{{ relacion['created_at'].strftime('%d/%m/%Y') if relacion['created_at'] else '-' }}</td>
                         <td>

@@ -97,7 +97,7 @@
                 </div>
 
                 <!-- Centro Médico -->
-                <div class="mb-4">
+                <div class="mb-3">
                     <label for="centro_id" class="form-label">
                         <i class="fas fa-hospital-alt me-2" style="color: var(--primary-color);"></i>
                         Centro Médico*
@@ -110,6 +110,19 @@
                         </option>
                         {% endfor %}
                     </select>
+                </div>
+                
+                <!-- Centro por Defecto -->
+                <div class="mb-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="es_defecto" name="es_defecto" value="1">
+                        <label class="form-check-label" for="es_defecto">
+                            <i class="fas fa-star me-2" style="color: #FFD700;"></i>
+                            <strong>Marcar como Centro por Defecto</strong>
+                            <br>
+                            <small class="text-muted">Este centro se preseleccionará automáticamente al agregar pacientes o generar facturas para este médico.</small>
+                        </label>
+                    </div>
                 </div>
 
                 <!-- Botones -->

@@ -3409,7 +3409,7 @@ def facturacion_medico_centro():
             JOIN medicos m ON mc.medico_id = m.id
             JOIN centros_medicos c ON mc.centro_id = c.id
             WHERE (m.nombre LIKE %s OR c.nombre LIKE %s) AND mc.activo = 1
-            ORDER BY m.nombre, c.nombre
+            ORDER BY mc.es_defecto DESC, m.nombre, c.nombre
         """, (search_pattern, search_pattern)).fetchall()
     else:
         relaciones_list = conn.execute('''
@@ -3418,7 +3418,7 @@ def facturacion_medico_centro():
             JOIN medicos m ON mc.medico_id = m.id
             JOIN centros_medicos c ON mc.centro_id = c.id
             WHERE mc.activo = 1
-            ORDER BY m.nombre, c.nombre
+            ORDER BY mc.es_defecto DESC, m.nombre, c.nombre
         ''').fetchall()
     
     conn.close()
@@ -3433,6 +3433,7 @@ def facturacion_medico_centro_nuevo():
     if request.method == 'POST':
         medico_id = request.form.get('medico_id')
         centro_id = request.form.get('centro_id')
+        es_defecto = 1 if request.form.get('es_defecto') == '1' else 0
         
         if not medico_id or not centro_id:
             flash('Debe seleccionar médico y centro médico', 'error')
@@ -3446,12 +3447,19 @@ def facturacion_medico_centro_nuevo():
             flash('Ya existe esa relación entre el médico y el centro médico', 'error')
             return redirect(url_for('facturacion_medico_centro_nuevo'))
         
-        conn.execute('INSERT INTO medico_centro (medico_id, centro_id) VALUES (%s, %s)', 
-                    (medico_id, centro_id))
+        # Si se marca como defecto, desmarcar otros centros de ese médico
+        if es_defecto == 1:
+            conn.execute('UPDATE medico_centro SET es_defecto = 0 WHERE medico_id = %s', (medico_id,))
+        
+        conn.execute('INSERT INTO medico_centro (medico_id, centro_id, es_defecto) VALUES (%s, %s, %s)', 
+                    (medico_id, centro_id, es_defecto))
         conn.commit()
         conn.close()
         
-        flash('Relación Médico-Centro creada exitosamente', 'success')
+        mensaje = 'Relación Médico-Centro creada exitosamente'
+        if es_defecto == 1:
+            mensaje += ' (marcada como centro por defecto)'
+        flash(mensaje, 'success')
         return redirect(url_for('facturacion_medico_centro'))
     
     # Obtener listas para los select
