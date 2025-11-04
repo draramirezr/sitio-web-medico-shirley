@@ -4980,6 +4980,32 @@ def facturacion_generar():
             itbis = 0
             total_final = total
             
+            # Obtener centro médico por defecto del médico
+            centro_medico = conn.execute('''
+                SELECT c.nombre, c.direccion
+                FROM medico_centro mc
+                JOIN centros_medicos c ON mc.centro_id = c.id
+                WHERE mc.medico_id = %s AND mc.es_defecto = 1 AND mc.activo = 1 AND c.activo = 1
+                LIMIT 1
+            ''', (medico_factura_id,)).fetchone()
+            
+            # Si no hay centro por defecto, buscar el primero disponible
+            if not centro_medico:
+                centro_medico = conn.execute('''
+                    SELECT c.nombre, c.direccion
+                    FROM medico_centro mc
+                    JOIN centros_medicos c ON mc.centro_id = c.id
+                    WHERE mc.medico_id = %s AND mc.activo = 1 AND c.activo = 1
+                    LIMIT 1
+                ''', (medico_factura_id,)).fetchone()
+            
+            # Si aún no hay centro, usar valores por defecto
+            if not centro_medico:
+                centro_medico = {
+                    'nombre': 'Centro Oriental de Ginecología y Obstetricia',
+                    'direccion': 'Zona Oriental, República Dominicana'
+                }
+            
             conn.close()
             
             # Mostrar vista previa con los datos del médico que factura
@@ -4996,7 +5022,8 @@ def facturacion_generar():
                                  pacientes_ids=json.dumps(ids_list),
                                  ars_id=ars_id,
                                  ncf_id=ncf_id,
-                                 medico_factura_id=medico_factura_id)
+                                 medico_factura_id=medico_factura_id,
+                                 centro_medico=centro_medico)
     
     # GET: PASO 1 - Mostrar formulario para seleccionar ARS, NCF, Médico y fecha
     from datetime import date
@@ -6195,6 +6222,32 @@ def facturacion_ver_factura(factura_id):
         ORDER BY fd.id
     ''', (factura_id,)).fetchall()
     
+    # Obtener centro médico por defecto del médico
+    centro_medico = conn.execute('''
+        SELECT c.nombre, c.direccion
+        FROM medico_centro mc
+        JOIN centros_medicos c ON mc.centro_id = c.id
+        WHERE mc.medico_id = %s AND mc.es_defecto = 1 AND mc.activo = 1 AND c.activo = 1
+        LIMIT 1
+    ''', (factura['medico_id'],)).fetchone()
+    
+    # Si no hay centro por defecto, buscar el primero disponible
+    if not centro_medico:
+        centro_medico = conn.execute('''
+            SELECT c.nombre, c.direccion
+            FROM medico_centro mc
+            JOIN centros_medicos c ON mc.centro_id = c.id
+            WHERE mc.medico_id = %s AND mc.activo = 1 AND c.activo = 1
+            LIMIT 1
+        ''', (factura['medico_id'],)).fetchone()
+    
+    # Si aún no hay centro, usar valores por defecto
+    if not centro_medico:
+        centro_medico = {
+            'nombre': 'Centro Oriental de Ginecología y Obstetricia',
+            'direccion': 'Zona Oriental, República Dominicana'
+        }
+    
     conn.close()
     
     # Calcular totales (sin ITBIS)
@@ -6207,7 +6260,8 @@ def facturacion_ver_factura(factura_id):
                          pacientes=pacientes,
                          subtotal=subtotal,
                          itbis=itbis,
-                         total=total_final)
+                         total=total_final,
+                         centro_medico=centro_medico)
 
 @app.route('/facturacion/enviar-email/<int:factura_id>', methods=['POST'])
 @login_required

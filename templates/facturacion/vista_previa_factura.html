@@ -353,7 +353,7 @@
         <div class="footer-factura">
             <p><strong>{{ medico['nombre'] }}</strong></p>
             <p>{{ medico['especialidad'] }} | Cédula: {{ medico['cedula'] }}{% if medico['exequatur'] %} | EXEQUATUR: {{ medico['exequatur'] }}{% endif %}</p>
-            <p>Centro Oriental de Ginecología y Obstetricia, Zona Oriental, República Dominicana</p>
+            <p>{{ centro_medico['nombre'] }}, {{ centro_medico['direccion'] }}</p>
         </div>
     </div>
 
