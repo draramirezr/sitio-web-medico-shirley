@@ -623,8 +623,8 @@
 
         <!-- Footer -->
         <div class="footer-factura">
-            <p><strong>Dra. Shirley Scarlett Ramírez Montero</strong></p>
-            <p>Ginecóloga/Obstetra | Cédula: 10240 | EXEQUATUR: 014-0020410-1</p>
+            <p><strong>{{ factura['medico_nombre'] }}</strong></p>
+            <p>{{ factura['medico_especialidad'] }}{% if factura['medico_cedula'] %} | Cédula: {{ factura['medico_cedula'] }}{% endif %}{% if factura['medico_exequatur'] %} | EXEQUATUR: {{ factura['medico_exequatur'] }}{% endif %}</p>
             <p>{{ centro_medico['nombre'] }}, {{ centro_medico['direccion'] }}</p>
         </div>
     </div>
