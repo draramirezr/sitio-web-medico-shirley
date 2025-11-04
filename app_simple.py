@@ -5412,6 +5412,152 @@ def facturacion_historico():
                          fecha_desde=fecha_desde,
                          fecha_hasta=fecha_hasta)
 
+@app.route('/facturacion/editar-factura/<int:factura_id>', methods=['GET', 'POST'])
+@login_required
+def facturacion_editar_factura(factura_id):
+    """Editar factura existente - Solo si tiene menos de 30 días"""
+    from datetime import datetime, timedelta
+    
+    conn = get_db_connection()
+    
+    # Obtener la factura
+    factura = conn.execute('''
+        SELECT f.*, a.nombre_ars, m.nombre as medico_nombre
+        FROM facturas f
+        JOIN ars a ON f.ars_id = a.id
+        JOIN medicos m ON f.medico_id = m.id
+        WHERE f.id = %s AND f.activo = 1
+    ''', (factura_id,)).fetchone()
+    
+    if not factura:
+        flash('Factura no encontrada', 'error')
+        conn.close()
+        return redirect(url_for('facturacion_historico'))
+    
+    # Validar que la factura tenga menos de 30 días
+    fecha_factura = datetime.strptime(str(factura['fecha_factura']), '%Y-%m-%d')
+    fecha_limite = fecha_factura + timedelta(days=30)
+    fecha_actual = datetime.now()
+    
+    if fecha_actual > fecha_limite:
+        dias_transcurridos = (fecha_actual - fecha_factura).days
+        flash(f'⚠️ No se puede editar esta factura. Han transcurrido {dias_transcurridos} días desde su creación. El límite es 30 días.', 'error')
+        conn.close()
+        return redirect(url_for('facturacion_historico'))
+    
+    if request.method == 'POST':
+        try:
+            # Obtener los IDs de pacientes a agregar
+            import json
+            pacientes_agregar_ids = request.form.get('pacientes_agregar_ids', '[]')
+            pacientes_agregar_list = json.loads(pacientes_agregar_ids)
+            
+            # Obtener los IDs de pacientes a eliminar
+            pacientes_eliminar_ids = request.form.get('pacientes_eliminar_ids', '[]')
+            pacientes_eliminar_list = json.loads(pacientes_eliminar_ids)
+            
+            cursor = conn.cursor()
+            
+            # AGREGAR PACIENTES NUEVOS
+            if pacientes_agregar_list:
+                placeholders = ','.join(['%s' for _ in pacientes_agregar_list])
+                # Actualizar pacientes pendientes a facturados
+                cursor.execute(f'''
+                    UPDATE facturas_detalle 
+                    SET factura_id = %s, estado = 'facturado', medico_id = %s
+                    WHERE id IN ({placeholders}) AND estado = 'pendiente'
+                ''', [factura_id, factura['medico_id']] + pacientes_agregar_list)
+            
+            # ELIMINAR PACIENTES DE LA FACTURA (regresar a pendiente)
+            if pacientes_eliminar_list:
+                placeholders = ','.join(['%s' for _ in pacientes_eliminar_list])
+                cursor.execute(f'''
+                    UPDATE facturas_detalle 
+                    SET factura_id = NULL, estado = 'pendiente', medico_id = NULL
+                    WHERE id IN ({placeholders}) AND factura_id = %s
+                ''', pacientes_eliminar_list + [factura_id])
+            
+            # RECALCULAR TOTAL DE LA FACTURA
+            total_result = cursor.execute('''
+                SELECT COALESCE(SUM(monto), 0) as total
+                FROM facturas_detalle
+                WHERE factura_id = %s AND estado = 'facturado'
+            ''', (factura_id,)).fetchone()
+            
+            nuevo_total = total_result['total']
+            
+            # Actualizar el total en la factura
+            cursor.execute('''
+                UPDATE facturas SET total = %s WHERE id = %s
+            ''', (nuevo_total, factura_id))
+            
+            # REGISTRO DE AUDITORÍA
+            observacion = f"Factura editada por {current_user.nombre}. "
+            if pacientes_agregar_list:
+                observacion += f"Agregados: {len(pacientes_agregar_list)} paciente(s). "
+            if pacientes_eliminar_list:
+                observacion += f"Eliminados: {len(pacientes_eliminar_list)} paciente(s). "
+            observacion += f"Nuevo total: RD${nuevo_total:,.2f}"
+            
+            cursor.execute('''
+                UPDATE facturas 
+                SET observaciones = CONCAT(COALESCE(observaciones, ''), '\n[', NOW(), '] ', %s)
+                WHERE id = %s
+            ''', (observacion, factura_id))
+            
+            conn.commit()
+            conn.close()
+            
+            flash(f'✅ Factura #{factura_id} actualizada exitosamente. Nuevo total: RD${nuevo_total:,.2f}', 'success')
+            return redirect(url_for('facturacion_ver_factura', factura_id=factura_id))
+            
+        except Exception as e:
+            conn.rollback()
+            conn.close()
+            flash(f'Error al actualizar factura: {str(e)}', 'error')
+            return redirect(url_for('facturacion_editar_factura', factura_id=factura_id))
+    
+    # GET: Mostrar formulario de edición
+    
+    # Obtener pacientes actuales de la factura
+    pacientes_factura = conn.execute('''
+        SELECT fd.*, 
+               COALESCE(m.nombre, 'Sin médico') as medico_nombre,
+               s.nombre as servicio_nombre
+        FROM facturas_detalle fd
+        LEFT JOIN medicos m ON fd.medico_consulta = m.id
+        LEFT JOIN servicios s ON fd.servicio_id = s.id
+        WHERE fd.factura_id = %s AND fd.estado = 'facturado'
+        ORDER BY fd.fecha_servicio DESC
+    ''', (factura_id,)).fetchall()
+    
+    # Obtener pacientes pendientes del MISMO ARS (para agregar)
+    pacientes_pendientes = conn.execute('''
+        SELECT fd.*, 
+               COALESCE(m.nombre, 'Sin médico') as medico_nombre,
+               s.nombre as servicio_nombre,
+               COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
+        FROM facturas_detalle fd
+        LEFT JOIN medicos m ON fd.medico_consulta = m.id
+        LEFT JOIN servicios s ON fd.servicio_id = s.id
+        LEFT JOIN pacientes p ON fd.paciente_id = p.id
+        WHERE fd.estado = 'pendiente' AND fd.ars_id = %s
+        ORDER BY fd.fecha_servicio DESC
+    ''', (factura['ars_id'],)).fetchall()
+    
+    conn.close()
+    
+    # Calcular días restantes
+    dias_transcurridos = (fecha_actual - fecha_factura).days
+    dias_restantes = 30 - dias_transcurridos
+    
+    return render_template('facturacion/editar_factura.html',
+                         factura=factura,
+                         pacientes_factura=pacientes_factura,
+                         pacientes_pendientes=pacientes_pendientes,
+                         dias_restantes=dias_restantes,
+                         dias_transcurridos=dias_transcurridos)
+
 @app.route('/facturacion/dashboard')
 @login_required
 def facturacion_dashboard():

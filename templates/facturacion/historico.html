@@ -104,6 +104,34 @@
         transform: scale(1.05);
     }
     
+    .btn-editar-factura {
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        border: none;
+        color: white;
+        padding: 0.5rem 1.2rem;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 0.9rem;
+        margin: 0.2rem;
+    }
+    
+    .btn-editar-factura:hover {
+        background: linear-gradient(135deg, #45a049 0%, #357a38 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    }
+    
+    .btn-editar-factura.disabled {
+        background: #cccccc;
+        cursor: not-allowed;
+        opacity: 0.6;
+        pointer-events: none;
+    }
+    
     .badge-ncf {
         background: linear-gradient(135deg, rgba(206, 176, 183, 0.2) 0%, rgba(242, 226, 230, 0.3) 100%);
         color: #B89BA3;
@@ -240,13 +268,13 @@
             <table class="table table-hover mb-0">
                 <thead>
                     <tr>
-                        <th style="width: 10%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">ID</th>
-                        <th style="width: 15%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Fecha</th>
-                        <th style="width: 25%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">NCF</th>
-                        <th style="width: 25%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">ARS</th>
-                        <th style="width: 20%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Médico</th>
-                        <th style="width: 15%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Monto</th>
-                        <th style="width: 15%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Acción</th>
+                        <th style="width: 8%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">ID</th>
+                        <th style="width: 12%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Fecha</th>
+                        <th style="width: 20%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">NCF</th>
+                        <th style="width: 20%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">ARS</th>
+                        <th style="width: 18%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Médico</th>
+                        <th style="width: 12%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Monto</th>
+                        <th style="width: 10%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -263,9 +291,25 @@
                     <td><small>{{ factura['medico_nombre'] }}</small></td>
                     <td class="text-center"><strong style="color: #B89BA3;"> {{ factura['total']|formato_moneda }}</strong></td>
                     <td class="text-center">
+                        <!-- Botón Ver Factura -->
                         <a href="{{ url_for('facturacion_ver_factura', factura_id=factura['id']) }}" 
-                           class="btn-ver-factura">
-                            <i class="fas fa-eye me-1"></i>Ver Factura
+                           class="btn-ver-factura"
+                           title="Ver factura">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        
+                        <!-- Botón Editar (solo si tiene menos de 30 días) -->
+                        {% set fecha_factura = factura['fecha_factura']|string %}
+                        {% set dias_transcurridos = ((none|default(0, true))) %}
+                        {% set dias_desde_creacion = (now.strftime('%Y-%m-%d') | string) %}
+                        
+                        <!-- Calcular si es editable mediante JavaScript inline -->
+                        <a href="{{ url_for('facturacion_editar_factura', factura_id=factura['id']) }}" 
+                           class="btn-editar-factura"
+                           id="btnEditar{{ factura['id'] }}"
+                           data-fecha="{{ factura['fecha_factura'] }}"
+                           title="Editar factura">
+                            <i class="fas fa-edit"></i>
                         </a>
                     </td>
                 </tr>
@@ -301,6 +345,40 @@
     </div>
     {% endif %}
 </div>
+
+<script>
+// Validar si cada factura es editable (menos de 30 días)
+document.addEventListener('DOMContentLoaded', function() {
+    const botonesEditar = document.querySelectorAll('[id^="btnEditar"]');
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    
+    botonesEditar.forEach(btn => {
+        const fechaFacturaStr = btn.getAttribute('data-fecha');
+        const fechaFactura = new Date(fechaFacturaStr + 'T00:00:00');
+        
+        // Calcular diferencia en días
+        const diffTime = hoy - fechaFactura;
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays > 30) {
+            // Deshabilitar botón si pasaron más de 30 días
+            btn.classList.add('disabled');
+            btn.style.pointerEvents = 'none';
+            btn.title = `No editable (${diffDays} días desde creación)`;
+            btn.onclick = function(e) {
+                e.preventDefault();
+                alert(`⚠️ Esta factura no se puede editar porque han transcurrido ${diffDays} días desde su creación.\n\nEl límite para editar es de 30 días.`);
+                return false;
+            };
+        } else {
+            // Mostrar días restantes en el tooltip
+            const diasRestantes = 30 - diffDays;
+            btn.title = `Editar factura (${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} restante${diasRestantes !== 1 ? 's' : ''})`;
+        }
+    });
+});
+</script>
 {% endblock %}
 
 
