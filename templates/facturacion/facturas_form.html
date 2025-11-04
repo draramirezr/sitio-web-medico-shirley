@@ -289,7 +289,7 @@
             </div>
             
             <div class="row">
-                <div class="col-md-6 mb-3">
+                <div class="col-md-4 mb-3">
                     <label class="form-label" for="medico_id">
                         Médico <span class="text-danger">*</span>
                     </label>
@@ -301,7 +301,7 @@
                     </select>
                 </div>
                 
-                <div class="col-md-6 mb-3">
+                <div class="col-md-4 mb-3">
                     <label class="form-label" for="ars_id">
                         ARS <span class="text-danger">*</span>
                     </label>
@@ -311,6 +311,19 @@
                         <option value="{{ ars['id'] }}">{{ ars['nombre_ars'] }}</option>
                         {% endfor %}
                     </select>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <label class="form-label" for="centro_medico_id">
+                        Centro Médico
+                        <i class="fas fa-star" style="color: #FFD700; font-size: 0.7rem;" title="Se preselecciona automáticamente el centro por defecto del médico"></i>
+                    </label>
+                    <select class="form-select" id="centro_medico_id" name="centro_medico_id">
+                        <option value="">Seleccione primero un médico...</option>
+                    </select>
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i> El centro por defecto se selecciona automáticamente
+                    </small>
                 </div>
             </div>
             
@@ -413,6 +426,59 @@
 </div>
 
 <script>
+// Datos de centros médicos por médico (del backend)
+const centrosPorMedico = {
+    {% for centro in centros_medicos %}
+    {{ centro['medico_id'] }}: {{ centro['medico_id'] }} in centrosPorMedico ? centrosPorMedico[{{ centro['medico_id'] }}] : (centrosPorMedico[{{ centro['medico_id'] }}] = []),
+    {% endfor %}
+};
+
+// Llenar el objeto con los datos
+{% for centro in centros_medicos %}
+if (!centrosPorMedico[{{ centro['medico_id'] }}]) {
+    centrosPorMedico[{{ centro['medico_id'] }}] = [];
+}
+centrosPorMedico[{{ centro['medico_id'] }}].push({
+    id: {{ centro['centro_id'] }},
+    nombre: "{{ centro['centro_nombre'] }}",
+    es_defecto: {{ centro['es_defecto'] }}
+});
+{% endfor %}
+
+// Event listener para cambio de médico
+document.getElementById('medico_id').addEventListener('change', function() {
+    const medicoId = parseInt(this.value);
+    const centroSelect = document.getElementById('centro_medico_id');
+    
+    // Limpiar opciones
+    centroSelect.innerHTML = '<option value="">Seleccione un centro médico...</option>';
+    
+    if (medicoId && centrosPorMedico[medicoId]) {
+        const centros = centrosPorMedico[medicoId];
+        let centroDefectoId = null;
+        
+        centros.forEach(centro => {
+            const option = document.createElement('option');
+            option.value = centro.id;
+            option.textContent = centro.nombre;
+            
+            if (centro.es_defecto == 1) {
+                option.textContent += ' ⭐ (Por Defecto)';
+                centroDefectoId = centro.id;
+            }
+            
+            centroSelect.appendChild(option);
+        });
+        
+        // Preseleccionar el centro por defecto
+        if (centroDefectoId) {
+            centroSelect.value = centroDefectoId;
+        }
+    } else {
+        centroSelect.innerHTML = '<option value="">No hay centros médicos asociados</option>';
+    }
+});
+
 let numeroLinea = 0;
 let lineas = [];
 

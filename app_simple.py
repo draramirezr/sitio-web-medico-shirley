@@ -4484,6 +4484,15 @@ def facturacion_facturas_nueva():
         ars_list = conn.execute('SELECT * FROM ars WHERE activo = 1 ORDER BY nombre_ars').fetchall()
         servicios_list = conn.execute('SELECT * FROM tipos_servicios WHERE activo = 1 ORDER BY descripcion').fetchall()
         
+        # Obtener centros médicos de todos los médicos
+        centros_medicos = conn.execute('''
+            SELECT mc.medico_id, mc.centro_id, mc.es_defecto, c.nombre as centro_nombre
+            FROM medico_centro mc
+            JOIN centros_medicos c ON mc.centro_id = c.id
+            WHERE mc.activo = 1 AND c.activo = 1
+            ORDER BY mc.medico_id, mc.es_defecto DESC, c.nombre
+        ''').fetchall()
+        
         # Verificar si hay que descargar el PDF automáticamente
         descargar_pdf = session.pop('descargar_pdf_pacientes', False)
         
@@ -4491,6 +4500,7 @@ def facturacion_facturas_nueva():
                              medicos=medicos, 
                              ars_list=ars_list, 
                              servicios_list=servicios_list,
+                             centros_medicos=centros_medicos,
                              descargar_pdf=descargar_pdf)
     finally:
         conn.close()
