@@ -5581,31 +5581,62 @@ def facturacion_editar_factura(factura_id):
     
     # GET: Mostrar formulario de edición
     
+    # Verificar si la tabla servicios existe
+    try:
+        conn.execute("SELECT 1 FROM servicios LIMIT 1")
+        servicios_existe = True
+    except:
+        servicios_existe = False
+    
     # Obtener pacientes actuales de la factura
-    pacientes_factura = conn.execute('''
-        SELECT fd.*, 
-               COALESCE(m.nombre, 'Sin médico') as medico_nombre,
-               s.nombre as servicio_nombre
-        FROM facturas_detalle fd
-        LEFT JOIN medicos m ON fd.medico_consulta = m.id
-        LEFT JOIN servicios s ON fd.servicio_id = s.id
-        WHERE fd.factura_id = %s AND fd.estado = 'facturado'
-        ORDER BY fd.fecha_servicio DESC
-    ''', (factura_id,)).fetchall()
+    if servicios_existe:
+        pacientes_factura = conn.execute('''
+            SELECT fd.*, 
+                   COALESCE(m.nombre, 'Sin médico') as medico_nombre,
+                   COALESCE(s.nombre, 'N/A') as servicio_nombre
+            FROM facturas_detalle fd
+            LEFT JOIN medicos m ON fd.medico_consulta = m.id
+            LEFT JOIN servicios s ON fd.servicio_id = s.id
+            WHERE fd.factura_id = %s AND fd.estado = 'facturado'
+            ORDER BY fd.fecha_servicio DESC
+        ''', (factura_id,)).fetchall()
+    else:
+        pacientes_factura = conn.execute('''
+            SELECT fd.*, 
+                   COALESCE(m.nombre, 'Sin médico') as medico_nombre,
+                   'N/A' as servicio_nombre
+            FROM facturas_detalle fd
+            LEFT JOIN medicos m ON fd.medico_consulta = m.id
+            WHERE fd.factura_id = %s AND fd.estado = 'facturado'
+            ORDER BY fd.fecha_servicio DESC
+        ''', (factura_id,)).fetchall()
     
     # Obtener pacientes pendientes del MISMO ARS (para agregar)
-    pacientes_pendientes = conn.execute('''
-        SELECT fd.*, 
-               COALESCE(m.nombre, 'Sin médico') as medico_nombre,
-               s.nombre as servicio_nombre,
-               COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
-        FROM facturas_detalle fd
-        LEFT JOIN medicos m ON fd.medico_consulta = m.id
-        LEFT JOIN servicios s ON fd.servicio_id = s.id
-        LEFT JOIN pacientes p ON fd.paciente_id = p.id
-        WHERE fd.estado = 'pendiente' AND fd.ars_id = %s
-        ORDER BY fd.fecha_servicio DESC
-    ''', (factura['ars_id'],)).fetchall()
+    if servicios_existe:
+        pacientes_pendientes = conn.execute('''
+            SELECT fd.*, 
+                   COALESCE(m.nombre, 'Sin médico') as medico_nombre,
+                   COALESCE(s.nombre, 'N/A') as servicio_nombre,
+                   COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
+            FROM facturas_detalle fd
+            LEFT JOIN medicos m ON fd.medico_consulta = m.id
+            LEFT JOIN servicios s ON fd.servicio_id = s.id
+            LEFT JOIN pacientes p ON fd.paciente_id = p.id
+            WHERE fd.estado = 'pendiente' AND fd.ars_id = %s
+            ORDER BY fd.fecha_servicio DESC
+        ''', (factura['ars_id'],)).fetchall()
+    else:
+        pacientes_pendientes = conn.execute('''
+            SELECT fd.*, 
+                   COALESCE(m.nombre, 'Sin médico') as medico_nombre,
+                   'N/A' as servicio_nombre,
+                   COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
+            FROM facturas_detalle fd
+            LEFT JOIN medicos m ON fd.medico_consulta = m.id
+            LEFT JOIN pacientes p ON fd.paciente_id = p.id
+            WHERE fd.estado = 'pendiente' AND fd.ars_id = %s
+            ORDER BY fd.fecha_servicio DESC
+        ''', (factura['ars_id'],)).fetchall()
     
     conn.close()
     
