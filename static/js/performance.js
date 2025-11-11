@@ -109,8 +109,9 @@ function handleScroll() {
   });
 }
 
-// 6. PREFETCH DE PÁGINAS IMPORTANTES
+// 6. PREFETCH DE PÁGINAS IMPORTANTES Y AL HOVER
 function prefetchPages() {
+  // Prefetch de páginas importantes inmediato
   const importantPages = [
     '/services',
     '/appointment',
@@ -122,6 +123,20 @@ function prefetchPages() {
     link.rel = 'prefetch';
     link.href = page;
     document.head.appendChild(link);
+  });
+  
+  // Prefetch al hacer hover sobre enlaces internos (carga instantánea)
+  const internalLinks = document.querySelectorAll('a[href^="/"]');
+  internalLinks.forEach(link => {
+    link.addEventListener('mouseenter', function() {
+      const href = this.getAttribute('href');
+      if (href && !document.querySelector(`link[rel="prefetch"][href="${href}"]`)) {
+        const prefetch = document.createElement('link');
+        prefetch.rel = 'prefetch';
+        prefetch.href = href;
+        document.head.appendChild(prefetch);
+      }
+    }, { once: true, passive: true });
   });
 }
 

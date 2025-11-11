@@ -1,25 +1,23 @@
 ﻿<!DOCTYPE html>
 <html lang="es">
 <head>
-    <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    <!-- Google Tag Manager - Optimizado para Performance -->
+    <script>
+    (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
     j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-TW8956LR');</script>
-    <!-- End Google Tag Manager -->
+    })(window,document,'script','dataLayer','GTM-TW8956LR');
     
     {% if not current_user.is_authenticated %}
-    <!-- Google tag (gtag.js) - Google Ads - Solo páginas públicas -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-11017749694"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'AW-11017749694');
-    </script>
-    <!-- End Google Ads -->
+    // Google Ads configurado mediante GTM (elimina carga duplicada)
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'AW-11017749694');
     {% endif %}
+    </script>
+    <!-- End Google Tag Manager -->
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -141,8 +139,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
     <!-- Preload de recursos críticos -->
+    <link rel="preload" href="{{ url_for('static', filename='css/fontawesome-minimal.min.css') }}?v=1.0" as="style">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" as="script">
+    
+    <!-- Font Awesome Minimal Minificado - Solo iconos usados (~2KB vs 32KB) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome-minimal.min.css') }}?v=1.0">
+    
     <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive-enhanced.min.css') }}?v=3.0">
     
     <!-- CSS local - Carga directa para prevenir FOUC -->
@@ -154,9 +157,6 @@
     
     <!-- Responsive Enhanced CSS (CRÍTICO para móvil) - Versión Minificada -->
     <link href="{{ url_for('static', filename='css/responsive-enhanced.min.css') }}?v=3.0" rel="stylesheet">
-    
-    <!-- Font Awesome - Carga directa para prevenir FOUC -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?v=3" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
     
     <!-- Estilos Críticos Inline - Prevenir FOUC (Flash of Unstyled Content) -->
     <style>
@@ -1008,69 +1008,10 @@
         <i class="fas fa-calendar-plus"></i>
     </a>
 
-    <!-- JavaScript - Carga diferida y async para máxima velocidad -->
+    <!-- JavaScript - Carga optimizada con defer para máxima velocidad -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     
-    <!-- Optimización de rendimiento -->
-    <script>
-        // Prefetch de páginas al hover para carga instantánea
-        document.addEventListener('DOMContentLoaded', function() {
-            const links = document.querySelectorAll('a[href^="/"], a[href^="{{ request.url_root }}"]');
-            links.forEach(link => {
-                link.addEventListener('mouseenter', function() {
-                    const href = this.getAttribute('href');
-                    if (href && !document.querySelector(`link[rel="prefetch"][href="${href}"]`)) {
-                        const prefetch = document.createElement('link');
-                        prefetch.rel = 'prefetch';
-                        prefetch.href = href;
-                        document.head.appendChild(prefetch);
-                    }
-                }, { once: true, passive: true });
-            });
-        });
-    </script>
-    
-    <!-- Schema Markup para SEO (Datos Estructurados) -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Physician",
-      "name": "Dra. Shirley Ramírez Montero",
-      "alternateName": "Dra. Shirley Ramírez",
-      "image": "{{ url_for('static', filename='logos/logo-dra-shirley.png', _external=True) }}",
-      "description": "Ginecóloga y obstetra especializada en salud femenina, embarazo, parto y cuidado prenatal.",
-      "medicalSpecialty": ["Gynecology", "Obstetrics"],
-      "url": "https://drashirleyramirez.com",
-      "telephone": "+1-829-740-5073",
-      "email": "dra.ramirezr@gmail.com",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "Centro Oriental de Ginecología y Obstetricia, Zona Oriental",
-        "addressLocality": "República Dominicana",
-        "addressCountry": "DO"
-      },
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": 18.4975225,
-        "longitude": -69.8651385
-      },
-      "sameAs": [
-        "https://www.instagram.com/dra.ramirezr/",
-        "https://www.linkedin.com/in/shirley-ramirez-montero-a10964168/"
-      ],
-      "priceRange": "$$",
-      "openingHoursSpecification": [
-        {
-          "@type": "OpeningHoursSpecification",
-          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-          "opens": "09:00",
-          "closes": "18:00"
-        }
-      ]
-    }
-    </script>
-    
-    <!-- Script de optimización de rendimiento (defer para no bloquear) -->
+    <!-- Script de optimización de rendimiento -->
     <script src="{{ url_for('static', filename='js/performance.js') }}?v=2" defer></script>
     
     <!-- Script para ocultar loader cuando la página está lista - Prevenir FOUC -->
