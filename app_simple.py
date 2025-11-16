@@ -5778,9 +5778,9 @@ def facturacion_editar_factura(factura_id):
 @app.route('/facturacion/dashboard')
 @login_required
 def facturacion_dashboard():
-    """Dashboard de indicadores de facturación - Solo Administradores"""
-    # Solo administradores pueden ver el dashboard
-    if current_user.perfil != 'Administrador':
+    """Dashboard de indicadores de facturación - Administradores y Registro de Facturas"""
+    # Solo administradores y registro de facturas pueden ver el dashboard
+    if current_user.perfil not in ['Administrador', 'Registro de Facturas']:
         flash('No tienes permisos para acceder a esta sección', 'error')
         return redirect(url_for('facturacion_menu'))
     
@@ -5812,8 +5812,33 @@ def facturacion_dashboard():
     
     # Obtener listas para los filtros
     ars_list = conn.execute('SELECT * FROM ars WHERE activo = 1 ORDER BY nombre_ars').fetchall()
-    medicos_factura_list = conn.execute('SELECT * FROM medicos WHERE activo = 1 AND factura = 1 ORDER BY nombre').fetchall()  # Solo habilitados para facturar
-    medicos_consulta_list = conn.execute('SELECT * FROM medicos WHERE activo = 1 ORDER BY nombre').fetchall()  # Todos los médicos
+    medicos_factura_list = conn.execute('SELECT * FROM medicos WHERE activo = 1 AND factura = 1 ORDER BY nombre').fetchall()
+    medicos_consulta_list = conn.execute('SELECT * FROM medicos WHERE activo = 1 ORDER BY nombre').fetchall()
+    
+    # Variables de control para el template
+    es_administrador = current_user.perfil == 'Administrador'
+    medico_usuario_id = None
+    
+    # Si es perfil "Registro de Facturas", filtrar por médico con mismo email
+    if current_user.perfil == 'Registro de Facturas':
+        # Buscar médico con el mismo email del usuario
+        medico_usuario = conn.execute(
+            'SELECT * FROM medicos WHERE email = ? AND activo = 1',
+            (current_user.email,)
+        ).fetchone()
+        
+        if medico_usuario:
+            medico_usuario_id = medico_usuario['id']
+            # Filtrar lista de médicos consulta para solo mostrar el suyo
+            medicos_consulta_list = [medico_usuario]
+            # Forzar el filtro automáticamente si no hay selección
+            if not medico_consulta_ids:
+                medico_consulta_ids = [medico_usuario_id]
+        else:
+            # Si no encuentra su médico, mostrar mensaje y redirigir
+            flash('No se encontró un médico asociado a tu cuenta. Contacta al administrador.', 'error')
+            conn.close()
+            return redirect(url_for('facturacion_menu'))
     
     # ==================== INDICADORES GENERALES ====================
     # Total de facturas generadas (en el rango y filtros)
@@ -6110,7 +6135,9 @@ def facturacion_dashboard():
                          medicos_consulta_list=medicos_consulta_list,
                          ars_ids_seleccionados=ars_ids,
                          medico_factura_ids_seleccionados=medico_factura_ids,
-                         medico_consulta_ids_seleccionados=medico_consulta_ids)
+                         medico_consulta_ids_seleccionados=medico_consulta_ids,
+                         es_administrador=es_administrador,
+                         medico_usuario_id=medico_usuario_id)
 
 @app.route('/facturacion/ver-factura/<int:factura_id>')
 @login_required

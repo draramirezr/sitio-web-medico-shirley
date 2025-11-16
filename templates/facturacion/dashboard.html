@@ -537,6 +537,7 @@
                     <i class="fas fa-info-circle"></i> Usa Ctrl+Click para seleccionar múltiples
                 </small>
             </div>
+            {% if es_administrador %}
             <div class="form-group">
                 <label for="medico_factura_id">
                     <input type="checkbox" id="medico_factura_check" onchange="toggleFilter('medico_factura_id', this.checked)" {% if medico_factura_ids_seleccionados %}checked{% endif %}>
@@ -553,6 +554,7 @@
                     <i class="fas fa-info-circle"></i> Usa Ctrl+Click para seleccionar múltiples
                 </small>
             </div>
+            {% endif %}
             <div class="form-group">
                 <label for="medico_consulta_id">
                     <input type="checkbox" id="medico_consulta_check" onchange="toggleFilter('medico_consulta_id', this.checked)" {% if medico_consulta_ids_seleccionados %}checked{% endif %}>
