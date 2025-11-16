@@ -160,6 +160,24 @@
         font-weight: 500;
     }
     
+    /* Hacer que select múltiples se vean como combobox normales */
+    .form-group select[multiple] {
+        height: 45px;
+        overflow: hidden;
+        padding-right: 2.5rem;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23CEB0B7' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        cursor: pointer;
+    }
+    
+    .form-group select[multiple]:focus,
+    .form-group select[multiple]:active {
+        height: auto;
+        min-height: 200px;
+        overflow-y: auto;
+    }
+    
     .form-group input:focus,
     .form-group select:focus {
         outline: none;
@@ -526,16 +544,13 @@
                     <input type="checkbox" id="ars_check" onchange="toggleFilter('ars_id', this.checked)" {% if ars_ids_seleccionados %}checked{% endif %}>
                     <span>ARS:</span>
                 </label>
-                <select id="ars_id" name="ars_id" class="form-select" multiple size="5" {% if not ars_ids_seleccionados %}disabled{% endif %}>
+                <select id="ars_id" name="ars_id" class="form-select" multiple {% if not ars_ids_seleccionados %}disabled{% endif %}>
                     {% for ars in ars_list %}
                         <option value="{{ ars.id }}" {% if ars.id in ars_ids_seleccionados %}selected{% endif %}>
                             {{ ars.nombre_ars }}
                         </option>
                     {% endfor %}
                 </select>
-                <small class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.3rem;">
-                    <i class="fas fa-info-circle"></i> Usa Ctrl+Click para seleccionar múltiples
-                </small>
             </div>
             {% if es_administrador %}
             <div class="form-group">
@@ -543,16 +558,13 @@
                     <input type="checkbox" id="medico_factura_check" onchange="toggleFilter('medico_factura_id', this.checked)" {% if medico_factura_ids_seleccionados %}checked{% endif %}>
                     <span>Médico Factura:</span>
                 </label>
-                <select id="medico_factura_id" name="medico_factura_id" class="form-select" multiple size="5" {% if not medico_factura_ids_seleccionados %}disabled{% endif %}>
+                <select id="medico_factura_id" name="medico_factura_id" class="form-select" multiple {% if not medico_factura_ids_seleccionados %}disabled{% endif %}>
                     {% for medico in medicos_factura_list %}
                         <option value="{{ medico.id }}" {% if medico.id in medico_factura_ids_seleccionados %}selected{% endif %}>
                             {{ medico.nombre }}
                         </option>
                     {% endfor %}
                 </select>
-                <small class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.3rem;">
-                    <i class="fas fa-info-circle"></i> Usa Ctrl+Click para seleccionar múltiples
-                </small>
             </div>
             {% endif %}
             <div class="form-group">
@@ -560,16 +572,13 @@
                     <input type="checkbox" id="medico_consulta_check" onchange="toggleFilter('medico_consulta_id', this.checked)" {% if medico_consulta_ids_seleccionados %}checked{% endif %}>
                     <span>Médico Paciente:</span>
                 </label>
-                <select id="medico_consulta_id" name="medico_consulta_id" class="form-select" multiple size="5" {% if not medico_consulta_ids_seleccionados %}disabled{% endif %}>
+                <select id="medico_consulta_id" name="medico_consulta_id" class="form-select" multiple {% if not medico_consulta_ids_seleccionados %}disabled{% endif %}>
                     {% for medico in medicos_consulta_list %}
                         <option value="{{ medico.id }}" {% if medico.id in medico_consulta_ids_seleccionados %}selected{% endif %}>
                             {{ medico.nombre }}
                         </option>
                     {% endfor %}
                 </select>
-                <small class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.3rem;">
-                    <i class="fas fa-info-circle"></i> Usa Ctrl+Click para seleccionar múltiples
-                </small>
             </div>
             <button type="submit" class="btn-filter">
                 <i class="fas fa-search me-2"></i>Filtrar
