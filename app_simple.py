@@ -5778,9 +5778,9 @@ def facturacion_editar_factura(factura_id):
 @app.route('/facturacion/dashboard')
 @login_required
 def facturacion_dashboard():
-    """Dashboard de indicadores de facturación - Administradores y Registro de Facturas"""
-    # Solo administradores y registro de facturas pueden ver el dashboard
-    if current_user.perfil not in ['Administrador', 'Registro de Facturas']:
+    """Dashboard de indicadores de facturación - Administradores, Registro de Facturas y Nivel 2"""
+    # Perfiles permitidos
+    if current_user.perfil not in ['Administrador', 'Registro de Facturas', 'Nivel 2']:
         flash('No tienes permisos para acceder a esta sección', 'error')
         return redirect(url_for('facturacion_menu'))
     
@@ -5819,8 +5819,8 @@ def facturacion_dashboard():
     es_administrador = current_user.perfil == 'Administrador'
     medico_usuario_id = None
     
-    # Si es perfil "Registro de Facturas", filtrar por médico con mismo email
-    if current_user.perfil == 'Registro de Facturas':
+    # Si es perfil "Registro de Facturas" o "Nivel 2", filtrar por médico con mismo email
+    if current_user.perfil in ['Registro de Facturas', 'Nivel 2']:
         # Buscar médico con el mismo email del usuario
         medico_usuario = conn.execute(
             'SELECT * FROM medicos WHERE email = %s AND activo = 1',

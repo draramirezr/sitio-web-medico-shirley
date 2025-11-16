@@ -244,8 +244,8 @@
     </div>
     {% endif %}
 
-    <!-- Dashboard SOLO para Registro de Facturas (fuera de maestras) -->
-    {% if current_user.perfil == 'Registro de Facturas' %}
+    <!-- Dashboard para Registro de Facturas y Nivel 2 (fuera de maestras) -->
+    {% if current_user.perfil in ['Registro de Facturas', 'Nivel 2'] %}
     <div class="row g-4 mb-4">
         <div class="col-lg-3 col-md-6 animate-card">
             <a href="{{ url_for('facturacion_dashboard') }}" style="text-decoration: none;">
