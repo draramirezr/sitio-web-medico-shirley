@@ -135,21 +135,7 @@
         letter-spacing: 0.5px;
     }
     
-    .form-group label input[type="checkbox"] {
-        width: 18px;
-        height: 18px;
-        cursor: pointer;
-        accent-color: var(--primary-color);
-    }
-    
-    .form-group select:disabled {
-        background-color: #f5f5f5;
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-    
-    .form-group input,
-    .form-group select {
+    .form-group input[type="date"] {
         width: 100%;
         padding: 0.85rem 1rem;
         border: 2px solid rgba(206, 176, 183, 0.2);
@@ -160,30 +146,146 @@
         font-weight: 500;
     }
     
-    /* Hacer que select múltiples se vean como combobox normales */
-    .form-group select[multiple] {
-        height: 45px;
-        overflow: hidden;
-        padding-right: 2.5rem;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23CEB0B7' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 1rem center;
-        cursor: pointer;
-    }
-    
-    .form-group select[multiple]:focus,
-    .form-group select[multiple]:active {
-        height: auto;
-        min-height: 200px;
-        overflow-y: auto;
-    }
-    
-    .form-group input:focus,
-    .form-group select:focus {
+    .form-group input[type="date"]:focus {
         outline: none;
         border-color: var(--primary-color);
         box-shadow: 0 0 0 4px rgba(206, 176, 183, 0.1);
         transform: translateY(-2px);
+    }
+    
+    /* Estilo para el dropdown personalizado */
+    .custom-multiselect {
+        position: relative;
+        width: 100%;
+    }
+    
+    .multiselect-button {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        border: 2px solid rgba(206, 176, 183, 0.2);
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: white;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #2c3e50;
+        text-align: left;
+    }
+    
+    .multiselect-button:hover {
+        border-color: var(--primary-color);
+    }
+    
+    .multiselect-button.open {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(206, 176, 183, 0.1);
+    }
+    
+    .multiselect-arrow {
+        font-size: 0.8rem;
+        color: var(--primary-color);
+        transition: transform 0.3s ease;
+    }
+    
+    .multiselect-button.open .multiselect-arrow {
+        transform: rotate(180deg);
+    }
+    
+    .multiselect-dropdown {
+        position: absolute;
+        top: calc(100% + 5px);
+        left: 0;
+        right: 0;
+        background: white;
+        border: 2px solid var(--primary-color);
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+    }
+    
+    .multiselect-dropdown.show {
+        display: block;
+        animation: slideDown 0.3s ease;
+    }
+    
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .multiselect-option {
+        padding: 0.8rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        cursor: pointer;
+        transition: background 0.2s ease;
+        border-bottom: 1px solid rgba(206, 176, 183, 0.1);
+    }
+    
+    .multiselect-option:last-child {
+        border-bottom: none;
+    }
+    
+    .multiselect-option:hover {
+        background: rgba(206, 176, 183, 0.05);
+    }
+    
+    .multiselect-option input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: var(--primary-color);
+    }
+    
+    .multiselect-option label {
+        cursor: pointer;
+        margin: 0;
+        flex: 1;
+        font-weight: 500;
+        color: #2c3e50;
+    }
+    
+    .multiselect-header {
+        padding: 0.8rem 1rem;
+        background: rgba(206, 176, 183, 0.05);
+        border-bottom: 2px solid rgba(206, 176, 183, 0.2);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    
+    .select-all-btn {
+        background: transparent;
+        border: 1px solid var(--primary-color);
+        color: var(--primary-color);
+        padding: 0.3rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .select-all-btn:hover {
+        background: var(--primary-color);
+        color: white;
     }
     
     .btn-filter {
@@ -530,7 +632,7 @@
     <!-- Filtros de Fecha -->
     <div class="filter-card animate-card" style="animation-delay: 0.1s">
         <h3><i class="fas fa-filter me-2"></i>Filtrar por Período y Categorías</h3>
-        <form method="GET" action="{{ url_for('facturacion_dashboard') }}" class="filter-form">
+        <form method="GET" action="{{ url_for('facturacion_dashboard') }}" class="filter-form" id="filterForm">
             <div class="form-group">
                 <label for="fecha_desde">Fecha Desde:</label>
                 <input type="date" id="fecha_desde" name="fecha_desde" value="{{ fecha_desde }}" required>
@@ -539,47 +641,90 @@
                 <label for="fecha_hasta">Fecha Hasta:</label>
                 <input type="date" id="fecha_hasta" name="fecha_hasta" value="{{ fecha_hasta }}" required>
             </div>
+            
+            <!-- Filtro ARS -->
             <div class="form-group">
-                <label for="ars_id">
-                    <input type="checkbox" id="ars_check" onchange="toggleFilter('ars_id', this.checked)" {% if ars_ids_seleccionados %}checked{% endif %}>
-                    <span>ARS:</span>
-                </label>
-                <select id="ars_id" name="ars_id" class="form-select" multiple {% if not ars_ids_seleccionados %}disabled{% endif %}>
-                    {% for ars in ars_list %}
-                        <option value="{{ ars.id }}" {% if ars.id in ars_ids_seleccionados %}selected{% endif %}>
-                            {{ ars.nombre_ars }}
-                        </option>
-                    {% endfor %}
-                </select>
+                <label>ARS:</label>
+                <div class="custom-multiselect">
+                    <div class="multiselect-button" onclick="toggleDropdown('ars')">
+                        <span id="ars-selected-text">Todos seleccionados ({{ ars_list|length }})</span>
+                        <i class="fas fa-chevron-down multiselect-arrow"></i>
+                    </div>
+                    <div class="multiselect-dropdown" id="ars-dropdown">
+                        <div class="multiselect-header">
+                            <span style="font-weight: 600; color: #2c3e50;">Seleccionar ARS</span>
+                            <button type="button" class="select-all-btn" onclick="toggleAllOptions('ars')">Todos</button>
+                        </div>
+                        {% for ars in ars_list %}
+                        <div class="multiselect-option" onclick="toggleOption(event, 'ars')">
+                            <input type="checkbox" 
+                                   name="ars_id" 
+                                   value="{{ ars.id }}" 
+                                   id="ars-{{ ars.id }}"
+                                   {% if not ars_ids_seleccionados or ars.id in ars_ids_seleccionados %}checked{% endif %}>
+                            <label for="ars-{{ ars.id }}">{{ ars.nombre_ars }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
+            
+            <!-- Filtro Médico Factura (solo para administradores) -->
             {% if es_administrador %}
             <div class="form-group">
-                <label for="medico_factura_id">
-                    <input type="checkbox" id="medico_factura_check" onchange="toggleFilter('medico_factura_id', this.checked)" {% if medico_factura_ids_seleccionados %}checked{% endif %}>
-                    <span>Médico Factura:</span>
-                </label>
-                <select id="medico_factura_id" name="medico_factura_id" class="form-select" multiple {% if not medico_factura_ids_seleccionados %}disabled{% endif %}>
-                    {% for medico in medicos_factura_list %}
-                        <option value="{{ medico.id }}" {% if medico.id in medico_factura_ids_seleccionados %}selected{% endif %}>
-                            {{ medico.nombre }}
-                        </option>
-                    {% endfor %}
-                </select>
+                <label>Médico Factura:</label>
+                <div class="custom-multiselect">
+                    <div class="multiselect-button" onclick="toggleDropdown('medico_factura')">
+                        <span id="medico_factura-selected-text">Todos seleccionados ({{ medicos_factura_list|length }})</span>
+                        <i class="fas fa-chevron-down multiselect-arrow"></i>
+                    </div>
+                    <div class="multiselect-dropdown" id="medico_factura-dropdown">
+                        <div class="multiselect-header">
+                            <span style="font-weight: 600; color: #2c3e50;">Seleccionar Médico</span>
+                            <button type="button" class="select-all-btn" onclick="toggleAllOptions('medico_factura')">Todos</button>
+                        </div>
+                        {% for medico in medicos_factura_list %}
+                        <div class="multiselect-option" onclick="toggleOption(event, 'medico_factura')">
+                            <input type="checkbox" 
+                                   name="medico_factura_id" 
+                                   value="{{ medico.id }}" 
+                                   id="medico_factura-{{ medico.id }}"
+                                   {% if not medico_factura_ids_seleccionados or medico.id in medico_factura_ids_seleccionados %}checked{% endif %}>
+                            <label for="medico_factura-{{ medico.id }}">{{ medico.nombre }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
             {% endif %}
+            
+            <!-- Filtro Médico Paciente -->
             <div class="form-group">
-                <label for="medico_consulta_id">
-                    <input type="checkbox" id="medico_consulta_check" onchange="toggleFilter('medico_consulta_id', this.checked)" {% if medico_consulta_ids_seleccionados %}checked{% endif %}>
-                    <span>Médico Paciente:</span>
-                </label>
-                <select id="medico_consulta_id" name="medico_consulta_id" class="form-select" multiple {% if not medico_consulta_ids_seleccionados %}disabled{% endif %}>
-                    {% for medico in medicos_consulta_list %}
-                        <option value="{{ medico.id }}" {% if medico.id in medico_consulta_ids_seleccionados %}selected{% endif %}>
-                            {{ medico.nombre }}
-                        </option>
-                    {% endfor %}
-                </select>
+                <label>Médico Paciente:</label>
+                <div class="custom-multiselect">
+                    <div class="multiselect-button" onclick="toggleDropdown('medico_consulta')">
+                        <span id="medico_consulta-selected-text">Todos seleccionados ({{ medicos_consulta_list|length }})</span>
+                        <i class="fas fa-chevron-down multiselect-arrow"></i>
+                    </div>
+                    <div class="multiselect-dropdown" id="medico_consulta-dropdown">
+                        <div class="multiselect-header">
+                            <span style="font-weight: 600; color: #2c3e50;">Seleccionar Médico</span>
+                            <button type="button" class="select-all-btn" onclick="toggleAllOptions('medico_consulta')">Todos</button>
+                        </div>
+                        {% for medico in medicos_consulta_list %}
+                        <div class="multiselect-option" onclick="toggleOption(event, 'medico_consulta')">
+                            <input type="checkbox" 
+                                   name="medico_consulta_id" 
+                                   value="{{ medico.id }}" 
+                                   id="medico_consulta-{{ medico.id }}"
+                                   {% if not medico_consulta_ids_seleccionados or medico.id in medico_consulta_ids_seleccionados %}checked{% endif %}>
+                            <label for="medico_consulta-{{ medico.id }}">{{ medico.nombre }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
+            
             <button type="submit" class="btn-filter">
                 <i class="fas fa-search me-2"></i>Filtrar
             </button>
@@ -672,18 +817,100 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js" defer></script>
 
 <script>
-    // Función para activar/desactivar filtros
-    function toggleFilter(selectId, isEnabled) {
-        const selectElement = document.getElementById(selectId);
-        selectElement.disabled = !isEnabled;
+    // ==================== FUNCIONES PARA DROPDOWNS MULTISELECT ====================
+    
+    // Cerrar dropdown al hacer clic fuera
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.custom-multiselect')) {
+            document.querySelectorAll('.multiselect-dropdown').forEach(dropdown => {
+                dropdown.classList.remove('show');
+                const button = dropdown.previousElementSibling;
+                button.classList.remove('open');
+            });
+        }
+    });
+    
+    // Abrir/cerrar dropdown
+    function toggleDropdown(filterName) {
+        const dropdown = document.getElementById(filterName + '-dropdown');
+        const button = dropdown.previousElementSibling;
+        const isOpen = dropdown.classList.contains('show');
         
-        // Si se desactiva, deseleccionar todas las opciones
-        if (!isEnabled) {
-            for (let i = 0; i < selectElement.options.length; i++) {
-                selectElement.options[i].selected = false;
-            }
+        // Cerrar todos los demás dropdowns
+        document.querySelectorAll('.multiselect-dropdown').forEach(d => {
+            d.classList.remove('show');
+            d.previousElementSibling.classList.remove('open');
+        });
+        
+        // Abrir/cerrar el actual
+        if (!isOpen) {
+            dropdown.classList.add('show');
+            button.classList.add('open');
         }
     }
+    
+    // Marcar/desmarcar opción
+    function toggleOption(event, filterName) {
+        // Si el clic fue directamente en el checkbox, el navegador ya lo manejó
+        if (event.target.type === 'checkbox') {
+            updateSelectedText(filterName);
+            return;
+        }
+        
+        // Si el clic fue en el label o el div contenedor
+        const option = event.currentTarget;
+        const checkbox = option.querySelector('input[type="checkbox"]');
+        checkbox.checked = !checkbox.checked;
+        
+        updateSelectedText(filterName);
+    }
+    
+    // Seleccionar/deseleccionar todos
+    function toggleAllOptions(filterName) {
+        const dropdown = document.getElementById(filterName + '-dropdown');
+        const checkboxes = dropdown.querySelectorAll('input[type="checkbox"]');
+        
+        // Verificar si todos están marcados
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        
+        // Si todos están marcados, desmarcar todos; si no, marcar todos
+        checkboxes.forEach(cb => {
+            cb.checked = !allChecked;
+        });
+        
+        updateSelectedText(filterName);
+    }
+    
+    // Actualizar texto de selección
+    function updateSelectedText(filterName) {
+        const dropdown = document.getElementById(filterName + '-dropdown');
+        const checkboxes = dropdown.querySelectorAll('input[type="checkbox"]');
+        const selectedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+        const totalCount = checkboxes.length;
+        const textElement = document.getElementById(filterName + '-selected-text');
+        
+        if (selectedCount === 0) {
+            textElement.textContent = 'Ninguno seleccionado';
+            textElement.style.color = '#dc3545';
+        } else if (selectedCount === totalCount) {
+            textElement.textContent = `Todos seleccionados (${totalCount})`;
+            textElement.style.color = '#2c3e50';
+        } else {
+            textElement.textContent = `${selectedCount} de ${totalCount} seleccionados`;
+            textElement.style.color = '#2c3e50';
+        }
+    }
+    
+    // Inicializar textos al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+        updateSelectedText('ars');
+        {% if es_administrador %}
+        updateSelectedText('medico_factura');
+        {% endif %}
+        updateSelectedText('medico_consulta');
+    });
+    
+    // ==================== FUNCIONES PARA GRÁFICOS ====================
     
     // Esperar a que se cargue Chart.js antes de ejecutar
     document.addEventListener('DOMContentLoaded', function() {
