@@ -5823,7 +5823,7 @@ def facturacion_dashboard():
     if current_user.perfil == 'Registro de Facturas':
         # Buscar médico con el mismo email del usuario
         medico_usuario = conn.execute(
-            'SELECT * FROM medicos WHERE email = ? AND activo = 1',
+            'SELECT * FROM medicos WHERE email = %s AND activo = 1',
             (current_user.email,)
         ).fetchone()
         
