@@ -229,8 +229,8 @@
             </a>
         </div>
 
-        <!-- Dashboard (Solo Administradores) -->
-        {% if current_user.perfil == 'Administrador' %}
+        <!-- Dashboard (Administradores y Registro de Facturas) -->
+        {% if current_user.perfil == 'Administrador' or current_user.perfil == 'Registro de Facturas' %}
         <div class="col-lg-3 col-md-6 animate-card" style="animation-delay: 0.8s">
             <a href="{{ url_for('facturacion_dashboard') }}" style="text-decoration: none;">
                 <div class="maestra-card">
