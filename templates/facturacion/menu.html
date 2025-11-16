@@ -228,9 +228,12 @@
                 </div>
             </a>
         </div>
+    </div>
+    {% endif %}
 
-        <!-- Dashboard (Administradores y Registro de Facturas) -->
-        {% if current_user.perfil == 'Administrador' or current_user.perfil == 'Registro de Facturas' %}
+    <!-- Dashboard (Administradores y Registro de Facturas) -->
+    {% if current_user.perfil == 'Administrador' or current_user.perfil == 'Registro de Facturas' %}
+    <div class="row g-4 mb-4">
         <div class="col-lg-3 col-md-6 animate-card" style="animation-delay: 0.8s">
             <a href="{{ url_for('facturacion_dashboard') }}" style="text-decoration: none;">
                 <div class="maestra-card">
@@ -240,7 +243,6 @@
                 </div>
             </a>
         </div>
-        {% endif %}
     </div>
     {% endif %}
 
