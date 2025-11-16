@@ -652,22 +652,19 @@
     const montos = facturacionPorMes.map(item => item.total_monto);
     
     new Chart(ctxMes, {
-        type: 'line',
+        type: 'bar',
         data: {
             labels: meses,
             datasets: [{
                 label: 'Monto Facturado ($)',
                 data: montos,
+                backgroundColor: 'rgba(206, 176, 183, 0.8)',
                 borderColor: '#CEB0B7',
-                backgroundColor: 'rgba(206, 176, 183, 0.1)',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: '#CEB0B7',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointRadius: 6,
-                pointHoverRadius: 8
+                borderWidth: 2,
+                borderRadius: 8,
+                hoverBackgroundColor: 'rgba(206, 176, 183, 1)',
+                hoverBorderColor: '#B89BA3',
+                hoverBorderWidth: 3
             }]
         },
         options: {
@@ -749,18 +746,23 @@
         return fecha.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
     });
     
-    // Colores para cada ARS
+    // Colores distintivos para cada ARS
     const coloresARS = [
-        '#CEB0B7',
-        '#B89BA3',
-        '#A88A92',
-        '#8B7178',
-        '#6D565E',
-        '#5A464B',
-        '#ACACAD',
-        '#9A9A9B',
-        '#888889',
-        '#767677'
+        '#CEB0B7', // Rosa principal
+        '#3498db', // Azul brillante
+        '#e74c3c', // Rojo
+        '#2ecc71', // Verde
+        '#f39c12', // Naranja
+        '#9b59b6', // Morado
+        '#1abc9c', // Turquesa
+        '#e67e22', // Naranja oscuro
+        '#34495e', // Gris azulado
+        '#16a085', // Verde azulado
+        '#d35400', // Naranja quemado
+        '#8e44ad', // Púrpura
+        '#27ae60', // Verde oscuro
+        '#2980b9', // Azul oscuro
+        '#c0392b'  // Rojo oscuro
     ];
     
     // Crear datasets (una línea por cada ARS)
