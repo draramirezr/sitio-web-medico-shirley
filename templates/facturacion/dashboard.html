@@ -93,6 +93,8 @@
             0 0 0 1px rgba(255, 255, 255, 0.5) inset;
         margin-bottom: 2rem;
         border: 1px solid rgba(206, 176, 183, 0.1);
+        position: relative;
+        z-index: 100;
     }
     
     .filter-card h3 {
@@ -323,6 +325,7 @@
         border-left: 5px solid;
         position: relative;
         overflow: hidden;
+        z-index: 1;
     }
     
     .stat-card::after {
@@ -435,6 +438,8 @@
         margin-bottom: 2rem;
         transition: all 0.3s ease;
         border: 1px solid rgba(206, 176, 183, 0.1);
+        position: relative;
+        z-index: 1;
     }
     
     .chart-card:hover {
