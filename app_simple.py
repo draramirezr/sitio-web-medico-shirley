@@ -5794,15 +5794,15 @@ def facturacion_dashboard():
     fecha_desde = request.args.get('fecha_desde', default=fecha_hace_12_meses.strftime('%Y-%m-%d'))
     fecha_hasta = request.args.get('fecha_hasta', default=fecha_actual.strftime('%Y-%m-%d'))
     
-    # Obtener filtros de ARS y Médico (pueden ser múltiples)
-    ars_ids = request.args.getlist('ars_id', type=int)  # Lista de ARS
-    medico_factura_ids = request.args.getlist('medico_factura_id', type=int)  # Médicos que facturan
-    medico_consulta_ids = request.args.getlist('medico_consulta_id', type=int)  # Médicos que atienden
+    # Obtener filtros de ARS y Médico (pueden ser múltiples o individuales)
+    ars_id = request.args.get('ars_id', type=int)
+    medico_factura_id = request.args.get('medico_factura_id', type=int)
+    medico_consulta_id = request.args.get('medico_consulta_id', type=int)
     
-    # Filtrar valores vacíos o None
-    ars_ids = [id for id in ars_ids if id]
-    medico_factura_ids = [id for id in medico_factura_ids if id]
-    medico_consulta_ids = [id for id in medico_consulta_ids if id]
+    # Convertir a listas para compatibilidad con código existente
+    ars_ids = [ars_id] if ars_id else []
+    medico_factura_ids = [medico_factura_id] if medico_factura_id else []
+    medico_consulta_ids = [medico_consulta_id] if medico_consulta_id else []
     
     # Si medico_consulta_ids está presente, ignorar medico_factura_ids (mutuamente excluyentes)
     if medico_consulta_ids:

@@ -120,16 +120,32 @@
     .form-group {
         flex: 1;
         min-width: 200px;
+        position: relative;
     }
     
     .form-group label {
-        display: block;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
         color: var(--text-muted);
         font-weight: 600;
         margin-bottom: 0.6rem;
         font-size: 0.9rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+    }
+    
+    .form-group label input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: var(--primary-color);
+    }
+    
+    .form-group select:disabled {
+        background-color: #f5f5f5;
+        opacity: 0.6;
+        cursor: not-allowed;
     }
     
     .form-group input,
@@ -142,22 +158,6 @@
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         background: white;
         font-weight: 500;
-    }
-    
-    /* Estilo para select múltiples - dropdown compacto */
-    .form-group select[multiple] {
-        height: 45px;
-        overflow: hidden;
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23CEB0B7' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 1rem center;
-        cursor: pointer;
-    }
-    
-    .form-group select[multiple]:focus {
-        height: auto;
-        min-height: 150px;
     }
     
     .form-group input:focus,
@@ -522,8 +522,12 @@
                 <input type="date" id="fecha_hasta" name="fecha_hasta" value="{{ fecha_hasta }}" required>
             </div>
             <div class="form-group">
-                <label for="ars_id">ARS:</label>
-                <select id="ars_id" name="ars_id" class="form-select" multiple>
+                <label for="ars_id">
+                    <input type="checkbox" id="ars_check" onchange="toggleFilter('ars_id', this.checked)" {% if ars_ids_seleccionados %}checked{% endif %}>
+                    <span>ARS:</span>
+                </label>
+                <select id="ars_id" name="ars_id" class="form-select" {% if not ars_ids_seleccionados %}disabled{% endif %}>
+                    <option value="">-- Todas las ARS --</option>
                     {% for ars in ars_list %}
                         <option value="{{ ars.id }}" {% if ars.id in ars_ids_seleccionados %}selected{% endif %}>
                             {{ ars.nombre_ars }}
@@ -532,8 +536,12 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="medico_factura_id">Médico Factura:</label>
-                <select id="medico_factura_id" name="medico_factura_id" class="form-select" multiple>
+                <label for="medico_factura_id">
+                    <input type="checkbox" id="medico_factura_check" onchange="toggleFilter('medico_factura_id', this.checked)" {% if medico_factura_ids_seleccionados %}checked{% endif %}>
+                    <span>Médico Factura:</span>
+                </label>
+                <select id="medico_factura_id" name="medico_factura_id" class="form-select" {% if not medico_factura_ids_seleccionados %}disabled{% endif %}>
+                    <option value="">-- Todos los Médicos --</option>
                     {% for medico in medicos_factura_list %}
                         <option value="{{ medico.id }}" {% if medico.id in medico_factura_ids_seleccionados %}selected{% endif %}>
                             {{ medico.nombre }}
@@ -542,8 +550,12 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="medico_consulta_id">Médico Paciente:</label>
-                <select id="medico_consulta_id" name="medico_consulta_id" class="form-select" multiple>
+                <label for="medico_consulta_id">
+                    <input type="checkbox" id="medico_consulta_check" onchange="toggleFilter('medico_consulta_id', this.checked)" {% if medico_consulta_ids_seleccionados %}checked{% endif %}>
+                    <span>Médico Paciente:</span>
+                </label>
+                <select id="medico_consulta_id" name="medico_consulta_id" class="form-select" {% if not medico_consulta_ids_seleccionados %}disabled{% endif %}>
+                    <option value="">-- Todos los Médicos --</option>
                     {% for medico in medicos_consulta_list %}
                         <option value="{{ medico.id }}" {% if medico.id in medico_consulta_ids_seleccionados %}selected{% endif %}>
                             {{ medico.nombre }}
@@ -643,6 +655,17 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js" defer></script>
 
 <script>
+    // Función para activar/desactivar filtros
+    function toggleFilter(selectId, isEnabled) {
+        const selectElement = document.getElementById(selectId);
+        selectElement.disabled = !isEnabled;
+        
+        // Si se desactiva, resetear a "Todos"
+        if (!isEnabled) {
+            selectElement.value = '';
+        }
+    }
+    
     // Esperar a que se cargue Chart.js antes de ejecutar
     document.addEventListener('DOMContentLoaded', function() {
         if (typeof Chart === 'undefined') {
