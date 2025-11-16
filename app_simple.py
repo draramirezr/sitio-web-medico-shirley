@@ -5784,20 +5784,29 @@ def facturacion_dashboard():
         flash('No tienes permisos para acceder a esta sección', 'error')
         return redirect(url_for('facturacion_menu'))
     
-    from datetime import datetime
+    from datetime import datetime, timedelta
     
-    # Obtener filtros de fecha (por defecto: año actual)
-    fecha_desde = request.args.get('fecha_desde', default=f'{datetime.now().year}-01-01')
-    fecha_hasta = request.args.get('fecha_hasta', default=f'{datetime.now().year}-12-31')
+    # Calcular fechas por defecto: últimos 12 meses
+    fecha_actual = datetime.now()
+    fecha_hace_12_meses = fecha_actual - timedelta(days=365)
     
-    # Obtener filtros de ARS y Médico (2 tipos - mutuamente excluyentes)
-    ars_id = request.args.get('ars_id', type=int)
-    medico_factura_id = request.args.get('medico_factura_id', type=int)  # Médico que factura
-    medico_consulta_id = request.args.get('medico_consulta_id', type=int)  # Médico que atiende
+    # Obtener filtros de fecha (por defecto: últimos 12 meses)
+    fecha_desde = request.args.get('fecha_desde', default=fecha_hace_12_meses.strftime('%Y-%m-%d'))
+    fecha_hasta = request.args.get('fecha_hasta', default=fecha_actual.strftime('%Y-%m-%d'))
     
-    # Si medico_consulta_id está presente, ignorar medico_factura_id (mutuamente excluyentes)
-    if medico_consulta_id:
-        medico_factura_id = None
+    # Obtener filtros de ARS y Médico (pueden ser múltiples)
+    ars_ids = request.args.getlist('ars_id', type=int)  # Lista de ARS
+    medico_factura_ids = request.args.getlist('medico_factura_id', type=int)  # Médicos que facturan
+    medico_consulta_ids = request.args.getlist('medico_consulta_id', type=int)  # Médicos que atienden
+    
+    # Filtrar valores vacíos o None
+    ars_ids = [id for id in ars_ids if id]
+    medico_factura_ids = [id for id in medico_factura_ids if id]
+    medico_consulta_ids = [id for id in medico_consulta_ids if id]
+    
+    # Si medico_consulta_ids está presente, ignorar medico_factura_ids (mutuamente excluyentes)
+    if medico_consulta_ids:
+        medico_factura_ids = []
     
     conn = get_db_connection()
     
@@ -5808,22 +5817,23 @@ def facturacion_dashboard():
     
     # ==================== INDICADORES GENERALES ====================
     # Total de facturas generadas (en el rango y filtros)
-    # Si se filtra por medico_consulta, contar facturas distintas con ese médico
-    if medico_consulta_id:
-        # Contar facturas distintas que tienen ese médico consulta
+    # Si se filtra por medico_consulta, contar facturas distintas con esos médicos
+    if medico_consulta_ids:
+        # Contar facturas distintas que tienen esos médicos consulta
         query_facturas = '''
             SELECT COUNT(DISTINCT fd.factura_id) as total 
             FROM facturas_detalle fd
             JOIN facturas f ON fd.factura_id = f.id
             WHERE fd.activo = 1 
             AND f.fecha_factura BETWEEN %s AND %s
-            AND fd.medico_consulta = %s
-        '''
-        params_facturas = [fecha_desde, fecha_hasta, medico_consulta_id]
+            AND fd.medico_consulta IN (%s)
+        ''' % (','.join(['%s'] * len(medico_consulta_ids)))
+        params_facturas = [fecha_desde, fecha_hasta] + medico_consulta_ids
         
-        if ars_id:
-            query_facturas += ' AND f.ars_id = %s'
-            params_facturas.append(ars_id)
+        if ars_ids:
+            query_facturas = query_facturas.replace('IN (%s)', 'IN (' + ','.join(['%s'] * len(medico_consulta_ids)) + ')')
+            query_facturas += ' AND f.ars_id IN (' + ','.join(['%s'] * len(ars_ids)) + ')'
+            params_facturas = [fecha_desde, fecha_hasta] + medico_consulta_ids + ars_ids
     else:
         # Contar facturas normalmente
         query_facturas = '''
@@ -5833,32 +5843,32 @@ def facturacion_dashboard():
         '''
         params_facturas = [fecha_desde, fecha_hasta]
         
-        if ars_id:
-            query_facturas += ' AND ars_id = %s'
-            params_facturas.append(ars_id)
+        if ars_ids:
+            query_facturas += ' AND ars_id IN (' + ','.join(['%s'] * len(ars_ids)) + ')'
+            params_facturas.extend(ars_ids)
         
-        if medico_factura_id:
-            query_facturas += ' AND medico_id = %s'
-            params_facturas.append(medico_factura_id)
+        if medico_factura_ids:
+            query_facturas += ' AND medico_id IN (' + ','.join(['%s'] * len(medico_factura_ids)) + ')'
+            params_facturas.extend(medico_factura_ids)
     
     total_facturas = conn.execute(query_facturas, params_facturas).fetchone()['total']
     
     # Total facturado (monto en el rango y filtros)
-    if medico_consulta_id:
-        # Si filtramos por médico consulta, sumar desde facturas_detalle
+    if medico_consulta_ids:
+        # Si filtramos por médicos consulta, sumar desde facturas_detalle
         query_monto = '''
             SELECT COALESCE(SUM(fd.monto), 0) as total 
             FROM facturas_detalle fd
             JOIN facturas f ON fd.factura_id = f.id
             WHERE fd.activo = 1 
             AND f.fecha_factura BETWEEN %s AND %s
-            AND fd.medico_consulta = %s
+            AND fd.medico_consulta IN (''' + ','.join(['%s'] * len(medico_consulta_ids)) + ''')
         '''
-        params_monto = [fecha_desde, fecha_hasta, medico_consulta_id]
+        params_monto = [fecha_desde, fecha_hasta] + medico_consulta_ids
         
-        if ars_id:
-            query_monto += ' AND f.ars_id = %s'
-            params_monto.append(ars_id)
+        if ars_ids:
+            query_monto += ' AND f.ars_id IN (' + ','.join(['%s'] * len(ars_ids)) + ')'
+            params_monto.extend(ars_ids)
     else:
         # Si no hay filtro de médico consulta, usar facturas normal
         query_monto = '''
@@ -5868,33 +5878,41 @@ def facturacion_dashboard():
         '''
         params_monto = [fecha_desde, fecha_hasta]
         
-        if ars_id:
-            query_monto += ' AND ars_id = %s'
-            params_monto.append(ars_id)
+        if ars_ids:
+            query_monto += ' AND ars_id IN (' + ','.join(['%s'] * len(ars_ids)) + ')'
+            params_monto.extend(ars_ids)
         
-        if medico_factura_id:
-            query_monto += ' AND medico_id = %s'
-            params_monto.append(medico_factura_id)
+        if medico_factura_ids:
+            query_monto += ' AND medico_id IN (' + ','.join(['%s'] * len(medico_factura_ids)) + ')'
+            params_monto.extend(medico_factura_ids)
     
     total_facturado = conn.execute(query_monto, params_monto).fetchone()['total']
     
-    # Pacientes pendientes (siempre actual, pero con filtros de ARS/Médico)
-    query_pendientes = "SELECT COUNT(*) as total FROM facturas_detalle WHERE estado = 'pendiente'"
-    params_pendientes = []
+    # ARS Pendientes por Facturar (nombres de ARS con pacientes pendientes)
+    query_ars_pendientes = '''
+        SELECT DISTINCT a.nombre_ars 
+        FROM facturas_detalle fd
+        JOIN ars a ON fd.ars_id = a.id
+        WHERE fd.estado = 'pendiente'
+    '''
+    params_ars_pendientes = []
     
-    if ars_id:
-        query_pendientes += ' AND ars_id = %s'
-        params_pendientes.append(ars_id)
+    if ars_ids:
+        query_ars_pendientes += ' AND fd.ars_id IN (' + ','.join(['%s'] * len(ars_ids)) + ')'
+        params_ars_pendientes.extend(ars_ids)
     
-    if medico_factura_id:
-        query_pendientes += ' AND medico_id = %s'
-        params_pendientes.append(medico_factura_id)
+    if medico_factura_ids:
+        query_ars_pendientes += ' AND fd.medico_id IN (' + ','.join(['%s'] * len(medico_factura_ids)) + ')'
+        params_ars_pendientes.extend(medico_factura_ids)
     
-    if medico_consulta_id:
-        query_pendientes += ' AND medico_consulta = %s'
-        params_pendientes.append(medico_consulta_id)
+    if medico_consulta_ids:
+        query_ars_pendientes += ' AND fd.medico_consulta IN (' + ','.join(['%s'] * len(medico_consulta_ids)) + ')'
+        params_ars_pendientes.extend(medico_consulta_ids)
     
-    pacientes_pendientes = conn.execute(query_pendientes, params_pendientes).fetchone()['total']
+    query_ars_pendientes += ' ORDER BY a.nombre_ars'
+    
+    ars_pendientes = conn.execute(query_ars_pendientes, params_ars_pendientes).fetchall()
+    ars_pendientes_nombres = [row['nombre_ars'] for row in ars_pendientes]
     
     # Monto total pendiente por facturar (suma de todos los costos de servicios pendientes)
     query_monto_pendiente = '''
@@ -5904,17 +5922,17 @@ def facturacion_dashboard():
     '''
     params_monto_pendiente = []
     
-    if ars_id:
-        query_monto_pendiente += ' AND fd.ars_id = %s'
-        params_monto_pendiente.append(ars_id)
+    if ars_ids:
+        query_monto_pendiente += ' AND fd.ars_id IN (' + ','.join(['%s'] * len(ars_ids)) + ')'
+        params_monto_pendiente.extend(ars_ids)
     
-    if medico_factura_id:
-        query_monto_pendiente += ' AND fd.medico_id = %s'
-        params_monto_pendiente.append(medico_factura_id)
+    if medico_factura_ids:
+        query_monto_pendiente += ' AND fd.medico_id IN (' + ','.join(['%s'] * len(medico_factura_ids)) + ')'
+        params_monto_pendiente.extend(medico_factura_ids)
     
-    if medico_consulta_id:
-        query_monto_pendiente += ' AND fd.medico_consulta = %s'
-        params_monto_pendiente.append(medico_consulta_id)
+    if medico_consulta_ids:
+        query_monto_pendiente += ' AND fd.medico_consulta IN (' + ','.join(['%s'] * len(medico_consulta_ids)) + ')'
+        params_monto_pendiente.extend(medico_consulta_ids)
     
     monto_pendiente = conn.execute(query_monto_pendiente, params_monto_pendiente).fetchone()['total']
     
@@ -5927,22 +5945,22 @@ def facturacion_dashboard():
     '''
     params_facturados = [fecha_desde, fecha_hasta]
     
-    if ars_id:
-        query_facturados += ' AND f.ars_id = %s'
-        params_facturados.append(ars_id)
+    if ars_ids:
+        query_facturados += ' AND f.ars_id IN (' + ','.join(['%s'] * len(ars_ids)) + ')'
+        params_facturados.extend(ars_ids)
     
-    if medico_consulta_id:
-        query_facturados += ' AND fd.medico_consulta = %s'
-        params_facturados.append(medico_consulta_id)
-    elif medico_factura_id:
-        query_facturados += ' AND f.medico_id = %s'
-        params_facturados.append(medico_factura_id)
+    if medico_consulta_ids:
+        query_facturados += ' AND fd.medico_consulta IN (' + ','.join(['%s'] * len(medico_consulta_ids)) + ')'
+        params_facturados.extend(medico_consulta_ids)
+    elif medico_factura_ids:
+        query_facturados += ' AND f.medico_id IN (' + ','.join(['%s'] * len(medico_factura_ids)) + ')'
+        params_facturados.extend(medico_factura_ids)
     
     pacientes_facturados = conn.execute(query_facturados, params_facturados).fetchone()['total']
     
     # ==================== FACTURACIÓN POR MES ====================
-    if medico_consulta_id:
-        # Si filtramos por médico consulta, sumar desde facturas_detalle
+    if medico_consulta_ids:
+        # Si filtramos por médicos consulta, sumar desde facturas_detalle
         query_mes = '''
             SELECT 
                 DATE_FORMAT(f.fecha_factura, '%%Y-%%m') as mes,
@@ -5951,13 +5969,13 @@ def facturacion_dashboard():
             JOIN facturas f ON fd.factura_id = f.id
             WHERE fd.activo = 1 
             AND f.fecha_factura BETWEEN %s AND %s
-            AND fd.medico_consulta = %s
+            AND fd.medico_consulta IN (''' + ','.join(['%s'] * len(medico_consulta_ids)) + ''')
         '''
-        params_mes = [fecha_desde, fecha_hasta, medico_consulta_id]
+        params_mes = [fecha_desde, fecha_hasta] + medico_consulta_ids
         
-        if ars_id:
-            query_mes += ' AND f.ars_id = %s'
-            params_mes.append(ars_id)
+        if ars_ids:
+            query_mes += ' AND f.ars_id IN (' + ','.join(['%s'] * len(ars_ids)) + ')'
+            params_mes.extend(ars_ids)
         
         query_mes += ' GROUP BY DATE_FORMAT(f.fecha_factura, \'%%Y-%%m\') ORDER BY mes ASC'
     else:
@@ -5972,21 +5990,21 @@ def facturacion_dashboard():
         '''
         params_mes = [fecha_desde, fecha_hasta]
         
-        if ars_id:
-            query_mes += ' AND ars_id = %s'
-            params_mes.append(ars_id)
+        if ars_ids:
+            query_mes += ' AND ars_id IN (' + ','.join(['%s'] * len(ars_ids)) + ')'
+            params_mes.extend(ars_ids)
         
-        if medico_factura_id:
-            query_mes += ' AND medico_id = %s'
-            params_mes.append(medico_factura_id)
+        if medico_factura_ids:
+            query_mes += ' AND medico_id IN (' + ','.join(['%s'] * len(medico_factura_ids)) + ')'
+            params_mes.extend(medico_factura_ids)
         
         query_mes += ' GROUP BY DATE_FORMAT(fecha_factura, \'%%Y-%%m\') ORDER BY mes ASC'
     
     facturacion_por_mes = conn.execute(query_mes, params_mes).fetchall()
     
     # ==================== FACTURACIÓN POR ARS ====================
-    if medico_consulta_id:
-        # Si filtramos por médico consulta, sumar desde facturas_detalle
+    if medico_consulta_ids:
+        # Si filtramos por médicos consulta, sumar desde facturas_detalle
         query_ars = '''
             SELECT a.nombre_ars, COALESCE(SUM(fd.monto), 0) as total_monto
             FROM facturas_detalle fd
@@ -5994,13 +6012,13 @@ def facturacion_dashboard():
             JOIN ars a ON f.ars_id = a.id
             WHERE fd.activo = 1
             AND f.fecha_factura BETWEEN %s AND %s
-            AND fd.medico_consulta = %s
+            AND fd.medico_consulta IN (''' + ','.join(['%s'] * len(medico_consulta_ids)) + ''')
         '''
-        params_ars = [fecha_desde, fecha_hasta, medico_consulta_id]
+        params_ars = [fecha_desde, fecha_hasta] + medico_consulta_ids
         
-        if ars_id:
-            query_ars += ' AND f.ars_id = %s'
-            params_ars.append(ars_id)
+        if ars_ids:
+            query_ars += ' AND f.ars_id IN (' + ','.join(['%s'] * len(ars_ids)) + ')'
+            params_ars.extend(ars_ids)
         
         query_ars += ' GROUP BY a.id, a.nombre_ars ORDER BY total_monto DESC'
     else:
@@ -6014,113 +6032,21 @@ def facturacion_dashboard():
         '''
         params_ars = [fecha_desde, fecha_hasta]
         
-        if ars_id:
-            query_ars += ' AND f.ars_id = %s'
-            params_ars.append(ars_id)
+        if ars_ids:
+            query_ars += ' AND f.ars_id IN (' + ','.join(['%s'] * len(ars_ids)) + ')'
+            params_ars.extend(ars_ids)
         
-        if medico_factura_id:
-            query_ars += ' AND f.medico_id = %s'
-            params_ars.append(medico_factura_id)
+        if medico_factura_ids:
+            query_ars += ' AND f.medico_id IN (' + ','.join(['%s'] * len(medico_factura_ids)) + ')'
+            params_ars.extend(medico_factura_ids)
         
         query_ars += ' GROUP BY a.id, a.nombre_ars ORDER BY total_monto DESC'
     
     facturacion_por_ars = conn.execute(query_ars, params_ars).fetchall()
     
-    # ==================== FACTURACIÓN POR MÉDICO ====================
-    if medico_consulta_id:
-        # Si filtramos por médico consulta, sumar desde facturas_detalle
-        query_medico = '''
-            SELECT m.nombre, COALESCE(SUM(fd.monto), 0) as total_monto
-            FROM facturas_detalle fd
-            JOIN facturas f ON fd.factura_id = f.id
-            JOIN medicos m ON fd.medico_consulta = m.id
-            WHERE fd.activo = 1
-            AND f.fecha_factura BETWEEN %s AND %s
-            AND fd.medico_consulta = %s
-        '''
-        params_medico = [fecha_desde, fecha_hasta, medico_consulta_id]
-        
-        if ars_id:
-            query_medico += ' AND f.ars_id = %s'
-            params_medico.append(ars_id)
-        
-        query_medico += ' GROUP BY m.id, m.nombre ORDER BY total_monto DESC'
-    else:
-        # Si no hay filtro de médico consulta, usar facturas normal
-        query_medico = '''
-            SELECT m.nombre, COALESCE(SUM(f.total), 0) as total_monto
-            FROM facturas f
-            JOIN medicos m ON f.medico_id = m.id
-            WHERE f.activo = 1
-            AND f.fecha_factura BETWEEN %s AND %s
-        '''
-        params_medico = [fecha_desde, fecha_hasta]
-        
-        if ars_id:
-            query_medico += ' AND f.ars_id = %s'
-            params_medico.append(ars_id)
-        
-        if medico_factura_id:
-            query_medico += ' AND f.medico_id = %s'
-            params_medico.append(medico_factura_id)
-        
-        query_medico += ' GROUP BY m.id, m.nombre ORDER BY total_monto DESC'
-    
-    facturacion_por_medico = conn.execute(query_medico, params_medico).fetchall()
-    
-    # ==================== FACTURACIÓN POR MÉDICO Y MES (para gráfico) ====================
-    if medico_consulta_id:
-        # Si filtramos por médico consulta, sumar desde facturas_detalle
-        query_medico_mes = '''
-            SELECT 
-                m.nombre,
-                DATE_FORMAT(f.fecha_factura, '%%Y-%%m') as mes,
-                COALESCE(SUM(fd.monto), 0) as total_monto,
-                COUNT(DISTINCT fd.id) as total_pacientes
-            FROM facturas_detalle fd
-            JOIN facturas f ON fd.factura_id = f.id
-            JOIN medicos m ON fd.medico_consulta = m.id
-            WHERE fd.activo = 1
-            AND f.fecha_factura BETWEEN %s AND %s
-            AND fd.medico_consulta = %s
-        '''
-        params_medico_mes = [fecha_desde, fecha_hasta, medico_consulta_id]
-        
-        if ars_id:
-            query_medico_mes += ' AND f.ars_id = %s'
-            params_medico_mes.append(ars_id)
-        
-        query_medico_mes += ' GROUP BY m.id, m.nombre, DATE_FORMAT(f.fecha_factura, \'%%Y-%%m\') ORDER BY m.nombre, mes ASC'
-    else:
-        # Si no hay filtro de médico consulta, usar facturas normal y contar pacientes
-        query_medico_mes = '''
-            SELECT 
-                m.nombre,
-                DATE_FORMAT(f.fecha_factura, '%%Y-%%m') as mes,
-                COALESCE(SUM(f.total), 0) as total_monto,
-                COALESCE(SUM((SELECT COUNT(*) FROM facturas_detalle WHERE factura_id = f.id)), 0) as total_pacientes
-            FROM facturas f
-            JOIN medicos m ON f.medico_id = m.id
-            WHERE f.activo = 1
-            AND f.fecha_factura BETWEEN %s AND %s
-        '''
-        params_medico_mes = [fecha_desde, fecha_hasta]
-        
-        if ars_id:
-            query_medico_mes += ' AND f.ars_id = %s'
-            params_medico_mes.append(ars_id)
-        
-        if medico_factura_id:
-            query_medico_mes += ' AND f.medico_id = %s'
-            params_medico_mes.append(medico_factura_id)
-        
-        query_medico_mes += ' GROUP BY m.id, m.nombre, DATE_FORMAT(f.fecha_factura, \'%%Y-%%m\') ORDER BY m.nombre, mes ASC'
-    
-    facturacion_medico_mes = conn.execute(query_medico_mes, params_medico_mes).fetchall()
-    
     # ==================== FACTURACIÓN POR ARS Y MES (para gráfico) ====================
-    if medico_consulta_id:
-        # Si filtramos por médico consulta, sumar desde facturas_detalle
+    if medico_consulta_ids:
+        # Si filtramos por médicos consulta, sumar desde facturas_detalle
         query_ars_mes = '''
             SELECT 
                 a.nombre_ars,
@@ -6131,13 +6057,13 @@ def facturacion_dashboard():
             JOIN ars a ON f.ars_id = a.id
             WHERE fd.activo = 1
             AND f.fecha_factura BETWEEN %s AND %s
-            AND fd.medico_consulta = %s
+            AND fd.medico_consulta IN (''' + ','.join(['%s'] * len(medico_consulta_ids)) + ''')
         '''
-        params_ars_mes = [fecha_desde, fecha_hasta, medico_consulta_id]
+        params_ars_mes = [fecha_desde, fecha_hasta] + medico_consulta_ids
         
-        if ars_id:
-            query_ars_mes += ' AND f.ars_id = %s'
-            params_ars_mes.append(ars_id)
+        if ars_ids:
+            query_ars_mes += ' AND f.ars_id IN (' + ','.join(['%s'] * len(ars_ids)) + ')'
+            params_ars_mes.extend(ars_ids)
         
         query_ars_mes += ' GROUP BY a.id, a.nombre_ars, DATE_FORMAT(f.fecha_factura, \'%%Y-%%m\') ORDER BY a.nombre_ars, mes ASC'
     else:
@@ -6154,13 +6080,13 @@ def facturacion_dashboard():
         '''
         params_ars_mes = [fecha_desde, fecha_hasta]
         
-        if ars_id:
-            query_ars_mes += ' AND f.ars_id = %s'
-            params_ars_mes.append(ars_id)
+        if ars_ids:
+            query_ars_mes += ' AND f.ars_id IN (' + ','.join(['%s'] * len(ars_ids)) + ')'
+            params_ars_mes.extend(ars_ids)
         
-        if medico_factura_id:
-            query_ars_mes += ' AND f.medico_id = %s'
-            params_ars_mes.append(medico_factura_id)
+        if medico_factura_ids:
+            query_ars_mes += ' AND f.medico_id IN (' + ','.join(['%s'] * len(medico_factura_ids)) + ')'
+            params_ars_mes.extend(medico_factura_ids)
         
         query_ars_mes += ' GROUP BY a.id, a.nombre_ars, DATE_FORMAT(f.fecha_factura, \'%%Y-%%m\') ORDER BY a.nombre_ars, mes ASC'
     
@@ -6171,22 +6097,20 @@ def facturacion_dashboard():
     return render_template('facturacion/dashboard.html',
                          total_facturas=total_facturas,
                          total_facturado=total_facturado,
-                         pacientes_pendientes=pacientes_pendientes,
+                         ars_pendientes_nombres=ars_pendientes_nombres,
                          monto_pendiente=monto_pendiente,
                          pacientes_facturados=pacientes_facturados,
                          facturacion_por_mes=facturacion_por_mes,
                          facturacion_por_ars=facturacion_por_ars,
-                         facturacion_por_medico=facturacion_por_medico,
                          facturacion_ars_mes=facturacion_ars_mes,
-                         facturacion_medico_mes=facturacion_medico_mes,
                          fecha_desde=fecha_desde,
                          fecha_hasta=fecha_hasta,
                          ars_list=ars_list,
                          medicos_factura_list=medicos_factura_list,
                          medicos_consulta_list=medicos_consulta_list,
-                         ars_id_seleccionado=ars_id,
-                         medico_factura_id_seleccionado=medico_factura_id,
-                         medico_consulta_id_seleccionado=medico_consulta_id)
+                         ars_ids_seleccionados=ars_ids,
+                         medico_factura_ids_seleccionados=medico_factura_ids,
+                         medico_consulta_ids_seleccionados=medico_consulta_ids)
 
 @app.route('/facturacion/ver-factura/<int:factura_id>')
 @login_required

@@ -506,33 +506,30 @@
                 <input type="date" id="fecha_hasta" name="fecha_hasta" value="{{ fecha_hasta }}" required>
             </div>
             <div class="form-group">
-                <label for="ars_id">ARS:</label>
-                <select id="ars_id" name="ars_id" class="form-select">
-                    <option value="">-- Todas las ARS --</option>
+                <label for="ars_id">ARS (selección múltiple):</label>
+                <select id="ars_id" name="ars_id" class="form-select" multiple size="3">
                     {% for ars in ars_list %}
-                        <option value="{{ ars.id }}" {% if ars_id_seleccionado == ars.id %}selected{% endif %}>
+                        <option value="{{ ars.id }}" {% if ars.id in ars_ids_seleccionados %}selected{% endif %}>
                             {{ ars.nombre_ars }}
                         </option>
                     {% endfor %}
                 </select>
             </div>
             <div class="form-group">
-                <label for="medico_factura_id">Médico Factura:</label>
-                <select id="medico_factura_id" name="medico_factura_id" class="form-select">
-                    <option value="">-- Todos los Médicos (habilitados para facturar) --</option>
+                <label for="medico_factura_id">Médico Factura (selección múltiple):</label>
+                <select id="medico_factura_id" name="medico_factura_id" class="form-select" multiple size="3">
                     {% for medico in medicos_factura_list %}
-                        <option value="{{ medico.id }}" {% if medico_factura_id_seleccionado == medico.id %}selected{% endif %}>
+                        <option value="{{ medico.id }}" {% if medico.id in medico_factura_ids_seleccionados %}selected{% endif %}>
                             {{ medico.nombre }}
                         </option>
                     {% endfor %}
                 </select>
             </div>
             <div class="form-group">
-                <label for="medico_consulta_id">Médico Paciente:</label>
-                <select id="medico_consulta_id" name="medico_consulta_id" class="form-select">
-                    <option value="">-- Todos los Médicos (que atendieron pacientes) --</option>
+                <label for="medico_consulta_id">Médico Paciente (selección múltiple):</label>
+                <select id="medico_consulta_id" name="medico_consulta_id" class="form-select" multiple size="3">
                     {% for medico in medicos_consulta_list %}
-                        <option value="{{ medico.id }}" {% if medico_consulta_id_seleccionado == medico.id %}selected{% endif %}>
+                        <option value="{{ medico.id }}" {% if medico.id in medico_consulta_ids_seleccionados %}selected{% endif %}>
                             {{ medico.nombre }}
                         </option>
                     {% endfor %}
@@ -579,14 +576,27 @@
             </div>
         </div>
         
-        <!-- Pacientes Pendientes por Facturar -->
+        <!-- ARS Pendientes por Facturar -->
         <div class="col-lg-3 col-md-6 animate-card" style="animation-delay: 0.4s">
             <div class="stat-card warning">
                 <div class="stat-icon warning">
-                    <i class="fas fa-clock"></i>
+                    <i class="fas fa-building"></i>
                 </div>
-                <p class="stat-value">{{ pacientes_pendientes }}</p>
-                <p class="stat-label">Pacientes Pendientes</p>
+                {% if ars_pendientes_nombres|length > 0 %}
+                    <div style="position: relative; z-index: 1;">
+                        <p class="stat-label" style="margin-bottom: 0.8rem;">ARS Pendientes por Facturar</p>
+                        <div style="max-height: 150px; overflow-y: auto; padding-right: 5px;">
+                            {% for ars in ars_pendientes_nombres %}
+                                <span style="display: inline-block; background: rgba(255, 193, 7, 0.15); color: #856404; padding: 0.4rem 0.8rem; border-radius: 8px; margin: 0.2rem; font-size: 0.85rem; font-weight: 600; border: 1px solid rgba(255, 193, 7, 0.3);">
+                                    {{ ars }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="stat-value" style="font-size: 1.5rem;">✓</p>
+                    <p class="stat-label">Sin ARS Pendientes</p>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -608,16 +618,6 @@
             <div class="chart-card">
                 <h3><i class="fas fa-calendar-alt"></i>Facturación por ARS y Mes</h3>
                 <canvas id="chartARSporMes" height="100"></canvas>
-            </div>
-        </div>
-    </div>
-    
-    <div class="row g-4 mb-4">
-        <!-- Facturación por Médico -->
-        <div class="col-lg-12 animate-card" style="animation-delay: 0.8s">
-            <div class="chart-card">
-                <h3><i class="fas fa-user-md"></i>Cantidad de Pacientes por Médico (por Mes)</h3>
-                <canvas id="chartPorMedico"></canvas>
             </div>
         </div>
     </div>
@@ -856,179 +856,6 @@
                             size: 12
                         }
                     }
-                }
-            }
-        }
-    });
-    
-    // ==================== GRÁFICO: FACTURACIÓN POR MÉDICO Y MES ====================
-    const ctxMedico = document.getElementById('chartPorMedico').getContext('2d');
-    const facturacionMedicoMes = {{ facturacion_medico_mes | tojson }};
-    
-    // Obtener lista única de médicos
-    const medicosUnicos = [...new Set(facturacionMedicoMes.map(item => item.nombre))];
-    
-    // Obtener lista única de meses
-    const mesesMedicosUnicos = [...new Set(facturacionMedicoMes.map(item => item.mes))].sort();
-    
-    // Preparar meses con formato
-    const mesesMedicosFormateados = mesesMedicosUnicos.map(mes => {
-        const [year, month] = mes.split('-');
-        const fecha = new Date(year, month - 1);
-        return fecha.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
-    });
-    
-    // Colores para cada médico (líneas)
-    const coloresMedicos = [
-        '#CEB0B7', // Rosa principal
-        '#28a745', // Verde
-        '#3498db', // Azul
-        '#e74c3c', // Rojo
-        '#9b59b6', // Morado
-        '#f39c12', // Naranja
-        '#1abc9c', // Turquesa
-        '#e67e22', // Naranja oscuro
-        '#2ecc71', // Verde claro
-        '#34495e', // Gris azulado
-        '#16a085', // Verde azulado
-        '#d35400'  // Naranja quemado
-    ];
-    
-    // Crear datasets (una línea por cada médico)
-    const datasetsMedicos = medicosUnicos.map((medico, indexMedico) => {
-        const datosMedico = mesesMedicosUnicos.map(mes => {
-            const registro = facturacionMedicoMes.find(item => item.nombre === medico && item.mes === mes);
-            return registro ? registro.total_pacientes : 0;
-        });
-        
-        const color = coloresMedicos[indexMedico % coloresMedicos.length];
-        
-        return {
-            label: medico,
-            data: datosMedico,
-            borderColor: color,
-            backgroundColor: color,
-            borderWidth: 3,
-            fill: false,
-            tension: 0.4, // Curva suave
-            pointBackgroundColor: color,
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2,
-            pointRadius: 5,
-            pointHoverRadius: 7,
-            pointHoverBackgroundColor: color,
-            pointHoverBorderColor: '#fff',
-            pointHoverBorderWidth: 3
-        };
-    });
-    
-    new Chart(ctxMedico, {
-        type: 'line',
-        data: {
-            labels: mesesMedicosFormateados,
-            datasets: datasetsMedicos
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            interaction: {
-                mode: 'index',
-                intersect: false,
-            },
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                    labels: {
-                        color: '#282828',
-                        font: {
-                            size: 13,
-                            weight: '600'
-                        },
-                        padding: 15,
-                        boxWidth: 40,
-                        boxHeight: 4,
-                        usePointStyle: false,
-                        generateLabels: function(chart) {
-                            const datasets = chart.data.datasets;
-                            return datasets.map((dataset, i) => ({
-                                text: dataset.label,
-                                fillStyle: dataset.borderColor,
-                                strokeStyle: dataset.borderColor,
-                                lineWidth: 3,
-                                hidden: false,
-                                index: i
-                            }));
-                        }
-                    }
-                },
-                tooltip: {
-                    backgroundColor: '#fff',
-                    titleColor: '#282828',
-                    bodyColor: '#666',
-                    borderColor: '#CEB0B7',
-                    borderWidth: 2,
-                    padding: 12,
-                    bodyFont: {
-                        size: 14
-                    },
-                    callbacks: {
-                        label: function(context) {
-                            return context.dataset.label + ': ' + context.parsed.y + ' pacientes';
-                        }
-                    }
-                },
-                datalabels: {
-                    display: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Cantidad de Pacientes',
-                        color: '#666',
-                        font: {
-                            size: 12,
-                            weight: '600'
-                        }
-                    },
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)'
-                    },
-                    ticks: {
-                        color: '#666',
-                        font: {
-                            size: 12
-                        },
-                        callback: function(value) {
-                            return value;
-                        }
-                    }
-                },
-                x: {
-                    grid: {
-                        display: false
-                    },
-                    ticks: {
-                        color: '#666',
-                        font: {
-                            size: 12
-                        }
-                    }
-                }
-            },
-            onClick: (event, elements) => {
-                if (elements.length > 0) {
-                    const element = elements[0];
-                    const datasetIndex = element.datasetIndex;
-                    const dataIndex = element.index;
-                    const medico = datasetsMedicos[datasetIndex].label;
-                    const mes = mesesMedicosFormateados[dataIndex];
-                    const valor = datasetsMedicos[datasetIndex].data[dataIndex];
-                    
-                    alert(`${medico}\n${mes}\nPacientes: ${valor}`);
                 }
             }
         }
