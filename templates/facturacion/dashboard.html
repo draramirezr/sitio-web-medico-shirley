@@ -206,7 +206,7 @@
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
         max-height: 300px;
         overflow-y: auto;
-        z-index: 1000;
+        z-index: 9999;
         display: none;
     }
     
@@ -647,7 +647,7 @@
                 <label>ARS:</label>
                 <div class="custom-multiselect">
                     <div class="multiselect-button" onclick="toggleDropdown('ars')">
-                        <span id="ars-selected-text">Todos seleccionados ({{ ars_list|length }})</span>
+                        <span id="ars-selected-text">Todos</span>
                         <i class="fas fa-chevron-down multiselect-arrow"></i>
                     </div>
                     <div class="multiselect-dropdown" id="ars-dropdown">
@@ -675,7 +675,7 @@
                 <label>Médico Factura:</label>
                 <div class="custom-multiselect">
                     <div class="multiselect-button" onclick="toggleDropdown('medico_factura')">
-                        <span id="medico_factura-selected-text">Todos seleccionados ({{ medicos_factura_list|length }})</span>
+                        <span id="medico_factura-selected-text">Todos</span>
                         <i class="fas fa-chevron-down multiselect-arrow"></i>
                     </div>
                     <div class="multiselect-dropdown" id="medico_factura-dropdown">
@@ -703,7 +703,7 @@
                 <label>Médico Paciente:</label>
                 <div class="custom-multiselect">
                     <div class="multiselect-button" onclick="toggleDropdown('medico_consulta')">
-                        <span id="medico_consulta-selected-text">Todos seleccionados ({{ medicos_consulta_list|length }})</span>
+                        <span id="medico_consulta-selected-text">Todos</span>
                         <i class="fas fa-chevron-down multiselect-arrow"></i>
                     </div>
                     <div class="multiselect-dropdown" id="medico_consulta-dropdown">
@@ -893,7 +893,7 @@
             textElement.textContent = 'Ninguno seleccionado';
             textElement.style.color = '#dc3545';
         } else if (selectedCount === totalCount) {
-            textElement.textContent = `Todos seleccionados (${totalCount})`;
+            textElement.textContent = 'Todos';
             textElement.style.color = '#2c3e50';
         } else {
             textElement.textContent = `${selectedCount} de ${totalCount} seleccionados`;
