@@ -403,14 +403,14 @@
         background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%) !important;
         border: none;
         color: white !important;
-        padding: 0.65rem 1.2rem;
-        border-radius: 10px;
+        padding: 0.5rem 0.8rem;
+        border-radius: 8px;
         font-weight: 600;
-        font-size: 0.9rem;
+        font-size: 0.8rem;
         transition: all 0.3s ease;
         text-decoration: none;
         display: inline-block;
-        margin: 0.25rem 0.3rem;
+        margin: 0 0.2rem;
         white-space: nowrap;
     }
     
@@ -423,20 +423,21 @@
     
     .btn-accion i {
         color: white !important;
+        margin-right: 0.3rem;
     }
     
     .btn-volver {
         background: #ACACAD !important;
         border: none;
         color: white !important;
-        padding: 0.65rem 1.2rem;
-        border-radius: 10px;
+        padding: 0.5rem 0.8rem;
+        border-radius: 8px;
         font-weight: 600;
-        font-size: 0.9rem;
+        font-size: 0.8rem;
         transition: all 0.3s ease;
         text-decoration: none;
         display: inline-block;
-        margin: 0.25rem 0.3rem;
+        margin: 0 0.2rem;
         white-space: nowrap;
     }
     
@@ -449,20 +450,21 @@
     
     .btn-volver i {
         color: white !important;
+        margin-right: 0.3rem;
     }
     
     .btn-email {
         background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%) !important;
         border: none;
         color: white !important;
-        padding: 0.65rem 1.2rem;
-        border-radius: 10px;
+        padding: 0.5rem 0.8rem;
+        border-radius: 8px;
         font-weight: 600;
-        font-size: 0.9rem;
+        font-size: 0.8rem;
         transition: all 0.3s ease;
         text-decoration: none;
         display: inline-block;
-        margin: 0.25rem 0.3rem;
+        margin: 0 0.2rem;
         white-space: nowrap;
     }
     
@@ -475,18 +477,30 @@
     
     .btn-email i {
         color: white !important;
+        margin-right: 0.3rem;
     }
     
-    /* Contenedor de botones con flex para mejor organización */
+    /* Contenedor de botones en una sola línea */
     .botones-factura-container {
         display: flex;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         justify-content: center;
         align-items: center;
-        gap: 0.3rem;
         max-width: 900px;
         margin: 0 auto 2rem auto;
-        padding: 0 1rem;
+        padding: 0;
+        overflow-x: auto;
+        gap: 0;
+    }
+    
+    /* Ocultar scrollbar en navegadores webkit */
+    .botones-factura-container::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .botones-factura-container {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
     }
     
     .badge-facturada {
