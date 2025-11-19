@@ -1,11 +1,11 @@
-{% extends "base.html" %}
+ï»¿{% extends "base.html" %}
 
 {% block title %}Factura #{{ factura['id'] }}{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
 <style>
-    /* ========== ESTILOS DE IMPRESIÓN ========== */
+    /* ========== ESTILOS DE IMPRESIï¿½N ========== */
     @media print {
         /* Ocultar elementos no imprimibles */
         .no-print, 
@@ -20,7 +20,7 @@
             display: none !important;
         }
         
-        /* Reset de página */
+        /* Reset de pï¿½gina */
         @page {
             size: letter;
             margin: 0.5in;
@@ -32,7 +32,7 @@
             padding: 0 !important;
         }
         
-        /* Container de factura optimizado para impresión */
+        /* Container de factura optimizado para impresiï¿½n */
         .factura-container {
             box-shadow: none !important;
             border: none !important;
@@ -68,7 +68,7 @@
             color: #666 !important;
         }
         
-        /* Info boxes para impresión */
+        /* Info boxes para impresiï¿½n */
         .factura-info {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -101,7 +101,7 @@
             font-size: 0.9rem !important;
         }
         
-        /* Tabla optimizada para impresión */
+        /* Tabla optimizada para impresiï¿½n */
         .tabla-factura {
             width: 100%;
             border-collapse: collapse;
@@ -140,7 +140,7 @@
             background-color: transparent !important;
         }
         
-        /* Totales para impresión */
+        /* Totales para impresiï¿½n */
         .totales-section {
             margin-top: 1rem;
             border-top: 2px solid #000;
@@ -177,7 +177,7 @@
             font-weight: 600 !important;
         }
         
-        /* Footer para impresión */
+        /* Footer para impresiï¿½n */
         .footer-factura {
             text-align: center;
             margin-top: 2rem;
@@ -216,7 +216,7 @@
             font-weight: 600;
         }
         
-        /* Forzar colores en impresión */
+        /* Forzar colores en impresiï¿½n */
         * {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
@@ -508,11 +508,11 @@
         </span>
     </div>
 
-    <!-- Botones de Acción ARRIBA (Header) -->
+    <!-- Botones de Acciï¿½n ARRIBA (Header) -->
     <div class="no-print" style="max-width: 900px; margin: 0 auto 2rem auto; text-align: center;">
         <a href="{{ url_for('facturacion_historico') }}" class="btn-volver no-print">
             <i class="fas fa-arrow-left me-2"></i>
-            Volver al Histórico
+            Volver al Histï¿½rico
         </a>
         <a href="{{ url_for('facturacion_descargar_pdf', factura_id=factura['id']) }}" target="_blank" class="btn-accion no-print">
             <i class="fas fa-print me-2"></i>
@@ -539,15 +539,15 @@
             <img src="{{ url_for('static', filename='logos/logo-dra-shirley.png') }}" alt="Logo" class="factura-logo">
             <div class="factura-title-center">
                 <h1 class="factura-title">FACTURA</h1>
-                <div class="factura-title-small">CRÉDITO FISCAL #{{ factura['id'] }}</div>
+                <div class="factura-title-small">CRï¿½DITO FISCAL #{{ factura['id'] }}</div>
             </div>
             <div style="width: 120px;"></div>
         </div>
 
-        <!-- Información Principal en 3 Columnas -->
+        <!-- Informaciï¿½n Principal en 3 Columnas -->
         <div class="factura-info">
             <div class="info-box">
-                <h6>Información de Factura</h6>
+                <h6>Informaciï¿½n de Factura</h6>
                 <p><strong>Fecha:</strong> {{ factura['fecha_factura'] }}</p>
                 <p><strong>Cliente (ARS):</strong> {{ factura['nombre_ars'] }}</p>
                 {% if factura['ars_rnc'] %}
@@ -561,16 +561,16 @@
                 <p><strong>Tipo:</strong> {{ factura['ncf_tipo'] }}</p>
                 {% endif %}
                 {% if factura['ncf_fecha_fin'] %}
-                <p><strong>Válido hasta:</strong> {{ factura['ncf_fecha_fin'] }}</p>
+                <p><strong>Vï¿½lido hasta:</strong> {{ factura['ncf_fecha_fin'] }}</p>
                 {% endif %}
             </div>
             <div class="info-box">
-                <h6>Información del Médico</h6>
-                <p style="margin-bottom: 0.1rem;"><strong>Médico:</strong> {{ factura['medico_nombre'] }}</p>
+                <h6>Informaciï¿½n del Mï¿½dico</h6>
+                <p style="margin-bottom: 0.1rem;"><strong>Mï¿½dico:</strong> {{ factura['medico_nombre'] }}</p>
                 <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem; color: #666;">{{ factura['medico_especialidad'] }}</p>
-                <p><strong>Cédula:</strong> {{ factura['medico_cedula'] }}</p>
+                <p><strong>Cï¿½dula:</strong> {{ factura['medico_cedula'] }}</p>
                 {% if factura['medico_exequatur'] %}
-                <p><strong>Exequátur:</strong> {{ factura['medico_exequatur'] }}</p>
+                <p><strong>Exequï¿½tur:</strong> {{ factura['medico_exequatur'] }}</p>
                 {% endif %}
             </div>
         </div>
@@ -583,7 +583,7 @@
                     <th style="width: 20%;">NOMBRES PACIENTE</th>
                     <th style="width: 12%;">NSS/CONTRATO</th>
                     <th style="width: 10%;">FECHA</th>
-                    <th style="width: 13%;">AUTORIZACIÓN</th>
+                    <th style="width: 13%;">AUTORIZACIï¿½N</th>
                     <th style="width: 25%;">SERVICIO</th>
                     <th style="width: 15%;" class="text-right">V/UNITARIO</th>
                 </tr>
@@ -603,7 +603,7 @@
             </tbody>
         </table>
 
-        <!-- Sección de Totales -->
+        <!-- Secciï¿½n de Totales -->
         <div class="totales-section">
             <div class="total-row subtotal">
                 <div class="total-label">SUB-TOTAL:</div>
@@ -619,25 +619,25 @@
             </div>
         </div>
 
-        <!-- Firma (solo visible en impresión) -->
+        <!-- Firma (solo visible en impresiï¿½n) -->
         <div class="firma-section" style="display: none;">
             <div class="firma-linea"></div>
-            <div class="firma-nombre">Dra. Shirley Ramírez</div>
+            <div class="firma-nombre">Dra. Shirley Ramï¿½rez</div>
         </div>
 
         <!-- Footer -->
         <div class="footer-factura">
             <p><strong>{{ factura['medico_nombre'] }}</strong></p>
-            <p>{{ factura['medico_especialidad'] }}{% if factura['medico_cedula'] %} | Cédula: {{ factura['medico_cedula'] }}{% endif %}{% if factura['medico_exequatur'] %} | EXEQUATUR: {{ factura['medico_exequatur'] }}{% endif %}</p>
+            <p>{{ factura['medico_especialidad'] }}{% if factura['medico_cedula'] %} | Cï¿½dula: {{ factura['medico_cedula'] }}{% endif %}{% if factura['medico_exequatur'] %} | EXEQUATUR: {{ factura['medico_exequatur'] }}{% endif %}</p>
             <p>{{ centro_medico['nombre'] }}, {{ centro_medico['direccion'] }}</p>
         </div>
     </div>
 
-    <!-- Botones de Acción ABAJO (Pie de página) -->
+    <!-- Botones de Acciï¿½n ABAJO (Pie de pï¿½gina) -->
     <div class="no-print" style="max-width: 900px; margin: 2rem auto; text-align: center;">
         <a href="{{ url_for('facturacion_historico') }}" class="btn-volver no-print">
             <i class="fas fa-arrow-left me-2"></i>
-            Volver al Histórico
+            Volver al Histï¿½rico
         </a>
         <a href="{{ url_for('facturacion_descargar_pdf', factura_id=factura['id']) }}" target="_blank" class="btn-accion no-print">
             <i class="fas fa-print me-2"></i>
@@ -685,16 +685,16 @@
                                placeholder="correo@ejemplo.com">
                         <div class="form-text">
                             <i class="fas fa-info-circle me-1"></i>
-                            Por defecto se enviará al email del médico. Puedes cambiarlo si lo deseas.
+                            Por defecto se enviarï¿½ al email del mï¿½dico. Puedes cambiarlo si lo deseas.
                         </div>
                     </div>
                     
                     <div class="alert alert-info mb-0" style="background-color: rgba(206, 176, 183, 0.1); border-color: #CEB0B7; color: #666;">
-                        <strong><i class="fas fa-file-pdf me-1"></i> Se adjuntará:</strong><br>
+                        <strong><i class="fas fa-file-pdf me-1"></i> Se adjuntarï¿½:</strong><br>
                         <small>
-                            • Factura #{{ factura['id'] }}<br>
-                            • NCF: {{ factura['ncf_numero'] if factura['ncf_numero'] else factura['ncf'] }}<br>
-                            • Total: {{ total|formato_moneda }}
+                            ï¿½ Factura #{{ factura['id'] }}<br>
+                            ï¿½ NCF: {{ factura['ncf_numero'] if factura['ncf_numero'] else factura['ncf'] }}<br>
+                            ï¿½ Total: {{ total|formato_moneda }}
                         </small>
                     </div>
                 </div>
@@ -720,7 +720,7 @@
             <div class="modal-header" style="background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%); border: none;">
                 <h5 class="modal-title text-white">
                     <i class="fas fa-print me-2"></i>
-                    ¿Desea Imprimir la Factura?
+                    ï¿½Desea Imprimir la Factura?
                 </h5>
             </div>
             <div class="modal-body" style="padding: 2rem;">
@@ -729,12 +729,12 @@
                 </div>
                 <p class="text-center mb-3" style="font-size: 1.1rem; color: #333;">
                     La factura ha sido generada exitosamente.<br>
-                    <strong>¿Desea imprimirla ahora?</strong>
+                    <strong>ï¿½Desea imprimirla ahora?</strong>
                 </p>
                 <div class="alert" style="background-color: rgba(206, 176, 183, 0.1); border-color: #CEB0B7; color: #666; text-align: center;">
                     <small>
                         <i class="fas fa-info-circle me-1"></i>
-                        También puede imprimir más tarde desde el botón "Imprimir"
+                        Tambiï¿½n puede imprimir mï¿½s tarde desde el botï¿½n "Imprimir"
                     </small>
                 </div>
             </div>
@@ -745,7 +745,7 @@
                 </button>
                 <button type="button" class="btn" onclick="imprimirFactura()" style="background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%); color: white; border: none; font-weight: 600; min-width: 120px; padding: 0.7rem 1.5rem; border-radius: 12px;">
                     <i class="fas fa-print me-2"></i>
-                    Sí, Imprimir
+                    Sï¿½, Imprimir
                 </button>
             </div>
         </div>
@@ -777,11 +777,11 @@ function cerrarModalImprimir() {
     }
 }
 
-// Mostrar modal de impresión si viene el parámetro en la URL
+// Mostrar modal de impresiï¿½n si viene el parï¿½metro en la URL
 document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('mostrar_modal_imprimir') === '1') {
-        // Mostrar el modal después de un pequeño delay para asegurar que la página esté cargada
+        // Mostrar el modal despuï¿½s de un pequeï¿½o delay para asegurar que la pï¿½gina estï¿½ cargada
         setTimeout(function() {
             var modal = new bootstrap.Modal(document.getElementById('modalImprimir'));
             modal.show();
@@ -791,5 +791,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 {% endblock %}
+
 
 
