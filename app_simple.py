@@ -6720,8 +6720,14 @@ def facturacion_descargar_excel(factura_id):
         # Obtener datos del NCF
         ncf_data = conn.execute('SELECT fecha_fin, tipo FROM ncf WHERE id = %s', (factura['ncf_id'],)).fetchone()
         
-        # Obtener centro médico
-        centro_medico = conn.execute('SELECT * FROM centros_medicos WHERE id = %s', (factura['centro_medico_id'],)).fetchone()
+        # Obtener centro médico (con manejo de error si no existe centro_medico_id)
+        centro_medico = None
+        if 'centro_medico_id' in factura.keys() and factura['centro_medico_id']:
+            centro_medico = conn.execute('SELECT * FROM centros_medicos WHERE id = %s', (factura['centro_medico_id'],)).fetchone()
+        
+        # Si no hay centro médico, obtener el predeterminado
+        if not centro_medico:
+            centro_medico = conn.execute('SELECT * FROM centros_medicos WHERE id = 1').fetchone()
         
         # Generar Excel
         ncf_numero = factura['ncf_numero'] if factura['ncf_numero'] else factura.get('ncf', 'N/A')
