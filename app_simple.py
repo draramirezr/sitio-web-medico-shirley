@@ -5456,6 +5456,300 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None,
     buffer.seek(0)
     return buffer
 
+def generar_excel_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None, centro_medico=None, factura=None):
+    """Generar Excel de la factura con el mismo formato que el PDF"""
+    from io import BytesIO
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+    
+    # Crear workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = f"Factura {factura_id}"
+    
+    # Definir estilos
+    header_font = Font(name='Arial', size=20, bold=True, color='000000')
+    subtitle_font = Font(name='Arial', size=10, color='666666')
+    section_font = Font(name='Arial', size=11, bold=True, color='B89BA3')
+    bold_font = Font(name='Arial', size=10, bold=True)
+    normal_font = Font(name='Arial', size=10)
+    
+    # Colores
+    header_fill = PatternFill(start_color='CEB0B7', end_color='CEB0B7', fill_type='solid')
+    info_fill = PatternFill(start_color='F2E2E6', end_color='F2E2E6', fill_type='solid')
+    
+    # Bordes
+    thin_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    # Alineaciones
+    center_align = Alignment(horizontal='center', vertical='center')
+    left_align = Alignment(horizontal='left', vertical='center')
+    right_align = Alignment(horizontal='right', vertical='center')
+    
+    # HEADER: FACTURA
+    row = 1
+    ws.merge_cells(f'A{row}:G{row}')
+    cell = ws[f'A{row}']
+    cell.value = 'FACTURA'
+    cell.font = header_font
+    cell.alignment = center_align
+    
+    row += 1
+    ws.merge_cells(f'A{row}:G{row}')
+    cell = ws[f'A{row}']
+    cell.value = f'CRÉDITO FISCAL #{factura_id}'
+    cell.font = subtitle_font
+    cell.alignment = center_align
+    
+    row += 2  # Espacio
+    
+    # INFORMACIÓN EN 3 COLUMNAS
+    if pacientes and len(pacientes) > 0:
+        # Extraer datos
+        ars_nombre = pacientes[0].get('nombre_ars', 'N/A')
+        ars_rnc = pacientes[0].get('ars_rnc', 'N/A')
+        medico_nombre = pacientes[0].get('medico_nombre', 'N/A')
+        medico_especialidad = pacientes[0].get('medico_especialidad', 'N/A')
+        medico_cedula = pacientes[0].get('medico_cedula', 'N/A')
+        medico_exequatur = pacientes[0].get('medico_exequatur', '')
+        ncf_tipo = ncf_data.get('tipo', 'CRÉDITO FISCAL') if ncf_data else 'CRÉDITO FISCAL'
+        ncf_fecha_fin = ncf_data.get('fecha_fin', '') if ncf_data else ''
+        
+        # Columna 1: Información de Factura
+        ws.merge_cells(f'A{row}:B{row}')
+        cell = ws[f'A{row}']
+        cell.value = 'Información de Factura'
+        cell.font = section_font
+        cell.fill = info_fill
+        cell.border = thin_border
+        
+        # Columna 2: NCF
+        ws.merge_cells(f'C{row}:D{row}')
+        cell = ws[f'C{row}']
+        cell.value = 'NCF'
+        cell.font = section_font
+        cell.fill = info_fill
+        cell.border = thin_border
+        
+        # Columna 3: Información del Médico
+        ws.merge_cells(f'E{row}:G{row}')
+        cell = ws[f'E{row}']
+        cell.value = 'Información del Médico'
+        cell.font = section_font
+        cell.fill = info_fill
+        cell.border = thin_border
+        
+        row += 1
+        
+        # Datos de columna 1
+        col1_row_start = row
+        ws.merge_cells(f'A{row}:B{row}')
+        ws[f'A{row}'] = f'Fecha: {fecha}'
+        ws[f'A{row}'].font = normal_font
+        ws[f'A{row}'].border = thin_border
+        row += 1
+        
+        ws.merge_cells(f'A{row}:B{row}')
+        ws[f'A{row}'] = f'Cliente (ARS): {ars_nombre}'
+        ws[f'A{row}'].font = normal_font
+        ws[f'A{row}'].border = thin_border
+        row += 1
+        
+        ws.merge_cells(f'A{row}:B{row}')
+        ws[f'A{row}'] = f'RNC: {ars_rnc}'
+        ws[f'A{row}'].font = normal_font
+        ws[f'A{row}'].border = thin_border
+        
+        # Datos de columna 2 (NCF)
+        row_ncf = col1_row_start
+        ws.merge_cells(f'C{row_ncf}:D{row_ncf}')
+        ws[f'C{row_ncf}'] = ncf
+        ws[f'C{row_ncf}'].font = Font(name='Arial', size=12, bold=True, color='B89BA3')
+        ws[f'C{row_ncf}'].border = thin_border
+        row_ncf += 1
+        
+        ws.merge_cells(f'C{row_ncf}:D{row_ncf}')
+        ws[f'C{row_ncf}'] = f'Tipo: {ncf_tipo}'
+        ws[f'C{row_ncf}'].font = normal_font
+        ws[f'C{row_ncf}'].border = thin_border
+        row_ncf += 1
+        
+        if ncf_fecha_fin:
+            ws.merge_cells(f'C{row_ncf}:D{row_ncf}')
+            ws[f'C{row_ncf}'] = f'Válido hasta: {ncf_fecha_fin}'
+            ws[f'C{row_ncf}'].font = normal_font
+            ws[f'C{row_ncf}'].border = thin_border
+        
+        # Datos de columna 3 (Médico)
+        row_med = col1_row_start
+        ws.merge_cells(f'E{row_med}:G{row_med}')
+        ws[f'E{row_med}'] = f'Médico: {medico_nombre}'
+        ws[f'E{row_med}'].font = bold_font
+        ws[f'E{row_med}'].border = thin_border
+        row_med += 1
+        
+        ws.merge_cells(f'E{row_med}:G{row_med}')
+        ws[f'E{row_med}'] = medico_especialidad
+        ws[f'E{row_med}'].font = normal_font
+        ws[f'E{row_med}'].border = thin_border
+        row_med += 1
+        
+        ws.merge_cells(f'E{row_med}:G{row_med}')
+        ws[f'E{row_med}'] = f'Cédula: {medico_cedula}'
+        ws[f'E{row_med}'].font = normal_font
+        ws[f'E{row_med}'].border = thin_border
+        
+        if medico_exequatur:
+            row_med += 1
+            ws.merge_cells(f'E{row_med}:G{row_med}')
+            ws[f'E{row_med}'] = f'Exequátur: {medico_exequatur}'
+            ws[f'E{row_med}'].font = normal_font
+            ws[f'E{row_med}'].border = thin_border
+        
+        row += 3  # Espacio después de la info
+    
+    # TABLA DE PACIENTES
+    headers = ['No.', 'NOMBRES PACIENTE', 'NSS/CONTRATO', 'FECHA', 'AUTORIZACIÓN', 'SERVICIO', 'V/UNITARIO']
+    
+    for col_idx, header in enumerate(headers, 1):
+        cell = ws.cell(row=row, column=col_idx)
+        cell.value = header
+        cell.font = Font(name='Arial', size=10, bold=True, color='FFFFFF')
+        cell.fill = header_fill
+        cell.alignment = center_align
+        cell.border = thin_border
+    
+    row += 1
+    
+    # Datos de pacientes
+    for idx, paciente in enumerate(pacientes, 1):
+        ws.cell(row=row, column=1, value=idx)
+        ws.cell(row=row, column=2, value=paciente['nombre_paciente'])
+        ws.cell(row=row, column=3, value=paciente['nss'])
+        ws.cell(row=row, column=4, value=paciente['fecha_servicio'])
+        ws.cell(row=row, column=5, value=paciente['autorizacion'])
+        ws.cell(row=row, column=6, value=paciente['descripcion_servicio'])
+        ws.cell(row=row, column=7, value=float(paciente['monto']))
+        
+        # Aplicar estilos
+        for col_idx in range(1, 8):
+            cell = ws.cell(row=row, column=col_idx)
+            cell.font = normal_font
+            cell.border = thin_border
+            
+            if col_idx == 1:
+                cell.alignment = center_align
+            elif col_idx == 7:
+                cell.alignment = right_align
+                cell.number_format = '"RD$"#,##0.00'
+            else:
+                cell.alignment = left_align
+        
+        row += 1
+    
+    row += 1  # Espacio antes de totales
+    
+    # TOTALES
+    subtotal = total
+    
+    # SUB-TOTAL
+    ws.merge_cells(f'F{row}:F{row}')
+    cell = ws[f'F{row}']
+    cell.value = 'SUB-TOTAL:'
+    cell.font = bold_font
+    cell.alignment = right_align
+    
+    cell = ws[f'G{row}']
+    cell.value = float(subtotal)
+    cell.font = bold_font
+    cell.alignment = right_align
+    cell.number_format = '"RD$"#,##0.00'
+    
+    row += 1
+    
+    # ITBIS
+    ws.merge_cells(f'F{row}:F{row}')
+    cell = ws[f'F{row}']
+    cell.value = 'ITBIS:'
+    cell.font = normal_font
+    cell.alignment = right_align
+    
+    cell = ws[f'G{row}']
+    cell.value = '*E'
+    cell.font = normal_font
+    cell.alignment = right_align
+    
+    row += 1
+    
+    # TOTAL
+    ws.merge_cells(f'F{row}:F{row}')
+    cell = ws[f'F{row}']
+    cell.value = 'TOTAL:'
+    cell.font = Font(name='Arial', size=12, bold=True)
+    cell.alignment = right_align
+    
+    cell = ws[f'G{row}']
+    cell.value = float(total)
+    cell.font = Font(name='Arial', size=12, bold=True, color='B89BA3')
+    cell.alignment = right_align
+    cell.number_format = '"RD$"#,##0.00'
+    
+    row += 3  # Espacio
+    
+    # FOOTER
+    if pacientes and len(pacientes) > 0:
+        ws.merge_cells(f'A{row}:G{row}')
+        cell = ws[f'A{row}']
+        cell.value = medico_nombre
+        cell.font = bold_font
+        cell.alignment = center_align
+        row += 1
+        
+        footer_text = medico_especialidad
+        if medico_cedula:
+            footer_text += f' | Cédula: {medico_cedula}'
+        if medico_exequatur:
+            footer_text += f' | EXEQUATUR: {medico_exequatur}'
+        
+        ws.merge_cells(f'A{row}:G{row}')
+        cell = ws[f'A{row}']
+        cell.value = footer_text
+        cell.font = normal_font
+        cell.alignment = center_align
+        row += 1
+        
+        if centro_medico:
+            centro_texto = f"{centro_medico['nombre']}, {centro_medico['direccion']}"
+        else:
+            centro_texto = 'Centro Oriental de Ginecología y Obstetricia, Zona Oriental, República Dominicana'
+        
+        ws.merge_cells(f'A{row}:G{row}')
+        cell = ws[f'A{row}']
+        cell.value = centro_texto
+        cell.font = normal_font
+        cell.alignment = center_align
+    
+    # Ajustar anchos de columna
+    ws.column_dimensions['A'].width = 8
+    ws.column_dimensions['B'].width = 25
+    ws.column_dimensions['C'].width = 15
+    ws.column_dimensions['D'].width = 12
+    ws.column_dimensions['E'].width = 15
+    ws.column_dimensions['F'].width = 30
+    ws.column_dimensions['G'].width = 15
+    
+    # Guardar en buffer
+    buffer = BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+    return buffer
+
 def enviar_email_factura(destinatario, factura_id, ncf, pdf_buffer, monto_total=0.00):
     """Enviar factura por email con template estandarizado usando SendGrid API"""
     try:
@@ -6377,6 +6671,81 @@ def facturacion_descargar_pdf(factura_id):
         if conn:
             conn.close()
         flash(f'Error al descargar el PDF: {str(e)}', 'error')
+        return redirect(url_for('facturacion_ver_factura', factura_id=factura_id))
+
+@app.route('/facturacion/descargar-excel/<int:factura_id>')
+@login_required
+def facturacion_descargar_excel(factura_id):
+    """Descargar Excel de factura generada"""
+    conn = get_db_connection()
+    
+    try:
+        # Obtener datos de la factura
+        factura = conn.execute('''
+            SELECT f.*, a.nombre_ars, a.rnc as ars_rnc, 
+                   m.nombre as medico_nombre, m.especialidad as medico_especialidad, 
+                   m.cedula as medico_cedula, m.exequatur as medico_exequatur,
+                   m.email as medico_email,
+                   n.tipo as ncf_tipo, n.prefijo as ncf_prefijo, n.fecha_fin as ncf_fecha_fin
+            FROM facturas f
+            JOIN ars a ON f.ars_id = a.id
+            JOIN medicos m ON f.medico_id = m.id
+            LEFT JOIN ncf n ON f.ncf_id = n.id
+            WHERE f.id = %s AND f.activo = 1
+        ''', (factura_id,)).fetchone()
+        
+        if not factura:
+            flash('Factura no encontrada', 'error')
+            conn.close()
+            return redirect(url_for('facturacion_historico'))
+        
+        # Obtener pacientes de la factura
+        pacientes = conn.execute('''
+            SELECT fd.*, m.nombre as medico_nombre, m.especialidad as medico_especialidad,
+                   m.cedula as medico_cedula, m.exequatur as medico_exequatur,
+                   a.nombre_ars, a.rnc as ars_rnc, ca.codigo_ars
+            FROM facturas_detalle fd
+            JOIN medicos m ON fd.medico_id = m.id
+            JOIN ars a ON fd.ars_id = a.id
+            LEFT JOIN codigo_ars ca ON ca.medico_id = m.id AND ca.ars_id = a.id
+            WHERE fd.factura_id = %s
+            ORDER BY fd.id
+        ''', (factura_id,)).fetchall()
+        
+        if not pacientes:
+            flash('No se encontraron pacientes en esta factura', 'error')
+            conn.close()
+            return redirect(url_for('facturacion_ver_factura', factura_id=factura_id))
+        
+        # Obtener datos del NCF
+        ncf_data = conn.execute('SELECT fecha_fin, tipo FROM ncf WHERE id = %s', (factura['ncf_id'],)).fetchone()
+        
+        # Obtener centro médico
+        centro_medico = conn.execute('SELECT * FROM centros_medicos WHERE id = %s', (factura['centro_medico_id'],)).fetchone()
+        
+        # Generar Excel
+        ncf_numero = factura['ncf_numero'] if factura['ncf_numero'] else factura.get('ncf', 'N/A')
+        excel_buffer = generar_excel_factura(factura_id, ncf_numero, factura['fecha_factura'], pacientes, factura['total'], ncf_data, centro_medico, factura)
+        
+        conn.close()
+        
+        # Nombre del archivo
+        nombre_archivo = f"Factura_{factura_id}_NCF_{ncf_numero.replace(' ', '_')}.xlsx"
+        
+        return send_file(
+            excel_buffer,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name=nombre_archivo
+        )
+        
+    except Exception as e:
+        print(f"❌ Error al descargar Excel de factura: {e}")
+        import traceback
+        traceback.print_exc()
+        if conn:
+            conn.close()
+        flash(f'Error al descargar el Excel: {str(e)}', 'error')
         return redirect(url_for('facturacion_ver_factura', factura_id=factura_id))
 
 @app.route('/facturacion/paciente/<int:paciente_id>/editar', methods=['GET', 'POST'])
