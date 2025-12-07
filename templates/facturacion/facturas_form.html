@@ -1030,12 +1030,38 @@ document.getElementById('formFactura').addEventListener('submit', function(e) {
 // Descargar PDF automáticamente si se acaba de agregar pacientes
 {% if descargar_pdf %}
 window.addEventListener('DOMContentLoaded', function() {
+    // Limpiar el formulario después de agregar pacientes exitosamente
+    limpiarFormulario();
+    
     // Esperar un momento para que se muestre el flash message
     setTimeout(function() {
         window.location.href = "{{ url_for('facturacion_pacientes_agregados_pdf') }}";
     }, 500);
 });
 {% endif %}
+
+// Función para limpiar todo el formulario
+function limpiarFormulario() {
+    // Limpiar selectores
+    document.getElementById('medico_id').value = '';
+    document.getElementById('ars_id').value = '';
+    document.getElementById('centro_medico_id').value = '';
+    document.getElementById('centro_medico_id').innerHTML = '<option value="">Seleccione primero un médico...</option>';
+    
+    // Limpiar tabla de pacientes
+    const tbody = document.getElementById('tbody-lineas');
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="8" class="text-center text-muted">
+                <i class="fas fa-info-circle me-2"></i>No hay pacientes agregados. 
+                Haga clic en "Agregar Línea" o cargue un archivo Excel.
+            </td>
+        </tr>
+    `;
+    
+    // Resetear contador de líneas
+    numeroLinea = 0;
+}
 
 // ========== PREVENIR ENTER NORMAL, PERMITIR CTRL+ENTER ==========
 document.addEventListener('keydown', function(e) {
