@@ -4703,7 +4703,18 @@ def procesar_excel():
             
             # ========== VALIDACIÓN 2: NSS (Solo números y guiones) ==========
             import re
-            nss = str(nss_raw).strip()
+            # Limpiar NSS: si Excel lo convirtió a float (ej: 136605324.0), remover decimales
+            try:
+                # Si es un número, convertir a int para eliminar decimales espurios
+                nss_temp = float(nss_raw)
+                if nss_temp.is_integer():
+                    nss = str(int(nss_temp)).strip()
+                else:
+                    nss = str(nss_raw).strip()
+            except (ValueError, TypeError):
+                # Si no es número, usar como string (puede tener guiones)
+                nss = str(nss_raw).strip()
+            
             if not re.match(r'^[0-9\-]+$', nss):
                 errores.append(f'❌ Fila {row_num}: NSS "{nss}" solo debe contener números y guiones')
                 continue
