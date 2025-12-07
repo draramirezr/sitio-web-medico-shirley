@@ -105,9 +105,9 @@
     }
     
     .btn-editar-factura {
-        background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%);
-        border: none;
-        color: white;
+        background: white;
+        border: 2px solid #CEB0B7;
+        color: #CEB0B7;
         padding: 0.5rem 1.2rem;
         border-radius: 10px;
         font-weight: 600;
@@ -118,30 +118,20 @@
         margin: 0.2rem;
     }
     
-    .btn-editar-factura i {
-        color: white !important;
-    }
-    
     .btn-editar-factura:hover {
-        background: linear-gradient(135deg, #B89BA3 0%, #A88B8F 100%);
+        background: #AB9B9F;
         color: white;
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(206, 176, 183, 0.4);
     }
     
-    .btn-editar-factura:hover i {
-        color: white !important;
-    }
-    
     .btn-editar-factura.disabled {
         background: #cccccc;
+        border-color: #cccccc;
+        color: white;
         cursor: not-allowed;
         opacity: 0.6;
         pointer-events: none;
-    }
-    
-    .btn-editar-factura.disabled i {
-        color: white !important;
     }
     
     .badge-ncf {
@@ -156,9 +146,9 @@
     }
     
     .btn-filtrar {
-        background: linear-gradient(135deg, #ACACAD 0%, #9A9A9B 100%);
-        border: none;
-        color: white;
+        background: white;
+        border: 2px solid var(--primary-color);
+        color: var(--primary-color);
         padding: 0.6rem 2rem;
         border-radius: 10px;
         font-weight: 600;
@@ -166,10 +156,10 @@
     }
     
     .btn-filtrar:hover {
-        background: linear-gradient(135deg, #9A9A9B 0%, #8A8A8B 100%);
+        background: #AB9B9F;
         color: white;
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(172, 172, 173, 0.4);
+        box-shadow: 0 8px 25px rgba(206, 176, 183, 0.4);
     }
     
     .btn-limpiar {

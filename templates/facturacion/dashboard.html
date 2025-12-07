@@ -293,9 +293,9 @@
     }
     
     .btn-filter {
-        background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%);
-        border: none;
-        color: white;
+        background: white;
+        border: 2px solid var(--primary-color);
+        color: var(--primary-color);
         border-radius: 12px;
         padding: 0.85rem 2rem;
         font-weight: 600;
@@ -306,6 +306,8 @@
     }
     
     .btn-filter:hover {
+        background: #AB9B9F;
+        color: white;
         transform: translateY(-3px);
         box-shadow: 0 8px 25px rgba(206, 176, 183, 0.4);
     }
@@ -324,7 +326,6 @@
             0 0 0 1px rgba(206, 176, 183, 0.05) inset;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         height: 100%;
-        border-left: 5px solid;
         position: relative;
         overflow: hidden;
         z-index: 1;
@@ -356,22 +357,18 @@
     }
     
     .stat-card.primary { 
-        border-color: var(--primary-color);
         color: var(--primary-color);
     }
     
     .stat-card.success { 
-        border-color: var(--success-color);
         color: var(--success-color);
     }
     
     .stat-card.warning { 
-        border-color: var(--warning-color);
         color: var(--warning-color);
     }
     
     .stat-card.danger { 
-        border-color: var(--danger-color);
         color: var(--danger-color);
     }
     
@@ -469,10 +466,9 @@
     
     /* Botón Volver Moderno */
     .btn-volver {
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(10px);
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        color: white;
+        background: white;
+        border: 2px solid white;
+        color: var(--primary-color);
         border-radius: 15px;
         padding: 0.85rem 1.8rem;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -485,10 +481,10 @@
     }
     
     .btn-volver:hover {
-        background: rgba(255, 255, 255, 0.3);
-        border-color: rgba(255, 255, 255, 0.5);
+        background: var(--primary-color);
+        border-color: var(--primary-color);
         transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 8px 25px rgba(206, 176, 183, 0.3);
         color: white;
     }
     
