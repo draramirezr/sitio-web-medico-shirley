@@ -94,7 +94,7 @@
         margin-bottom: 2rem;
         border: 1px solid rgba(206, 176, 183, 0.1);
         position: relative;
-        z-index: 100;
+        z-index: 10;
     }
     
     .filter-card h3 {
@@ -208,7 +208,7 @@
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
         max-height: 300px;
         overflow-y: auto;
-        z-index: 9999;
+        z-index: 99999;
         display: none;
     }
     
@@ -263,14 +263,16 @@
     
     .multiselect-header {
         padding: 0.8rem 1rem;
-        background: rgba(206, 176, 183, 0.05);
+        background: white;
         border-bottom: 2px solid rgba(206, 176, 183, 0.2);
         display: flex;
         justify-content: space-between;
         align-items: center;
         position: sticky;
         top: 0;
-        z-index: 10;
+        z-index: 100;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
     }
     
     .select-all-btn {
@@ -731,7 +733,7 @@
             </div>
             
             <button type="submit" class="btn-filter">
-                <i class="fas fa-search me-2"></i>Filtrar
+                <i class="fas fa-filter me-2"></i>Aplicar Filtros
             </button>
         </form>
     </div>
