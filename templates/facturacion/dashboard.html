@@ -915,6 +915,36 @@
         updateSelectedText('medico_consulta');
     });
     
+    // ==================== PROCESAR FORMULARIO ANTES DE ENVIAR ====================
+    // Si TODOS los checkboxes de un filtro están marcados, desmarcarlos para enviar "sin filtro"
+    document.getElementById('filterForm').addEventListener('submit', function(e) {
+        // Procesar cada grupo de filtros
+        const filterGroups = [
+            { name: 'ars', dropdown: 'ars-dropdown' },
+            {% if es_administrador %}
+            { name: 'medico_factura', dropdown: 'medico_factura-dropdown' },
+            {% endif %}
+            { name: 'medico_consulta', dropdown: 'medico_consulta-dropdown' }
+        ];
+        
+        filterGroups.forEach(group => {
+            const dropdown = document.getElementById(group.dropdown);
+            if (!dropdown) return;
+            
+            const checkboxes = dropdown.querySelectorAll('input[type="checkbox"]');
+            const totalCheckboxes = checkboxes.length;
+            const checkedCheckboxes = Array.from(checkboxes).filter(cb => cb.checked).length;
+            
+            // Si TODOS están marcados O NINGUNO está marcado, desmarcar todos para enviar "sin filtro"
+            if (checkedCheckboxes === totalCheckboxes || checkedCheckboxes === 0) {
+                checkboxes.forEach(cb => cb.checked = false);
+            }
+        });
+        
+        // Continuar con el envío del formulario
+        return true;
+    });
+    
     // ==================== FUNCIONES PARA GRÁFICOS ====================
     
     // Esperar a que se cargue Chart.js antes de ejecutar
