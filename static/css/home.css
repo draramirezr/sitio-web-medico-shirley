@@ -971,8 +971,15 @@
         color: var(--title-color);
         font-size: 1.15rem;
         font-weight: 700;
-        border-top: 2px solid var(--primary-color);
-        padding-top: 1.2rem;
+    }
+    
+    .testimonial-avatar {
+        box-shadow: 0 4px 12px rgba(206, 176, 183, 0.3);
+        transition: transform 0.3s ease;
+    }
+    
+    .testimonial-card:hover .testimonial-avatar {
+        transform: scale(1.1);
     }
     
     .testimonial-rating {
