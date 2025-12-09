@@ -24,8 +24,8 @@
     <title>{% block title %}Dra. Shirley Ramírez - Ginecóloga y Obstetra en Santo Domingo | Salud Femenina{% endblock %}</title>
     
     <!-- Meta Tags SEO -->
-    <meta name="description" content="{% block description %}🏆 Dra. Shirley Ramírez - Ginecóloga y Obstetra en Santo Domingo, República Dominicana. Especialista en salud femenina, embarazo, control prenatal y tratamientos estéticos ginecológicos. ✅ Atención personalizada. 📞 829-740-5073{% endblock %}">
-    <meta name="keywords" content="ginecóloga Santo Domingo, obstetra República Dominicana, Dra Shirley Ramírez, control prenatal Santo Domingo, tratamientos estéticos ginecológicos, salud femenina República Dominicana, embarazo Santo Domingo, parto República Dominicana, ginecología estética, medicina reproductiva Santo Domingo, consulta ginecológica, mejor ginecóloga Santo Domingo">
+    <meta name="description" content="{% block description %}Ginecóloga y Obstetra en Santo Domingo Este. Experta en Ginecología Estética Láser: Rejuvenecimiento vaginal, tensado vaginal y labioplastia. Control prenatal, embarazo y salud femenina integral. Citas: 829-740-5073{% endblock %}">
+    <meta name="keywords" content="ginecóloga Santo Domingo Este, ginecología estética láser, rejuvenecimiento vaginal, tensado vaginal, labioplastia Santo Domingo, Dra Shirley Ramírez, control prenatal Santo Domingo, tratamientos estéticos ginecológicos, salud femenina República Dominicana, embarazo Santo Domingo, mejor ginecóloga Santo Domingo, obstetra Santo Domingo Este">
     <meta name="author" content="Dra. Shirley Ramírez">
     <meta name="robots" content="{% block robots %}index, follow{% endblock %}">
     <link rel="canonical" href="https://www.draramirez.com{{ request.path }}">
@@ -34,15 +34,15 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.draramirez.com{{ request.path }}">
-    <meta property="og:title" content="{% block og_title %}Dra. Shirley Ramírez - Ginecóloga y Obstetra{% endblock %}">
-    <meta property="og:description" content="{% block og_description %}Especialista en salud femenina, embarazo y parto. Atención personalizada y profesional.{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}Dra. Shirley Ramírez - Ginecóloga y Obstetra en Santo Domingo Este{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Experta en Ginecología Estética Láser: Rejuvenecimiento vaginal, tensado y labioplastia. Control prenatal y salud femenina integral.{% endblock %}">
     <meta property="og:image" content="{{ url_for('static', filename='logos/logo-dra-shirley.png', _external=True) }}">
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://www.draramirez.com{{ request.path }}">
-    <meta property="twitter:title" content="{% block twitter_title %}Dra. Shirley Ramírez - Ginecóloga y Obstetra{% endblock %}">
-    <meta property="twitter:description" content="{% block twitter_description %}Especialista en salud femenina, embarazo y parto.{% endblock %}">
+    <meta property="twitter:title" content="{% block twitter_title %}Dra. Shirley Ramírez - Ginecóloga y Obstetra en Santo Domingo Este{% endblock %}">
+    <meta property="twitter:description" content="{% block twitter_description %}Experta en Ginecología Estética Láser: Rejuvenecimiento vaginal, tensado y labioplastia. Control prenatal.{% endblock %}">
     <meta property="twitter:image" content="{{ url_for('static', filename='logos/logo-dra-shirley.png', _external=True) }}">
     
     <!-- Schema.org Structured Data para SEO Médico - Optimizado para Google -->
@@ -54,8 +54,30 @@
       "alternateName": "Dra. Shirley Ramírez",
       "image": "{{ url_for('static', filename='logos/logo-dra-shirley.png', _external=True) }}",
       "logo": "{{ url_for('static', filename='logos/logo-dra-shirley.png', _external=True) }}",
-      "description": "Ginecóloga y Obstetra en Santo Domingo especializada en salud femenina, embarazo, control prenatal, medicina reproductiva y tratamientos estéticos ginecológicos. Atención personalizada con tecnología de vanguardia.",
-      "medicalSpecialty": ["Gynecology", "Obstetrics", "Women's Health", "Reproductive Medicine", "Aesthetic Gynecology"],
+      "description": "Ginecóloga y Obstetra en Santo Domingo Este. Experta en Ginecología Estética Láser: Rejuvenecimiento vaginal, tensado vaginal, labioplastia. Control prenatal, embarazo y salud femenina integral con tecnología de vanguardia.",
+      "medicalSpecialty": ["Gynecology", "Obstetrics", "Women's Health", "Reproductive Medicine", "Aesthetic Gynecology", "Laser Gynecology"],
+      "availableService": [
+        {
+          "@type": "MedicalProcedure",
+          "name": "Rejuvenecimiento Vaginal con Láser",
+          "description": "Tratamiento estético para mejorar la elasticidad y apariencia vaginal"
+        },
+        {
+          "@type": "MedicalProcedure",
+          "name": "Tensado Vaginal",
+          "description": "Procedimiento para recuperar la tonicidad vaginal"
+        },
+        {
+          "@type": "MedicalProcedure",
+          "name": "Labioplastia",
+          "description": "Cirugía estética de labios menores y mayores"
+        },
+        {
+          "@type": "MedicalProcedure",
+          "name": "Control Prenatal",
+          "description": "Seguimiento completo del embarazo"
+        }
+      ],
       "priceRange": "$$",
       "address": {
         "@type": "PostalAddress",
@@ -963,7 +985,7 @@
                             </p>
                             <p class="text-muted mb-0" style="font-size: 0.85rem;">
                                 <i class="fas fa-envelope me-2"></i>
-                                <a href="mailto:dra.ramirezr@gmail.com" class="text-muted text-decoration-none">dra.ramirezr@gmail.com</a>
+                                <a href="mailto:dra.ramirezr@gmail.com" class="text-muted text-decoration-none" data-nosnippet>Contacto por email</a>
                             </p>
                         </div>
                     </div>
@@ -974,7 +996,7 @@
             
             <div class="row align-items-center">
                 <div class="col-md-12 text-center">
-                    <p class="text-muted mb-0" style="font-size: 0.85rem;">
+                    <p class="text-muted mb-0" style="font-size: 0.85rem;" data-nosnippet>
                         &copy; 2025 Dra. Shirley Ramírez. Todos los derechos reservados.
                     </p>
                 </div>
