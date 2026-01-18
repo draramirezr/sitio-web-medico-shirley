@@ -159,6 +159,41 @@
     .animate-card {
         animation: slideInUp 0.5s ease-out;
     }
+    
+    /* Contenedor de citas con scroll personalizado */
+    .appointments-container {
+        scrollbar-width: thin;
+        scrollbar-color: var(--primary-color) #f1f1f1;
+    }
+    
+    .appointments-container::-webkit-scrollbar {
+        width: 12px;
+    }
+    
+    .appointments-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+        margin: 10px 0;
+    }
+    
+    .appointments-container::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        border-radius: 10px;
+        border: 2px solid #f1f1f1;
+        transition: all 0.3s ease;
+    }
+    
+    .appointments-container::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, #9B8A8E 100%);
+        border: 2px solid #e0e0e0;
+    }
+    
+    /* Indicador visual de que hay más contenido */
+    .appointments-container::after {
+        content: '';
+        display: block;
+        height: 1px;
+    }
 </style>
 
 <div class="container py-5">
@@ -180,7 +215,28 @@
     </div>
 
     {% if appointments %}
-    <div class="row">
+    <!-- Indicador de cantidad de citas -->
+    <div class="alert alert-info mb-3" style="background: linear-gradient(135deg, rgba(206, 176, 183, 0.15) 0%, rgba(206, 176, 183, 0.25) 100%); border: 2px solid var(--primary-color); border-radius: 15px;">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <i class="fas fa-info-circle me-2" style="color: var(--primary-color);"></i>
+                <strong style="color: var(--primary-color);">Total de citas:</strong> 
+                <span class="badge" style="background: var(--primary-color); color: white; font-size: 1rem; padding: 0.4rem 0.8rem;">
+                    {{ appointments|length }}
+                </span>
+            </div>
+            {% if appointments|length > 3 %}
+            <small style="color: var(--primary-dark);">
+                <i class="fas fa-arrow-down me-1"></i>
+                Desplázate para ver todas las citas
+            </small>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Contenedor con scroll para citas -->
+    <div class="appointments-container" style="max-height: 1400px; overflow-y: auto; padding-right: 10px;">
+        <div class="row">
         {% for appointment in appointments %}
         <div class="col-12 mb-4">
             <div class="card appointment-card">
@@ -279,6 +335,12 @@
                                     <i class="fas fa-eye me-2"></i>
                                     Ver Detalles Completos
                                 </button>
+                                
+                                <!-- Botón para eliminar cita -->
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ appointment['id'] }}">
+                                    <i class="fas fa-trash-alt me-2"></i>
+                                    Eliminar Cita
+                                </button>
                             </div>
                             <small class="text-muted d-block mt-2">
                                 <i class="fas fa-calendar-plus"></i>
@@ -373,8 +435,50 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Modal de confirmación para eliminar -->
+        <div class="modal fade" id="deleteModal{{ appointment['id'] }}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Confirmar Eliminación
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-3">¿Estás seguro que deseas eliminar esta cita?</p>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Esta acción no se puede deshacer.</strong>
+                        </div>
+                        <div class="p-3 bg-light rounded">
+                            <strong>Paciente:</strong> {{ appointment['first_name'] }} {{ appointment['last_name'] }}<br>
+                            <strong>Teléfono:</strong> {{ appointment['phone'] }}<br>
+                            <strong>Tipo:</strong> {{ appointment['appointment_type'] }}<br>
+                            {% if appointment['appointment_date'] %}
+                            <strong>Fecha:</strong> {{ appointment['appointment_date'] }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Cancelar
+                        </button>
+                        <form action="{{ url_for('delete_appointment', appointment_id=appointment['id']) }}" method="POST" style="display: inline;">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash-alt me-2"></i>Sí, Eliminar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
         {% endfor %}
+        </div>
     </div>
+    <!-- Fin contenedor con scroll -->
 
     <!-- Resumen de citas por estado -->
     <div class="row mt-5">
@@ -389,20 +493,32 @@
                 <div class="card-body">
                     <div class="row text-center">
                         <div class="col-md-3">
-                            <h4 class="text-warning">{{ appointments|selectattr('11', 'equalto', 'pending')|list|length }}</h4>
-                            <p>Pendientes</p>
+                            <h4 class="text-warning">
+                                <i class="fas fa-clock me-2"></i>
+                                {{ appointments|selectattr('status', 'equalto', 'pending')|list|length }}
+                            </h4>
+                            <p class="mb-0 fw-bold">Pendientes</p>
                         </div>
                         <div class="col-md-3">
-                            <h4 class="text-success">{{ appointments|selectattr('11', 'equalto', 'confirmed')|list|length }}</h4>
-                            <p>Confirmadas</p>
+                            <h4 class="text-success">
+                                <i class="fas fa-check-circle me-2"></i>
+                                {{ appointments|selectattr('status', 'equalto', 'confirmed')|list|length }}
+                            </h4>
+                            <p class="mb-0 fw-bold">Confirmadas</p>
                         </div>
                         <div class="col-md-3">
-                            <h4 class="text-info">{{ appointments|selectattr('11', 'equalto', 'completed')|list|length }}</h4>
-                            <p>Completadas</p>
+                            <h4 class="text-info">
+                                <i class="fas fa-clipboard-check me-2"></i>
+                                {{ appointments|selectattr('status', 'equalto', 'completed')|list|length }}
+                            </h4>
+                            <p class="mb-0 fw-bold">Completadas</p>
                         </div>
                         <div class="col-md-3">
-                            <h4 class="text-danger">{{ appointments|selectattr('11', 'equalto', 'cancelled')|list|length }}</h4>
-                            <p>Canceladas</p>
+                            <h4 class="text-danger">
+                                <i class="fas fa-times-circle me-2"></i>
+                                {{ appointments|selectattr('status', 'equalto', 'cancelled')|list|length }}
+                            </h4>
+                            <p class="mb-0 fw-bold">Canceladas</p>
                         </div>
                     </div>
                 </div>

@@ -152,6 +152,41 @@
     .animate-card {
         animation: slideInUp 0.5s ease-out;
     }
+    
+    /* Contenedor de mensajes con scroll personalizado */
+    .messages-container {
+        scrollbar-width: thin;
+        scrollbar-color: var(--primary-color) #f1f1f1;
+    }
+    
+    .messages-container::-webkit-scrollbar {
+        width: 12px;
+    }
+    
+    .messages-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+        margin: 10px 0;
+    }
+    
+    .messages-container::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        border-radius: 10px;
+        border: 2px solid #f1f1f1;
+        transition: all 0.3s ease;
+    }
+    
+    .messages-container::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, #9B8A8E 100%);
+        border: 2px solid #e0e0e0;
+    }
+    
+    /* Indicador visual de que hay más contenido */
+    .messages-container::after {
+        content: '';
+        display: block;
+        height: 1px;
+    }
 </style>
 
 <div class="container py-5">
@@ -173,7 +208,36 @@
     </div>
 
     {% if messages %}
-    <div class="row">
+    <!-- Indicador de cantidad de mensajes -->
+    <div class="alert alert-info mb-3" style="background: linear-gradient(135deg, rgba(206, 176, 183, 0.15) 0%, rgba(206, 176, 183, 0.25) 100%); border: 2px solid var(--primary-color); border-radius: 15px;">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <i class="fas fa-info-circle me-2" style="color: var(--primary-color);"></i>
+                <strong style="color: var(--primary-color);">Total de mensajes:</strong> 
+                <span class="badge" style="background: var(--primary-color); color: white; font-size: 1rem; padding: 0.4rem 0.8rem;">
+                    {{ messages|length }}
+                </span>
+                <span class="ms-3">
+                    <i class="fas fa-envelope-open text-success me-1"></i>
+                    <strong>Leídos:</strong> <span class="badge bg-success">{{ messages|selectattr('read')|list|length }}</span>
+                </span>
+                <span class="ms-2">
+                    <i class="fas fa-envelope text-danger me-1"></i>
+                    <strong>Sin leer:</strong> <span class="badge bg-danger">{{ messages|rejectattr('read')|list|length }}</span>
+                </span>
+            </div>
+            {% if messages|length > 3 %}
+            <small style="color: var(--primary-dark);">
+                <i class="fas fa-arrow-down me-1"></i>
+                Desplázate para ver todos los mensajes
+            </small>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Contenedor con scroll para mensajes -->
+    <div class="messages-container" style="max-height: 1400px; overflow-y: auto; padding-right: 10px;">
+        <div class="row">
         {% for message in messages %}
         <div class="col-12 mb-4">
             <div class="card message-card {% if not message['read'] %}message-unread{% endif %}">
@@ -253,6 +317,12 @@
                                     Marcar como Leído
                                 </button>
                                 {% endif %}
+                                
+                                <!-- Botón para eliminar mensaje -->
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteMessageModal{{ message['id'] }}">
+                                    <i class="fas fa-trash-alt me-2"></i>
+                                    Eliminar Mensaje
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -319,8 +389,48 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Modal de confirmación para eliminar mensaje -->
+        <div class="modal fade" id="deleteMessageModal{{ message['id'] }}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Confirmar Eliminación
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-3">¿Estás seguro que deseas eliminar este mensaje?</p>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Esta acción no se puede deshacer.</strong>
+                        </div>
+                        <div class="p-3 bg-light rounded">
+                            <strong>De:</strong> {{ message['name'] }}<br>
+                            <strong>Email:</strong> {{ message['email'] }}<br>
+                            <strong>Asunto:</strong> {{ message['subject'] }}<br>
+                            <strong>Fecha:</strong> {{ message['created_at'] }}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Cancelar
+                        </button>
+                        <form action="{{ url_for('delete_message', message_id=message['id']) }}" method="POST" style="display: inline;">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash-alt me-2"></i>Sí, Eliminar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
         {% endfor %}
+        </div>
     </div>
+    <!-- Fin contenedor con scroll -->
 
     <!-- Resumen -->
     <div class="row mt-5">
@@ -335,12 +445,18 @@
                 <div class="card-body">
                     <div class="row text-center">
                         <div class="col-md-6">
-                            <h4 class="text-danger">{{ messages|rejectattr('6')|list|length }}</h4>
-                            <p>Sin Leer</p>
+                            <h4 class="text-danger">
+                                <i class="fas fa-envelope me-2"></i>
+                                {{ messages|rejectattr('read')|list|length }}
+                            </h4>
+                            <p class="mb-0 fw-bold">Sin Leer</p>
                         </div>
                         <div class="col-md-6">
-                            <h4 class="text-success">{{ messages|selectattr('6')|list|length }}</h4>
-                            <p>Leídos</p>
+                            <h4 class="text-success">
+                                <i class="fas fa-envelope-open me-2"></i>
+                                {{ messages|selectattr('read')|list|length }}
+                            </h4>
+                            <p class="mb-0 fw-bold">Leídos</p>
                         </div>
                     </div>
                 </div>

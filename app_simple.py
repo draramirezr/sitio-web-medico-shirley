@@ -166,10 +166,12 @@ RECAPTCHA_SECRET_KEY = os.getenv('RECAPTCHA_SECRET_KEY', '')
 app.config['SESSION_COOKIE_SECURE'] = os.getenv('FLASK_ENV') == 'production'  # True en producción
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_DOMAIN'] = '.draramirez.com'  # Permite cookies en www y sin www
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=8)
 app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=7)
 app.config['REMEMBER_COOKIE_SECURE'] = os.getenv('FLASK_ENV') == 'production'
 app.config['REMEMBER_COOKIE_HTTPONLY'] = True
+app.config['REMEMBER_COOKIE_DOMAIN'] = '.draramirez.com'  # Permite cookies en www y sin www
 
 # Desactivar caché de templates para desarrollo
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -287,6 +289,8 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 login_manager.login_message = None  # Desactivar mensaje automático para evitar duplicación
 login_manager.login_message_category = 'warning'
+login_manager.session_protection = 'strong'  # Protección fuerte contra secuestro de sesión
+login_manager.refresh_view = 'login'  # Vista para refrescar autenticación si expira
 
 # Configuración de compresión Gzip/Brotli para máxima velocidad
 if COMPRESS_AVAILABLE:
@@ -609,8 +613,31 @@ def load_user(user_id):
 
 @app.before_request
 def check_password_temporal():
-    """Verificar si el usuario tiene contraseña temporal y forzar cambio"""
-    # Solo para usuarios autenticados
+    """
+    1. Redirigir a URL canónica (HTTPS + WWW) para SEO
+    2. Verificar si el usuario tiene contraseña temporal y forzar cambio
+    """
+    # PASO 1: Forzar URL canónica (HTTPS + WWW) - Importante para SEO
+    # Solo en producción (cuando no es localhost)
+    if request.host not in ['localhost', '127.0.0.1', 'localhost:5000', '127.0.0.1:5000']:
+        # Obtener la URL completa
+        url = request.url
+        
+        # Verificar si NO es HTTPS o NO tiene WWW
+        if request.scheme != 'https' or not request.host.startswith('www.'):
+            # IMPORTANTE: Solo redirigir si NO es una petición autenticada para evitar pérdida de sesión
+            # Las peticiones de usuarios logueados deben mantener su sesión
+            if not current_user.is_authenticated:
+                # Construir la URL canónica correcta
+                canonical_host = 'www.draramirez.com'
+                
+                # Reemplazar el esquema y host por la versión canónica
+                canonical_url = url.replace(f'{request.scheme}://{request.host}', f'https://{canonical_host}')
+                
+                # Redirección permanente 301 (importante para SEO)
+                return redirect(canonical_url, code=301)
+    
+    # PASO 2: Verificar contraseña temporal (solo para usuarios autenticados)
     if current_user.is_authenticated:
         # Excluir rutas de cambio de contraseña y logout para evitar loops
         if request.endpoint not in ['cambiar_password_obligatorio', 'logout', 'static']:
@@ -2607,6 +2634,39 @@ def update_appointment_status_ajax(appointment_id):
         print(f"Error al actualizar estado de cita: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@app.route('/admin/appointments/<int:appointment_id>/delete', methods=['POST'])
+@login_required
+def delete_appointment(appointment_id):
+    """Eliminar una cita permanentemente"""
+    try:
+        conn = get_db_connection()
+        
+        # Obtener datos de la cita antes de eliminar (para el log)
+        appointment = conn.execute(
+            'SELECT * FROM appointments WHERE id = %s',
+            (appointment_id,)
+        ).fetchone()
+        
+        if not appointment:
+            conn.close()
+            flash('Cita no encontrada', 'error')
+            return redirect(url_for('admin_appointments'))
+        
+        # Eliminar la cita
+        conn.execute('DELETE FROM appointments WHERE id = %s', (appointment_id,))
+        conn.commit()
+        conn.close()
+        
+        print(f"✅ Cita eliminada: ID={appointment_id}, Paciente: {appointment['first_name']} {appointment['last_name']}")
+        flash(f'Cita de {appointment["first_name"]} {appointment["last_name"]} eliminada correctamente', 'success')
+        
+        return redirect(url_for('admin_appointments'))
+        
+    except Exception as e:
+        print(f"❌ Error al eliminar cita: {e}")
+        flash(f'Error al eliminar la cita: {str(e)}', 'error')
+        return redirect(url_for('admin_appointments'))
+
 @app.route('/admin/messages/<int:message_id>/mark-read', methods=['POST'])
 @login_required
 def mark_message_read(message_id):
@@ -2625,6 +2685,39 @@ def mark_message_read(message_id):
         import traceback
         traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/admin/messages/<int:message_id>/delete', methods=['POST'])
+@login_required
+def delete_message(message_id):
+    """Eliminar un mensaje permanentemente"""
+    try:
+        conn = get_db_connection()
+        
+        # Obtener datos del mensaje antes de eliminar (para el log)
+        message = conn.execute(
+            'SELECT * FROM contact_messages WHERE id = %s',
+            (message_id,)
+        ).fetchone()
+        
+        if not message:
+            conn.close()
+            flash('Mensaje no encontrado', 'error')
+            return redirect(url_for('admin_messages'))
+        
+        # Eliminar el mensaje
+        conn.execute('DELETE FROM contact_messages WHERE id = %s', (message_id,))
+        conn.commit()
+        conn.close()
+        
+        print(f"✅ Mensaje eliminado: ID={message_id}, De: {message['name']} ({message['email']})")
+        flash(f'Mensaje de {message["name"]} eliminado correctamente', 'success')
+        
+        return redirect(url_for('admin_messages'))
+        
+    except Exception as e:
+        print(f"❌ Error al eliminar mensaje: {e}")
+        flash(f'Error al eliminar el mensaje: {str(e)}', 'error')
+        return redirect(url_for('admin_messages'))
 
 @app.route('/admin/messages/<int:message_id>/block-sender', methods=['POST'])
 @login_required
@@ -6223,9 +6316,9 @@ def facturacion_dashboard():
     
     total_facturado = conn.execute(query_monto, params_monto).fetchone()['total']
     
-    # ARS Pendientes por Facturar (nombres de ARS con pacientes pendientes)
+    # ARS Pendientes por Facturar (nombres de ARS con pacientes pendientes y montos)
     query_ars_pendientes = '''
-        SELECT DISTINCT a.nombre_ars 
+        SELECT a.nombre_ars, COALESCE(SUM(fd.monto), 0) as monto_pendiente
         FROM facturas_detalle fd
         JOIN ars a ON fd.ars_id = a.id
         WHERE fd.estado = 'pendiente'
@@ -6244,10 +6337,11 @@ def facturacion_dashboard():
         query_ars_pendientes += ' AND fd.medico_consulta IN (' + placeholders_medicos_c + ')'
         params_ars_pendientes.extend(medico_consulta_ids)
     
-    query_ars_pendientes += ' ORDER BY a.nombre_ars'
+    query_ars_pendientes += ' GROUP BY a.nombre_ars ORDER BY monto_pendiente DESC, a.nombre_ars'
     
     ars_pendientes = conn.execute(query_ars_pendientes, params_ars_pendientes).fetchall()
-    ars_pendientes_nombres = [row['nombre_ars'] for row in ars_pendientes]
+    # Convertir a lista de diccionarios con nombre y monto
+    ars_pendientes_detalle = [{'nombre': row['nombre_ars'], 'monto': row['monto_pendiente']} for row in ars_pendientes]
     
     # Monto total pendiente por facturar (suma de todos los costos de servicios pendientes)
     query_monto_pendiente = '''
@@ -6432,7 +6526,7 @@ def facturacion_dashboard():
     return render_template('facturacion/dashboard.html',
                          total_facturas=total_facturas,
                          total_facturado=total_facturado,
-                         ars_pendientes_nombres=ars_pendientes_nombres,
+                         ars_pendientes_detalle=ars_pendientes_detalle,
                          monto_pendiente=monto_pendiente,
                          pacientes_facturados=pacientes_facturados,
                          facturacion_por_mes=facturacion_por_mes,
