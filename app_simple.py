@@ -614,30 +614,12 @@ def load_user(user_id):
 @app.before_request
 def check_password_temporal():
     """
-    1. Redirigir a URL canónica (HTTPS + WWW) para SEO
-    2. Verificar si el usuario tiene contraseña temporal y forzar cambio
+    Verificar si el usuario tiene contraseña temporal y forzar cambio
     """
-    # PASO 1: Forzar URL canónica (HTTPS + WWW) - Importante para SEO
-    # Solo en producción (cuando no es localhost)
-    if request.host not in ['localhost', '127.0.0.1', 'localhost:5000', '127.0.0.1:5000']:
-        # Obtener la URL completa
-        url = request.url
-        
-        # Verificar si NO es HTTPS o NO tiene WWW
-        if request.scheme != 'https' or not request.host.startswith('www.'):
-            # IMPORTANTE: Solo redirigir si NO es una petición autenticada para evitar pérdida de sesión
-            # Las peticiones de usuarios logueados deben mantener su sesión
-            if not current_user.is_authenticated:
-                # Construir la URL canónica correcta
-                canonical_host = 'www.draramirez.com'
-                
-                # Reemplazar el esquema y host por la versión canónica
-                canonical_url = url.replace(f'{request.scheme}://{request.host}', f'https://{canonical_host}')
-                
-                # Redirección permanente 301 (importante para SEO)
-                return redirect(canonical_url, code=301)
+    # NOTA: Redirección HTTPS/WWW deshabilitada temporalmente por bucle infinito
+    # Railway maneja HTTPS automáticamente con su proxy
     
-    # PASO 2: Verificar contraseña temporal (solo para usuarios autenticados)
+    # Verificar contraseña temporal (solo para usuarios autenticados)
     if current_user.is_authenticated:
         # Excluir rutas de cambio de contraseña y logout para evitar loops
         if request.endpoint not in ['cambiar_password_obligatorio', 'logout', 'static']:
