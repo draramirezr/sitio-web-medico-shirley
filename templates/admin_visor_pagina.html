@@ -91,6 +91,7 @@
         margin-right: 15px;
         cursor: pointer;
         accent-color: #002D62;
+        flex-shrink: 0;
     }
     
     .radio-label {
@@ -148,6 +149,146 @@
     .btn-back:hover {
         background: var(--primary-color);
         color: white;
+    }
+    
+    /* ========== RESPONSIVE DESIGN ========== */
+    
+    /* Tablets (768px - 992px) */
+    @media (max-width: 992px) {
+        .visor-container {
+            margin: 30px auto;
+            padding: 15px;
+        }
+        
+        .visor-header {
+            padding: 25px 20px;
+        }
+        
+        .visor-title {
+            font-size: 24px;
+        }
+        
+        .form-container {
+            padding: 30px 25px;
+        }
+    }
+    
+    /* Móviles (max 768px) */
+    @media (max-width: 768px) {
+        .visor-container {
+            margin: 20px auto;
+            padding: 10px;
+        }
+        
+        .visor-header {
+            padding: 20px 15px;
+            border-radius: 15px;
+        }
+        
+        .visor-title {
+            font-size: 22px;
+        }
+        
+        .visor-subtitle {
+            font-size: 13px;
+        }
+        
+        .form-container {
+            padding: 25px 20px;
+            border-radius: 15px;
+        }
+        
+        .form-title {
+            font-size: 18px;
+        }
+        
+        .current-badge {
+            font-size: 12px;
+            padding: 6px 12px;
+        }
+        
+        .radio-option {
+            padding: 15px;
+        }
+        
+        .radio-title {
+            font-size: 16px;
+        }
+        
+        .radio-description {
+            font-size: 12px;
+        }
+        
+        .btn-save {
+            padding: 16px;
+            font-size: 15px;
+        }
+        
+        .btn-back {
+            padding: 12px;
+            font-size: 13px;
+        }
+    }
+    
+    /* Móviles pequeños (max 480px) */
+    @media (max-width: 480px) {
+        .visor-container {
+            margin: 10px auto;
+            padding: 5px;
+        }
+        
+        .visor-header {
+            padding: 15px 10px;
+        }
+        
+        .visor-title {
+            font-size: 20px;
+        }
+        
+        .visor-subtitle {
+            font-size: 12px;
+        }
+        
+        .form-container {
+            padding: 20px 15px;
+        }
+        
+        .form-title {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .radio-group {
+            margin: 20px 0;
+        }
+        
+        .radio-option {
+            padding: 12px;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .radio-option input[type="radio"] {
+            margin-bottom: 10px;
+        }
+        
+        .radio-title {
+            font-size: 15px;
+        }
+        
+        .radio-description {
+            font-size: 11px;
+        }
+        
+        .btn-save {
+            padding: 14px;
+            font-size: 14px;
+        }
+        
+        .btn-back {
+            padding: 10px;
+            font-size: 12px;
+        }
     }
 </style>
 
