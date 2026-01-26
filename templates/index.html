@@ -13,23 +13,18 @@
 {% if tema == 'mes_patria' %}
 <!-- Estilos del borde animado Mes de la Patria -->
 <style>
-    /* Ajustar wrapper para el borde animado */
+    /* Mantener contenedor con su tamaño original del CSS */
     .hero-image-container {
         position: relative;
-        width: 480px;
-        height: 480px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
     }
     
-    /* Borde animado tricolor con colores de la bandera dominicana */
+    /* Borde animado tricolor - se adapta al tamaño de la imagen */
     .borde-tricolor-rotante {
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        top: -15px;
+        left: -15px;
+        right: -15px;
+        bottom: -15px;
         border-radius: 50%;
         background: conic-gradient(
             #002D62 0deg 120deg,
@@ -39,6 +34,7 @@
         );
         z-index: 1;
         animation: rotar-bandera 8s linear infinite;
+        pointer-events: none;
     }
     
     @keyframes rotar-bandera {
@@ -64,6 +60,39 @@
     .hero-image-container img {
         position: relative;
         z-index: 3;
+    }
+    
+    /* Responsive para móviles y tablets */
+    @media (max-width: 768px) {
+        .borde-tricolor-rotante {
+            top: -12px;
+            left: -12px;
+            right: -12px;
+            bottom: -12px;
+        }
+        
+        .borde-tricolor-rotante::after {
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .borde-tricolor-rotante {
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+        }
+        
+        .borde-tricolor-rotante::after {
+            top: 6px;
+            left: 6px;
+            right: 6px;
+            bottom: 6px;
+        }
     }
 </style>
 {% endif %}
