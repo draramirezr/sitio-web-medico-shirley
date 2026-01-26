@@ -13,12 +13,7 @@
 {% if tema == 'mes_patria' %}
 <!-- Estilos del borde animado Mes de la Patria -->
 <style>
-    /* Mantener contenedor con su tamaño original del CSS */
-    .hero-image-container {
-        position: relative;
-    }
-    
-    /* Borde animado tricolor - se adapta al tamaño de la imagen */
+    /* Borde animado tricolor - NO tocar hero-image-container */
     .borde-tricolor-rotante {
         position: absolute;
         top: -15px;
@@ -32,7 +27,7 @@
             #CE1126 180deg 300deg,
             white 300deg 360deg
         );
-        z-index: 1;
+        z-index: 0;
         animation: rotar-bandera 8s linear infinite;
         pointer-events: none;
     }
@@ -52,14 +47,14 @@
         bottom: 10px;
         background: transparent;
         border-radius: 50%;
-        z-index: 2;
+        z-index: 1;
     }
     
     /* Asegurar que la imagen esté encima del borde */
     .hero-image-container picture,
     .hero-image-container img {
         position: relative;
-        z-index: 3;
+        z-index: 2;
     }
     
     /* Responsive para móviles y tablets */
