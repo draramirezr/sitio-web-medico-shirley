@@ -707,6 +707,25 @@ def init_db():
         )
     '''))
     
+    # Tabla de configuración del sitio (para temas y configuraciones generales)
+    cursor.execute(adapt_sql_for_database('''
+        CREATE TABLE IF NOT EXISTS configuracion_sitio (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            clave VARCHAR(100) UNIQUE NOT NULL,
+            valor VARCHAR(255),
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    '''))
+    
+    # Insertar configuración por defecto si no existe
+    try:
+        cursor.execute(adapt_sql_for_database('''
+            INSERT INTO configuracion_sitio (clave, valor) 
+            VALUES ('tema_principal', 'original')
+        '''))
+    except:
+        pass  # Ya existe, no hacer nada
+    
     # Tabla de citas
     cursor.execute(adapt_sql_for_database('''
         CREATE TABLE IF NOT EXISTS appointments (
@@ -1111,6 +1130,54 @@ def increment_visit_counter():
     except Exception as e:
         print(f"Error al incrementar contador de visitas: {e}")
 
+def obtener_configuracion(clave, default='original'):
+    """Obtener valor de configuración del sitio"""
+    try:
+        conn = get_db_connection()
+        config = conn.execute(
+            'SELECT valor FROM configuracion_sitio WHERE clave = %s',
+            (clave,)
+        ).fetchone()
+        conn.close()
+        
+        if config and config['valor']:
+            return config['valor']
+        return default
+    except Exception as e:
+        print(f"Error al obtener configuración {clave}: {e}")
+        return default
+
+def actualizar_configuracion(clave, valor):
+    """Actualizar o crear configuración del sitio"""
+    try:
+        conn = get_db_connection()
+        
+        # Verificar si existe
+        existe = conn.execute(
+            'SELECT id FROM configuracion_sitio WHERE clave = %s',
+            (clave,)
+        ).fetchone()
+        
+        if existe:
+            # Actualizar
+            conn.execute(
+                'UPDATE configuracion_sitio SET valor = %s, updated_at = CURRENT_TIMESTAMP WHERE clave = %s',
+                (valor, clave)
+            )
+        else:
+            # Insertar
+            conn.execute(
+                'INSERT INTO configuracion_sitio (clave, valor) VALUES (%s, %s)',
+                (clave, valor)
+            )
+        
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"Error al actualizar configuración {clave}: {e}")
+        return False
+
 def create_database_indexes():
     """Verificar y crear índices críticos si no existen - MySQL optimized"""
     try:
@@ -1402,9 +1469,18 @@ def index():
         testimonial_dict['time_ago'] = time_ago
         testimonials_with_dates.append(testimonial_dict)
     
+    # Obtener tema configurado (original o mes_patria)
+    tema = obtener_configuracion('tema_principal', 'original')
+    
+    # Auto-desactivar tema patriótico después de febrero
+    if tema == 'mes_patria' and today.month > 2:
+        actualizar_configuracion('tema_principal', 'original')
+        tema = 'original'
+    
     return render_template('index.html', 
                          services=services, 
-                         testimonials=testimonials_with_dates)
+                         testimonials=testimonials_with_dates,
+                         tema=tema)
 
 @app.route('/index-v2')
 def index_v2():
@@ -2501,6 +2577,33 @@ def admin_messages():
     conn.close()
     
     return render_template('admin_messages.html', messages=messages)
+
+@app.route('/admin/visor-pagina')
+@login_required
+def admin_visor_pagina():
+    """Página para seleccionar el tema de la página principal"""
+    tema_actual = obtener_configuracion('tema_principal', 'original')
+    return render_template('admin_visor_pagina.html', tema_actual=tema_actual)
+
+@app.route('/admin/visor-pagina/guardar', methods=['POST'])
+@login_required
+def guardar_tema_pagina():
+    """Guardar el tema seleccionado"""
+    nuevo_tema = request.form.get('theme', 'original')
+    
+    # Validar que sea un tema válido
+    if nuevo_tema not in ['original', 'mes_patria']:
+        flash('Tema inválido', 'error')
+        return redirect(url_for('admin_visor_pagina'))
+    
+    # Guardar en base de datos
+    if actualizar_configuracion('tema_principal', nuevo_tema):
+        nombre_tema = 'Diseño Original' if nuevo_tema == 'original' else '🇩🇴 Mes de la Patria'
+        flash(f'✅ Tema actualizado a: {nombre_tema}', 'success')
+    else:
+        flash('Error al guardar la configuración', 'error')
+    
+    return redirect(url_for('admin_visor_pagina'))
 
 @app.route('/admin/appointments/<int:appointment_id>/update', methods=['POST'])
 @login_required

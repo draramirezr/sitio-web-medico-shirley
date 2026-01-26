@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Dra. Shirley Ramírez - Ginecóloga y Obstetra en Santo Domingo Este | Ginecología Estética Láser{% endblock %}
 
@@ -10,6 +10,64 @@
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/home.min.css') }}">
 
+{% if tema == 'mes_patria' %}
+<!-- Estilos del borde animado Mes de la Patria -->
+<style>
+    /* Ajustar wrapper para el borde animado */
+    .hero-image-container {
+        position: relative;
+        width: 480px;
+        height: 480px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Borde animado tricolor con colores de la bandera dominicana */
+    .borde-tricolor-rotante {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 50%;
+        background: conic-gradient(
+            #002D62 0deg 120deg,
+            white 120deg 180deg,
+            #CE1126 180deg 300deg,
+            white 300deg 360deg
+        );
+        z-index: 1;
+        animation: rotar-bandera 8s linear infinite;
+    }
+    
+    @keyframes rotar-bandera {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    /* Máscara interna para crear el efecto de borde */
+    .borde-tricolor-rotante::after {
+        content: '';
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        background: transparent;
+        border-radius: 50%;
+        z-index: 2;
+    }
+    
+    /* Asegurar que la imagen esté encima del borde */
+    .hero-image-container picture,
+    .hero-image-container img {
+        position: relative;
+        z-index: 3;
+    }
+</style>
+{% endif %}
+
 <!-- ========== HERO FULLSCREEN ========== -->
 <section class="hero-fullscreen">
     <!-- Burbujas decorativas -->
@@ -20,6 +78,11 @@
     
     <!-- Imagen de la Dra. Shirley - WebP con fallback -->
     <div class="hero-image-container">
+        {% if tema == 'mes_patria' %}
+        <!-- Borde animado tricolor para Mes de la Patria -->
+        <div class="borde-tricolor-rotante"></div>
+        {% endif %}
+        
         <picture>
             <source srcset="{{ url_for('static', filename='images/97472.webp') }}" type="image/webp">
             <img src="{{ url_for('static', filename='images/97472.jpg') }}" 
