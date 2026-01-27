@@ -309,6 +309,7 @@
                 {% if tema_actual == 'original' %}Diseño Original
                 {% elif tema_actual == 'mes_patria' %}🇩🇴 Mes de la Patria
                 {% elif tema_actual == 'cancer_mama' %}🎗️ Cáncer de Mama
+                {% elif tema_actual == 'mes_mujer' %}♀ Mes de la Mujer
                 {% else %}Diseño Original
                 {% endif %}
             </div>
@@ -342,6 +343,15 @@
                     <div class="radio-label">
                         <div class="radio-title">🎗️ Cáncer de Mama</div>
                         <div class="radio-description">Banner rosa dinámico + Lazo rosa (Octubre)</div>
+                    </div>
+                </label>
+                
+                <!-- Opción 4: Mes de la Mujer -->
+                <label class="radio-option {% if tema_actual == 'mes_mujer' %}selected{% endif %}" onclick="selectTheme(this, 'mes_mujer')">
+                    <input type="radio" name="theme" value="mes_mujer" {% if tema_actual == 'mes_mujer' %}checked{% endif %}>
+                    <div class="radio-label">
+                        <div class="radio-title">♀ Mes de la Mujer</div>
+                        <div class="radio-description">Banner morado dinámico + Símbolo ♀ (Marzo)</div>
                     </div>
                 </label>
             </div>

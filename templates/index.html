@@ -417,6 +417,241 @@
 </style>
 {% endif %}
 
+{% if tema == 'mes_mujer' %}
+<!-- Banner Superior Dinámico Mes de la Mujer -->
+<div class="mujer-banner-dinamico">
+    <div class="textos-rotativos-mujer">
+        <div class="texto-mujer-item active"><i class="fas fa-venus" style="color: #ce93d8;"></i> MES DE LA MUJER - MARZO 2026 <i class="fas fa-venus" style="color: #ce93d8;"></i></div>
+        <div class="texto-mujer-item"><i class="fas fa-heart" style="color: #ce93d8;"></i> "Empoderando la salud femenina cada día" <i class="fas fa-heart" style="color: #ce93d8;"></i></div>
+        <div class="texto-mujer-item">8 de Marzo - Día Internacional de la Mujer</div>
+    </div>
+</div>
+
+<!-- Estilos del Tema Mes de la Mujer -->
+<style>
+    /* Banner Superior Dinámico Morado */
+    .mujer-banner-dinamico {
+        background: linear-gradient(135deg, #8B008B 0%, #9370DB 100%);
+        color: white;
+        text-align: center;
+        padding: 15px 20px;
+        font-size: 16px;
+        font-weight: 700;
+        box-shadow: 0 4px 15px rgba(139, 0, 139, 0.3);
+        overflow: hidden;
+        min-height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        filter: none !important;
+    }
+    
+    /* Contenedor de textos rotativos */
+    .textos-rotativos-mujer {
+        position: relative;
+        width: 100%;
+        height: 25px;
+        overflow: hidden;
+        filter: none !important;
+    }
+    
+    .texto-mujer-item {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s ease;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding: 0 10px;
+        filter: none !important;
+    }
+    
+    .texto-mujer-item.active {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    .texto-mujer-item.exit {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    
+    /* Borde morado degradado girando */
+    .borde-mujer-rotante {
+        position: absolute;
+        top: -15px;
+        left: -15px;
+        right: -15px;
+        bottom: -15px;
+        border-radius: 50%;
+        background: conic-gradient(
+            #8B008B 0deg 90deg,
+            #DA70D6 90deg 180deg,
+            #9370DB 180deg 270deg,
+            #DA70D6 270deg 360deg
+        );
+        z-index: 0;
+        animation: rotar-borde-mujer 10s linear infinite;
+        pointer-events: none;
+    }
+    
+    @keyframes rotar-borde-mujer {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .borde-mujer-rotante::after {
+        content: '';
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        background: transparent;
+        border-radius: 50%;
+        z-index: 1;
+    }
+    
+    /* Imagen encima del borde */
+    .hero-image-container picture,
+    .hero-image-container img {
+        position: relative;
+        z-index: 2;
+    }
+    
+    /* Símbolos de mujer flotantes */
+    .simbolo-mujer-flotante {
+        position: absolute;
+        font-size: 60px;
+        opacity: 0.08;
+        color: #8B008B !important;
+        animation: flotar-simbolo-mujer 18s linear infinite;
+        pointer-events: none;
+        z-index: 0;
+        filter: none !important;
+    }
+    
+    .simbolo-mujer-flotante i {
+        color: #8B008B !important;
+        filter: none !important;
+    }
+    
+    .simbolo-mujer-flotante:nth-child(1) {
+        left: 10%;
+        font-size: 50px;
+        animation-duration: 18s;
+        animation-delay: -5s;
+    }
+    
+    .simbolo-mujer-flotante:nth-child(2) {
+        left: 25%;
+        font-size: 65px;
+        animation-duration: 22s;
+        animation-delay: -12s;
+    }
+    
+    .simbolo-mujer-flotante:nth-child(3) {
+        right: 25%;
+        font-size: 55px;
+        animation-duration: 20s;
+        animation-delay: -8s;
+    }
+    
+    .simbolo-mujer-flotante:nth-child(4) {
+        right: 10%;
+        font-size: 60px;
+        animation-duration: 24s;
+        animation-delay: -15s;
+    }
+    
+    @keyframes flotar-simbolo-mujer {
+        from {
+            bottom: -100px;
+            transform: translateX(0) rotate(0deg);
+        }
+        to {
+            bottom: 110vh;
+            transform: translateX(50px) rotate(360deg);
+        }
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .mujer-banner-dinamico {
+            font-size: 14px;
+            padding: 12px 15px;
+        }
+        
+        .textos-rotativos-mujer {
+            height: 22px;
+        }
+        
+        .borde-mujer-rotante {
+            top: -12px;
+            left: -12px;
+            right: -12px;
+            bottom: -12px;
+        }
+        
+        .borde-mujer-rotante::after {
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
+        }
+        
+        .simbolo-mujer-flotante {
+            font-size: 45px !important;
+        }
+        
+        .simbolo-mujer-flotante:nth-child(2) {
+            font-size: 50px !important;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .mujer-banner-dinamico {
+            font-size: 12px;
+            padding: 10px 10px;
+        }
+        
+        .textos-rotativos-mujer {
+            height: 20px;
+        }
+        
+        .texto-mujer-item {
+            font-size: 12px;
+        }
+        
+        .borde-mujer-rotante {
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+        }
+        
+        .borde-mujer-rotante::after {
+            top: 6px;
+            left: 6px;
+            right: 6px;
+            bottom: 6px;
+        }
+        
+        .simbolo-mujer-flotante {
+            font-size: 35px !important;
+        }
+        
+        .simbolo-mujer-flotante:nth-child(2) {
+            font-size: 42px !important;
+        }
+    }
+</style>
+{% endif %}
+
 <!-- ========== HERO FULLSCREEN ========== -->
 <section class="hero-fullscreen">
     <!-- Elementos decorativos flotantes -->
@@ -426,6 +661,12 @@
     <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
     <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
     <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
+    {% elif tema == 'mes_mujer' %}
+    <!-- Símbolos de mujer flotantes para Mes de la Mujer -->
+    <div class="simbolo-mujer-flotante"><i class="fas fa-venus"></i></div>
+    <div class="simbolo-mujer-flotante"><i class="fas fa-venus"></i></div>
+    <div class="simbolo-mujer-flotante"><i class="fas fa-venus"></i></div>
+    <div class="simbolo-mujer-flotante"><i class="fas fa-venus"></i></div>
     {% else %}
     <!-- Burbujas decorativas (diseño original y otros temas) -->
     <div class="bubble"></div>
@@ -442,6 +683,9 @@
         {% elif tema == 'cancer_mama' %}
         <!-- Lazo rosa animado para Cáncer de Mama -->
         <div class="lazo-rosa-rotante"></div>
+        {% elif tema == 'mes_mujer' %}
+        <!-- Borde morado degradado para Mes de la Mujer -->
+        <div class="borde-mujer-rotante"></div>
         {% endif %}
         
         <picture>
@@ -644,6 +888,12 @@
     <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
     <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
     <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
+    {% elif tema == 'mes_mujer' %}
+    <!-- Símbolos de mujer flotantes -->
+    <div class="simbolo-mujer-flotante"><i class="fas fa-venus"></i></div>
+    <div class="simbolo-mujer-flotante"><i class="fas fa-venus"></i></div>
+    <div class="simbolo-mujer-flotante"><i class="fas fa-venus"></i></div>
+    <div class="simbolo-mujer-flotante"><i class="fas fa-venus"></i></div>
     {% else %}
     <!-- Burbujas decorativas -->
     <div class="bubble"></div>
@@ -761,6 +1011,28 @@
         }
         
         setInterval(rotarTextoRosa, 4000);
+    });
+</script>
+{% endif %}
+
+{% if tema == 'mes_mujer' %}
+<script>
+    // Rotación automática de textos en el banner morado (mes de la mujer)
+    document.addEventListener('DOMContentLoaded', function() {
+        const textosMujer = document.querySelectorAll('.texto-mujer-item');
+        if (textosMujer.length === 0) return;
+        
+        let currentIndexMujer = 0;
+        
+        function rotarTextoMujer() {
+            textosMujer[currentIndexMujer].classList.remove('active');
+            textosMujer[currentIndexMujer].classList.add('exit');
+            currentIndexMujer = (currentIndexMujer + 1) % textosMujer.length;
+            setTimeout(() => textosMujer.forEach(t => t.classList.remove('exit')), 800);
+            textosMujer[currentIndexMujer].classList.add('active');
+        }
+        
+        setInterval(rotarTextoMujer, 4000);
     });
 </script>
 {% endif %}

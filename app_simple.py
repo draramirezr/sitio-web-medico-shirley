@@ -1477,17 +1477,25 @@ def index():
     
     # Auto-activación al inicio del mes (si está en "original")
     if mes_actual == 2 and tema == 'original':
-        # Primer día de febrero: activar automáticamente Mes de la Patria
+        # Febrero: activar Mes de la Patria
         actualizar_configuracion('tema_principal', 'mes_patria')
         tema = 'mes_patria'
+    elif mes_actual == 3 and tema == 'original':
+        # Marzo: activar Mes de la Mujer
+        actualizar_configuracion('tema_principal', 'mes_mujer')
+        tema = 'mes_mujer'
     elif mes_actual == 10 and tema == 'original':
-        # Primer día de octubre: activar automáticamente Cáncer de Mama
+        # Octubre: activar Cáncer de Mama
         actualizar_configuracion('tema_principal', 'cancer_mama')
         tema = 'cancer_mama'
     
     # Auto-desactivación al terminar el mes
     elif mes_actual == 3 and tema == 'mes_patria':
-        # Marzo: desactivar Mes de la Patria
+        # Marzo: desactivar Mes de la Patria y activar Mes de la Mujer
+        actualizar_configuracion('tema_principal', 'mes_mujer')
+        tema = 'mes_mujer'
+    elif mes_actual == 4 and tema == 'mes_mujer':
+        # Abril: desactivar Mes de la Mujer
         actualizar_configuracion('tema_principal', 'original')
         tema = 'original'
     elif mes_actual == 11 and tema == 'cancer_mama':
@@ -2613,7 +2621,7 @@ def guardar_tema_pagina():
     nuevo_tema = request.form.get('theme', 'original')
     
     # Validar que sea un tema válido
-    if nuevo_tema not in ['original', 'mes_patria', 'cancer_mama']:
+    if nuevo_tema not in ['original', 'mes_patria', 'cancer_mama', 'mes_mujer']:
         flash('Tema inválido', 'error')
         return redirect(url_for('admin_visor_pagina'))
     
@@ -2623,7 +2631,8 @@ def guardar_tema_pagina():
         nombres_temas = {
             'original': 'Diseño Original',
             'mes_patria': '🇩🇴 Mes de la Patria',
-            'cancer_mama': '🎗️ Cáncer de Mama'
+            'cancer_mama': '🎗️ Cáncer de Mama',
+            'mes_mujer': '♀ Mes de la Mujer'
         }
         nombre_tema = nombres_temas.get(nuevo_tema, 'Diseño Original')
         flash(f'✅ Tema actualizado a: {nombre_tema}', 'success')
