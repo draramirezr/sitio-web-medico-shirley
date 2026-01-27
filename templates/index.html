@@ -278,12 +278,14 @@
     .lazo-rosa-flotante {
         position: absolute;
         font-size: 60px;
-        opacity: 0.12;
-        color: #FF69B4 !important;
+        opacity: 0.15;
         animation: flotar-lazo-continuo 18s linear infinite;
         pointer-events: none;
         z-index: 0;
         filter: none !important;
+        -webkit-filter: none !important;
+        color: transparent !important;
+        text-shadow: 0 0 0 #FF69B4 !important;
     }
     
     .lazo-rosa-flotante:nth-child(1) {
@@ -291,7 +293,6 @@
         font-size: 50px;
         animation-duration: 18s;
         animation-delay: -5s;
-        color: #FF69B4 !important;
     }
     
     .lazo-rosa-flotante:nth-child(2) {
@@ -299,7 +300,6 @@
         font-size: 70px;
         animation-duration: 22s;
         animation-delay: -12s;
-        color: #FF69B4 !important;
     }
     
     .lazo-rosa-flotante:nth-child(3) {
@@ -307,7 +307,6 @@
         font-size: 55px;
         animation-duration: 20s;
         animation-delay: -8s;
-        color: #FF69B4 !important;
     }
     
     .lazo-rosa-flotante:nth-child(4) {
@@ -315,7 +314,6 @@
         font-size: 65px;
         animation-duration: 24s;
         animation-delay: -15s;
-        color: #FF69B4 !important;
     }
     
     @keyframes flotar-lazo-continuo {
@@ -356,12 +354,12 @@
         
         .lazo-rosa-flotante {
             font-size: 45px !important;
-            color: #FF69B4 !important;
+            text-shadow: 0 0 0 #FF69B4 !important;
         }
         
         .lazo-rosa-flotante:nth-child(2) {
             font-size: 55px !important;
-            color: #FF69B4 !important;
+            text-shadow: 0 0 0 #FF69B4 !important;
         }
     }
     
@@ -395,12 +393,12 @@
         
         .lazo-rosa-flotante {
             font-size: 35px !important;
-            color: #FF69B4 !important;
+            text-shadow: 0 0 0 #FF69B4 !important;
         }
         
         .lazo-rosa-flotante:nth-child(2) {
             font-size: 45px !important;
-            color: #FF69B4 !important;
+            text-shadow: 0 0 0 #FF69B4 !important;
         }
     }
 </style>
