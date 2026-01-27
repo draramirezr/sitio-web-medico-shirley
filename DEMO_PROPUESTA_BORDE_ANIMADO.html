@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROPUESTA: Solo Borde Animado con Colores de la Bandera</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        
+        /* Hero Section - DISEÑO ACTUAL SIN CAMBIOS */
+        .hero-section {
+            background: linear-gradient(135deg, rgba(206, 176, 183, 0.1) 0%, rgba(242, 226, 230, 0.3) 100%);
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 60px 20px;
+            position: relative;
+        }
+        
+        /* SOLO ESTE CAMBIO: Wrapper para la imagen con borde animado */
+        .hero-image-wrapper {
+            position: relative;
+            margin-bottom: 40px;
+            width: 330px;
+            height: 330px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Imagen (sin cambios) */
+        .hero-image {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 20px 60px rgba(206, 176, 183, 0.4);
+            border: 5px solid white;
+            position: relative;
+            z-index: 3;
+        }
+        
+        /* ⭐ NUEVO: Borde Animado Tricolor - Opción A */
+        .borde-tricolor-rotante {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 50%;
+            background: conic-gradient(
+                #002D62 0deg 120deg,
+                white 120deg 180deg,
+                #CE1126 180deg 300deg,
+                white 300deg 360deg
+            );
+            z-index: 1;
+            animation: rotar 8s linear infinite;
+        }
+        
+        @keyframes rotar {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Máscara interna para crear el efecto de "borde" */
+        .borde-tricolor-rotante::after {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
+            background: linear-gradient(135deg, rgba(206, 176, 183, 0.1) 0%, rgba(242, 226, 230, 0.3) 100%);
+            border-radius: 50%;
+            z-index: 2;
+        }
+        
+        /* Título y textos - SIN CAMBIOS DEL DISEÑO ACTUAL */
+        .hero-title {
+            font-size: 3rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-tagline {
+            font-size: 1.4rem;
+            color: #6c757d;
+            margin-bottom: 30px;
+        }
+        
+        .info-badge {
+            background: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            margin-top: 20px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        /* Sección de demostración */
+        .demo-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        
+        .demo-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .demo-title {
+            color: #CE1126;
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 800;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        
+        .comparison-item {
+            text-align: center;
+        }
+        
+        .comparison-label {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        
+        .image-preview {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            position: relative;
+        }
+        
+        .image-preview img {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: 5px solid white;
+            box-shadow: 0 10px 30px rgba(206, 176, 183, 0.3);
+        }
+        
+        /* Preview del borde normal */
+        .preview-normal {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .preview-normal img {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: 5px solid #CEB0B7;
+            box-shadow: 0 10px 30px rgba(206, 176, 183, 0.3);
+        }
+        
+        /* Preview del borde animado */
+        .preview-animado {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .preview-animado .borde-rotante {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 50%;
+            background: conic-gradient(
+                #002D62 0deg 120deg,
+                white 120deg 180deg,
+                #CE1126 180deg 300deg,
+                white 300deg 360deg
+            );
+            animation: rotar 8s linear infinite;
+            z-index: 1;
+        }
+        
+        .preview-animado .borde-rotante::after {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
+            background: white;
+            border-radius: 50%;
+            z-index: 2;
+        }
+        
+        .preview-animado img {
+            width: 170px;
+            height: 170px;
+            border-radius: 50%;
+            border: 5px solid white;
+            box-shadow: 0 10px 30px rgba(206, 176, 183, 0.3);
+            position: relative;
+            z-index: 3;
+        }
+        
+        .features-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+        
+        .features-list li {
+            padding: 12px;
+            margin: 8px 0;
+            background: #f8f9fa;
+            border-left: 4px solid #002D62;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+        
+        .features-list li i {
+            color: #28a745;
+            margin-right: 10px;
+        }
+        
+        .speed-options {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .speed-btn {
+            padding: 12px 25px;
+            border: 2px solid #002D62;
+            background: white;
+            color: #002D62;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .speed-btn:hover {
+            background: #002D62;
+            color: white;
+        }
+        
+        .speed-btn.active {
+            background: #CE1126;
+            color: white;
+            border-color: #CE1126;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(206, 17, 38, 0.1) 0%, rgba(0, 45, 98, 0.1) 100%);
+            border: 3px solid #002D62;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        .highlight-text {
+            color: #002D62;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .highlight-subtext {
+            color: #CE1126;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section con DISEÑO ACTUAL + Borde Animado -->
+    <section class="hero-section">
+        <div class="hero-image-wrapper">
+            <!-- ⭐ NUEVO: Borde Tricolor Rotante ⭐ -->
+            <div class="borde-tricolor-rotante"></div>
+            
+            <!-- Imagen (sin cambios) -->
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Crect fill='%23CEB0B7' width='300' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='20' text-anchor='middle' dy='.3em' fill='white'%3EDra. Shirley%3C/text%3E%3C/svg%3E" 
+                 alt="Dra. Shirley Ramírez" 
+                 class="hero-image">
+        </div>
+        
+        <h1 class="hero-title">
+            Dra. Shirley Ramírez<br>
+            <span class="hero-gradient">Cuidado Integral de la Salud Femenina</span>
+        </h1>
+        
+        <p class="hero-tagline">
+            Ginecóloga y Obstetra | Gineco-Estética
+        </p>
+        
+        <div class="info-badge">
+            <i class="fas fa-phone" style="color: #CEB0B7;"></i> 829-740-5073
+        </div>
+    </section>
+    
+    <!-- Información de la Demo -->
+    <div class="demo-container">
+        <div class="demo-card">
+            <h2 class="demo-title">
+                🇩🇴 TU PROPUESTA: Solo Borde Animado Tricolor
+            </h2>
+            
+            <div class="highlight-box">
+                <div class="highlight-text">
+                    ✨ Diseño actual + Borde patriótico en movimiento ✨
+                </div>
+                <div class="highlight-subtext">
+                    Sutil, elegante y profesional
+                </div>
+            </div>
+            
+            <h3 style="color: #002D62; margin: 30px 0 15px 0; font-size: 22px; text-align: center;">
+                📊 Comparación Visual
+            </h3>
+            
+            <div class="comparison-grid">
+                <!-- ANTES -->
+                <div class="comparison-item">
+                    <div class="comparison-label">
+                        ❌ ANTES (Diseño Actual)
+                    </div>
+                    <div class="preview-normal">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Crect fill='%23CEB0B7' width='180' height='180'/%3E%3Ctext x='50%25' y='50%25' font-size='16' text-anchor='middle' dy='.3em' fill='white'%3EDra.%3C/text%3E%3C/svg%3E" 
+                             alt="Antes">
+                    </div>
+                    <p style="color: #6c757d; margin-top: 15px; font-size: 14px;">
+                        Borde rosa estático
+                    </p>
+                </div>
+                
+                <!-- DESPUÉS -->
+                <div class="comparison-item">
+                    <div class="comparison-label" style="background: linear-gradient(135deg, rgba(0, 45, 98, 0.1) 0%, rgba(206, 17, 38, 0.1) 100%); border: 2px solid #002D62;">
+                        ✅ DESPUÉS (Con Borde Animado)
+                    </div>
+                    <div class="preview-animado">
+                        <div class="borde-rotante"></div>
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='170' height='170'%3E%3Crect fill='%23CEB0B7' width='170' height='170'/%3E%3Ctext x='50%25' y='50%25' font-size='16' text-anchor='middle' dy='.3em' fill='white'%3EDra.%3C/text%3E%3C/svg%3E" 
+                             alt="Después">
+                    </div>
+                    <p style="color: #002D62; margin-top: 15px; font-size: 14px; font-weight: 700;">
+                        🇩🇴 Borde tricolor en MOVIMIENTO 🇩🇴
+                    </p>
+                </div>
+            </div>
+            
+            <h3 style="color: #002D62; margin-top: 40px; margin-bottom: 15px; font-size: 20px;">
+                ✅ Características del Borde Animado:
+            </h3>
+            <ul class="features-list">
+                <li><i class="fas fa-check-circle"></i> <strong>Colores de la Bandera:</strong> Azul (#002D62), Blanco y Rojo (#CE1126)</li>
+                <li><i class="fas fa-check-circle"></i> <strong>Animación:</strong> Rotación continua y suave (8 segundos por vuelta completa)</li>
+                <li><i class="fas fa-check-circle"></i> <strong>Grosor:</strong> 8px de ancho (visible pero no exagerado)</li>
+                <li><i class="fas fa-check-circle"></i> <strong>Efecto:</strong> Degradado cónico que simula la bandera en movimiento</li>
+                <li><i class="fas fa-check-circle"></i> <strong>Diseño:</strong> TODO lo demás permanece EXACTAMENTE igual</li>
+            </ul>
+            
+            <h3 style="color: #CE1126; margin-top: 40px; margin-bottom: 15px; font-size: 20px;">
+                🎯 Ventajas de Esta Propuesta:
+            </h3>
+            <ul class="features-list">
+                <li><i class="fas fa-star"></i> <strong>Mínimo cambio:</strong> Solo afecta la foto, nada más</li>
+                <li><i class="fas fa-star"></i> <strong>Muy sutil:</strong> Celebra el Mes de la Patria sin ser invasivo</li>
+                <li><i class="fas fa-star"></i> <strong>Profesional:</strong> Mantiene 100% la seriedad del sitio médico</li>
+                <li><i class="fas fa-star"></i> <strong>Llamativo:</strong> El movimiento capta la atención</li>
+                <li><i class="fas fa-star"></i> <strong>Fácil de quitar:</strong> Después de febrero, simplemente remover el efecto</li>
+            </ul>
+            
+            <div class="highlight-box" style="margin-top: 40px;">
+                <div class="highlight-text">
+                    🎨 Prueba Velocidades del Borde
+                </div>
+                <div class="highlight-subtext" style="margin-bottom: 20px;">
+                    Haz clic en los botones para ver diferentes velocidades de rotación
+                </div>
+                
+                <div class="speed-options">
+                    <button class="speed-btn" onclick="changeSpeed(4)">
+                        ⚡ Rápido (4s)
+                    </button>
+                    <button class="speed-btn active" onclick="changeSpeed(8)">
+                        ✅ Normal (8s) - Recomendado
+                    </button>
+                    <button class="speed-btn" onclick="changeSpeed(12)">
+                        🐢 Lento (12s)
+                    </button>
+                    <button class="speed-btn" onclick="changeSpeed(15)">
+                        😌 Muy Lento (15s)
+                    </button>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 40px; padding: 25px; background: #e7f5ff; border-radius: 15px; border: 2px solid #002D62;">
+                <strong style="color: #002D62; font-size: 20px;">
+                    💡 RECOMENDACIÓN FINAL
+                </strong>
+                <p style="margin-top: 15px; color: #495057; line-height: 1.8; font-size: 16px;">
+                    Esta es la opción <strong>PERFECTA</strong> para ti: mantiene el profesionalismo del sitio médico 
+                    mientras celebras discretamente el Mes de la Patria. El borde animado es <strong>elegante, 
+                    llamativo y fácil de implementar/remover</strong>.
+                </p>
+                <p style="margin-top: 15px; color: #CE1126; font-weight: 700; font-size: 18px;">
+                    ⭐ Velocidad recomendada: 8 segundos (equilibrada)
+                </p>
+            </div>
+            
+            <h3 style="color: #002D62; margin-top: 40px; margin-bottom: 15px; font-size: 20px;">
+                📊 Comparación con las Otras Opciones:
+            </h3>
+            <ul class="features-list">
+                <li><i class="fas fa-chart-line"></i> <strong>Impacto Visual:</strong> ⭐⭐⭐ (Moderado - Solo la foto)</li>
+                <li><i class="fas fa-user-md"></i> <strong>Profesionalismo:</strong> ⭐⭐⭐⭐⭐ (Máximo - Muy apropiado)</li>
+                <li><i class="fas fa-flag"></i> <strong>Mensaje Patriótico:</strong> ⭐⭐⭐ (Sutil pero presente)</li>
+                <li><i class="fas fa-code"></i> <strong>Facilidad de Implementación:</strong> ⭐⭐⭐⭐⭐ (Muy fácil)</li>
+                <li><i class="fas fa-calendar-times"></i> <strong>Facilidad de Remover:</strong> ⭐⭐⭐⭐⭐ (Solo borrar 30 líneas)</li>
+            </ul>
+            
+            <div style="text-align: center; margin-top: 40px;">
+                <p style="color: #6c757d; font-size: 14px; font-style: italic;">
+                    👀 Observa cómo el borde gira suavemente alrededor de la foto en la parte superior de esta página
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function changeSpeed(seconds) {
+            // Cambiar velocidad de rotación
+            const bordes = document.querySelectorAll('.borde-tricolor-rotante, .borde-rotante');
+            bordes.forEach(borde => {
+                borde.style.animation = `rotar ${seconds}s linear infinite`;
+            });
+            
+            // Actualizar botón activo
+            document.querySelectorAll('.speed-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+================================================
+ESTILOS RESPONSIVE PARA EL BORDE ANIMADO
+================================================
+
+AGREGAR ESTOS ESTILOS AL FINAL DEL BLOQUE {% if tema == 'mes_patria' %}
+en templates/index.html (después de @keyframes rotar-bandera)
+
+------------------------------------------------
+COPIAR ESTO:
+------------------------------------------------
+
+    /* Responsive para el borde animado */
+    @media (max-width: 768px) {
+        .hero-image-container {
+            width: 320px;
+            height: 320px;
+        }
+        
+        .borde-tricolor-rotante::after {
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .hero-image-container {
+            width: 280px;
+            height: 280px;
+        }
+        
+        .borde-tricolor-rotante::after {
+            top: 6px;
+            left: 6px;
+            right: 6px;
+            bottom: 6px;
+        }
+    }
+
+================================================
+UBICACIÓN EXACTA:
+================================================
+Buscar en index.html línea ~67:
+    @keyframes rotar-bandera {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+AGREGAR JUSTO DESPUÉS de esas 4 líneas.
+
+================================================

@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEMO: Selector de Tema en Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 40px 20px;
+        }
+        
+        .admin-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(206, 176, 183, 0.3);
+        }
+        
+        .admin-title {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+        
+        .admin-subtitle {
+            font-size: 16px;
+            opacity: 0.95;
+        }
+        
+        .admin-menu {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .menu-item {
+            display: block;
+            padding: 15px 20px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #2c3e50;
+            transition: all 0.3s ease;
+            border-left: 4px solid #CEB0B7;
+        }
+        
+        .menu-item:hover {
+            background: #CEB0B7;
+            color: white;
+            transform: translateX(10px);
+        }
+        
+        .menu-item i {
+            margin-right: 12px;
+            width: 25px;
+        }
+        
+        /* ⭐ NUEVA SECCIÓN: Configuración de Tema ⭐ */
+        .theme-config-section {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            border: 3px solid #002D62;
+        }
+        
+        .theme-section-title {
+            color: #002D62;
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .theme-section-subtitle {
+            color: #6c757d;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        
+        .theme-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .theme-option {
+            border: 3px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            background: #f8f9fa;
+        }
+        
+        .theme-option:hover {
+            border-color: #CEB0B7;
+            box-shadow: 0 8px 30px rgba(206, 176, 183, 0.2);
+            transform: translateY(-5px);
+        }
+        
+        .theme-option.active {
+            border-color: #002D62;
+            background: linear-gradient(135deg, rgba(0, 45, 98, 0.05) 0%, rgba(206, 17, 38, 0.05) 100%);
+            box-shadow: 0 10px 40px rgba(0, 45, 98, 0.2);
+        }
+        
+        .theme-option.active::after {
+            content: '✓';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #28a745;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 900;
+        }
+        
+        .theme-radio {
+            display: none;
+        }
+        
+        .theme-preview {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        /* Preview Diseño Original */
+        .theme-preview.original {
+            border: 5px solid #CEB0B7;
+            background: linear-gradient(135deg, rgba(206, 176, 183, 0.2) 0%, rgba(242, 226, 230, 0.4) 100%);
+        }
+        
+        /* Preview Mes de la Patria */
+        .theme-preview.patria {
+            background: conic-gradient(
+                #002D62 0deg 120deg,
+                white 120deg 180deg,
+                #CE1126 180deg 300deg,
+                white 300deg 360deg
+            );
+            animation: rotar 8s linear infinite;
+        }
+        
+        .theme-preview.patria::after {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
+            background: linear-gradient(135deg, rgba(206, 176, 183, 0.2) 0%, rgba(242, 226, 230, 0.4) 100%);
+            border-radius: 50%;
+        }
+        
+        @keyframes rotar {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .theme-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .theme-description {
+            font-size: 13px;
+            color: #6c757d;
+            text-align: center;
+            line-height: 1.6;
+        }
+        
+        .theme-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-top: 10px;
+        }
+        
+        .theme-badge.normal {
+            background: #e7f5ff;
+            color: #002D62;
+        }
+        
+        .theme-badge.special {
+            background: linear-gradient(135deg, #002D62 0%, #CE1126 100%);
+            color: white;
+        }
+        
+        .current-theme-badge {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        
+        .btn-save {
+            background: linear-gradient(135deg, #002D62 0%, #CE1126 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0, 45, 98, 0.3);
+            display: block;
+            width: 100%;
+        }
+        
+        .btn-save:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 45, 98, 0.4);
+        }
+        
+        .btn-preview {
+            background: white;
+            color: #002D62;
+            border: 2px solid #002D62;
+            padding: 12px 30px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            width: 100%;
+        }
+        
+        .btn-preview:hover {
+            background: #002D62;
+            color: white;
+        }
+        
+        .demo-info {
+            background: #fff;
+            padding: 30px;
+            margin-top: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .demo-info-title {
+            color: #CE1126;
+            font-size: 22px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 800;
+        }
+        
+        .features-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+        
+        .features-list li {
+            padding: 12px;
+            margin: 8px 0;
+            background: #f8f9fa;
+            border-left: 4px solid #002D62;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+        
+        .features-list li i {
+            color: #28a745;
+            margin-right: 10px;
+        }
+        
+        .alert-info {
+            background: #e7f5ff;
+            border: 2px solid #002D62;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .alert-warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .theme-options {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Header del Admin -->
+        <div class="admin-header">
+            <h1 class="admin-title">
+                <i class="fas fa-user-shield"></i> Panel Administrativo
+            </h1>
+            <p class="admin-subtitle">Dra. Shirley Ramírez - Configuración del Sitio Web</p>
+        </div>
+        
+        <!-- Menú Principal (simulado) -->
+        <div class="admin-menu">
+            <h3 style="color: #2c3e50; margin-bottom: 20px; font-weight: 700;">
+                <i class="fas fa-th-large"></i> Menú Principal
+            </h3>
+            <a href="#" class="menu-item">
+                <i class="fas fa-calendar-alt"></i> Gestión de Citas
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-envelope"></i> Mensajes de Contacto
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-file-invoice-dollar"></i> Sistema de Facturación
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-users"></i> Gestión de Usuarios
+            </a>
+        </div>
+        
+        <!-- ⭐ NUEVA SECCIÓN: Configuración de Tema ⭐ -->
+        <div class="theme-config-section">
+            <h2 class="theme-section-title">
+                <i class="fas fa-palette"></i>
+                🇩🇴 Tema de la Página Principal
+            </h2>
+            <p class="theme-section-subtitle">
+                Selecciona el tema que se mostrará en la página de inicio del sitio web
+            </p>
+            
+            <!-- Tema Actual -->
+            <div style="text-align: center; margin-bottom: 30px;">
+                <div class="current-theme-badge">
+                    ✅ Tema Actual: Diseño Original
+                </div>
+            </div>
+            
+            <!-- Opciones de Tema -->
+            <form id="themeForm">
+                <div class="theme-options">
+                    <!-- Opción 1: Diseño Original -->
+                    <label for="theme-original" class="theme-option active">
+                        <input type="radio" id="theme-original" name="theme" value="original" class="theme-radio" checked>
+                        <div class="theme-preview original">
+                            <i class="fas fa-user-md" style="font-size: 50px; color: #CEB0B7;"></i>
+                        </div>
+                        <div class="theme-title">
+                            🎨 Diseño Original
+                        </div>
+                        <div class="theme-description">
+                            Diseño profesional estándar con colores de la marca (rosa elegante)
+                        </div>
+                        <div style="text-align: center;">
+                            <span class="theme-badge normal">ESTADO NORMAL</span>
+                        </div>
+                    </label>
+                    
+                    <!-- Opción 2: Mes de la Patria -->
+                    <label for="theme-patria" class="theme-option">
+                        <input type="radio" id="theme-patria" name="theme" value="mes_patria" class="theme-radio">
+                        <div class="theme-preview patria">
+                            <i class="fas fa-flag" style="font-size: 50px; color: white; position: relative; z-index: 10;"></i>
+                        </div>
+                        <div class="theme-title">
+                            🇩🇴 Mes de la Patria
+                        </div>
+                        <div class="theme-description">
+                            Borde animado con colores de la bandera dominicana (Azul, Blanco, Rojo)
+                        </div>
+                        <div style="text-align: center;">
+                            <span class="theme-badge special">FEBRERO 2026</span>
+                        </div>
+                    </label>
+                </div>
+                
+                <!-- Vista Previa -->
+                <div class="alert-info">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <i class="fas fa-info-circle" style="font-size: 30px; color: #002D62;"></i>
+                        <div>
+                            <strong style="color: #002D62; font-size: 16px;">Vista Previa del Tema</strong>
+                            <p style="color: #6c757d; margin-top: 5px; font-size: 14px;">
+                                El tema seleccionado se aplicará INMEDIATAMENTE a la página de inicio cuando guardes los cambios.
+                            </p>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-preview" onclick="openPreview()">
+                        <i class="fas fa-eye me-2"></i> Ver Vista Previa Antes de Guardar
+                    </button>
+                </div>
+                
+                <!-- Botón Guardar -->
+                <button type="submit" class="btn-save">
+                    <i class="fas fa-save me-2"></i> Guardar Configuración de Tema
+                </button>
+                
+                <!-- Advertencia -->
+                <div class="alert-warning" style="margin-top: 20px;">
+                    <div style="display: flex; align-items: start; gap: 15px;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 25px; color: #856404;"></i>
+                        <div>
+                            <strong style="color: #856404; font-size: 15px;">⏱️ Recordatorio Automático</strong>
+                            <p style="color: #856404; margin-top: 8px; font-size: 13px;">
+                                El tema "Mes de la Patria" se desactivará automáticamente el 1 de Marzo 2026 
+                                y volverá al Diseño Original. No necesitas hacer nada.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Información Técnica -->
+        <div class="demo-info">
+            <h2 class="demo-info-title">
+                🔧 Cómo Funciona Esta Funcionalidad
+            </h2>
+            
+            <h3 style="color: #002D62; margin-top: 25px; margin-bottom: 12px; font-size: 18px;">
+                ✅ Implementación Técnica:
+            </h3>
+            <ul class="features-list">
+                <li><i class="fas fa-database"></i> <strong>Base de Datos:</strong> Se guarda la configuración en tabla "configuracion_sitio"</li>
+                <li><i class="fas fa-code"></i> <strong>Backend:</strong> Flask lee la configuración y la pasa al template</li>
+                <li><i class="fas fa-paint-brush"></i> <strong>Frontend:</strong> index.html muestra el borde animado solo si está activado</li>
+                <li><i class="fas fa-clock"></i> <strong>Automático:</strong> Se desactiva solo el 1 de Marzo</li>
+            </ul>
+            
+            <h3 style="color: #CE1126; margin-top: 25px; margin-bottom: 12px; font-size: 18px;">
+                🎯 Ventajas del Sistema:
+            </h3>
+            <ul class="features-list">
+                <li><i class="fas fa-star"></i> <strong>Control Total:</strong> Tú decides cuándo activar/desactivar</li>
+                <li><i class="fas fa-star"></i> <strong>Instantáneo:</strong> Los cambios se ven inmediatamente</li>
+                <li><i class="fas fa-star"></i> <strong>Sin Código:</strong> No necesitas editar archivos, solo hacer click</li>
+                <li><i class="fas fa-star"></i> <strong>Reversible:</strong> Puedes volver al diseño original cuando quieras</li>
+                <li><i class="fas fa-star"></i> <strong>Futuro:</strong> Podrás agregar más temas (Navidad, etc.)</li>
+            </ul>
+            
+            <div style="text-align: center; margin-top: 30px; padding: 25px; background: linear-gradient(135deg, rgba(206, 176, 183, 0.1) 0%, rgba(206, 176, 183, 0.2) 100%); border-radius: 15px;">
+                <strong style="color: #2c3e50; font-size: 18px;">
+                    💡 Esta es una DEMO de cómo se verá el selector en tu panel admin
+                </strong>
+                <p style="margin-top: 15px; color: #6c757d; line-height: 1.7;">
+                    Haz clic en las opciones arriba para ver la diferencia. 
+                    Observa cómo el preview del "Mes de la Patria" gira con los colores de la bandera.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Manejar selección de tema
+        document.querySelectorAll('.theme-option').forEach(option => {
+            option.addEventListener('click', function() {
+                // Quitar active de todas las opciones
+                document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
+                
+                // Agregar active a la seleccionada
+                this.classList.add('active');
+                
+                // Marcar el radio button
+                this.querySelector('input[type="radio"]').checked = true;
+                
+                // Actualizar badge de tema actual
+                const selectedTheme = this.querySelector('input[type="radio"]').value;
+                const badge = document.querySelector('.current-theme-badge');
+                
+                if (selectedTheme === 'original') {
+                    badge.innerHTML = '✅ Tema Seleccionado: Diseño Original';
+                    badge.style.background = 'linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%)';
+                } else {
+                    badge.innerHTML = '✅ Tema Seleccionado: 🇩🇴 Mes de la Patria';
+                    badge.style.background = 'linear-gradient(135deg, #002D62 0%, #CE1126 100%)';
+                }
+            });
+        });
+        
+        // Manejar envío del formulario
+        document.getElementById('themeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const selectedTheme = document.querySelector('input[name="theme"]:checked').value;
+            
+            alert('✅ Configuración guardada!\n\n' + 
+                  'Tema seleccionado: ' + (selectedTheme === 'original' ? 'Diseño Original' : '🇩🇴 Mes de la Patria') + '\n\n' +
+                  'Los visitantes verán este tema en la página de inicio.');
+        });
+        
+        // Abrir vista previa
+        function openPreview() {
+            const selectedTheme = document.querySelector('input[name="theme"]:checked').value;
+            
+            if (selectedTheme === 'mes_patria') {
+                alert('🇩🇴 Vista Previa: Mes de la Patria\n\n' +
+                      'Abre el archivo: DEMO_PROPUESTA_BORDE_ANIMADO.html\n\n' +
+                      'Ahí verás exactamente cómo se verá tu página.');
+            } else {
+                alert('Vista Previa: Diseño Original\n\n' +
+                      'Este es el diseño actual que ya tienes en www.draramirez.com');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+================================================
+  COMANDOS PARA DESPLEGAR - COPIAR Y PEGAR
+================================================
+
+IMPORTANTE: Abre Git Bash en la carpeta del proyecto
+(Click derecho -> Git Bash Here)
+
+Luego COPIA Y PEGA estos comandos UNO POR UNO:
+
+------------------------------------------------
+COMANDO 1: Agregar archivos
+------------------------------------------------
+git add app_simple.py templates/admin.html templates/admin_visor_pagina.html templates/index.html
+
+------------------------------------------------
+COMANDO 2: Crear commit
+------------------------------------------------
+git commit -m "Feature: Visor de Pagina - Tema Mes de la Patria con borde animado"
+
+------------------------------------------------
+COMANDO 3: Subir a Railway
+------------------------------------------------
+git push origin main
+
+================================================
+DESPUES DE ESTOS 3 COMANDOS:
+================================================
+1. Espera 2-3 minutos
+2. Ir a https://www.draramirez.com/admin
+3. Login
+4. Click en boton "Visor de Página"
+5. Seleccionar "Mes de la Patria"
+6. Guardar
+7. Ver https://www.draramirez.com/
+
+¡El borde tricolor estará girando! 🇩🇴
+================================================

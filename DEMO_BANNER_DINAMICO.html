@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEMO: Banner Dinámico Mes de la Patria</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #F2E2E6 50%, #fef5f7 100%);
+        }
+        
+        /* Banner Superior Dinámico */
+        .patria-banner-dinamico {
+            background: linear-gradient(135deg, #002D62 0%, #CE1126 100%);
+            color: white;
+            text-align: center;
+            padding: 15px 20px;
+            font-size: 16px;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            position: relative;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Contenedor de textos rotativos */
+        .textos-rotativos {
+            position: relative;
+            width: 100%;
+            height: 25px;
+            overflow: hidden;
+        }
+        
+        .texto-item {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 10px;
+        }
+        
+        .texto-item.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .texto-item.exit {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        
+        /* Hero Section */
+        .hero-section {
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+        }
+        
+        .hero-image-wrapper {
+            position: relative;
+            margin-bottom: 40px;
+        }
+        
+        .borde-tricolor {
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            right: -15px;
+            bottom: -15px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #002D62 0deg 120deg,
+                white 120deg 180deg,
+                #CE1126 180deg 300deg,
+                white 300deg 360deg
+            );
+            z-index: 0;
+            animation: rotar 8s linear infinite;
+        }
+        
+        @keyframes rotar {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .borde-tricolor::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            background: transparent;
+            border-radius: 50%;
+        }
+        
+        .hero-image {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 20px 60px rgba(206, 176, 183, 0.4);
+            border: 5px solid white;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .hero-title {
+            font-size: 3rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 800;
+            text-align: center;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-tagline {
+            font-size: 1.3rem;
+            color: #6c757d;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .patria-banner-dinamico {
+                font-size: 14px;
+                padding: 12px 15px;
+            }
+            
+            .textos-rotativos {
+                height: 22px;
+            }
+            
+            .hero-image {
+                width: 250px;
+                height: 250px;
+            }
+            
+            .hero-title {
+                font-size: 2.2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .patria-banner-dinamico {
+                font-size: 12px;
+                padding: 10px 10px;
+            }
+            
+            .textos-rotativos {
+                height: 20px;
+            }
+            
+            .texto-item {
+                font-size: 12px;
+            }
+            
+            .hero-image {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .hero-title {
+                font-size: 1.8rem;
+            }
+        }
+        
+        .demo-info {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .demo-title {
+            color: #CE1126;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 26px;
+            font-weight: 800;
+        }
+        
+        .feature-box {
+            background: #e7f5ff;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 5px solid #002D62;
+            margin-bottom: 20px;
+        }
+        
+        .feature-title {
+            color: #002D62;
+            margin-bottom: 12px;
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        .feature-list {
+            color: #495057;
+            line-height: 2;
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .feature-list li {
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .feature-list li::before {
+            content: '✅';
+            position: absolute;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- ⭐ Banner Superior Dinámico con Textos Rotativos ⭐ -->
+    <div class="patria-banner-dinamico">
+        <div class="textos-rotativos">
+            <div class="texto-item active">🇩🇴 ORGULLOSAMENTE DOMINICANA 🇩🇴</div>
+            <div class="texto-item">"En este mes de la patria celebra nuestra independencia con salud"</div>
+            <div class="texto-item">27 de Febrero - Día de la Independencia Nacional</div>
+        </div>
+    </div>
+    
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-image-wrapper">
+            <div class="borde-tricolor"></div>
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Crect fill='%23CEB0B7' width='300' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='20' text-anchor='middle' dy='.3em' fill='white'%3EDra. Shirley%3C/text%3E%3C/svg%3E" 
+                 alt="Dra. Shirley Ramírez" 
+                 class="hero-image">
+        </div>
+        
+        <h1 class="hero-title">
+            Dra. Shirley Ramírez<br>
+            <span class="hero-gradient">Cuidado Integral de la Salud Femenina</span>
+        </h1>
+        
+        <p class="hero-tagline">
+            Ginecóloga y Obstetra | Gineco-Estética
+        </p>
+        
+        <!-- SIN cuadro de mensaje - todo está en el banner dinámico -->
+    </section>
+    
+    <!-- Explicación -->
+    <div class="demo-info">
+        <h2 class="demo-title">
+            🇩🇴 BANNER DINÁMICO - Textos Rotativos
+        </h2>
+        
+        <div class="feature-box">
+            <h3 class="feature-title">✨ Cómo Funciona:</h3>
+            <ul class="feature-list">
+                <li>El banner muestra 3 mensajes diferentes</li>
+                <li>Cambia automáticamente cada 4 segundos</li>
+                <li>Transición suave con fade in/out</li>
+                <li>Loop infinito (vuelve al primero después del tercero)</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box" style="background: #fff3cd; border-left-color: #ffc107;">
+            <h3 class="feature-title" style="color: #856404;">📱 Responsive:</h3>
+            <ul class="feature-list" style="color: #856404;">
+                <li>Desktop: Texto grande y visible</li>
+                <li>Tablet: Texto mediano adaptado</li>
+                <li>Móvil: Texto pequeño pero legible</li>
+                <li>Auto-ajusta si el texto es muy largo</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box" style="background: #d4edda; border-left-color: #28a745;">
+            <h3 class="feature-title" style="color: #155724;">🎯 Mensajes que Rotan:</h3>
+            <ul class="feature-list" style="color: #155724;">
+                <li><strong>Mensaje 1:</strong> "🇩🇴 ORGULLOSAMENTE DOMINICANA 🇩🇴"</li>
+                <li><strong>Mensaje 2:</strong> "En este mes de la patria celebra nuestra independencia con salud"</li>
+                <li><strong>Mensaje 3:</strong> "27 de Febrero - Día de la Independencia Nacional"</li>
+            </ul>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; padding: 25px; background: linear-gradient(135deg, rgba(0,45,98,0.05) 0%, rgba(206,17,38,0.05) 100%); border-radius: 15px;">
+            <p style="color: #002D62; font-size: 18px; font-weight: 700; margin-bottom: 10px;">
+                ⏱️ Velocidad: 4 segundos por mensaje
+            </p>
+            <p style="color: #6c757d; font-size: 14px;">
+                👆 Observa el banner arriba - los textos van cambiando automáticamente
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        // Rotación automática de textos en el banner
+        const textos = document.querySelectorAll('.texto-item');
+        let currentIndex = 0;
+        
+        function rotarTexto() {
+            // Marcar actual como exit
+            textos[currentIndex].classList.remove('active');
+            textos[currentIndex].classList.add('exit');
+            
+            // Siguiente texto
+            currentIndex = (currentIndex + 1) % textos.length;
+            
+            // Limpiar clase exit después de la transición
+            setTimeout(() => {
+                textos.forEach(t => t.classList.remove('exit'));
+            }, 800);
+            
+            // Activar siguiente
+            textos[currentIndex].classList.add('active');
+        }
+        
+        // Cambiar cada 4 segundos
+        setInterval(rotarTexto, 4000);
+    </script>
+</body>
+</html>

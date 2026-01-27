@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPCIÓN 2: Mes Cáncer de Mama - Lazo Rosa Animado</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #F2E2E6 50%, #fef5f7 100%);
+        }
+        
+        /* Banner Dinámico */
+        .cancer-banner-dinamico {
+            background: linear-gradient(135deg, #FF1493 0%, #FF69B4 100%);
+            color: white;
+            text-align: center;
+            padding: 15px 20px;
+            font-size: 16px;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(255, 20, 147, 0.3);
+            overflow: hidden;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .textos-rotativos {
+            position: relative;
+            width: 100%;
+            height: 25px;
+            overflow: hidden;
+        }
+        
+        .texto-item {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .texto-item.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .texto-item.exit {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        
+        /* Hero */
+        .hero-section {
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+        }
+        
+        .hero-image-wrapper {
+            position: relative;
+            margin-bottom: 40px;
+        }
+        
+        /* Lazo Rosa Animado */
+        .lazo-rosa-rotante {
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            border-radius: 50%;
+            background: repeating-conic-gradient(
+                #FF1493 0deg 30deg,
+                #FF69B4 30deg 60deg,
+                #FFB6C1 60deg 90deg,
+                #FF69B4 90deg 120deg
+            );
+            z-index: 0;
+            animation: pulsate 3s ease-in-out infinite, rotate 15s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulsate {
+            0%, 100% { opacity: 0.8; transform: scale(1) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1.05) rotate(180deg); }
+        }
+        
+        .lazo-rosa-rotante::after {
+            content: '';
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            bottom: 12px;
+            background: transparent;
+            border-radius: 50%;
+        }
+        
+        .hero-image {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 20px 60px rgba(255, 105, 180, 0.4);
+            border: 5px solid white;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .hero-title {
+            font-size: 3rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 800;
+            text-align: center;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-tagline {
+            font-size: 1.3rem;
+            color: #6c757d;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .demo-info {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .cancer-banner-dinamico {
+                font-size: 14px;
+                padding: 12px 15px;
+            }
+            
+            .hero-image {
+                width: 250px;
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cancer-banner-dinamico">
+        <div class="textos-rotativos">
+            <div class="texto-item active">🎗️ MES DE CONCIENTIZACIÓN DEL CÁNCER DE MAMA 🎗️</div>
+            <div class="texto-item">💗 "Tu salud es tu mayor tesoro - Hazte tu chequeo hoy" 💗</div>
+            <div class="texto-item">Octubre: Mes de la Prevención y Detección Temprana</div>
+        </div>
+    </div>
+    
+    <section class="hero-section">
+        <div class="hero-image-wrapper">
+            <div class="lazo-rosa-rotante"></div>
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Crect fill='%23CEB0B7' width='300' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='20' text-anchor='middle' dy='.3em' fill='white'%3EDra. Shirley%3C/text%3E%3C/svg%3E" 
+                 alt="Dra. Shirley" 
+                 class="hero-image">
+        </div>
+        
+        <h1 class="hero-title">
+            Dra. Shirley Ramírez<br>
+            <span class="hero-gradient">Cuidado Integral de la Salud Femenina</span>
+        </h1>
+        
+        <p class="hero-tagline">
+            Ginecóloga y Obstetra | Gineco-Estética
+        </p>
+    </section>
+    
+    <div class="demo-info">
+        <h2 style="color: #FF1493; text-align: center; font-size: 26px; font-weight: 800; margin-bottom: 20px;">
+            🎗️ OPCIÓN 1: Lazo Rosa con Banner Dinámico
+        </h2>
+        
+        <div style="background: #ffe6f0; padding: 20px; border-radius: 12px; border-left: 5px solid #FF69B4; margin-bottom: 20px;">
+            <h3 style="color: #C71585; margin-bottom: 12px;">✨ Elementos:</h3>
+            <ul style="color: #495057; line-height: 2; list-style: none; padding-left: 20px;">
+                <li>🎗️ Banner rosa con textos rotando (cada 4 segundos)</li>
+                <li>💗 Borde rosa animado (efecto lazo)</li>
+                <li>📱 100% responsive</li>
+                <li>🎨 Mantiene profesionalismo</li>
+            </ul>
+        </div>
+        
+        <div style="background: #fff3cd; padding: 20px; border-radius: 12px; border-left: 5px solid #ffc107;">
+            <h3 style="color: #856404; margin-bottom: 12px;">📋 Mensajes que Rotan:</h3>
+            <ul style="color: #856404; line-height: 2; list-style: none; padding-left: 20px;">
+                <li>1. "Mes de Concientización del Cáncer de Mama"</li>
+                <li>2. "Tu salud es tu mayor tesoro - Hazte tu chequeo hoy"</li>
+                <li>3. "Octubre: Mes de la Prevención y Detección Temprana"</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        const textos = document.querySelectorAll('.texto-item');
+        let currentIndex = 0;
+        
+        function rotarTexto() {
+            textos[currentIndex].classList.remove('active');
+            textos[currentIndex].classList.add('exit');
+            currentIndex = (currentIndex + 1) % textos.length;
+            setTimeout(() => textos.forEach(t => t.classList.remove('exit')), 800);
+            textos[currentIndex].classList.add('active');
+        }
+        
+        setInterval(rotarTexto, 4000);
+    </script>
+</body>
+</html>

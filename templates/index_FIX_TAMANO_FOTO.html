@@ -1,0 +1,87 @@
+{% if tema == 'mes_patria' %}
+<!-- Estilos del borde animado Mes de la Patria - CORREGIDO -->
+<style>
+    /* NO cambiar el tamaño del contenedor - mantener original */
+    .hero-image-container {
+        position: relative;
+        /* No forzar tamaños - usar los del CSS original */
+    }
+    
+    /* Borde animado tricolor - se adapta al tamaño de la imagen */
+    .borde-tricolor-rotante {
+        position: absolute;
+        top: -15px;
+        left: -15px;
+        right: -15px;
+        bottom: -15px;
+        border-radius: 50%;
+        background: conic-gradient(
+            #002D62 0deg 120deg,
+            white 120deg 180deg,
+            #CE1126 180deg 300deg,
+            white 300deg 360deg
+        );
+        z-index: 1;
+        animation: rotar-bandera 8s linear infinite;
+        pointer-events: none;
+    }
+    
+    @keyframes rotar-bandera {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    /* Máscara interna para crear el efecto de borde - se adapta */
+    .borde-tricolor-rotante::after {
+        content: '';
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        background: transparent;
+        border-radius: 50%;
+        z-index: 2;
+    }
+    
+    /* Asegurar que la imagen esté encima del borde - SIN cambiar tamaño */
+    .hero-image-container picture,
+    .hero-image-container img {
+        position: relative;
+        z-index: 3;
+    }
+    
+    /* Responsive - ajustar tamaño del borde según pantalla */
+    @media (max-width: 768px) {
+        .borde-tricolor-rotante {
+            top: -12px;
+            left: -12px;
+            right: -12px;
+            bottom: -12px;
+        }
+        
+        .borde-tricolor-rotante::after {
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .borde-tricolor-rotante {
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+        }
+        
+        .borde-tricolor-rotante::after {
+            top: 6px;
+            left: 6px;
+            right: 6px;
+            bottom: 6px;
+        }
+    }
+</style>
+{% endif %}

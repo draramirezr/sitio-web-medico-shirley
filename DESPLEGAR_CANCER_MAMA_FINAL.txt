@@ -1,0 +1,56 @@
+================================================
+DESPLEGAR TEMA CÁNCER DE MAMA - 100% RESPONSIVE
+================================================
+
+✅ CAMBIOS IMPLEMENTADOS:
+
+1. Visor de Página actualizado con 3 opciones:
+   - Diseño Original
+   - 🇩🇴 Mes de la Patria (Febrero)
+   - 🎗️ Cáncer de Mama (Octubre) ← NUEVO
+
+2. Banner rosa dinámico con 3 mensajes rotando:
+   - "Mes de Concientización del Cáncer de Mama"
+   - "Tu salud es tu mayor tesoro"
+   - "Octubre: Prevención y Detección Temprana"
+
+3. Lazo rosa animado alrededor de la foto
+
+4. Auto-desactivación en Noviembre
+
+5. TODO 100% RESPONSIVE (móvil, tablet, desktop)
+
+================================================
+COMANDOS PARA DESPLEGAR (Git Bash):
+================================================
+
+git add app_simple.py templates/admin_visor_pagina.html templates/index.html
+
+git commit -m "Feature: Tema Cancer de Mama - Banner dinamico rosa + Lazo animado 100% responsive"
+
+git push origin main
+
+================================================
+DESPUÉS DEL DESPLIEGUE (2-3 min):
+================================================
+
+PARA PROBAR (EN OCTUBRE):
+1. Ir a: https://www.draramirez.com/admin/visor-pagina
+2. Verás 3 opciones ahora
+3. Seleccionar: "🎗️ Cáncer de Mama"
+4. Guardar
+5. Ir a: https://www.draramirez.com/
+
+VERÁS:
+✅ Banner rosa rotando con 3 mensajes
+✅ Foto con lazo rosa girando
+✅ TODO 100% responsive en móvil
+
+================================================
+NOTA IMPORTANTE:
+================================================
+Este tema es para OCTUBRE (no se activa ahora).
+Puedes probarlo en cualquier momento desde el visor.
+Se auto-desactiva en Noviembre automáticamente.
+
+================================================

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPCIÓN 1: Banner Patriótico Sutil - Mes de la Patria</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        
+        /* Banner Mes de la Patria - SUTIL */
+        .patria-banner {
+            background: linear-gradient(135deg, #002D62 0%, #CE1126 100%);
+            color: white;
+            text-align: center;
+            padding: 15px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .patria-banner::before {
+            content: '🇩🇴';
+            position: absolute;
+            left: 20px;
+            font-size: 24px;
+        }
+        
+        .patria-banner::after {
+            content: '🇩🇴';
+            position: absolute;
+            right: 20px;
+            font-size: 24px;
+        }
+        
+        .patria-banner-text {
+            animation: fadeIn 1s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, rgba(206, 176, 183, 0.1) 0%, rgba(242, 226, 230, 0.3) 100%);
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 60px 20px;
+            position: relative;
+        }
+        
+        .hero-image {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(206, 176, 183, 0.4);
+            border: 5px solid #CEB0B7;
+        }
+        
+        .hero-title {
+            font-size: 3rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-tagline {
+            font-size: 1.4rem;
+            color: #6c757d;
+            margin-bottom: 30px;
+        }
+        
+        .info-badge {
+            background: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            margin-top: 20px;
+        }
+        
+        .demo-info {
+            background: #fff;
+            padding: 30px;
+            margin: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .demo-title {
+            color: #CE1126;
+            font-size: 24px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .demo-description {
+            color: #6c757d;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+        
+        .features-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .features-list li {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-left: 4px solid #002D62;
+            border-radius: 5px;
+        }
+        
+        .features-list li i {
+            color: #28a745;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Banner Patriótico SUTIL -->
+    <div class="patria-banner">
+        <div class="patria-banner-text">
+            <strong>MES DE LA PATRIA</strong> - Febrero 2026 | ¡Celebramos 182 años de Independencia Dominicana!
+        </div>
+    </div>
+    
+    <!-- Hero Section (sin cambios en el diseño principal) -->
+    <section class="hero-section">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Crect fill='%23CEB0B7' width='300' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='20' text-anchor='middle' dy='.3em' fill='white'%3EDra. Shirley%3C/text%3E%3C/svg%3E" 
+             alt="Dra. Shirley Ramírez" 
+             class="hero-image">
+        
+        <h1 class="hero-title">
+            Dra. Shirley Ramírez<br>
+            <span class="hero-gradient">Cuidado Integral de la Salud Femenina</span>
+        </h1>
+        
+        <p class="hero-tagline">
+            Ginecóloga y Obstetra | Gineco-Estética
+        </p>
+        
+        <div class="info-badge">
+            <i class="fas fa-phone" style="color: #CEB0B7;"></i> 829-740-5073
+        </div>
+    </section>
+    
+    <!-- Info de la Demo -->
+    <div class="demo-info">
+        <h2 class="demo-title">
+            <i class="fas fa-eye"></i> OPCIÓN 1: Banner Patriótico SUTIL
+        </h2>
+        
+        <p class="demo-description">
+            Esta opción agrega un <strong>banner discreto en la parte superior</strong> que celebra el Mes de la Patria sin modificar el diseño principal de la página.
+        </p>
+        
+        <h3 style="color: #002D62; margin-top: 20px; margin-bottom: 10px;">
+            ✅ Características:
+        </h3>
+        <ul class="features-list">
+            <li><i class="fas fa-check-circle"></i> Banner superior con colores de la bandera (Azul y Rojo)</li>
+            <li><i class="fas fa-check-circle"></i> Mensaje patriótico: "Mes de la Patria - 182 años de Independencia"</li>
+            <li><i class="fas fa-check-circle"></i> Banderas 🇩🇴 a los lados</li>
+            <li><i class="fas fa-check-circle"></i> El resto de la página permanece <strong>SIN CAMBIOS</strong></li>
+            <li><i class="fas fa-check-circle"></i> Mantiene 100% el profesionalismo médico</li>
+            <li><i class="fas fa-check-circle"></i> Fácil de activar/desactivar después de febrero</li>
+        </ul>
+        
+        <h3 style="color: #CE1126; margin-top: 20px; margin-bottom: 10px;">
+            📊 Nivel de Cambio:
+        </h3>
+        <ul class="features-list">
+            <li><i class="fas fa-star"></i> Impacto Visual: ⭐⭐ (Bajo - Sutil)</li>
+            <li><i class="fas fa-star"></i> Profesionalismo: ⭐⭐⭐⭐⭐ (Muy Alto)</li>
+            <li><i class="fas fa-star"></i> Mensaje Patriótico: ⭐⭐⭐ (Presente pero discreto)</li>
+            <li><i class="fas fa-star"></i> Facilidad de Implementación: ⭐⭐⭐⭐⭐ (Muy Fácil)</li>
+        </ul>
+        
+        <div style="text-align: center; margin-top: 30px; padding: 20px; background: #f0f8ff; border-radius: 10px;">
+            <strong style="color: #002D62; font-size: 18px;">
+                💡 RECOMENDACIÓN:
+            </strong>
+            <p style="margin-top: 10px; color: #6c757d;">
+                Esta es la opción <strong>MÁS PROFESIONAL</strong> y adecuada para un sitio médico. 
+                Celebra la fecha sin distraer del mensaje principal de salud.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
