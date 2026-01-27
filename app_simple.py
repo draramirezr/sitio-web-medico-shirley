@@ -1472,15 +1472,31 @@ def index():
     # Obtener tema configurado
     tema = obtener_configuracion('tema_principal', 'original')
     
-    # Auto-desactivar temas según el mes
-    if tema == 'mes_patria' and today.month > 2:
-        # Desactivar Mes de la Patria después de febrero
+    # Lógica inteligente de temas según el mes (permite activación manual)
+    mes_actual = today.month
+    
+    # Auto-activación al inicio del mes (si está en "original")
+    if mes_actual == 2 and tema == 'original':
+        # Primer día de febrero: activar automáticamente Mes de la Patria
+        actualizar_configuracion('tema_principal', 'mes_patria')
+        tema = 'mes_patria'
+    elif mes_actual == 10 and tema == 'original':
+        # Primer día de octubre: activar automáticamente Cáncer de Mama
+        actualizar_configuracion('tema_principal', 'cancer_mama')
+        tema = 'cancer_mama'
+    
+    # Auto-desactivación al terminar el mes
+    elif mes_actual == 3 and tema == 'mes_patria':
+        # Marzo: desactivar Mes de la Patria
         actualizar_configuracion('tema_principal', 'original')
         tema = 'original'
-    elif tema == 'cancer_mama' and today.month != 10:
-        # Desactivar Cáncer de Mama fuera de octubre
+    elif mes_actual == 11 and tema == 'cancer_mama':
+        # Noviembre: desactivar Cáncer de Mama
         actualizar_configuracion('tema_principal', 'original')
         tema = 'original'
+    
+    # Si el admin activó manualmente un tema fuera de su mes, respetarlo
+    # (No hacer nada, dejar el tema tal como está)
     
     return render_template('index.html', 
                          services=services, 
