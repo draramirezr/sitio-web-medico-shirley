@@ -175,8 +175,8 @@
 <!-- Banner Superior Dinámico Cáncer de Mama -->
 <div class="cancer-banner-dinamico">
     <div class="textos-rotativos-rosa">
-        <div class="texto-rosa-item active">🎗️ MES DE CONCIENTIZACIÓN DEL CÁNCER DE MAMA 🎗️</div>
-        <div class="texto-rosa-item">💗 "Tu salud es tu mayor tesoro - Hazte tu chequeo hoy" 💗</div>
+        <div class="texto-rosa-item active"><i class="fas fa-ribbon" style="color: #FFB6C1;"></i> MES DE CONCIENTIZACIÓN DEL CÁNCER DE MAMA <i class="fas fa-ribbon" style="color: #FFB6C1;"></i></div>
+        <div class="texto-rosa-item"><i class="fas fa-heart" style="color: #FFB6C1;"></i> "Tu salud es tu mayor tesoro - Hazte tu chequeo hoy" <i class="fas fa-heart" style="color: #FFB6C1;"></i></div>
         <div class="texto-rosa-item">Octubre: Mes de la Prevención y Detección Temprana</div>
     </div>
 </div>
@@ -289,8 +289,12 @@
         z-index: 0;
         filter: none !important;
         -webkit-filter: none !important;
-        color: transparent !important;
-        text-shadow: 0 0 0 #FF69B4 !important;
+    }
+    
+    .lazo-rosa-flotante i {
+        color: #FF69B4 !important;
+        filter: none !important;
+        -webkit-filter: none !important;
     }
     
     .lazo-rosa-flotante:nth-child(1) {
@@ -359,12 +363,14 @@
         
         .lazo-rosa-flotante {
             font-size: 45px !important;
-            text-shadow: 0 0 0 #FF69B4 !important;
+        }
+        
+        .lazo-rosa-flotante i {
+            color: #FF69B4 !important;
         }
         
         .lazo-rosa-flotante:nth-child(2) {
             font-size: 55px !important;
-            text-shadow: 0 0 0 #FF69B4 !important;
         }
     }
     
@@ -398,12 +404,14 @@
         
         .lazo-rosa-flotante {
             font-size: 35px !important;
-            text-shadow: 0 0 0 #FF69B4 !important;
+        }
+        
+        .lazo-rosa-flotante i {
+            color: #FF69B4 !important;
         }
         
         .lazo-rosa-flotante:nth-child(2) {
             font-size: 45px !important;
-            text-shadow: 0 0 0 #FF69B4 !important;
         }
     }
 </style>
@@ -414,10 +422,10 @@
     <!-- Elementos decorativos flotantes -->
     {% if tema == 'cancer_mama' %}
     <!-- Lazos rosas flotantes para Cáncer de Mama -->
-    <div class="lazo-rosa-flotante">🎗️</div>
-    <div class="lazo-rosa-flotante">🎗️</div>
-    <div class="lazo-rosa-flotante">🎗️</div>
-    <div class="lazo-rosa-flotante">🎗️</div>
+    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
+    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
+    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
+    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
     {% else %}
     <!-- Burbujas decorativas (diseño original y otros temas) -->
     <div class="bubble"></div>
@@ -632,10 +640,10 @@
     <!-- Elementos decorativos flotantes -->
     {% if tema == 'cancer_mama' %}
     <!-- Lazos rosas flotantes -->
-    <div class="lazo-rosa-flotante">🎗️</div>
-    <div class="lazo-rosa-flotante">🎗️</div>
-    <div class="lazo-rosa-flotante">🎗️</div>
-    <div class="lazo-rosa-flotante">🎗️</div>
+    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
+    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
+    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
+    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
     {% else %}
     <!-- Burbujas decorativas -->
     <div class="bubble"></div>
