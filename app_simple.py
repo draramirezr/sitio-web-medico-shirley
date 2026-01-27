@@ -1469,11 +1469,16 @@ def index():
         testimonial_dict['time_ago'] = time_ago
         testimonials_with_dates.append(testimonial_dict)
     
-    # Obtener tema configurado (original o mes_patria)
+    # Obtener tema configurado
     tema = obtener_configuracion('tema_principal', 'original')
     
-    # Auto-desactivar tema patriótico después de febrero
+    # Auto-desactivar temas según el mes
     if tema == 'mes_patria' and today.month > 2:
+        # Desactivar Mes de la Patria después de febrero
+        actualizar_configuracion('tema_principal', 'original')
+        tema = 'original'
+    elif tema == 'cancer_mama' and today.month != 10:
+        # Desactivar Cáncer de Mama fuera de octubre
         actualizar_configuracion('tema_principal', 'original')
         tema = 'original'
     
@@ -2592,13 +2597,19 @@ def guardar_tema_pagina():
     nuevo_tema = request.form.get('theme', 'original')
     
     # Validar que sea un tema válido
-    if nuevo_tema not in ['original', 'mes_patria']:
+    if nuevo_tema not in ['original', 'mes_patria', 'cancer_mama']:
         flash('Tema inválido', 'error')
         return redirect(url_for('admin_visor_pagina'))
     
     # Guardar en base de datos
     if actualizar_configuracion('tema_principal', nuevo_tema):
-        nombre_tema = 'Diseño Original' if nuevo_tema == 'original' else '🇩🇴 Mes de la Patria'
+        # Nombres de temas
+        nombres_temas = {
+            'original': 'Diseño Original',
+            'mes_patria': '🇩🇴 Mes de la Patria',
+            'cancer_mama': '🎗️ Cáncer de Mama'
+        }
+        nombre_tema = nombres_temas.get(nuevo_tema, 'Diseño Original')
         flash(f'✅ Tema actualizado a: {nombre_tema}', 'success')
     else:
         flash('Error al guardar la configuración', 'error')

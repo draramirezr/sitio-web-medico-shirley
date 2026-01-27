@@ -171,6 +171,166 @@
 </style>
 {% endif %}
 
+{% if tema == 'cancer_mama' %}
+<!-- Banner Superior Dinámico Cáncer de Mama -->
+<div class="cancer-banner-dinamico">
+    <div class="textos-rotativos-rosa">
+        <div class="texto-rosa-item active">🎗️ MES DE CONCIENTIZACIÓN DEL CÁNCER DE MAMA 🎗️</div>
+        <div class="texto-rosa-item">💗 "Tu salud es tu mayor tesoro - Hazte tu chequeo hoy" 💗</div>
+        <div class="texto-rosa-item">Octubre: Mes de la Prevención y Detección Temprana</div>
+    </div>
+</div>
+
+<!-- Estilos del Tema Cáncer de Mama -->
+<style>
+    /* Banner Superior Dinámico */
+    .cancer-banner-dinamico {
+        background: linear-gradient(135deg, #FF1493 0%, #FF69B4 100%);
+        color: white;
+        text-align: center;
+        padding: 15px 20px;
+        font-size: 16px;
+        font-weight: 700;
+        box-shadow: 0 4px 15px rgba(255, 20, 147, 0.3);
+        overflow: hidden;
+        min-height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Contenedor de textos rotativos */
+    .textos-rotativos-rosa {
+        position: relative;
+        width: 100%;
+        height: 25px;
+        overflow: hidden;
+    }
+    
+    .texto-rosa-item {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s ease;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding: 0 10px;
+    }
+    
+    .texto-rosa-item.active {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    .texto-rosa-item.exit {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    
+    /* Lazo Rosa Animado alrededor de la foto */
+    .lazo-rosa-rotante {
+        position: absolute;
+        top: -15px;
+        left: -15px;
+        right: -15px;
+        bottom: -15px;
+        border-radius: 50%;
+        background: repeating-conic-gradient(
+            #FF1493 0deg 30deg,
+            #FF69B4 30deg 60deg,
+            #FFB6C1 60deg 90deg,
+            #FF69B4 90deg 120deg
+        );
+        z-index: 0;
+        animation: rotar-lazo 12s linear infinite;
+        pointer-events: none;
+    }
+    
+    @keyframes rotar-lazo {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .lazo-rosa-rotante::after {
+        content: '';
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        background: transparent;
+        border-radius: 50%;
+        z-index: 1;
+    }
+    
+    /* Imagen encima del lazo */
+    .hero-image-container picture,
+    .hero-image-container img {
+        position: relative;
+        z-index: 2;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .cancer-banner-dinamico {
+            font-size: 14px;
+            padding: 12px 15px;
+        }
+        
+        .textos-rotativos-rosa {
+            height: 22px;
+        }
+        
+        .lazo-rosa-rotante {
+            top: -12px;
+            left: -12px;
+            right: -12px;
+            bottom: -12px;
+        }
+        
+        .lazo-rosa-rotante::after {
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .cancer-banner-dinamico {
+            font-size: 12px;
+            padding: 10px 10px;
+        }
+        
+        .textos-rotativos-rosa {
+            height: 20px;
+        }
+        
+        .texto-rosa-item {
+            font-size: 12px;
+        }
+        
+        .lazo-rosa-rotante {
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+        }
+        
+        .lazo-rosa-rotante::after {
+            top: 6px;
+            left: 6px;
+            right: 6px;
+            bottom: 6px;
+        }
+    }
+</style>
+{% endif %}
+
 <!-- ========== HERO FULLSCREEN ========== -->
 <section class="hero-fullscreen">
     <!-- Burbujas decorativas -->
@@ -184,6 +344,9 @@
         {% if tema == 'mes_patria' %}
         <!-- Borde animado tricolor para Mes de la Patria -->
         <div class="borde-tricolor-rotante"></div>
+        {% elif tema == 'cancer_mama' %}
+        <!-- Lazo rosa animado para Cáncer de Mama -->
+        <div class="lazo-rosa-rotante"></div>
         {% endif %}
         
         <picture>
@@ -472,6 +635,28 @@
         
         // Cambiar cada 4 segundos
         setInterval(rotarTexto, 4000);
+    });
+</script>
+{% endif %}
+
+{% if tema == 'cancer_mama' %}
+<script>
+    // Rotación automática de textos en el banner rosa (cáncer de mama)
+    document.addEventListener('DOMContentLoaded', function() {
+        const textosRosa = document.querySelectorAll('.texto-rosa-item');
+        if (textosRosa.length === 0) return;
+        
+        let currentIndexRosa = 0;
+        
+        function rotarTextoRosa() {
+            textosRosa[currentIndexRosa].classList.remove('active');
+            textosRosa[currentIndexRosa].classList.add('exit');
+            currentIndexRosa = (currentIndexRosa + 1) % textosRosa.length;
+            setTimeout(() => textosRosa.forEach(t => t.classList.remove('exit')), 800);
+            textosRosa[currentIndexRosa].classList.add('active');
+        }
+        
+        setInterval(rotarTextoRosa, 4000);
     });
 </script>
 {% endif %}

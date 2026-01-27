@@ -305,7 +305,12 @@
     <div class="form-container">
         <div style="text-align: center;">
             <div class="current-badge">
-                ✅ Actual: {{ 'Diseño Original' if tema_actual == 'original' else '🇩🇴 Mes de la Patria' }}
+                ✅ Actual: 
+                {% if tema_actual == 'original' %}Diseño Original
+                {% elif tema_actual == 'mes_patria' %}🇩🇴 Mes de la Patria
+                {% elif tema_actual == 'cancer_mama' %}🎗️ Cáncer de Mama
+                {% else %}Diseño Original
+                {% endif %}
             </div>
         </div>
         
@@ -327,7 +332,16 @@
                     <input type="radio" name="theme" value="mes_patria" {% if tema_actual == 'mes_patria' %}checked{% endif %}>
                     <div class="radio-label">
                         <div class="radio-title">🇩🇴 Mes de la Patria</div>
-                        <div class="radio-description">Borde animado con colores de la bandera</div>
+                        <div class="radio-description">Banner dinámico + Borde tricolor (Febrero)</div>
+                    </div>
+                </label>
+                
+                <!-- Opción 3: Cáncer de Mama -->
+                <label class="radio-option {% if tema_actual == 'cancer_mama' %}selected{% endif %}" onclick="selectTheme(this, 'cancer_mama')">
+                    <input type="radio" name="theme" value="cancer_mama" {% if tema_actual == 'cancer_mama' %}checked{% endif %}>
+                    <div class="radio-label">
+                        <div class="radio-title">🎗️ Cáncer de Mama</div>
+                        <div class="radio-description">Banner rosa dinámico + Lazo rosa (Octubre)</div>
                     </div>
                 </label>
             </div>
