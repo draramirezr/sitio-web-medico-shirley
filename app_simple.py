@@ -1469,47 +1469,54 @@ def index():
         testimonial_dict['time_ago'] = time_ago
         testimonials_with_dates.append(testimonial_dict)
     
-    # Obtener tema configurado
-    tema = obtener_configuracion('tema_principal', 'original')
-    
-    # Lógica inteligente de temas según el mes (permite activación manual)
-    mes_actual = today.month
-    
-    # Auto-activación al inicio del mes (si está en "original")
-    if mes_actual == 2 and tema == 'original':
-        # Febrero: activar Mes de la Patria
-        actualizar_configuracion('tema_principal', 'mes_patria')
-        tema = 'mes_patria'
-    elif mes_actual == 3 and tema == 'original':
-        # Marzo: activar Mes de la Mujer
-        actualizar_configuracion('tema_principal', 'mes_mujer')
-        tema = 'mes_mujer'
-    elif mes_actual == 10 and tema == 'original':
-        # Octubre: activar Cáncer de Mama
-        actualizar_configuracion('tema_principal', 'cancer_mama')
-        tema = 'cancer_mama'
-    
-    # Auto-desactivación al terminar el mes
-    elif mes_actual == 3 and tema == 'mes_patria':
-        # Marzo: desactivar Mes de la Patria y activar Mes de la Mujer
-        actualizar_configuracion('tema_principal', 'mes_mujer')
-        tema = 'mes_mujer'
-    elif mes_actual == 4 and tema == 'mes_mujer':
-        # Abril: desactivar Mes de la Mujer
-        actualizar_configuracion('tema_principal', 'original')
-        tema = 'original'
-    elif mes_actual == 11 and tema == 'cancer_mama':
-        # Noviembre: desactivar Cáncer de Mama
-        actualizar_configuracion('tema_principal', 'original')
+    # Obtener tema configurado con manejo de errores
+    try:
+        tema = obtener_configuracion('tema_principal', 'original')
+    except Exception as e:
+        print(f"Error al obtener tema: {e}")
         tema = 'original'
     
-    # Si el admin activó manualmente un tema fuera de su mes, respetarlo
-    # (No hacer nada, dejar el tema tal como está)
+    # Lógica inteligente de temas según el mes (con manejo de errores)
+    try:
+        mes_actual = today.month
+        
+        # Auto-activación al inicio del mes (si está en "original")
+        if mes_actual == 2 and tema == 'original':
+            # Febrero: activar Mes de la Patria
+            if actualizar_configuracion('tema_principal', 'mes_patria'):
+                tema = 'mes_patria'
+        elif mes_actual == 3 and tema == 'original':
+            # Marzo: activar Mes de la Mujer
+            if actualizar_configuracion('tema_principal', 'mes_mujer'):
+                tema = 'mes_mujer'
+        elif mes_actual == 10 and tema == 'original':
+            # Octubre: activar Cáncer de Mama
+            if actualizar_configuracion('tema_principal', 'cancer_mama'):
+                tema = 'cancer_mama'
+        
+        # Auto-desactivación al terminar el mes
+        elif mes_actual == 3 and tema == 'mes_patria':
+            # Marzo: desactivar Mes de la Patria y activar Mes de la Mujer
+            if actualizar_configuracion('tema_principal', 'mes_mujer'):
+                tema = 'mes_mujer'
+        elif mes_actual == 4 and tema == 'mes_mujer':
+            # Abril: desactivar Mes de la Mujer
+            if actualizar_configuracion('tema_principal', 'original'):
+                tema = 'original'
+        elif mes_actual == 11 and tema == 'cancer_mama':
+            # Noviembre: desactivar Cáncer de Mama
+            if actualizar_configuracion('tema_principal', 'original'):
+                tema = 'original'
+    except Exception as e:
+        print(f"Error en lógica de temas: {e}")
+        # Si hay error, usar tema por defecto
+        tema = 'original'
     
     return render_template('index.html', 
                          services=services, 
                          testimonials=testimonials_with_dates,
-                         tema=tema)
+                         tema=tema,
+                         ano_actual=today.year)
 
 @app.route('/index-v2')
 def index_v2():
