@@ -171,6 +171,240 @@
 </style>
 {% endif %}
 
+{% if tema == 'san_valentin' %}
+<!-- Banner Superior Dinámico San Valentín -->
+<div class="valentin-banner-dinamico">
+    <div class="textos-rotativos-valentin">
+        <div class="texto-valentin-item active"><i class="fas fa-heart" style="color: #FFB6C1;"></i> FELIZ DÍA DE SAN VALENTÍN <i class="fas fa-heart" style="color: #FFB6C1;"></i></div>
+        <div class="texto-valentin-item"><i class="fas fa-heartbeat" style="color: #FFB6C1;"></i> "Cuida tu salud con amor - Ama tu cuerpo" <i class="fas fa-heartbeat" style="color: #FFB6C1;"></i></div>
+        <div class="texto-valentin-item">14 de Febrero {{ ano_actual }} - Día del Amor y la Amistad</div>
+    </div>
+</div>
+
+<!-- Estilos del Tema San Valentín -->
+<style>
+    /* Banner Superior Dinámico */
+    .valentin-banner-dinamico {
+        background: linear-gradient(135deg, #FF1493 0%, #FF69B4 50%, #FF1493 100%);
+        color: white;
+        text-align: center;
+        padding: 15px 20px;
+        font-size: 16px;
+        font-weight: 700;
+        box-shadow: 0 4px 15px rgba(255, 20, 147, 0.4);
+        overflow: hidden;
+        min-height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        filter: none !important;
+    }
+    
+    .textos-rotativos-valentin {
+        position: relative;
+        width: 100%;
+        height: 25px;
+        overflow: hidden;
+    }
+    
+    .texto-valentin-item {
+        position: absolute;
+        width: 100%;
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s ease;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding: 0 10px;
+    }
+    
+    .texto-valentin-item.active {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    .texto-valentin-item.exit {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    
+    /* Borde de corazones pulsantes */
+    .borde-corazones-pulsante {
+        position: absolute;
+        top: -18px;
+        left: -18px;
+        right: -18px;
+        bottom: -18px;
+        border-radius: 50%;
+        background: radial-gradient(circle, #FF1493 0%, #FF69B4 40%, #FFB6C1 70%, #FFC0CB 100%);
+        opacity: 0.6;
+        z-index: 0;
+        animation: pulsar-corazon 2s ease-in-out infinite;
+        pointer-events: none;
+    }
+    
+    @keyframes pulsar-corazon {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 0.6;
+        }
+        50% {
+            transform: scale(1.05);
+            opacity: 0.8;
+        }
+    }
+    
+    .borde-corazones-pulsante::after {
+        content: '';
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        background: transparent;
+        border-radius: 50%;
+    }
+    
+    /* Imagen encima del borde */
+    .hero-image-container picture,
+    .hero-image-container img {
+        position: relative;
+        z-index: 2;
+    }
+    
+    /* Corazones flotantes */
+    .corazon-flotante {
+        position: absolute;
+        font-size: 50px;
+        opacity: 0.12;
+        color: #FF1493 !important;
+        animation: flotar-corazon-valentin 18s linear infinite;
+        pointer-events: none;
+        z-index: 0;
+        filter: none !important;
+    }
+    
+    .corazon-flotante i {
+        color: #FF1493 !important;
+        filter: none !important;
+    }
+    
+    .corazon-flotante:nth-child(1) {
+        left: 10%;
+        font-size: 45px;
+        animation-duration: 16s;
+        animation-delay: -4s;
+    }
+    
+    .corazon-flotante:nth-child(2) {
+        left: 25%;
+        font-size: 65px;
+        animation-duration: 20s;
+        animation-delay: -10s;
+    }
+    
+    .corazon-flotante:nth-child(3) {
+        right: 25%;
+        font-size: 55px;
+        animation-duration: 18s;
+        animation-delay: -7s;
+    }
+    
+    .corazon-flotante:nth-child(4) {
+        right: 10%;
+        font-size: 60px;
+        animation-duration: 22s;
+        animation-delay: -13s;
+    }
+    
+    @keyframes flotar-corazon-valentin {
+        from {
+            bottom: -100px;
+            transform: translateX(0) rotate(0deg) scale(1);
+        }
+        50% {
+            transform: translateX(30px) rotate(180deg) scale(1.1);
+        }
+        to {
+            bottom: 110vh;
+            transform: translateX(60px) rotate(360deg) scale(1);
+        }
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .valentin-banner-dinamico {
+            font-size: 14px;
+            padding: 12px 15px;
+        }
+        
+        .textos-rotativos-valentin {
+            height: 22px;
+        }
+        
+        .borde-corazones-pulsante {
+            top: -15px;
+            left: -15px;
+            right: -15px;
+            bottom: -15px;
+        }
+        
+        .borde-corazones-pulsante::after {
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+        }
+        
+        .corazon-flotante {
+            font-size: 38px !important;
+        }
+        
+        .corazon-flotante:nth-child(2) {
+            font-size: 48px !important;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .valentin-banner-dinamico {
+            font-size: 12px;
+            padding: 10px 10px;
+        }
+        
+        .textos-rotativos-valentin {
+            height: 20px;
+        }
+        
+        .texto-valentin-item {
+            font-size: 12px;
+        }
+        
+        .borde-corazones-pulsante {
+            top: -12px;
+            left: -12px;
+            right: -12px;
+            bottom: -12px;
+        }
+        
+        .borde-corazones-pulsante::after {
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
+        }
+        
+        .corazon-flotante {
+            font-size: 32px !important;
+        }
+        
+        .corazon-flotante:nth-child(2) {
+            font-size: 40px !important;
+        }
+    }
+</style>
+{% endif %}
+
 {% if tema == 'cancer_mama' %}
 <!-- Banner Superior Dinámico Cáncer de Mama -->
 <div class="cancer-banner-dinamico">
@@ -655,18 +889,24 @@
 <!-- ========== HERO FULLSCREEN ========== -->
 <section class="hero-fullscreen">
     <!-- Elementos decorativos flotantes -->
-    {% if tema == 'cancer_mama' %}
-    <!-- Lazos rosas flotantes para Cáncer de Mama -->
-    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
-    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
-    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
-    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
+    {% if tema == 'san_valentin' %}
+    <!-- Corazones flotantes para San Valentín -->
+    <div class="corazon-flotante"><i class="fas fa-heart"></i></div>
+    <div class="corazon-flotante"><i class="fas fa-heart"></i></div>
+    <div class="corazon-flotante"><i class="fas fa-heart"></i></div>
+    <div class="corazon-flotante"><i class="fas fa-heart"></i></div>
     {% elif tema == 'mes_mujer' %}
     <!-- Símbolos de mujer flotantes para Mes de la Mujer -->
     <div class="simbolo-mujer-flotante"><i class="fas fa-venus"></i></div>
     <div class="simbolo-mujer-flotante"><i class="fas fa-venus"></i></div>
     <div class="simbolo-mujer-flotante"><i class="fas fa-venus"></i></div>
     <div class="simbolo-mujer-flotante"><i class="fas fa-venus"></i></div>
+    {% elif tema == 'cancer_mama' %}
+    <!-- Lazos rosas flotantes para Cáncer de Mama -->
+    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
+    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
+    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
+    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
     {% else %}
     <!-- Burbujas decorativas (diseño original y otros temas) -->
     <div class="bubble"></div>
@@ -680,12 +920,15 @@
         {% if tema == 'mes_patria' %}
         <!-- Borde animado tricolor para Mes de la Patria -->
         <div class="borde-tricolor-rotante"></div>
-        {% elif tema == 'cancer_mama' %}
-        <!-- Lazo rosa animado para Cáncer de Mama -->
-        <div class="lazo-rosa-rotante"></div>
+        {% elif tema == 'san_valentin' %}
+        <!-- Borde de corazones pulsantes para San Valentín -->
+        <div class="borde-corazones-pulsante"></div>
         {% elif tema == 'mes_mujer' %}
         <!-- Borde morado degradado para Mes de la Mujer -->
         <div class="borde-mujer-rotante"></div>
+        {% elif tema == 'cancer_mama' %}
+        <!-- Lazo rosa animado para Cáncer de Mama -->
+        <div class="lazo-rosa-rotante"></div>
         {% endif %}
         
         <picture>
@@ -882,18 +1125,24 @@
 <!-- ========== CTA FINAL ========== -->
 <section class="section-modern" style="position: relative; overflow: hidden;">
     <!-- Elementos decorativos flotantes -->
-    {% if tema == 'cancer_mama' %}
-    <!-- Lazos rosas flotantes -->
-    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
-    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
-    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
-    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
+    {% if tema == 'san_valentin' %}
+    <!-- Corazones flotantes -->
+    <div class="corazon-flotante"><i class="fas fa-heart"></i></div>
+    <div class="corazon-flotante"><i class="fas fa-heart"></i></div>
+    <div class="corazon-flotante"><i class="fas fa-heart"></i></div>
+    <div class="corazon-flotante"><i class="fas fa-heart"></i></div>
     {% elif tema == 'mes_mujer' %}
     <!-- Símbolos de mujer flotantes -->
     <div class="simbolo-mujer-flotante"><i class="fas fa-venus"></i></div>
     <div class="simbolo-mujer-flotante"><i class="fas fa-venus"></i></div>
     <div class="simbolo-mujer-flotante"><i class="fas fa-venus"></i></div>
     <div class="simbolo-mujer-flotante"><i class="fas fa-venus"></i></div>
+    {% elif tema == 'cancer_mama' %}
+    <!-- Lazos rosas flotantes -->
+    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
+    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
+    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
+    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
     {% else %}
     <!-- Burbujas decorativas -->
     <div class="bubble"></div>
@@ -1011,6 +1260,28 @@
         }
         
         setInterval(rotarTextoRosa, 4000);
+    });
+</script>
+{% endif %}
+
+{% if tema == 'san_valentin' %}
+<script>
+    // Rotación automática de textos en el banner de San Valentín
+    document.addEventListener('DOMContentLoaded', function() {
+        const textosValentin = document.querySelectorAll('.texto-valentin-item');
+        if (textosValentin.length === 0) return;
+        
+        let currentIndexValentin = 0;
+        
+        function rotarTextoValentin() {
+            textosValentin[currentIndexValentin].classList.remove('active');
+            textosValentin[currentIndexValentin].classList.add('exit');
+            currentIndexValentin = (currentIndexValentin + 1) % textosValentin.length;
+            setTimeout(() => textosValentin.forEach(t => t.classList.remove('exit')), 800);
+            textosValentin[currentIndexValentin].classList.add('active');
+        }
+        
+        setInterval(rotarTextoValentin, 4000);
     });
 </script>
 {% endif %}

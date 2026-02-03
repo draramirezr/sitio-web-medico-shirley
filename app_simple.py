@@ -1476,13 +1476,19 @@ def index():
         print(f"Error al obtener tema: {e}")
         tema = 'original'
     
-    # Lógica inteligente de temas según el mes (con manejo de errores)
+    # Lógica inteligente de temas según el mes y día (con manejo de errores)
     try:
         mes_actual = today.month
+        dia_actual = today.day
         
-        # Auto-activación al inicio del mes (si está en "original")
-        if mes_actual == 2 and tema == 'original':
-            # Febrero: activar Mes de la Patria
+        # Auto-activación especial por fecha
+        if mes_actual == 2 and dia_actual == 14:
+            # 14 de Febrero: San Valentín (reemplaza Mes de la Patria ese día)
+            if tema != 'san_valentin':
+                if actualizar_configuracion('tema_principal', 'san_valentin'):
+                    tema = 'san_valentin'
+        elif mes_actual == 2 and tema == 'original':
+            # Resto de Febrero: activar Mes de la Patria
             if actualizar_configuracion('tema_principal', 'mes_patria'):
                 tema = 'mes_patria'
         elif mes_actual == 3 and tema == 'original':
@@ -1494,7 +1500,11 @@ def index():
             if actualizar_configuracion('tema_principal', 'cancer_mama'):
                 tema = 'cancer_mama'
         
-        # Auto-desactivación al terminar el mes
+        # Auto-desactivación al terminar el mes o día especial
+        elif mes_actual == 2 and dia_actual == 15 and tema == 'san_valentin':
+            # 15 de Febrero: volver a Mes de la Patria
+            if actualizar_configuracion('tema_principal', 'mes_patria'):
+                tema = 'mes_patria'
         elif mes_actual == 3 and tema == 'mes_patria':
             # Marzo: desactivar Mes de la Patria y activar Mes de la Mujer
             if actualizar_configuracion('tema_principal', 'mes_mujer'):
@@ -2628,7 +2638,7 @@ def guardar_tema_pagina():
     nuevo_tema = request.form.get('theme', 'original')
     
     # Validar que sea un tema válido
-    if nuevo_tema not in ['original', 'mes_patria', 'cancer_mama', 'mes_mujer']:
+    if nuevo_tema not in ['original', 'mes_patria', 'san_valentin', 'mes_mujer', 'cancer_mama']:
         flash('Tema inválido', 'error')
         return redirect(url_for('admin_visor_pagina'))
     
@@ -2638,8 +2648,9 @@ def guardar_tema_pagina():
         nombres_temas = {
             'original': 'Diseño Original',
             'mes_patria': '🇩🇴 Mes de la Patria',
-            'cancer_mama': '🎗️ Cáncer de Mama',
-            'mes_mujer': '♀ Mes de la Mujer'
+            'san_valentin': '💕 San Valentín',
+            'mes_mujer': '♀ Mes de la Mujer',
+            'cancer_mama': '🎗️ Cáncer de Mama'
         }
         nombre_tema = nombres_temas.get(nuevo_tema, 'Diseño Original')
         flash(f'✅ Tema actualizado a: {nombre_tema}', 'success')

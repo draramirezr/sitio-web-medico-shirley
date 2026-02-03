@@ -308,8 +308,9 @@
                 ✅ Actual: 
                 {% if tema_actual == 'original' %}Diseño Original
                 {% elif tema_actual == 'mes_patria' %}🇩🇴 Mes de la Patria
-                {% elif tema_actual == 'cancer_mama' %}🎗️ Cáncer de Mama
+                {% elif tema_actual == 'san_valentin' %}💕 San Valentín
                 {% elif tema_actual == 'mes_mujer' %}♀ Mes de la Mujer
+                {% elif tema_actual == 'cancer_mama' %}🎗️ Cáncer de Mama
                 {% else %}Diseño Original
                 {% endif %}
             </div>
@@ -333,16 +334,16 @@
                     <input type="radio" name="theme" value="mes_patria" {% if tema_actual == 'mes_patria' %}checked{% endif %}>
                     <div class="radio-label">
                         <div class="radio-title">🇩🇴 Mes de la Patria</div>
-                        <div class="radio-description">Banner dinámico + Borde tricolor (Febrero)</div>
+                        <div class="radio-description">Banner tricolor + Borde tricolor (Febrero)</div>
                     </div>
                 </label>
                 
-                <!-- Opción 3: Cáncer de Mama -->
-                <label class="radio-option {% if tema_actual == 'cancer_mama' %}selected{% endif %}" onclick="selectTheme(this, 'cancer_mama')">
-                    <input type="radio" name="theme" value="cancer_mama" {% if tema_actual == 'cancer_mama' %}checked{% endif %}>
+                <!-- Opción 3: San Valentín -->
+                <label class="radio-option {% if tema_actual == 'san_valentin' %}selected{% endif %}" onclick="selectTheme(this, 'san_valentin')">
+                    <input type="radio" name="theme" value="san_valentin" {% if tema_actual == 'san_valentin' %}checked{% endif %}>
                     <div class="radio-label">
-                        <div class="radio-title">🎗️ Cáncer de Mama</div>
-                        <div class="radio-description">Banner rosa dinámico + Lazo rosa (Octubre)</div>
+                        <div class="radio-title">💕 San Valentín</div>
+                        <div class="radio-description">Corazones románticos (Solo 14 de Febrero)</div>
                     </div>
                 </label>
                 
@@ -351,7 +352,16 @@
                     <input type="radio" name="theme" value="mes_mujer" {% if tema_actual == 'mes_mujer' %}checked{% endif %}>
                     <div class="radio-label">
                         <div class="radio-title">♀ Mes de la Mujer</div>
-                        <div class="radio-description">Banner morado dinámico + Símbolo ♀ (Marzo)</div>
+                        <div class="radio-description">Banner morado + Símbolo ♀ (Marzo)</div>
+                    </div>
+                </label>
+                
+                <!-- Opción 5: Cáncer de Mama -->
+                <label class="radio-option {% if tema_actual == 'cancer_mama' %}selected{% endif %}" onclick="selectTheme(this, 'cancer_mama')">
+                    <input type="radio" name="theme" value="cancer_mama" {% if tema_actual == 'cancer_mama' %}checked{% endif %}>
+                    <div class="radio-label">
+                        <div class="radio-title">🎗️ Cáncer de Mama</div>
+                        <div class="radio-description">Banner rosa + Lazos rosas (Octubre)</div>
                     </div>
                 </label>
             </div>
