@@ -575,6 +575,33 @@ def inject_recaptcha():
         'RECAPTCHA_SITE_KEY': RECAPTCHA_SITE_KEY
     }
 
+# Filtro personalizado para formatear fechas a dd/mm/yyyy
+@app.template_filter('fecha_es')
+def fecha_es_filter(fecha):
+    """Convertir fecha a formato dd/mm/yyyy (español)"""
+    if not fecha:
+        return ''
+    
+    try:
+        # Si es string
+        if isinstance(fecha, str):
+            # Intentar parsear diferentes formatos
+            for fmt in ['%Y-%m-%d', '%Y-%m-%d %H:%M:%S', '%d/%m/%Y']:
+                try:
+                    fecha_obj = datetime.strptime(fecha, fmt)
+                    return fecha_obj.strftime('%d/%m/%Y')
+                except:
+                    continue
+            return fecha  # Si no se puede convertir, devolver original
+        
+        # Si es objeto datetime o date
+        elif hasattr(fecha, 'strftime'):
+            return fecha.strftime('%d/%m/%Y')
+        
+        return str(fecha)
+    except:
+        return str(fecha) if fecha else ''
+
 # Modelo de Usuario para Flask-Login
 class User(UserMixin):
     def __init__(self, id, nombre, email, perfil):
