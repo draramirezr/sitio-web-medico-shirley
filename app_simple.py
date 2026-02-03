@@ -2273,7 +2273,7 @@ def request_appointment():
                 try:
                     from datetime import datetime
                     emergency_dt = datetime.strptime(emergency_datetime, '%Y-%m-%dT%H:%M')
-                    emergency_date = emergency_dt.strftime('%Y-%m-%d')
+                    emergency_date = emergency_dt.strftime('%Y-%m-%d')  # Mantener para SQL
                     emergency_time = emergency_dt.strftime('%H:%M')
                     
                     conn = get_db_connection()
