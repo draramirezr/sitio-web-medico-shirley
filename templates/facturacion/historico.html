@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Histórico de Facturas{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
@@ -283,7 +283,7 @@
                 {% for factura in facturas %}
                 <tr>
                     <td><strong>{{ factura['id'] }}</strong></td>
-                    <td>{{ factura['fecha_factura'] }}</td>
+                    <td>{{ factura['fecha_factura']|fecha_es }}</td>
                     <td>
                         <span class="badge-ncf">
                             {{ factura['ncf_numero'] if factura['ncf_numero'] else factura['ncf'] }}

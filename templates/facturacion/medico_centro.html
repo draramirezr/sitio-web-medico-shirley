@@ -203,7 +203,7 @@
                             <span class="badge bg-warning text-dark ms-2">Por Defecto</span>
                             {% endif %}
                         </td>
-                        <td>{{ relacion['created_at'].strftime('%d/%m/%Y') if relacion['created_at'] else '-' }}</td>
+                        <td>{{ relacion['created_at']|fecha_es if relacion['created_at'] else '-' }}</td>
                         <td>
                             <form method="POST" action="{{ url_for('facturacion_medico_centro_eliminar', relacion_id=relacion['id']) }}" 
                                   style="display: inline;" onsubmit="return confirm('¿Está seguro de eliminar esta relación?');">

@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Maestra de NCF - Facturación{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
@@ -224,7 +224,7 @@
                     </td>
                     <td class="text-center">
                         {% if ncf['fecha_fin'] %}
-                            <small>{{ ncf['fecha_fin'] }}</small>
+                            <small>{{ ncf['fecha_fin']|fecha_es }}</small>
                         {% else %}
                             <span class="text-muted"><i class="fas fa-minus"></i></span>
                         {% endif %}

@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Generar Factura - Paso 2{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
@@ -285,7 +285,7 @@
             </div>
             <div class="config-item">
                 <i class="fas fa-calendar-alt"></i>
-                <span><strong>Fecha Factura:</strong> {{ fecha_factura }}</span>
+                <span><strong>Fecha Factura:</strong> {{ fecha_factura|fecha_es }}</span>
             </div>
             <div class="config-item">
                 <i class="fas fa-users"></i>
@@ -366,7 +366,7 @@
                         </td>
                         <td>{{ paciente['nss'] }}</td>
                         <td><strong>{{ paciente['paciente_nombre_completo'] }}</strong></td>
-                        <td>{{ paciente['fecha_servicio'] }}</td>
+                        <td>{{ paciente['fecha_servicio']|fecha_es }}</td>
                         <td><code style="background: rgba(206, 176, 183, 0.1); padding: 0.25rem 0.5rem; border-radius: 5px;">{{ paciente['autorizacion'] }}</code></td>
                         <td>{{ paciente['descripcion_servicio'] }}</td>
                         <td class="text-center"><strong> {{ "{:,.2f}".format(paciente['monto']) }}</strong></td>

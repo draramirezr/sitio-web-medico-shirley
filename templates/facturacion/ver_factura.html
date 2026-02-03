@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Factura #{{ factura['id'] }}{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
@@ -578,7 +578,7 @@
         <div class="factura-info">
             <div class="info-box">
                 <h6>Información de Factura</h6>
-                <p><strong>Fecha:</strong> {{ factura['fecha_factura'] }}</p>
+                <p><strong>Fecha:</strong> {{ factura['fecha_factura']|fecha_es }}</p>
                 <p><strong>Cliente (ARS):</strong> {{ factura['nombre_ars'] }}</p>
                 {% if factura['ars_rnc'] %}
                 <p><strong>RNC:</strong> {{ factura['ars_rnc'] }}</p>
@@ -591,7 +591,7 @@
                 <p><strong>Tipo:</strong> {{ factura['ncf_tipo'] }}</p>
                 {% endif %}
                 {% if factura['ncf_fecha_fin'] %}
-                <p><strong>Válido hasta:</strong> {{ factura['ncf_fecha_fin'] }}</p>
+                <p><strong>Válido hasta:</strong> {{ factura['ncf_fecha_fin']|fecha_es }}</p>
                 {% endif %}
             </div>
             <div class="info-box">
@@ -624,7 +624,7 @@
                     <td class="text-center">{{ loop.index }}</td>
                     <td><strong>{{ paciente['nombre_paciente'] }}</strong></td>
                     <td>{{ paciente['nss'] }}</td>
-                    <td>{{ paciente['fecha_servicio'] }}</td>
+                    <td>{{ paciente['fecha_servicio']|fecha_es }}</td>
                     <td><code style="background: rgba(206, 176, 183, 0.1); padding: 0.25rem 0.5rem; border-radius: 5px;">{{ paciente['autorizacion'] }}</code></td>
                     <td>{{ paciente['descripcion_servicio'] }}</td>
                     <td class="text-right"><strong>{{ paciente['monto']|formato_moneda }}</strong></td>

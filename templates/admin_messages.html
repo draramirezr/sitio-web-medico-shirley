@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Gestión de Mensajes - Panel Admin | Dra. Shirley Ramírez{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
@@ -278,7 +278,7 @@
                             </div>
                             <small class="text-muted">
                                 <i class="fas fa-calendar-alt"></i>
-                                {{ message['created_at'] }}
+                                {{ message['created_at']|fecha_es }}
                             </small>
                         </div>
 
@@ -368,7 +368,7 @@
                         </div>
                         <div class="mb-3">
                             <strong><i class="fas fa-calendar-alt me-2"></i>Fecha de Recepción:</strong><br>
-                            {{ message['created_at'] }}
+                            {{ message['created_at']|fecha_es }}
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -411,7 +411,7 @@
                             <strong>De:</strong> {{ message['name'] }}<br>
                             <strong>Email:</strong> {{ message['email'] }}<br>
                             <strong>Asunto:</strong> {{ message['subject'] }}<br>
-                            <strong>Fecha:</strong> {{ message['created_at'] }}
+                            <strong>Fecha:</strong> {{ message['created_at']|fecha_es }}
                         </div>
                     </div>
                     <div class="modal-footer">

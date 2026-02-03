@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Pacientes Pendientes - Facturación{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
@@ -331,7 +331,7 @@
                     <td><strong>{{ paciente['id'] }}</strong></td>
                     <td>{{ paciente['nss'] }}</td>
                     <td>{{ paciente['nombre_paciente'] }}</td>
-                    <td>{{ paciente['fecha_servicio'] }}</td>
+                    <td>{{ paciente['fecha_servicio']|fecha_es }}</td>
                     <td>{{ paciente['descripcion_servicio'] }}</td>
                     <td class="text-center"><strong> {{ paciente['monto']|formato_moneda }}</strong></td>
                     <td><small>{{ paciente['medico_nombre'] }}</small></td>

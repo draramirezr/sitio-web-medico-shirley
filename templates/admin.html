@@ -482,7 +482,7 @@
                                         {{ message['message'][:100] }}{{ '...' if message['message']|length > 100 else '' }}
                                     </p>
                                     <small style="color: var(--text-muted); font-size: 0.8rem;">
-                                        <i class="fas fa-clock me-1"></i>{{ message['created_at'] }}
+                                        <i class="fas fa-clock me-1"></i>{{ message['created_at']|fecha_es }}
                                     </small>
                                 </div>
                             </div>
@@ -673,7 +673,7 @@
                             </div>
                             <div class="col-md-6 mb-2">
                                 <strong><i class="fas fa-calendar-alt me-2"></i>Fecha Solicitud:</strong><br>
-                                {{ appointment['created_at'] }}
+                                {{ appointment['created_at']|fecha_es }}
                             </div>
                         </div>
                     </div>
@@ -686,7 +686,7 @@
                         <div class="row">
                             <div class="col-md-6 mb-2">
                                 <strong><i class="fas fa-calendar me-2"></i>Fecha:</strong><br>
-                                {{ appointment['appointment_date'] if appointment['appointment_date'] else 'Por definir' }}
+                                {{ appointment['appointment_date']|fecha_es if appointment['appointment_date'] else 'Por definir' }}
                             </div>
                             <div class="col-md-6 mb-2">
                                 <strong><i class="fas fa-clock me-2"></i>Hora:</strong><br>
@@ -779,7 +779,7 @@
                             </div>
                             <div class="col-md-6 mb-2">
                                 <strong><i class="fas fa-calendar-alt me-2"></i>Fecha Solicitud:</strong><br>
-                                {{ appointment['created_at'] }}
+                                {{ appointment['created_at']|fecha_es }}
                             </div>
                         </div>
                     </div>
@@ -792,7 +792,7 @@
                         <div class="row">
                             <div class="col-md-6 mb-2">
                                 <strong><i class="fas fa-calendar me-2"></i>Fecha:</strong><br>
-                                {{ appointment['appointment_date'] if appointment['appointment_date'] else 'Por definir' }}
+                                {{ appointment['appointment_date']|fecha_es if appointment['appointment_date'] else 'Por definir' }}
                             </div>
                             <div class="col-md-6 mb-2">
                                 <strong><i class="fas fa-clock me-2"></i>Hora:</strong><br>
@@ -910,7 +910,7 @@
                             {% endif %}
                             <div class="col-md-6 mb-2">
                                 <strong><i class="fas fa-calendar-alt me-2"></i>Fecha:</strong><br>
-                                {{ message['created_at'] }}
+                                {{ message['created_at']|fecha_es }}
                             </div>
                         </div>
                     </div>

@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Gestión de Citas - Panel Admin | Dra. Shirley Ramírez{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
@@ -276,7 +276,7 @@
                                 {% if appointment['appointment_date'] %}
                                 <div class="mb-1">
                                     <i class="fas fa-calendar-day"></i>
-                                    <strong>Fecha:</strong> {{ appointment['appointment_date'] }}
+                                    <strong>Fecha:</strong> {{ appointment['appointment_date']|fecha_es }}
                                 </div>
                                 {% endif %}
                                 {% if appointment['appointment_time'] %}
@@ -344,7 +344,7 @@
                             </div>
                             <small class="text-muted d-block mt-2">
                                 <i class="fas fa-calendar-plus"></i>
-                                Registrada: {{ appointment['created_at'] }}
+                                Registrada: {{ appointment['created_at']|fecha_es }}
                             </small>
                         </div>
                     </div>
@@ -390,7 +390,7 @@
                             {% if appointment['appointment_date'] %}
                             <div class="col-md-6 mb-3">
                                 <strong><i class="fas fa-calendar-day me-2"></i>Fecha:</strong><br>
-                                {{ appointment['appointment_date'] }}
+                                {{ appointment['appointment_date']|fecha_es }}
                             </div>
                             {% endif %}
                             {% if appointment['appointment_time'] %}
@@ -419,7 +419,7 @@
                             {% endif %}
                             <div class="col-12 mb-3">
                                 <strong><i class="fas fa-calendar-plus me-2"></i>Fecha de Registro:</strong><br>
-                                {{ appointment['created_at'] }}
+                                {{ appointment['created_at']|fecha_es }}
                             </div>
                         </div>
                     </div>
@@ -458,7 +458,7 @@
                             <strong>Teléfono:</strong> {{ appointment['phone'] }}<br>
                             <strong>Tipo:</strong> {{ appointment['appointment_type'] }}<br>
                             {% if appointment['appointment_date'] %}
-                            <strong>Fecha:</strong> {{ appointment['appointment_date'] }}
+                            <strong>Fecha:</strong> {{ appointment['appointment_date']|fecha_es }}
                             {% endif %}
                         </div>
                     </div>

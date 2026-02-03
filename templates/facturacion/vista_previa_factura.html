@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Vista Previa - Factura{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
@@ -283,7 +283,7 @@
         <div class="factura-info">
             <div class="info-box">
                 <h6>Información de Factura</h6>
-                <p><strong>Fecha:</strong> {{ fecha_factura }}</p>
+                <p><strong>Fecha:</strong> {{ fecha_factura|fecha_es }}</p>
                 <p><strong>Cliente (ARS):</strong> {{ ars['nombre_ars'] }}</p>
                 {% if ars['rnc'] %}
                 <p><strong>RNC:</strong> {{ ars['rnc'] }}</p>
@@ -294,7 +294,7 @@
                 <p class="highlight">{{ ncf_completo }}</p>
                 <p><strong>Tipo:</strong> {{ ncf['tipo'] }}</p>
                 {% if ncf['fecha_fin'] %}
-                <p><strong>Válido hasta:</strong> {{ ncf['fecha_fin'] }}</p>
+                <p><strong>Válido hasta:</strong> {{ ncf['fecha_fin']|fecha_es }}</p>
                 {% endif %}
             </div>
             <div class="info-box">
@@ -324,7 +324,7 @@
                     <td class="text-center">{{ loop.index }}</td>
                     <td><strong>{{ paciente['nombre_paciente'] }}</strong></td>
                     <td>{{ paciente['nss'] }}</td>
-                    <td>{{ paciente['fecha_servicio'] }}</td>
+                    <td>{{ paciente['fecha_servicio']|fecha_es }}</td>
                     <td><code style="background: rgba(206, 176, 183, 0.1); padding: 0.25rem 0.5rem; border-radius: 5px;">{{ paciente['autorizacion'] }}</code></td>
                     <td>{{ paciente['descripcion_servicio'] }}</td>
                     <td class="text-right"><strong> {{ paciente['monto']|formato_moneda }}</strong></td>

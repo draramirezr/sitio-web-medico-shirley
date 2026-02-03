@@ -524,7 +524,7 @@
     {% else %}
     <div class="alerta-dias">
         <h5><i class="fas fa-info-circle"></i> Días restantes para editar: {{ dias_restantes }}</h5>
-        <p class="mb-0">Fecha de creación: {{ factura['fecha_factura'] }} (Hace {{ dias_transcurridos }} días)</p>
+        <p class="mb-0">Fecha de creación: {{ factura['fecha_factura']|fecha_es }} (Hace {{ dias_transcurridos }} días)</p>
     </div>
     {% endif %}
 
@@ -534,7 +534,7 @@
         <div class="info-grid">
             <div class="info-item">
                 <label>Fecha Factura</label>
-                <div class="valor">{{ factura['fecha_factura'] }}</div>
+                <div class="valor">{{ factura['fecha_factura']|fecha_es }}</div>
             </div>
             <div class="info-item">
                 <label>Médico que Factura</label>
@@ -590,7 +590,7 @@
                             <td class="text-center">{{ loop.index }}</td>
                             <td>{{ paciente['nombre_paciente'] }}</td>
                             <td>{{ paciente['nss'] }}</td>
-                            <td>{{ paciente['fecha_servicio'] }}</td>
+                            <td>{{ paciente['fecha_servicio']|fecha_es }}</td>
                             <td>{{ paciente['medico_nombre'] }}</td>
                             <td>{{ paciente['servicio_nombre'] or 'N/A' }}</td>
                             <td class="text-end">RD$ {{ "{:,.2f}".format(paciente['monto']) }}</td>
@@ -641,7 +641,7 @@
                             <td class="text-center">{{ loop.index }}</td>
                             <td>{{ paciente['paciente_nombre_completo'] or paciente['nombre_paciente'] }}</td>
                             <td>{{ paciente['nss'] }}</td>
-                            <td>{{ paciente['fecha_servicio'] }}</td>
+                            <td>{{ paciente['fecha_servicio']|fecha_es }}</td>
                             <td>{{ paciente['medico_nombre'] }}</td>
                             <td>{{ paciente['servicio_nombre'] or 'N/A' }}</td>
                             <td class="text-end">RD$ {{ "{:,.2f}".format(paciente['monto']) }}</td>

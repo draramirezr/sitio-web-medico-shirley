@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Gestión de Usuarios - Panel Administrativo{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
@@ -303,7 +303,7 @@
                         </td>
                         <td>
                             {% if usuario.created_at %}
-                                {{ usuario.created_at.strftime('%Y-%m-%d') if usuario.created_at is not string else usuario.created_at[:10] }}
+                                {{ usuario.created_at|fecha_es }}
                             {% else %}
                                 <span style="color: #999;">N/A</span>
                             {% endif %}
