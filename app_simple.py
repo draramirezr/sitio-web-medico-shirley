@@ -4030,7 +4030,24 @@ def facturacion_ncf_nuevo():
         prefijo = sanitize_input(request.form['prefijo'], 10)
         tamaño = request.form.get('tamaño', 0)
         ultimo_numero = request.form.get('ultimo_numero', 0)
-        fecha_fin = request.form.get('fecha_fin', '')
+        fecha_fin = request.form.get('fecha_fin', '').strip()
+        
+        # Convertir fecha_fin de dd/mm/yyyy a yyyy-mm-dd si tiene valor
+        fecha_fin_db = None
+        if fecha_fin:
+            try:
+                # Intentar parsear dd/mm/yyyy
+                from datetime import datetime
+                fecha_obj = datetime.strptime(fecha_fin, '%d/%m/%Y')
+                fecha_fin_db = fecha_obj.strftime('%Y-%m-%d')
+            except:
+                # Si falla, intentar yyyy-mm-dd (por si viene de formato antiguo)
+                try:
+                    fecha_obj = datetime.strptime(fecha_fin, '%Y-%m-%d')
+                    fecha_fin_db = fecha_fin
+                except:
+                    flash('Formato de fecha inválido. Use dd/mm/yyyy (ejemplo: 31/12/2026)', 'error')
+                    return redirect(url_for('facturacion_ncf_nuevo'))
         
         if not tipo or not prefijo or not tamaño:
             flash('Los campos Tipo, Prefijo y Tamaño son obligatorios', 'error')
@@ -4045,7 +4062,7 @@ def facturacion_ncf_nuevo():
         
         conn = get_db_connection()
         conn.execute('INSERT INTO ncf (tipo, prefijo, tamaño, ultimo_numero, fecha_fin) VALUES (%s, %s, %s, %s, %s)', 
-                    (tipo, prefijo, tamaño, ultimo_numero, fecha_fin if fecha_fin else None))
+                    (tipo, prefijo, tamaño, ultimo_numero, fecha_fin_db))
         conn.commit()
         conn.close()
         
@@ -4065,7 +4082,24 @@ def facturacion_ncf_editar(ncf_id):
         prefijo = sanitize_input(request.form['prefijo'], 10)
         tamaño = request.form.get('tamaño', 0)
         ultimo_numero = request.form.get('ultimo_numero', 0)
-        fecha_fin = request.form.get('fecha_fin', '')
+        fecha_fin = request.form.get('fecha_fin', '').strip()
+        
+        # Convertir fecha_fin de dd/mm/yyyy a yyyy-mm-dd si tiene valor
+        fecha_fin_db = None
+        if fecha_fin:
+            try:
+                # Intentar parsear dd/mm/yyyy
+                from datetime import datetime
+                fecha_obj = datetime.strptime(fecha_fin, '%d/%m/%Y')
+                fecha_fin_db = fecha_obj.strftime('%Y-%m-%d')
+            except:
+                # Si falla, intentar yyyy-mm-dd (por si viene de formato antiguo)
+                try:
+                    fecha_obj = datetime.strptime(fecha_fin, '%Y-%m-%d')
+                    fecha_fin_db = fecha_fin
+                except:
+                    flash('Formato de fecha inválido. Use dd/mm/yyyy (ejemplo: 31/12/2026)', 'error')
+                    return redirect(url_for('facturacion_ncf_editar', ncf_id=ncf_id))
         
         if not tipo or not prefijo or not tamaño:
             flash('Los campos Tipo, Prefijo y Tamaño son obligatorios', 'error')
@@ -4079,7 +4113,7 @@ def facturacion_ncf_editar(ncf_id):
             return redirect(url_for('facturacion_ncf_editar', ncf_id=ncf_id))
         
         conn.execute('UPDATE ncf SET tipo = %s, prefijo = %s, tamaño = %s, ultimo_numero = %s, fecha_fin = %s WHERE id = %s', 
-                    (tipo, prefijo, tamaño, ultimo_numero, fecha_fin if fecha_fin else None, ncf_id))
+                    (tipo, prefijo, tamaño, ultimo_numero, fecha_fin_db, ncf_id))
         conn.commit()
         conn.close()
         
@@ -7754,6 +7788,8 @@ if __name__ == '__main__':
     print(f"📄 PDF disponible: {'✅ SÍ' if REPORTLAB_AVAILABLE else '❌ NO'}")
     print(f"🔒 Seguridad: {'✅ ACTIVADA' if not debug else '⚠️ DESARROLLO'}")
     print("="*60 + "\n")
+
+    
     
     
     

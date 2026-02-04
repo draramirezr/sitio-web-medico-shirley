@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}{{ 'Editar NCF' if ncf else 'Nuevo NCF' }} - Facturación{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
@@ -156,12 +156,17 @@
                     <label class="form-label" for="fecha_fin">
                         Fecha Fin
                     </label>
-                    <input type="date" 
+                    <input type="text" 
                            class="form-control" 
                            id="fecha_fin" 
                            name="fecha_fin" 
-                           value="{{ ncf['fecha_fin'] if ncf and ncf['fecha_fin'] else '' }}">
-                    <small class="text-muted">Fecha de vencimiento o fin de validez del NCF (opcional)</small>
+                           value="{{ ncf['fecha_fin']|fecha_es if ncf and ncf['fecha_fin'] else '' }}"
+                           placeholder="dd/mm/yyyy"
+                           pattern="\d{2}/\d{2}/\d{4}"
+                           title="Formato: dd/mm/yyyy (ejemplo: 31/12/2026)">
+                    <small class="text-muted">
+                        <i class="fas fa-calendar"></i> Formato: dd/mm/yyyy (ejemplo: 31/12/2026) - Fecha de vencimiento (opcional)
+                    </small>
                 </div>
             </div>
 
@@ -187,6 +192,64 @@ function calcularProximo() {
 // Actualizar en tiempo real cuando se cambia el último número
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('ultimo_numero').addEventListener('input', calcularProximo);
+    
+    // Validación y formato de Fecha Fin (dd/mm/yyyy)
+    const fechaFinField = document.getElementById('fecha_fin');
+    
+    fechaFinField.addEventListener('input', function(e) {
+        let value = this.value.replace(/[^0-9/]/g, ''); // Solo números y /
+        
+        // Auto-agregar barras
+        if (value.length === 2 && !value.includes('/')) {
+            value += '/';
+        } else if (value.length === 5 && value.split('/').length === 2) {
+            value += '/';
+        }
+        
+        // Limitar longitud
+        if (value.length > 10) {
+            value = value.substring(0, 10);
+        }
+        
+        this.value = value;
+    });
+    
+    // Validación al salir del campo
+    fechaFinField.addEventListener('blur', function() {
+        const value = this.value.trim();
+        if (value === '') return; // Vacío está OK (opcional)
+        
+        // Validar formato dd/mm/yyyy
+        const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+        const match = value.match(regex);
+        
+        if (!match) {
+            alert('Formato de fecha incorrecto. Use: dd/mm/yyyy (ejemplo: 31/12/2026)');
+            this.focus();
+            return;
+        }
+        
+        const [, dia, mes, ano] = match;
+        
+        // Validar rangos
+        if (parseInt(dia) < 1 || parseInt(dia) > 31) {
+            alert('Día inválido. Debe estar entre 01 y 31');
+            this.focus();
+            return;
+        }
+        
+        if (parseInt(mes) < 1 || parseInt(mes) > 12) {
+            alert('Mes inválido. Debe estar entre 01 y 12');
+            this.focus();
+            return;
+        }
+        
+        if (parseInt(ano) < 2020 || parseInt(ano) > 2050) {
+            alert('Año inválido. Debe estar entre 2020 y 2050');
+            this.focus();
+            return;
+        }
+    });
 });
 </script>
 {% endblock %}

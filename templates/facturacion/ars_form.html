@@ -92,9 +92,10 @@
                            value="{{ ars['nombre_ars'] if ars else '' }}" 
                            required 
                            placeholder="Ej: ARS UNIVERSAL"
-                           pattern="[A-Za-zÀ-ÿ0-9\s\-]+"
-                           title="Letras, números, espacios y guiones permitidos"
+                           pattern="[A-Za-zÀ-ÿ\s\-]+"
+                           title="Solo letras, espacios y guiones permitidos"
                            maxlength="200">
+                    <small class="text-muted">Solo letras (sin números)</small>
                 </div>
 
                 <div class="mb-4">
@@ -129,9 +130,9 @@
 </div>
 
 <script>
-// Validación NOMBRE ARS - Letras, números, espacios y guiones
+// Validación NOMBRE ARS - SOLO LETRAS (sin números)
 document.getElementById('nombre_ars').addEventListener('input', function(e) {
-    this.value = this.value.replace(/[^A-Za-zÀ-ÿ0-9\s\-]/g, '');
+    this.value = this.value.replace(/[^A-Za-zÀ-ÿ\s\-]/g, '');
 });
 
 // Validación RNC - Solo números y guiones
@@ -144,7 +145,7 @@ document.getElementById('rnc').addEventListener('input', function(e) {
     document.getElementById(fieldId).addEventListener('paste', function(e) {
         setTimeout(() => {
             if (fieldId === 'nombre_ars') {
-                this.value = this.value.replace(/[^A-Za-zÀ-ÿ0-9\s\-]/g, '');
+                this.value = this.value.replace(/[^A-Za-zÀ-ÿ\s\-]/g, '');
             } else if (fieldId === 'rnc') {
                 this.value = this.value.replace(/[^0-9\-]/g, '');
             }

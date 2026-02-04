@@ -106,6 +106,10 @@
         border-radius: 15px;
         font-weight: 600;
         transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
     }
     
     .btn-volver:hover {
@@ -113,6 +117,27 @@
         color: white;
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(206, 176, 183, 0.3);
+    }
+    
+    .btn-excel {
+        background: white;
+        border: 2px solid #28a745;
+        color: #28a745;
+        padding: 0.7rem 1.5rem;
+        border-radius: 15px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .btn-excel:hover {
+        background: #28a745;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
     }
     
     .info-card {
@@ -165,15 +190,13 @@
             </div>
             <div style="display: flex; gap: 10px;">
                 <a href="{{ url_for('facturacion_pacientes_excel') }}{% if search %}?search={{ search }}{% endif %}" 
-                   class="btn btn-excel"
-                   style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 15px; font-weight: 600; transition: all 0.3s ease; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;"
-                   onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(40, 167, 69, 0.3)';"
-                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                   class="btn btn-excel">
                     <i class="fas fa-file-excel"></i>
                     Descargar Excel
                 </a>
                 <a href="{{ url_for('facturacion_menu') }}" class="btn btn-volver">
-                    <i class="fas fa-arrow-left me-2"></i>Volver al Menú
+                    <i class="fas fa-arrow-left"></i>
+                    Volver al Menú
                 </a>
             </div>
         </div>
