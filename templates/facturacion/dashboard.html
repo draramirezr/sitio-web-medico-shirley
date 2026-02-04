@@ -721,7 +721,7 @@
                         <p class="stat-label" style="margin-bottom: 0.8rem;">ARS Pendientes por Facturar</p>
                         <div style="max-height: 180px; overflow-y: auto; padding-right: 5px;">
                             {% for ars in ars_pendientes_detalle %}
-                                <a href="{{ url_for('facturacion_generar_factura') }}?ars_id={{ ars.id }}&auto=1" 
+                                <a href="{{ url_for('facturacion_generar') }}?ars_id={{ ars.id }}&auto=1" 
                                    style="display: flex; justify-content: space-between; align-items: center; background: rgba(255, 193, 7, 0.15); color: #856404; padding: 0.5rem 0.9rem; border-radius: 10px; margin: 0.3rem 0; font-size: 0.85rem; font-weight: 600; border: 1px solid rgba(255, 193, 7, 0.3); text-decoration: none; transition: all 0.3s ease; cursor: pointer;"
                                    onmouseover="this.style.background='rgba(255, 193, 7, 0.25)'; this.style.transform='translateX(5px)';"
                                    onmouseout="this.style.background='rgba(255, 193, 7, 0.15)'; this.style.transform='translateX(0)';"
