@@ -1802,12 +1802,21 @@ def send_email_sendgrid(to_email, subject, html_content, attachment_data=None, a
         bool: True si se envió exitosamente, False si hubo error
     """
     try:
+        # Verificaciones previas ANTES de intentar enviar
         if not SENDGRID_AVAILABLE:
-            print("⚠️ SendGrid no está instalado")
+            print("\n⚠️ SendGrid no está instalado. Emails deshabilitados.")
+            print("   Instala con: pip install sendgrid")
             return False
             
-        if not SENDGRID_API_KEY:
-            print("⚠️ SENDGRID_API_KEY no configurada")
+        if not SENDGRID_API_KEY or SENDGRID_API_KEY == '':
+            print("\n⚠️ SENDGRID_API_KEY no está configurada. Emails deshabilitados.")
+            print("   Configura SENDGRID_API_KEY en Railway → Variables")
+            print("   O establece EMAIL_CONFIGURED=false para deshabilitar emails")
+            return False
+        
+        if len(SENDGRID_API_KEY) < 30 or not SENDGRID_API_KEY.startswith('SG.'):
+            print("\n⚠️ SENDGRID_API_KEY parece inválida (debe empezar con 'SG.')")
+            print("   Verifica la API Key en SendGrid: https://app.sendgrid.com/settings/api_keys")
             return False
         
         # Crear mensaje
@@ -1857,9 +1866,30 @@ def send_email_sendgrid(to_email, subject, html_content, attachment_data=None, a
         return True
         
     except Exception as e:
-        print(f"❌ Error al enviar email con SendGrid: {e}")
-        import traceback
-        traceback.print_exc()
+        error_str = str(e).lower()
+        
+        # Manejar errores específicos con mensajes claros
+        if '401' in error_str or 'unauthorized' in error_str:
+            print("\n" + "="*60)
+            print("❌ ERROR: SENDGRID_API_KEY INVÁLIDA O EXPIRADA")
+            print("="*60)
+            print("La API Key de SendGrid no es válida.")
+            print("\nSOLUCIÓN:")
+            print("1. Ir a: https://app.sendgrid.com/settings/api_keys")
+            print("2. Crear nueva API Key con Full Access")
+            print("3. Copiar la key (empieza con SG.)")
+            print("4. En Railway → Variables → SENDGRID_API_KEY → Pegar")
+            print("\nO DESHABILITAR EMAILS:")
+            print("Railway → Variables → Agregar: EMAIL_CONFIGURED = false")
+            print("="*60 + "\n")
+        elif '403' in error_str or 'forbidden' in error_str:
+            print("\n⚠️ Error 403: API Key sin permisos suficientes")
+            print("   Crea una nueva con 'Full Access'")
+        else:
+            print(f"\n❌ Error al enviar email: {e}")
+            import traceback
+            traceback.print_exc()
+        
         return False
 
 def enviar_email_pdf_pacientes(medico_email, medico_nombre, pdf_buffer, num_pacientes, total):
@@ -7857,5 +7887,6 @@ if __name__ == '__main__':
     
     
 
+ 
  
  
