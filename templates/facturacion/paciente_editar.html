@@ -204,9 +204,11 @@
                                id="autorizacion" 
                                name="autorizacion" 
                                value="{{ paciente['autorizacion'] }}"
-                               pattern="[0-9]+"
-                               title="Solo números"
-                               required>
+                               pattern="[A-Za-z0-9\-]+"
+                               title="Letras, números y guiones"
+                               required
+                               maxlength="50">
+                        <small class="text-muted">Alfanumérico (letras y números)</small>
                     </div>
                 </div>
 
@@ -316,8 +318,14 @@ document.getElementById('nss').addEventListener('input', function() {
     this.value = this.value.replace(/[^0-9\-]/g, '');
 });
 
+// Validación AUTORIZACIÓN: Alfanumérico (letras Y números)
+document.getElementById('autorizacion').addEventListener('input', function() {
+    this.value = this.value.replace(/[^A-Za-z0-9\-]/g, '');
+    this.value = this.value.toUpperCase();
+});
+
 // Validación al pegar
-['nombre', 'servicio', 'nss'].forEach(fieldId => {
+['nombre', 'servicio', 'nss', 'autorizacion'].forEach(fieldId => {
     const field = document.getElementById(fieldId);
     if (!field) return;
     
@@ -328,10 +336,17 @@ document.getElementById('nss').addEventListener('input', function() {
                 this.value = this.value.toUpperCase();
             } else if (fieldId === 'nss') {
                 this.value = this.value.replace(/[^0-9\-]/g, '');
+            } else if (fieldId === 'autorizacion') {
+                this.value = this.value.replace(/[^A-Za-z0-9\-]/g, '');
+                this.value = this.value.toUpperCase();
             }
         }, 10);
     });
 });
 </script>
+
+<!-- Script para zona horaria y fechas -->
+<script src="{{ url_for('static', filename='js/filtros-fecha.js') }}"></script>
+
 {% endblock %}
 

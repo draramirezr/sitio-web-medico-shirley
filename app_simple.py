@@ -494,6 +494,12 @@ def formato_moneda(valor):
     except (ValueError, TypeError):
         return "0.00"
 
+def obtener_fecha_rd():
+    """Obtener fecha actual en zona horaria de República Dominicana (UTC-4)"""
+    from datetime import datetime, timezone, timedelta
+    tz_rd = timezone(timedelta(hours=-4))
+    return datetime.now(tz_rd).date()
+
 def formato_fecha_pdf(fecha):
     """Formatear fecha a dd/mm/yyyy para PDFs
     
@@ -1484,7 +1490,7 @@ def get_cached_homepage_data():
 @app.route('/')
 def index():
     """Página principal con testimonios rotativos"""
-    from datetime import datetime, timedelta
+    from datetime import datetime, timedelta, timezone
     import random
     
     # Limpiar rate limits antiguos periódicamente (cada visita a inicio)
@@ -1501,8 +1507,9 @@ def index():
     # Usar cache para datos (reduce consultas DB)
     services, all_testimonials = get_cached_homepage_data()
     
-    # Rotación diaria de testimonios
-    today = datetime.now()
+    # Rotación diaria de testimonios (zona horaria RD: UTC-4)
+    tz_rd = timezone(timedelta(hours=-4))
+    today = datetime.now(tz_rd)
     seed = today.timetuple().tm_yday
     random.seed(seed)
     
@@ -5564,9 +5571,10 @@ def facturacion_generar():
     
     conn.close()
     
-    # Fecha actual por defecto
-    fecha_actual_sql = date.today().strftime('%Y-%m-%d')  # Para input type="date"
-    fecha_actual_visual = date.today().strftime('%d/%m/%Y')  # Para mostrar dd/mm/yyyy
+    # Fecha actual por defecto (ajustada a zona horaria RD)
+    fecha_hoy_rd = obtener_fecha_rd()
+    fecha_actual_sql = fecha_hoy_rd.strftime('%Y-%m-%d')  # Para backend
+    fecha_actual_visual = fecha_hoy_rd.strftime('%d/%m/%Y')  # Para mostrar dd/mm/yyyy
     
     return render_template('facturacion/generar_factura.html', 
                          ars_list=ars_list, 
@@ -6607,10 +6615,11 @@ def facturacion_dashboard():
         flash('No tienes permisos para acceder a esta sección', 'error')
         return redirect(url_for('facturacion_menu'))
     
-    from datetime import datetime, timedelta
+    from datetime import datetime, timedelta, timezone
     
-    # Calcular fechas por defecto: últimos 12 meses
-    fecha_actual = datetime.now()
+    # Calcular fechas por defecto: últimos 12 meses (zona horaria RD)
+    tz_rd = timezone(timedelta(hours=-4))
+    fecha_actual = datetime.now(tz_rd)
     fecha_hace_12_meses = fecha_actual - timedelta(days=365)
     
     # Obtener filtros de fecha (por defecto: últimos 12 meses)
@@ -7345,10 +7354,11 @@ def facturacion_paciente_editar(paciente_id):
                 return redirect(url_for('facturacion_paciente_editar', paciente_id=paciente_id))
             
             # Validar que la fecha no sea futura
-            from datetime import date
             try:
+                from datetime import date
                 fecha_obj = date.fromisoformat(fecha) if isinstance(fecha, str) else fecha
-                if fecha_obj > date.today():
+                fecha_hoy_rd = obtener_fecha_rd()
+                if fecha_obj > fecha_hoy_rd:
                     flash('❌ La fecha de consulta no puede ser futura', 'error')
                     conn.close()
                     return redirect(url_for('facturacion_paciente_editar', paciente_id=paciente_id))
@@ -7401,9 +7411,8 @@ def facturacion_paciente_editar(paciente_id):
     ars_list = conn.execute('SELECT * FROM ars WHERE activo = 1 ORDER BY nombre_ars').fetchall()
     conn.close()
     
-    # Fecha actual para validación (no permitir fechas futuras)
-    from datetime import date
-    fecha_actual = date.today().strftime('%Y-%m-%d')
+    # Fecha actual para validación (no permitir fechas futuras) - Zona horaria RD
+    fecha_actual = obtener_fecha_rd().strftime('%Y-%m-%d')
     
     return render_template('facturacion/paciente_editar.html', 
                          paciente=paciente,
