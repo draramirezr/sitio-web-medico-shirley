@@ -297,10 +297,19 @@
                 Fecha de Facturación
                 <span class="required">*</span>
             </label>
-            <input type="date" class="form-control" id="fecha_factura" name="fecha_factura" 
-                   value="{{ fecha_actual }}" required onchange="checkForm()" max="{{ fecha_actual }}">
+            <input type="date" 
+                   class="form-control" 
+                   id="fecha_factura" 
+                   name="fecha_factura" 
+                   value="{{ fecha_actual }}" 
+                   required 
+                   onchange="checkForm()" 
+                   max="{{ fecha_actual }}"
+                   data-formato="dd/mm/yyyy"
+                   placeholder="dd/mm/yyyy">
             <small class="text-muted">
                 <i class="fas fa-info-circle"></i>
+                Formato: dd/mm/yyyy (Hoy por defecto) -
                 Por defecto: fecha actual (puede modificarla si es necesario)
             </small>
         </div>
@@ -418,4 +427,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+
+<!-- Script para filtros de fecha dd/mm/yyyy -->
+<script src="{{ url_for('static', filename='js/filtros-fecha.js') }}"></script>
+
 {% endblock %}
