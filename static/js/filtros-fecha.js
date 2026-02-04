@@ -10,18 +10,29 @@
 function inicializarFechasDDMMYYYY() {
     // Buscar todos los inputs de fecha con clase especial
     document.querySelectorAll('input[data-formato="dd/mm/yyyy"]').forEach(input => {
-        const valorActual = input.value; // yyyy-mm-dd
+        const valorActual = input.value; // yyyy-mm-dd o vacío
+        
+        console.log('🔍 Procesando campo fecha:', input.id, 'Valor:', valorActual);
         
         // Convertir a dd/mm/yyyy para mostrar
-        if (valorActual) {
-            const [ano, mes, dia] = valorActual.split('-');
-            input.setAttribute('data-valor-sql', valorActual); // Guardar original
-            input.value = `${dia}/${mes}/${ano}`; // Mostrar dd/mm/yyyy
+        if (valorActual && valorActual.includes('-')) {
+            try {
+                const [ano, mes, dia] = valorActual.split('-');
+                if (ano && mes && dia) {
+                    const fechaFormateada = `${dia}/${mes}/${ano}`;
+                    input.setAttribute('data-valor-sql', valorActual); // Guardar original
+                    input.value = fechaFormateada; // Mostrar dd/mm/yyyy
+                    console.log('✅ Fecha convertida:', valorActual, '→', fechaFormateada);
+                }
+            } catch (e) {
+                console.error('❌ Error al convertir fecha:', e);
+            }
         }
         
         // Cambiar type a text
         input.type = 'text';
         input.placeholder = 'dd/mm/yyyy';
+        input.title = 'Formato: dd/mm/yyyy (ejemplo: 04/02/2026)';
         
         // Validación en tiempo real
         input.addEventListener('input', function(e) {

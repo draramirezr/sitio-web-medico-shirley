@@ -182,7 +182,13 @@
                                id="fecha" 
                                name="fecha" 
                                value="{{ paciente['fecha_servicio'] }}"
-                               required>
+                               required
+                               max="{{ fecha_actual if fecha_actual else '' }}"
+                               data-formato="dd/mm/yyyy"
+                               placeholder="dd/mm/yyyy">
+                        <small class="text-muted" style="font-size: 0.8rem;">
+                            <i class="fas fa-exclamation-circle"></i> No se permiten fechas futuras
+                        </small>
                     </div>
                 </div>
 

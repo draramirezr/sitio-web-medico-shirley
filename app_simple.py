@@ -1856,7 +1856,9 @@ def send_email_sendgrid(to_email, subject, html_content, attachment_data=None, a
         return False
 
 def enviar_email_pdf_pacientes(medico_email, medico_nombre, pdf_buffer, num_pacientes, total):
-    """Enviar email con PDF adjunto de pacientes agregados usando SendGrid API"""
+    """Enviar email con PDF adjunto de pacientes agregados usando SendGrid API
+    También envía copia a todos los médicos facturadores
+    """
     try:
         if not EMAIL_CONFIGURED:
             print("\n⚠️  Email no configurado. El PDF no se envió.")
@@ -1868,7 +1870,7 @@ def enviar_email_pdf_pacientes(medico_email, medico_nombre, pdf_buffer, num_paci
         # Nombre del archivo
         filename = f'constancia_pacientes_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
         
-        # Enviar con SendGrid API
+        # Enviar al médico principal
         success = send_email_sendgrid(
             to_email=medico_email,
             subject=f'📋 Constancia - {num_pacientes} Paciente(s) Pendiente(s) de Facturación',
@@ -1886,6 +1888,37 @@ def enviar_email_pdf_pacientes(medico_email, medico_nombre, pdf_buffer, num_paci
             print(f"📋 Pacientes: {num_pacientes}")
             print(f"💰 Total: {total:,.2f}")
             print("=" * 60 + "\n")
+            
+            # NUEVO: Enviar copia a médicos facturadores
+            try:
+                conn = get_db_connection()
+                medicos_facturadores = conn.execute('''
+                    SELECT DISTINCT email, nombre 
+                    FROM medicos 
+                    WHERE activo = 1 AND factura = 1 AND email IS NOT NULL AND email != %s
+                    ORDER BY nombre
+                ''', (medico_email,)).fetchall()
+                conn.close()
+                
+                # Enviar copia a cada médico facturador
+                for med_fac in medicos_facturadores:
+                    if med_fac['email']:
+                        # Crear nueva copia del buffer para cada email
+                        pdf_copia = BytesIO(pdf_buffer.getvalue())
+                        
+                        # Enviar copia (sin esperar resultado)
+                        threading.Thread(target=send_email_sendgrid, args=(
+                            med_fac['email'],
+                            f'📋 [Copia] Constancia - {num_pacientes} Paciente(s) - {medico_nombre}',
+                            html,
+                            pdf_copia,
+                            filename
+                        )).start()
+                        
+                        print(f"📤 Copia enviada a: {med_fac['nombre']} ({med_fac['email']})")
+            except Exception as e:
+                print(f"⚠️ Error al enviar copias a médicos: {e}")
+                # No fallar si las copias no se envían
         
         return success
         
@@ -7309,6 +7342,17 @@ def facturacion_paciente_editar(paciente_id):
                 conn.close()
                 return redirect(url_for('facturacion_paciente_editar', paciente_id=paciente_id))
             
+            # Validar que la fecha no sea futura
+            from datetime import date
+            try:
+                fecha_obj = date.fromisoformat(fecha) if isinstance(fecha, str) else fecha
+                if fecha_obj > date.today():
+                    flash('❌ La fecha de consulta no puede ser futura', 'error')
+                    conn.close()
+                    return redirect(url_for('facturacion_paciente_editar', paciente_id=paciente_id))
+            except:
+                pass  # Si hay error en el formato, dejar que continúe (se validará después)
+            
             # Verificar autorización única (excepto el mismo registro)
             existe_autorizacion = conn.execute('''
                 SELECT id FROM facturas_detalle 
@@ -7355,6 +7399,10 @@ def facturacion_paciente_editar(paciente_id):
     ars_list = conn.execute('SELECT * FROM ars WHERE activo = 1 ORDER BY nombre_ars').fetchall()
     conn.close()
     
+    # Fecha actual para validación (no permitir fechas futuras)
+    from datetime import date
+    fecha_actual = date.today().strftime('%Y-%m-%d')
+    
     return render_template('facturacion/paciente_editar.html', 
                          paciente=paciente,
                          medicos=medicos,
@@ -7363,7 +7411,8 @@ def facturacion_paciente_editar(paciente_id):
                          ars_id_return=ars_id_return,
                          ncf_id_return=ncf_id_return,
                          medico_id_return=medico_id_return,
-                         fecha_return=fecha_return)
+                         fecha_return=fecha_return,
+                         fecha_actual=fecha_actual)
 
 @app.route('/facturacion/paciente/<int:paciente_id>/eliminar')
 @login_required

@@ -614,13 +614,23 @@ document.getElementById('formGenerar').addEventListener('submit', function(e) {
 // Función para editar paciente con doble click
 function editarPacienteRapido(pacienteId) {
     // Obtener datos actuales de la facturación para volver después
-    const arsId = '{{ ars_id }}';
-    const ncfId = '{{ ncf_id }}';
+    const arsId = '{{ ars.id if ars else "" }}';
+    const ncfId = '{{ ncf.id if ncf else "" }}';
     const medicoId = '{{ medico_factura_id }}';
     const fecha = '{{ fecha_factura }}';
     
+    // Verificar que tenemos todos los datos
+    if (!arsId || !ncfId || !medicoId || !fecha) {
+        console.error('❌ Faltan datos para volver a facturación:', {arsId, ncfId, medicoId, fecha});
+        alert('Error: No se pueden recuperar los datos de facturación. Se abrirá la edición normal.');
+        window.location.href = `/facturacion/paciente/${pacienteId}/editar`;
+        return;
+    }
+    
     // Construir URL con parámetros para volver
     const urlEditar = `/facturacion/paciente/${pacienteId}/editar?from_factura=1&ars_id=${arsId}&ncf_id=${ncfId}&medico_id=${medicoId}&fecha=${fecha}`;
+    
+    console.log('✅ Editando paciente con retorno a facturación:', urlEditar);
     
     // Redirigir
     window.location.href = urlEditar;
