@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}{{ 'Editar' if servicio else 'Nuevo' }} Servicio - Facturación{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
@@ -103,11 +103,13 @@
                            name="descripcion" 
                            value="{{ servicio['descripcion'] if servicio else '' }}" 
                            required 
-                           placeholder="Ej: Consulta"
-                           maxlength="200">
+                           placeholder="Ej: Consulta Ginecológica"
+                           maxlength="200"
+                           pattern="[A-Za-zÀ-ÿ\s\/\-\.]+"
+                           title="Solo letras, espacios, /, - y puntos">
                     <small class="text-muted">
                         <i class="fas fa-lightbulb me-1"></i>
-                        Nombre del servicio que aparecerá en las facturas
+                        Solo letras - Nombre del servicio que aparecerá en las facturas
                     </small>
                 </div>
 
@@ -145,5 +147,21 @@
         </div>
     </div>
 </div>
+
+<script>
+// Validación DESCRIPCIÓN - Solo letras
+document.getElementById('descripcion').addEventListener('input', function(e) {
+    // Permitir letras, espacios, acentos, /, - y puntos
+    this.value = this.value.replace(/[^A-Za-zÀ-ÿ\s\/\-\.]/g, '');
+});
+
+// Validación al pegar
+document.getElementById('descripcion').addEventListener('paste', function(e) {
+    setTimeout(() => {
+        this.value = this.value.replace(/[^A-Za-zÀ-ÿ\s\/\-\.]/g, '');
+    }, 10);
+});
+</script>
+
 {% endblock %}
 

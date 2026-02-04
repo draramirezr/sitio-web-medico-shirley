@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volviendo a Facturación...</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        
+        .loading-container {
+            text-align: center;
+            background: white;
+            padding: 40px 60px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #CEB0B7;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        h2 {
+            color: #CEB0B7;
+            margin: 0 0 10px 0;
+        }
+        
+        p {
+            color: #6c757d;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-container">
+        <div class="spinner"></div>
+        <h2><i class="fas fa-arrow-left"></i> Volviendo a Facturación</h2>
+        <p>Continuando donde lo dejaste...</p>
+        
+        <!-- Formulario oculto que se auto-envía -->
+        <form id="volverForm" method="POST" action="{{ url_for('facturacion_generar') }}">
+            <input type="hidden" name="step" value="1">
+            <input type="hidden" name="ars_id" value="{{ ars_id }}">
+            <input type="hidden" name="ncf_id" value="{{ ncf_id }}">
+            <input type="hidden" name="medico_factura_id" value="{{ medico_id }}">
+            <input type="hidden" name="fecha_factura" value="{{ fecha }}">
+        </form>
+    </div>
+    
+    <script>
+        // Auto-submit después de 500ms (para que se vea el mensaje)
+        setTimeout(function() {
+            document.getElementById('volverForm').submit();
+        }, 500);
+    </script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Pacientes - Facturación{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
@@ -163,7 +163,15 @@
                 </h1>
                 <p style="color: #666; margin: 0;">Pacientes únicos registrados en el sistema</p>
             </div>
-            <div>
+            <div style="display: flex; gap: 10px;">
+                <a href="{{ url_for('facturacion_pacientes_excel') }}{% if search %}?search={{ search }}{% endif %}" 
+                   class="btn btn-excel"
+                   style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 15px; font-weight: 600; transition: all 0.3s ease; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;"
+                   onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(40, 167, 69, 0.3)';"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                    <i class="fas fa-file-excel"></i>
+                    Descargar Excel
+                </a>
                 <a href="{{ url_for('facturacion_menu') }}" class="btn btn-volver">
                     <i class="fas fa-arrow-left me-2"></i>Volver al Menú
                 </a>

@@ -494,6 +494,43 @@ def formato_moneda(valor):
     except (ValueError, TypeError):
         return "0.00"
 
+def formato_fecha_pdf(fecha):
+    """Formatear fecha a dd/mm/yyyy para PDFs
+    
+    Args:
+        fecha: String, date o datetime
+        
+    Returns:
+        String en formato dd/mm/yyyy
+    """
+    if not fecha:
+        return ''
+    
+    try:
+        # Si es string
+        if isinstance(fecha, str):
+            # Intentar parsear yyyy-mm-dd
+            try:
+                fecha_obj = datetime.strptime(fecha, '%Y-%m-%d')
+                return fecha_obj.strftime('%d/%m/%Y')
+            except:
+                # Intentar otros formatos
+                for fmt in ['%Y-%m-%d %H:%M:%S', '%d/%m/%Y']:
+                    try:
+                        fecha_obj = datetime.strptime(fecha, fmt)
+                        return fecha_obj.strftime('%d/%m/%Y')
+                    except:
+                        continue
+                return str(fecha)
+        
+        # Si es objeto datetime o date
+        elif hasattr(fecha, 'strftime'):
+            return fecha.strftime('%d/%m/%Y')
+        
+        return str(fecha)
+    except:
+        return str(fecha) if fecha else ''
+
 # Filtro personalizado para obtener el nombre del día de la semana en español
 @app.template_filter('nombre_dia')
 def nombre_dia(fecha_str):
@@ -3862,6 +3899,102 @@ def facturacion_pacientes():
     conn.close()
     return render_template('facturacion/pacientes.html', pacientes_list=pacientes_list, search=search)
 
+@app.route('/facturacion/pacientes/excel')
+@login_required
+def facturacion_pacientes_excel():
+    """Descargar lista de pacientes en Excel"""
+    from datetime import datetime
+    
+    try:
+        import openpyxl
+        from openpyxl.styles import Font, PatternFill, Alignment
+        from io import BytesIO
+        
+        search = request.args.get('search', '')
+        conn = get_db_connection()
+        
+        # Obtener pacientes con los mismos filtros que la vista
+        if search:
+            pacientes_list = conn.execute('''
+                SELECT p.*, a.nombre_ars,
+                       (SELECT COUNT(*) FROM facturas_detalle fd WHERE fd.paciente_id = p.id) as total_registros
+                FROM pacientes p
+                LEFT JOIN ars a ON p.ars_id = a.id
+                WHERE (p.nss LIKE %s OR p.nombre LIKE %s) AND p.activo = 1
+                ORDER BY p.nombre
+            ''', (f'%{search}%', f'%{search}%')).fetchall()
+        else:
+            pacientes_list = conn.execute('''
+                SELECT p.*, a.nombre_ars,
+                       (SELECT COUNT(*) FROM facturas_detalle fd WHERE fd.paciente_id = p.id) as total_registros
+                FROM pacientes p
+                LEFT JOIN ars a ON p.ars_id = a.id
+                WHERE p.activo = 1
+                ORDER BY p.nombre
+            ''').fetchall()
+        
+        conn.close()
+        
+        # Crear workbook
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Pacientes"
+        
+        # Estilos
+        header_fill = PatternFill(start_color="AB9B9F", end_color="AB9B9F", fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF", size=12)
+        
+        # Encabezados
+        headers = ['ID', 'NSS', 'Nombre', 'ARS', 'Total Registros']
+        ws.append(headers)
+        
+        # Aplicar estilos a encabezados
+        for col_num, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_num)
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+        
+        # Agregar datos
+        for paciente in pacientes_list:
+            ws.append([
+                paciente['id'],
+                paciente['nss'],
+                paciente['nombre'],
+                paciente['nombre_ars'] if paciente['nombre_ars'] else 'Sin ARS',
+                paciente['total_registros']
+            ])
+        
+        # Ajustar ancho de columnas
+        ws.column_dimensions['A'].width = 8
+        ws.column_dimensions['B'].width = 20
+        ws.column_dimensions['C'].width = 35
+        ws.column_dimensions['D'].width = 25
+        ws.column_dimensions['E'].width = 18
+        
+        # Guardar en BytesIO
+        buffer = BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+        
+        # Nombre del archivo
+        filename = f"pacientes_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+        
+        return send_file(
+            buffer,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name=filename
+        )
+        
+    except ImportError:
+        flash('⚠️ openpyxl no está instalado. Instala con: pip install openpyxl', 'error')
+        return redirect(url_for('facturacion_pacientes'))
+    except Exception as e:
+        print(f"Error al generar Excel: {e}")
+        flash(f'Error al generar Excel: {str(e)}', 'error')
+        return redirect(url_for('facturacion_pacientes'))
+
 # ========== MAESTRA DE NCF ==========
 @app.route('/facturacion/ncf')
 @login_required
@@ -4224,7 +4357,7 @@ def facturacion_pacientes_pendientes_pdf():
                     str(idx),
                     str(p['nss']),
                     str(p['nombre_paciente'])[:22],
-                    str(p['fecha_servicio']),
+                    formato_fecha_pdf(p['fecha_servicio']),
                     str(p['descripcion_servicio'])[:25],
                     f"{p['monto']:,.2f}",
                     str(p['medico_nombre'])[:18],
@@ -4247,7 +4380,7 @@ def facturacion_pacientes_pendientes_pdf():
                     str(idx),
                     str(p['nss']),
                     str(p['nombre_paciente'])[:25],
-                    str(p['fecha_servicio']),
+                    formato_fecha_pdf(p['fecha_servicio']),
                     str(p['descripcion_servicio'])[:30],
                     f"{p['monto']:,.2f}",
                     str(p['nombre_ars'])[:18]
@@ -4268,7 +4401,7 @@ def facturacion_pacientes_pendientes_pdf():
                     str(idx),
                     str(p['nss']),
                     str(p['nombre_paciente'])[:25],
-                    str(p['fecha_servicio']),
+                    formato_fecha_pdf(p['fecha_servicio']),
                     str(p['descripcion_servicio'])[:30],
                     f"{p['monto']:,.2f}",
                     str(p['medico_nombre'])[:22]
@@ -4289,7 +4422,7 @@ def facturacion_pacientes_pendientes_pdf():
                     str(idx),
                     str(p['nss']),
                     str(p['nombre_paciente'])[:30],
-                    str(p['fecha_servicio']),
+                    formato_fecha_pdf(p['fecha_servicio']),
                     str(p['descripcion_servicio'])[:35],
                     f"{p['monto']:,.2f}"
                 ])
@@ -4494,7 +4627,7 @@ def facturacion_pacientes_agregados_pdf():
             str(idx),
             str(p['nss']),
             str(p['nombre_paciente'])[:25],  # Limitar nombre
-            str(p['fecha_servicio']),
+            formato_fecha_pdf(p['fecha_servicio']),
             str(p['descripcion_servicio'])[:30],  # Limitar servicio
             f"{p['monto']:,.2f}",
             str(p['nombre_ars'])[:15]  # Limitar ARS
@@ -5299,6 +5432,54 @@ def facturacion_generar():
     # GET: PASO 1 - Mostrar formulario para seleccionar ARS, NCF, Médico y fecha
     from datetime import date
     
+    # Detectar si viene de dashboard (auto-fill)
+    ars_id_prefill = request.args.get('ars_id', type=int)
+    auto_mode = request.args.get('auto') == '1'
+    
+    # Variables para pre-llenar
+    medico_id_prefill = None
+    ncf_id_prefill = None
+    mensaje_auto = None
+    
+    # Si viene de dashboard, pre-llenar datos
+    if auto_mode and ars_id_prefill:
+        # 1. Buscar médico asociado al usuario logueado
+        medico_usuario = conn.execute(
+            'SELECT id FROM medicos WHERE email = %s AND activo = 1 AND factura = 1',
+            (current_user.email,)
+        ).fetchone()
+        
+        if medico_usuario:
+            medico_id_prefill = medico_usuario['id']
+        else:
+            # Si no hay médico asociado, usar el primero disponible (Opción B)
+            primer_medico = conn.execute(
+                'SELECT id FROM medicos WHERE activo = 1 AND factura = 1 ORDER BY nombre LIMIT 1'
+            ).fetchone()
+            if primer_medico:
+                medico_id_prefill = primer_medico['id']
+        
+        # 2. Detectar tipo de NCF según ARS
+        ars_info = conn.execute('SELECT nombre_ars FROM ars WHERE id = %s', (ars_id_prefill,)).fetchone()
+        
+        if ars_info:
+            # Si es SENASA → Crédito Gubernamental
+            if 'SENASA' in ars_info['nombre_ars'].upper():
+                ncf_gubernamental = conn.execute(
+                    "SELECT id FROM ncf WHERE tipo LIKE '%Gubernamental%' AND activo = 1 ORDER BY id LIMIT 1"
+                ).fetchone()
+                if ncf_gubernamental:
+                    ncf_id_prefill = ncf_gubernamental['id']
+            else:
+                # Otras ARS → Crédito Fiscal
+                ncf_fiscal = conn.execute(
+                    "SELECT id FROM ncf WHERE tipo LIKE '%Fiscal%' AND activo = 1 ORDER BY id LIMIT 1"
+                ).fetchone()
+                if ncf_fiscal:
+                    ncf_id_prefill = ncf_fiscal['id']
+            
+            mensaje_auto = f"✅ Formulario pre-llenado para facturar: {ars_info['nombre_ars']}"
+    
     # Obtener todas las ARS activas
     ars_list = conn.execute('''
         SELECT * FROM ars WHERE activo = 1 ORDER BY nombre_ars
@@ -5323,7 +5504,12 @@ def facturacion_generar():
                          ars_list=ars_list, 
                          ncf_list=ncf_list,
                          medicos_habilitados=medicos_habilitados,
-                         fecha_actual=fecha_actual)
+                         fecha_actual=fecha_actual,
+                         ars_id_prefill=ars_id_prefill,
+                         medico_id_prefill=medico_id_prefill,
+                         ncf_id_prefill=ncf_id_prefill,
+                         auto_mode=auto_mode,
+                         mensaje_auto=mensaje_auto)
 
 @app.route('/facturacion/generar-factura-final', methods=['POST'])
 @login_required
@@ -5601,11 +5787,11 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None,
         ncf_fecha_fin = ncf_data.get('fecha_fin', '') if ncf_data else ''
         
         # Construir las 3 columnas (sin etiquetas de título, letras más grandes)
-        col1_text = f"<font size='10'>Fecha: {fecha}<br/>Cliente: {ars_nombre}<br/>RNC: {ars_rnc}</font>"
+        col1_text = f"<font size='10'>Fecha: {formato_fecha_pdf(fecha)}<br/>Cliente: {ars_nombre}<br/>RNC: {ars_rnc}</font>"
         
         col2_text = f"<b>NCF</b><br/><font size='11' color='#CEB0B7'><b>{ncf}</b></font><br/><font size='10'>Tipo: {ncf_tipo}"
         if ncf_fecha_fin:
-            col2_text += f"<br/>Válido hasta: {ncf_fecha_fin}"
+            col2_text += f"<br/>Válido hasta: {formato_fecha_pdf(ncf_fecha_fin)}"
         col2_text += "</font>"
         
         col3_text = f"<font size='10'><b>{medico_nombre}</b><br/>{medico_especialidad}<br/>Código: {codigo_ars}"
@@ -5653,7 +5839,7 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None,
                 str(idx),
                 p['nombre_paciente'],
                 p['nss'],
-                p['fecha_servicio'],
+                formato_fecha_pdf(p['fecha_servicio']),
                 p['autorizacion'],
                 p['descripcion_servicio'],
                 formato_moneda(p['monto'])
@@ -6484,7 +6670,7 @@ def facturacion_dashboard():
     
     # ARS Pendientes por Facturar (nombres de ARS con pacientes pendientes y montos)
     query_ars_pendientes = '''
-        SELECT a.nombre_ars, COALESCE(SUM(fd.monto), 0) as monto_pendiente
+        SELECT a.id as ars_id, a.nombre_ars, COALESCE(SUM(fd.monto), 0) as monto_pendiente
         FROM facturas_detalle fd
         JOIN ars a ON fd.ars_id = a.id
         WHERE fd.estado = 'pendiente'
@@ -6503,11 +6689,11 @@ def facturacion_dashboard():
         query_ars_pendientes += ' AND fd.medico_consulta IN (' + placeholders_medicos_c + ')'
         params_ars_pendientes.extend(medico_consulta_ids)
     
-    query_ars_pendientes += ' GROUP BY a.nombre_ars ORDER BY monto_pendiente DESC, a.nombre_ars'
+    query_ars_pendientes += ' GROUP BY a.id, a.nombre_ars ORDER BY monto_pendiente DESC, a.nombre_ars'
     
     ars_pendientes = conn.execute(query_ars_pendientes, params_ars_pendientes).fetchall()
-    # Convertir a lista de diccionarios con nombre y monto
-    ars_pendientes_detalle = [{'nombre': row['nombre_ars'], 'monto': row['monto_pendiente']} for row in ars_pendientes]
+    # Convertir a lista de diccionarios con id, nombre y monto
+    ars_pendientes_detalle = [{'id': row['ars_id'], 'nombre': row['nombre_ars'], 'monto': row['monto_pendiente']} for row in ars_pendientes]
     
     # Monto total pendiente por facturar (suma de todos los costos de servicios pendientes)
     query_monto_pendiente = '''
@@ -7032,6 +7218,13 @@ def facturacion_paciente_editar(paciente_id):
     """Editar un paciente pendiente de facturación"""
     conn = get_db_connection()
     
+    # Detectar si viene de facturación (doble click)
+    from_factura = request.args.get('from_factura') == '1' or request.form.get('from_factura') == '1'
+    ars_id_return = request.args.get('ars_id') or request.form.get('ars_id')
+    ncf_id_return = request.args.get('ncf_id') or request.form.get('ncf_id')
+    medico_id_return = request.args.get('medico_id') or request.form.get('medico_id')
+    fecha_return = request.args.get('fecha') or request.form.get('fecha')
+    
     # Verificar que el paciente existe y está pendiente
     paciente = conn.execute('''
         SELECT * FROM facturas_detalle WHERE id = %s
@@ -7084,6 +7277,16 @@ def facturacion_paciente_editar(paciente_id):
             conn.close()
             
             flash('✅ Registro actualizado exitosamente', 'success')
+            
+            # Si viene de facturación, volver ahí con formulario auto-submit
+            if from_factura and ars_id_return and ncf_id_return and medico_id_return and fecha_return:
+                # Renderizar página intermedia que hace POST automático
+                return render_template('facturacion/volver_facturacion.html',
+                                     ars_id=ars_id_return,
+                                     ncf_id=ncf_id_return,
+                                     medico_id=medico_id_return,
+                                     fecha=fecha_return)
+            
             return redirect(url_for('facturacion_pacientes_pendientes'))
             
         except Exception as e:
@@ -7100,7 +7303,12 @@ def facturacion_paciente_editar(paciente_id):
     return render_template('facturacion/paciente_editar.html', 
                          paciente=paciente,
                          medicos=medicos,
-                         ars_list=ars_list)
+                         ars_list=ars_list,
+                         from_factura=from_factura,
+                         ars_id_return=ars_id_return,
+                         ncf_id_return=ncf_id_return,
+                         medico_id_return=medico_id_return,
+                         fecha_return=fecha_return)
 
 @app.route('/facturacion/paciente/<int:paciente_id>/eliminar')
 @login_required

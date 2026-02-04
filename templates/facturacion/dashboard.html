@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Dashboard de Facturación - Indicadores en Tiempo Real | Dra. Shirley Ramírez{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
@@ -721,10 +721,17 @@
                         <p class="stat-label" style="margin-bottom: 0.8rem;">ARS Pendientes por Facturar</p>
                         <div style="max-height: 180px; overflow-y: auto; padding-right: 5px;">
                             {% for ars in ars_pendientes_detalle %}
-                                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255, 193, 7, 0.15); color: #856404; padding: 0.5rem 0.9rem; border-radius: 10px; margin: 0.3rem 0; font-size: 0.85rem; font-weight: 600; border: 1px solid rgba(255, 193, 7, 0.3);">
-                                    <span style="flex: 1;">{{ ars.nombre }}</span>
+                                <a href="{{ url_for('facturacion_generar_factura') }}?ars_id={{ ars.id }}&auto=1" 
+                                   style="display: flex; justify-content: space-between; align-items: center; background: rgba(255, 193, 7, 0.15); color: #856404; padding: 0.5rem 0.9rem; border-radius: 10px; margin: 0.3rem 0; font-size: 0.85rem; font-weight: 600; border: 1px solid rgba(255, 193, 7, 0.3); text-decoration: none; transition: all 0.3s ease; cursor: pointer;"
+                                   onmouseover="this.style.background='rgba(255, 193, 7, 0.25)'; this.style.transform='translateX(5px)';"
+                                   onmouseout="this.style.background='rgba(255, 193, 7, 0.15)'; this.style.transform='translateX(0)';"
+                                   title="Click para facturar esta ARS">
+                                    <span style="flex: 1;">
+                                        <i class="fas fa-external-link-alt" style="font-size: 0.7rem; margin-right: 6px; opacity: 0.7;"></i>
+                                        {{ ars.nombre }}
+                                    </span>
                                     <span style="font-weight: 700; color: #d39e00; font-size: 0.9rem; margin-left: 0.5rem; white-space: nowrap;">${{ "{:,.2f}".format(ars.monto) }}</span>
-                                </div>
+                                </a>
                             {% endfor %}
                         </div>
                     </div>

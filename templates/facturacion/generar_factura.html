@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Generar Factura - Paso 1{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
@@ -170,6 +170,21 @@
         </div>
     </div>
 
+    {% if mensaje_auto %}
+    <!-- Mensaje de auto-llenado desde dashboard -->
+    <div style="background: linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, rgba(40, 167, 69, 0.05) 100%); border: 2px solid #28a745; border-radius: 15px; padding: 15px 20px; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <i class="fas fa-magic" style="font-size: 24px; color: #28a745;"></i>
+            <div>
+                <strong style="color: #155724; font-size: 1.1rem;">{{ mensaje_auto }}</strong>
+                <p style="margin: 5px 0 0 0; color: #155724; font-size: 0.9rem;">
+                    ✅ Fecha, Médico, ARS y NCF pre-seleccionados. Puedes cambiarlos si lo necesitas.
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
     <!-- Step Indicator -->
     <div class="step-indicator">
         <div class="step">
@@ -379,6 +394,21 @@ function seleccionarNCFporARS() {
 
 // Verificar al cargar la página
 document.addEventListener('DOMContentLoaded', function() {
+    // Pre-seleccionar campos si viene de dashboard (auto-mode)
+    {% if auto_mode %}
+        {% if ars_id_prefill %}
+        document.getElementById('ars_id').value = {{ ars_id_prefill }};
+        {% endif %}
+        
+        {% if medico_id_prefill %}
+        document.getElementById('medico_factura_id').value = {{ medico_id_prefill }};
+        {% endif %}
+        
+        {% if ncf_id_prefill %}
+        document.getElementById('ncf_id').value = {{ ncf_id_prefill }};
+        {% endif %}
+    {% endif %}
+    
     checkForm();
     
     // Si solo hay un médico habilitado, actualizar info visual

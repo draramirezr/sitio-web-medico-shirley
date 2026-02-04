@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Maestra de Tipos de Servicios - Facturación{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
@@ -27,15 +27,17 @@
         overflow: hidden;
     }
     
-    /* Contenedor con scroll horizontal para responsive */
+    /* Contenedor con scroll horizontal y vertical */
     .table-responsive-wrapper {
         overflow-x: auto;
-        overflow-y: visible;
+        overflow-y: auto;
+        max-height: 600px; /* Altura máxima para ~7 filas */
     }
     
-    /* Barra de desplazamiento personalizada */
+    /* Barra de desplazamiento horizontal */
     .table-responsive-wrapper::-webkit-scrollbar {
         height: 10px;
+        width: 10px;
     }
     
     .table-responsive-wrapper::-webkit-scrollbar-track {
@@ -44,12 +46,20 @@
     }
     
     .table-responsive-wrapper::-webkit-scrollbar-thumb {
-        background: #AB9B9F;
+        background: linear-gradient(135deg, #CEB0B7 0%, #AB9B9F 100%);
         border-radius: 10px;
     }
     
     .table-responsive-wrapper::-webkit-scrollbar-thumb:hover {
-        background: #8A7A7F;
+        background: linear-gradient(135deg, #AB9B9F 0%, #8A7A7F 100%);
+    }
+    
+    /* Hacer que el encabezado sea pegajoso (sticky) */
+    .table-facturacion thead th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: #AB9B9F !important;
     }
     
     .table-facturacion table {
@@ -154,6 +164,29 @@
         font-weight: 700;
         font-size: 0.95rem;
     }
+    
+    /* Responsive para tablets y móviles */
+    @media (max-width: 992px) {
+        .table-responsive-wrapper {
+            max-height: 500px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .table-responsive-wrapper {
+            max-height: 450px;
+        }
+        
+        .facturacion-hero {
+            padding: 1.5rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .table-responsive-wrapper {
+            max-height: 400px;
+        }
+    }
 </style>
 
 <div class="container py-5">
@@ -194,6 +227,22 @@
         </form>
     </div>
 
+    <!-- Indicador de total -->
+    {% if servicios_list %}
+    <div style="background: linear-gradient(135deg, rgba(206, 176, 183, 0.1) 0%, rgba(206, 176, 183, 0.2) 100%); border: 2px solid #CEB0B7; border-radius: 12px; padding: 12px 20px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between;">
+        <div>
+            <i class="fas fa-list" style="color: #CEB0B7; margin-right: 8px;"></i>
+            <strong style="color: #CEB0B7;">Total de servicios:</strong>
+            <span style="background: #CEB0B7; color: white; padding: 4px 12px; border-radius: 15px; margin-left: 8px; font-weight: 700;">{{ servicios_list|length }}</span>
+        </div>
+        {% if servicios_list|length > 7 %}
+        <small style="color: #AB9B9F;">
+            <i class="fas fa-arrow-down"></i> Desplázate para ver todos
+        </small>
+        {% endif %}
+    </div>
+    {% endif %}
+    
     <!-- Tabla -->
     <div class="table-facturacion">
         {% if servicios_list %}

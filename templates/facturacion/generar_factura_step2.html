@@ -102,6 +102,20 @@
         border: none;
     }
     
+    /* Efecto hover para filas editables con doble click */
+    .tabla-pacientes tbody tr[data-paciente-id] {
+        transition: all 0.2s ease;
+    }
+    
+    .tabla-pacientes tbody tr[data-paciente-id]:hover {
+        background: rgba(206, 176, 183, 0.08) !important;
+        box-shadow: inset 0 0 0 2px rgba(206, 176, 183, 0.3);
+    }
+    
+    .tabla-pacientes tbody tr[data-paciente-id]:active {
+        background: rgba(206, 176, 183, 0.15) !important;
+    }
+    
     .tabla-pacientes thead th {
         color: #FFFFFF !important;
     }
@@ -325,6 +339,13 @@
         </div>
     </div>
 
+    <!-- Hint de doble click -->
+    <div style="background: rgba(23, 162, 184, 0.08); border-left: 4px solid #17a2b8; padding: 12px 20px; border-radius: 8px; margin-bottom: 15px;">
+        <i class="fas fa-info-circle" style="color: #17a2b8; margin-right: 8px;"></i>
+        <strong style="color: #0c5460;">Tip:</strong>
+        <span style="color: #0c5460;">Haz <strong>doble click</strong> en cualquier paciente para editarlo rápidamente.</span>
+    </div>
+    
     <!-- Tabla de Pacientes -->
     <form id="formGenerar" method="POST">
         <input type="hidden" name="step" value="2">
@@ -357,8 +378,12 @@
                     {% for paciente in pendientes %}
                     <tr data-medico="{{ paciente['medico_consulta'] }}" 
                         data-medico-nombre="{{ paciente['medico_nombre'] }}"
-                        data-fecha="{{ paciente['fecha_servicio'] }}">
-                        <td>
+                        data-fecha="{{ paciente['fecha_servicio'] }}"
+                        data-paciente-id="{{ paciente['id'] }}"
+                        ondblclick="editarPacienteRapido({{ paciente['id'] }})"
+                        style="cursor: pointer;"
+                        title="Doble click para editar este paciente">
+                        <td onclick="event.stopPropagation();">
                             <input type="checkbox" class="checkbox-custom paciente-check" 
                                    value="{{ paciente['id'] }}" 
                                    data-monto="{{ paciente['monto'] }}"
@@ -584,6 +609,31 @@ document.getElementById('formGenerar').addEventListener('submit', function(e) {
     
     // Enviar formulario
     this.submit();
+});
+
+// Función para editar paciente con doble click
+function editarPacienteRapido(pacienteId) {
+    // Obtener datos actuales de la facturación para volver después
+    const arsId = '{{ ars_id }}';
+    const ncfId = '{{ ncf_id }}';
+    const medicoId = '{{ medico_factura_id }}';
+    const fecha = '{{ fecha_factura }}';
+    
+    // Construir URL con parámetros para volver
+    const urlEditar = `/facturacion/paciente/${pacienteId}/editar?from_factura=1&ars_id=${arsId}&ncf_id=${ncfId}&medico_id=${medicoId}&fecha=${fecha}`;
+    
+    // Redirigir
+    window.location.href = urlEditar;
+}
+
+// Agregar efecto visual hover a las filas
+document.querySelectorAll('tbody tr[data-paciente-id]').forEach(row => {
+    row.addEventListener('mouseenter', function() {
+        this.style.background = 'rgba(206, 176, 183, 0.08)';
+    });
+    row.addEventListener('mouseleave', function() {
+        this.style.background = '';
+    });
 });
 </script>
 {% endblock %}
