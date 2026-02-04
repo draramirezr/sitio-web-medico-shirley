@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Nueva Factura - Facturación{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
@@ -414,12 +414,42 @@
             <a href="{{ url_for('facturacion_menu') }}" class="btn" style="background: #ACACAD !important; color: white !important; border-radius: 15px; padding: 0.8rem 2rem; text-decoration: none;">
                 <i class="fas fa-times me-2" style="color: white !important;"></i>Cancelar
             </a>
-            <button type="submit" class="btn btn-guardar-factura">
+            <button type="submit" class="btn btn-guardar-factura" id="btnAgregarPendientes">
                 <i class="fas fa-clock me-2"></i>Agregar como Pendientes
             </button>
         </div>
     </form>
 </div>
+
+<script>
+// Confirmación antes de agregar pacientes pendientes
+document.getElementById('formFactura').addEventListener('submit', function(e) {
+    e.preventDefault(); // Detener envío temporalmente
+    
+    // Obtener nombre de la ARS seleccionada
+    const arsSelect = document.getElementById('ars');
+    const arsNombre = arsSelect.options[arsSelect.selectedIndex].text;
+    
+    // Contar pacientes a agregar
+    const pacientesRows = document.querySelectorAll('#tablaPacientes tbody tr').length;
+    
+    if (pacientesRows === 0) {
+        alert('⚠️ Debe agregar al menos un paciente antes de continuar.');
+        return;
+    }
+    
+    // Mostrar confirmación
+    const mensaje = `¿Está seguro que todas las ${pacientesRows} consulta(s) agregada(s) corresponden a la ARS seleccionada?\n\n📋 ARS: ${arsNombre}\n👥 Total pacientes: ${pacientesRows}\n\n✅ Sí → Continuar\n❌ No → Cancelar y revisar`;
+    
+    if (confirm(mensaje)) {
+        // Usuario confirmó → Enviar formulario
+        this.submit();
+    } else {
+        // Usuario canceló → No hacer nada (puede revisar)
+        console.log('❌ Usuario canceló el envío para revisar');
+    }
+});
+</script>
 
 <script>
 // Datos de centros médicos por médico (del backend)

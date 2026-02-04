@@ -173,21 +173,6 @@
         </div>
     </div>
 
-    {% if mensaje_auto %}
-    <!-- Mensaje de auto-llenado desde dashboard -->
-    <div style="background: linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, rgba(40, 167, 69, 0.05) 100%); border: 2px solid #28a745; border-radius: 15px; padding: 15px 20px; margin-bottom: 20px;">
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <i class="fas fa-magic" style="font-size: 24px; color: #28a745;"></i>
-            <div>
-                <strong style="color: #155724; font-size: 1.1rem;">{{ mensaje_auto }}</strong>
-                <p style="margin: 5px 0 0 0; color: #155724; font-size: 0.9rem;">
-                    ✅ Fecha, Médico, ARS y NCF pre-seleccionados. Puedes cambiarlos si lo necesitas.
-                </p>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-    
     <!-- Step Indicator -->
     <div class="step-indicator">
         <div class="step">
@@ -313,8 +298,7 @@
             <input type="hidden" id="fecha_factura_sql" name="fecha_factura" value="{{ fecha_actual }}">
             <small class="text-muted">
                 <i class="fas fa-info-circle"></i>
-                Formato: dd/mm/yyyy - Fecha actual pre-llenada -
-                Por defecto: fecha actual (puede modificarla si es necesario)
+                Fecha actual pre-llenada (puede modificarla si es necesario)
             </small>
         </div>
 
