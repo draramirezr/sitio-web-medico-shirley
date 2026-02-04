@@ -5782,6 +5782,7 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None,
         medico_nombre = pacientes[0].get('medico_nombre', 'N/A')
         medico_especialidad = pacientes[0].get('medico_especialidad', 'N/A')
         codigo_ars = pacientes[0].get('codigo_ars', 'N/A')
+        medico_cedula = pacientes[0].get('medico_cedula', '')
         medico_exequatur = pacientes[0].get('medico_exequatur', '')
         ncf_tipo = ncf_data.get('tipo', 'CRÉDITO FISCAL') if ncf_data else 'CRÉDITO FISCAL'
         ncf_fecha_fin = ncf_data.get('fecha_fin', '') if ncf_data else ''
@@ -5797,6 +5798,8 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None,
         col3_text = f"<font size='10'><b>{medico_nombre}</b><br/>{medico_especialidad}<br/>Código: {codigo_ars}"
         if medico_exequatur:
             col3_text += f"<br/>Exequátur: {medico_exequatur}"
+        if medico_cedula:
+            col3_text += f"<br/>Cédula: {medico_cedula}"
         col3_text += "</font>"
         
         info_data = [[
@@ -6691,9 +6694,27 @@ def facturacion_dashboard():
     
     query_ars_pendientes += ' GROUP BY a.id, a.nombre_ars ORDER BY monto_pendiente DESC, a.nombre_ars'
     
-    ars_pendientes = conn.execute(query_ars_pendientes, params_ars_pendientes).fetchall()
-    # Convertir a lista de diccionarios con id, nombre y monto
-    ars_pendientes_detalle = [{'id': row['ars_id'], 'nombre': row['nombre_ars'], 'monto': row['monto_pendiente']} for row in ars_pendientes]
+    try:
+        ars_pendientes = conn.execute(query_ars_pendientes, params_ars_pendientes).fetchall()
+        # Convertir a lista de diccionarios con id, nombre y monto
+        ars_pendientes_detalle = []
+        for row in ars_pendientes:
+            try:
+                ars_detalle = {
+                    'id': row.get('ars_id') or row.get('id', 0),
+                    'nombre': row.get('nombre_ars', 'N/A'),
+                    'monto': row.get('monto_pendiente', 0)
+                }
+                ars_pendientes_detalle.append(ars_detalle)
+            except Exception as e:
+                print(f"⚠️ Error procesando ARS: {e}")
+                continue
+    except Exception as e:
+        print(f"❌ Error en query ARS pendientes: {e}")
+        import traceback
+        traceback.print_exc()
+        # Fallback: lista vacía
+        ars_pendientes_detalle = []
     
     # Monto total pendiente por facturar (suma de todos los costos de servicios pendientes)
     query_monto_pendiente = '''
