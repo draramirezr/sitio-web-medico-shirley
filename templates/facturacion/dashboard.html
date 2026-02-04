@@ -6,6 +6,9 @@
 {% block description %}Dashboard administrativo con estadísticas e indicadores de facturación en tiempo real. Sistema de gestión médica profesional.{% endblock %}
 
 {% block content %}
+<!-- Script para filtros de fecha dd/mm/yyyy - Cargar primero -->
+<script src="{{ url_for('static', filename='js/filtros-fecha.js') }}"></script>
+
 <style>
     :root {
         --primary-color: #CEB0B7;
@@ -1152,8 +1155,5 @@
     });
     } // Fin de initCharts()
 </script>
-
-<!-- Script para filtros de fecha dd/mm/yyyy -->
-<script src="{{ url_for('static', filename='js/filtros-fecha.js') }}"></script>
 
 {% endblock %}

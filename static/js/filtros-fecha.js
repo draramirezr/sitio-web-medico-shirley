@@ -94,6 +94,13 @@ function mantenerFiltros() {
 
 // Inicializar al cargar la página
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Inicializando sistema de fechas dd/mm/yyyy...');
     inicializarFechasDDMMYYYY();
     mantenerFiltros();
+    
+    // Forzar conversión después de un pequeño delay (por si hay pre-llenado dinámico)
+    setTimeout(function() {
+        console.log('🔄 Re-inicializando fechas (verificación)...');
+        inicializarFechasDDMMYYYY();
+    }, 500);
 });

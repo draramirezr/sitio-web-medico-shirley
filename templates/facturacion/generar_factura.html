@@ -4,6 +4,9 @@
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
+<!-- Script para filtros de fecha dd/mm/yyyy - Cargar primero -->
+<script src="{{ url_for('static', filename='js/filtros-fecha.js') }}"></script>
+
 <style>
     .facturacion-hero {
         background: linear-gradient(135deg, rgba(206, 176, 183, 0.1) 0%, rgba(242, 226, 230, 0.2) 100%);
@@ -427,8 +430,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-
-<!-- Script para filtros de fecha dd/mm/yyyy -->
-<script src="{{ url_for('static', filename='js/filtros-fecha.js') }}"></script>
-
 {% endblock %}
