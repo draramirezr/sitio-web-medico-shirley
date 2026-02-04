@@ -1,0 +1,43 @@
+================================================
+DESPLIEGUE FINAL - EJECUTAR EN GIT BASH
+================================================
+
+CAMBIOS INCLUIDOS:
+1. Sistema 5 temas estacionales
+2. San Valentín (14 febrero)
+3. Fechas formato dd/mm/yyyy en facturación
+4. Filtro personalizado |fecha_es
+5. Limpieza de repositorio
+
+================================================
+COMANDOS (Copiar y pegar en Git Bash):
+================================================
+
+git add app_simple.py templates/
+
+git commit -m "Feature: Sistema 5 temas + San Valentin + Fechas dd/mm/yyyy en facturacion"
+
+git push origin main
+
+================================================
+ARCHIVOS MODIFICADOS:
+================================================
+✅ app_simple.py (filtro fecha_es + lógica 5 temas)
+✅ templates/admin_visor_pagina.html (5 opciones)
+✅ templates/index.html (5 temas completos)
+✅ templates/facturacion/historico.html (fechas dd/mm/yyyy)
+✅ templates/facturacion/ver_factura.html (fechas dd/mm/yyyy)
+✅ templates/facturacion/editar_factura.html (fechas dd/mm/yyyy)
+✅ templates/facturacion/generar_factura_step2.html (fechas dd/mm/yyyy)
+✅ templates/facturacion/pacientes_pendientes.html (fechas dd/mm/yyyy)
+
+================================================
+RESULTADO DESPUÉS DEL DEPLOY:
+================================================
+✅ Fechas en facturación: 17/11/2025 (dd/mm/yyyy)
+✅ Visor con 5 temas funcionando
+✅ San Valentín activo el 14 de febrero
+✅ Todo responsive y sin errores
+
+Espera 2-3 minutos después del push.
+================================================

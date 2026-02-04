@@ -1,0 +1,44 @@
+================================================
+SOLUCIÓN EXTREMA - Git no detecta cambios
+================================================
+
+EJECUTA EN GIT BASH ESTOS COMANDOS:
+================================================
+
+OPCIÓN 1: Resetear el índice de Git
+------------------------------------------------
+git reset
+
+git add -A
+
+git status
+
+================================================
+
+OPCIÓN 2: Forzar actualización del índice
+------------------------------------------------
+git update-index --refresh
+
+git add app_simple.py templates/
+
+git status
+
+================================================
+
+OPCIÓN 3: Commit directo (saltarse staging)
+------------------------------------------------
+git commit -a -m "MEGA Update 2026: Todas las features"
+
+git push origin main
+
+================================================
+
+OPCIÓN 4: Verificar si hay cambios reales
+------------------------------------------------
+git diff HEAD app_simple.py | head -50
+
+¿VES líneas con + o - (cambios)?
+SÍ → Los cambios existen
+NO → Los cambios se perdieron
+
+================================================

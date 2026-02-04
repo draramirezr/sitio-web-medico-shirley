@@ -1,0 +1,68 @@
+================================================
+DESPLIEGUE FINAL - CON TODAS LAS CORRECCIONES
+================================================
+
+CAMBIOS INCLUIDOS:
+================================================
+
+1. ✅ HOTFIX Dashboard - Endpoint corregido
+2. ✅ Nombre ARS - Solo letras (sin números)
+3. ✅ Nombre Centro Médico - Solo letras (sin números)
+4. ✅ Fecha Fin NCF - Formato dd/mm/yyyy
+5. ✅ Python 3.11.7 especificado
+
+================================================
+COMANDOS PARA GIT BASH:
+================================================
+
+COMANDO 1: Agregar archivos
+------------------------------------------------
+git add app_simple.py templates/facturacion/dashboard.html templates/facturacion/ars_form.html templates/facturacion/centro_medico_form.html templates/facturacion/ncf_form.html .python-version runtime.txt
+
+COMANDO 2: Commit
+------------------------------------------------
+git commit -m "HOTFIX: Dashboard endpoint + Nombre ARS/Centro solo letras + Fecha NCF dd/mm/yyyy + Python 3.11.7"
+
+COMANDO 3: Push
+------------------------------------------------
+git push origin main
+
+================================================
+DESPUÉS DEL DEPLOY (2-3 min):
+================================================
+
+VERIFICAR:
+
+1. Dashboard:
+   https://www.draramirez.com/facturacion/dashboard
+   → ✅ Funciona sin error
+   → ✅ ARS clickeables funcionan
+
+2. Nombre ARS:
+   https://www.draramirez.com/facturacion/ars/nuevo
+   → ✅ No acepta números
+
+3. Nombre Centro:
+   https://www.draramirez.com/facturacion/centros-medicos/nuevo
+   → ✅ No acepta números
+
+4. Fecha NCF:
+   https://www.draramirez.com/facturacion/ncf/nuevo
+   → ✅ Campo muestra: dd/mm/yyyy
+   → ✅ Auto-agrega barras (31/12/2026)
+   → ✅ Valida formato
+
+================================================
+ARCHIVOS MODIFICADOS (7):
+================================================
+1. app_simple.py (conversión fecha NCF)
+2. templates/facturacion/dashboard.html (endpoint)
+3. templates/facturacion/ars_form.html (validación)
+4. templates/facturacion/centro_medico_form.html (validación)
+5. templates/facturacion/ncf_form.html (formato fecha)
+6. .python-version (Python 3.11.7)
+7. runtime.txt (Python 3.11.7)
+
+================================================
+
+¡TODO LISTO! 🚀

@@ -1,0 +1,78 @@
+================================================
+DIAGNÓSTICO: Por qué no se suben los cambios
+================================================
+
+PROBLEMA COMÚN: Archivos no guardados en disco
+
+SOLUCIÓN PASO A PASO:
+================================================
+
+PASO 1: GUARDAR TODOS LOS ARCHIVOS EN CURSOR
+------------------------------------------------
+1. En Cursor, presiona: Ctrl + K, luego S
+   (o File → Save All)
+2. Verifica que NO haya asteriscos (*) en las pestañas
+
+PASO 2: CERRAR CURSOR COMPLETAMENTE
+------------------------------------------------
+1. File → Exit (o Alt + F4)
+2. Esto fuerza guardar todo
+
+PASO 3: ABRIR GIT BASH
+------------------------------------------------
+1. Ve a: Z:\Pagina web shirley
+2. Click derecho → "Git Bash Here"
+
+PASO 4: VERIFICAR QUÉ DETECTA GIT
+------------------------------------------------
+En Git Bash, ejecuta:
+
+git status
+
+¿QUÉ DEBERÍAS VER?
+  modified:   app_simple.py
+  modified:   templates/admin.html
+  modified:   templates/index.html
+  ... etc
+
+¿QUÉ TE SALE A TI?
+_______________________________________________
+
+PASO 5: SI NO VE CAMBIOS
+------------------------------------------------
+Ejecuta:
+
+git diff app_simple.py | head -20
+
+¿VES líneas con + o - (cambios)?
+SÍ / NO: __________
+
+PASO 6: SI SIGUE SIN FUNCIONAR
+------------------------------------------------
+Ejecuta:
+
+git add app_simple.py templates/ --force
+
+git status
+
+git commit -m "Fix: All features"
+
+git push origin main
+
+================================================
+DIAGNÓSTICO RÁPIDO:
+================================================
+
+SI dice "nothing to commit":
+   → Los cambios NO se guardaron en disco
+   → SOLUCIÓN: Cerrar Cursor y volver a abrir
+
+SI dice "Changes to be committed":
+   → Los cambios SÍ están
+   → SOLUCIÓN: git commit + git push
+
+SI dice "Everything up-to-date":
+   → Ya se hizo commit pero no push
+   → SOLUCIÓN: Solo git push origin main
+
+================================================

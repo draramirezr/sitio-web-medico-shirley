@@ -1,0 +1,34 @@
+================================================
+COMANDOS FINALES - COPIAR EN GIT BASH
+================================================
+
+Abre Git Bash y ejecuta estos 3 comandos:
+
+------------------------------------------------
+COMANDO 1: Agregar archivos
+------------------------------------------------
+git add app_simple.py templates/admin_visor_pagina.html templates/index.html
+
+------------------------------------------------
+COMANDO 2: Crear commit
+------------------------------------------------
+git commit -m "Feature: Sistema 5 temas estacionales completo - Mes Patria + San Valentin + Mes Mujer + Cancer Mama"
+
+------------------------------------------------
+COMANDO 3: Push a Railway
+------------------------------------------------
+git push origin main
+
+================================================
+RESULTADO ESPERADO:
+================================================
+✅ 5 temas funcionando en el visor
+✅ San Valentín activo el 14 de febrero
+✅ Auto-activación según mes/día
+✅ Formatos de fecha dd/mm/yyyy
+✅ 100% responsive
+✅ Sin errores 500
+
+Espera 2-3 minutos después del push.
+
+================================================

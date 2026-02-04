@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPCIÓN 2: Mes de la Mujer - Empoderamiento</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #f3e5f5 50%, #fef5f7 100%);
+        }
+        
+        .mujer-banner {
+            background: linear-gradient(135deg, #6a1b9a 0%, #ba68c8 50%, #8B008B 100%);
+            color: white;
+            text-align: center;
+            padding: 15px 20px;
+            font-size: 16px;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(106, 27, 154, 0.4);
+            overflow: hidden;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .textos-rotativos {
+            position: relative;
+            width: 100%;
+            height: 25px;
+            overflow: hidden;
+        }
+        
+        .texto-item {
+            position: absolute;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+        
+        .texto-item.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .hero-section {
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Símbolos de mujer flotantes */
+        .simbolo-flotante {
+            position: absolute;
+            font-size: 60px;
+            opacity: 0.08;
+            color: #8B008B;
+            animation: flotar 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .simbolo-flotante:nth-child(1) {
+            left: 10%;
+            animation-duration: 18s;
+            animation-delay: -5s;
+        }
+        
+        .simbolo-flotante:nth-child(2) {
+            left: 25%;
+            animation-duration: 22s;
+            animation-delay: -12s;
+        }
+        
+        .simbolo-flotante:nth-child(3) {
+            right: 25%;
+            animation-duration: 20s;
+            animation-delay: -8s;
+        }
+        
+        .simbolo-flotante:nth-child(4) {
+            right: 10%;
+            animation-duration: 24s;
+            animation-delay: -15s;
+        }
+        
+        @keyframes flotar {
+            from {
+                bottom: -100px;
+                transform: translateX(0) rotate(0deg);
+            }
+            to {
+                bottom: 110vh;
+                transform: translateX(50px) rotate(360deg);
+            }
+        }
+        
+        .hero-image-wrapper {
+            position: relative;
+            margin-bottom: 40px;
+            z-index: 10;
+        }
+        
+        /* Borde con degradado morado */
+        .borde-morado-degradado {
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            right: -15px;
+            bottom: -15px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #6a1b9a 0deg,
+                #ba68c8 120deg,
+                #ce93d8 180deg,
+                #ba68c8 240deg,
+                #6a1b9a 360deg
+            );
+            z-index: 0;
+            animation: rotar-suave 12s linear infinite;
+        }
+        
+        @keyframes rotar-suave {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .borde-morado-degradado::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            background: transparent;
+            border-radius: 50%;
+        }
+        
+        .hero-image {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            border: 5px solid white;
+            box-shadow: 0 20px 60px rgba(139, 0, 139, 0.4);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .hero-title {
+            font-size: 3rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 800;
+            text-align: center;
+            z-index: 10;
+            position: relative;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-tagline {
+            font-size: 1.3rem;
+            color: #6c757d;
+            margin-bottom: 30px;
+            text-align: center;
+            z-index: 10;
+            position: relative;
+        }
+        
+        .demo-info {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="mujer-banner">
+        <div class="textos-rotativos">
+            <div class="texto-item active">♀ MES DE LA MUJER - MARZO 2026 ♀</div>
+            <div class="texto-item">💜 "Empoderando la salud femenina cada día" 💜</div>
+            <div class="texto-item">8 de Marzo - Día Internacional de la Mujer</div>
+        </div>
+    </div>
+    
+    <section class="hero-section">
+        <!-- Símbolos de mujer flotantes -->
+        <div class="simbolo-flotante"><i class="fas fa-venus"></i></div>
+        <div class="simbolo-flotante"><i class="fas fa-venus"></i></div>
+        <div class="simbolo-flotante"><i class="fas fa-venus"></i></div>
+        <div class="simbolo-flotante"><i class="fas fa-venus"></i></div>
+        
+        <div class="hero-image-wrapper">
+            <div class="borde-morado-degradado"></div>
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Crect fill='%23CEB0B7' width='300' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='20' text-anchor='middle' dy='.3em' fill='white'%3EDra. Shirley%3C/text%3E%3C/svg%3E" 
+                 alt="Dra. Shirley" 
+                 class="hero-image">
+        </div>
+        
+        <h1 class="hero-title">
+            Dra. Shirley Ramírez<br>
+            <span class="hero-gradient">Cuidado Integral de la Salud Femenina</span>
+        </h1>
+        
+        <p class="hero-tagline">
+            Ginecóloga y Obstetra | Gineco-Estética
+        </p>
+    </section>
+    
+    <div class="demo-info">
+        <h2 style="color: #8B008B; text-align: center; font-size: 26px; font-weight: 800; margin-bottom: 20px;">
+            💜 OPCIÓN 2: Símbolos de Mujer (♀)
+        </h2>
+        
+        <div style="background: #f3e5f5; padding: 20px; border-radius: 12px; border-left: 5px solid #8B008B; margin-bottom: 20px;">
+            <h3 style="color: #6a1b9a; margin-bottom: 12px;">✨ Elementos:</h3>
+            <ul style="color: #495057; line-height: 2; padding-left: 20px;">
+                <li>♀ Banner morado con degradado</li>
+                <li>💜 Borde morado degradado girando</li>
+                <li>♀ Símbolos de Venus (♀) flotando</li>
+                <li>🌸 Tema morado/violeta (color oficial)</li>
+            </ul>
+        </div>
+        
+        <div style="background: #e3f2fd; padding: 20px; border-radius: 12px; border-left: 5px solid #2196f3;">
+            <h3 style="color: #1976d2; margin-bottom: 12px;">🎯 Nivel:</h3>
+            <ul style="color: #1976d2; line-height: 2; padding-left: 20px;">
+                <li>⭐⭐⭐⭐ Impacto Visual (Alto)</li>
+                <li>⭐⭐⭐⭐⭐ Profesionalismo (Máximo)</li>
+                <li>⭐⭐⭐⭐⭐ Mensaje Social (Muy destacado)</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        const textos = document.querySelectorAll('.texto-item');
+        let idx = 0;
+        setInterval(() => {
+            textos[idx].classList.remove('active');
+            idx = (idx + 1) % textos.length;
+            textos[idx].classList.add('active');
+        }, 4000);
+    </script>
+</body>
+</html>

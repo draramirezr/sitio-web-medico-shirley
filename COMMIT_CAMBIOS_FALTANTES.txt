@@ -1,0 +1,49 @@
+================================================
+COMMIT DE CAMBIOS FALTANTES
+================================================
+
+Los cambios están en el archivo pero NO en Git.
+Necesitamos forzar a Git a detectarlos.
+
+SOLUCIÓN:
+================================================
+
+EJECUTA EN GIT BASH:
+================================================
+
+PASO 1: Forzar a Git a ver los cambios
+------------------------------------------------
+git add -u
+
+PASO 2: Si no funciona, tocar el archivo
+------------------------------------------------
+touch app_simple.py
+
+git add app_simple.py
+
+PASO 3: Ver qué detectó
+------------------------------------------------
+git status
+
+PASO 4: Commitear
+------------------------------------------------
+git commit -m "Fix: Cedula en PDF + Cambios faltantes de features"
+
+PASO 5: Push
+------------------------------------------------
+git push origin main
+
+================================================
+ALTERNATIVA SI NO FUNCIONA:
+================================================
+
+Hacer un cambio mínimo en app_simple.py:
+1. Abre app_simple.py en Notepad
+2. Agrega una línea vacía al final
+3. Guarda (Ctrl + S)
+4. Vuelve a Git Bash:
+   git add app_simple.py
+   git commit -m "Fix: Cedula PDF"
+   git push origin main
+
+================================================

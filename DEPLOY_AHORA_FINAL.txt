@@ -1,0 +1,66 @@
+================================================
+DESPLIEGUE AHORA - COMANDO FINAL
+================================================
+
+CAMBIOS LISTOS (9 archivos):
+================================================
+
+1. app_simple.py
+   - Validación fecha no futura
+   - Conversión fecha NCF
+   - Cédula en PDF
+   
+2. templates/facturacion/dashboard.html
+   - Endpoint corregido
+   - Filtros dd/mm/yyyy
+   - Botón Limpiar
+   
+3. templates/facturacion/historico.html
+   - Filtros dd/mm/yyyy
+   
+4. templates/facturacion/generar_factura.html
+   - Fecha actual dd/mm/yyyy
+   
+5. templates/facturacion/paciente_editar.html
+   - Fecha sin futuras
+   - Formato dd/mm/yyyy
+   
+6. templates/facturacion/ncf_form.html
+   - Fecha fin dd/mm/yyyy
+   
+7. templates/facturacion/ars_form.html
+   - Solo letras
+   
+8. templates/facturacion/centro_medico_form.html
+   - Solo letras
+   
+9. templates/facturacion/pacientes.html
+   - Botón Excel consistente
+   
+10. static/js/filtros-fecha.js (NUEVO)
+    - Sistema de fechas dd/mm/yyyy
+    
+11. .python-version + runtime.txt
+    - Python 3.11.7
+
+================================================
+EJECUTA EN GIT BASH:
+================================================
+
+git add app_simple.py templates/ static/js/filtros-fecha.js .python-version runtime.txt
+
+git commit -m "DEPLOY FINAL: Filtros fecha dd/mm/yyyy + Validacion sin futuras + Dashboard fix + Python 3.11.7 + 15 features"
+
+git push origin main
+
+================================================
+TIEMPO ESTIMADO: 3-4 minutos
+================================================
+
+DESPUÉS VERIFICAR:
+1. Dashboard funciona ✅
+2. Fechas formato dd/mm/yyyy ✅
+3. No acepta fechas futuras ✅
+4. Filtros persistentes ✅
+
+================================================

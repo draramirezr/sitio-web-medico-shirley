@@ -1,0 +1,48 @@
+================================================
+VERIFICAR COMMITS RECIENTES
+================================================
+
+EJECUTA EN GIT BASH:
+================================================
+
+COMANDO 1: Ver últimos 3 commits
+------------------------------------------------
+git log --oneline -3
+
+¿QUÉ VES?
+Copia los 3 últimos commits aquí:
+
+1. _______________________________________________
+2. _______________________________________________
+3. _______________________________________________
+
+COMANDO 2: Ver cambios desde último commit
+------------------------------------------------
+git diff HEAD --name-only
+
+¿QUÉ ARCHIVOS LISTA?
+Copia la lista:
+
+_______________________________________________
+_______________________________________________
+
+SI NO LISTA NADA:
+    → Los cambios YA se commitearon antes
+    → Solo falta hacer push
+
+SI LISTA archivos:
+    → Los cambios existen pero no están en commit
+    → Ejecuta: git add . && git commit -m "Update"
+
+COMANDO 3: Ver si hay commits sin push
+------------------------------------------------
+git status
+
+¿DICE "Your branch is ahead of 'origin/main' by X commits"?
+SÍ / NO: __________
+
+SI DICE SÍ:
+    → Solo ejecuta: git push origin main
+    → Los cambios ya están commiteados
+
+================================================

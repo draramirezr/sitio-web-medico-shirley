@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparación de Roles - Informe Ciencia de Datos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .tabla-comparacion {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            margin-bottom: 30px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        th {
+            padding: 20px 15px;
+            font-weight: 700;
+            text-align: left;
+        }
+        
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .aspecto {
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        
+        .btn-volver {
+            display: inline-block;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-volver:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-3px);
+        }
+        
+        .conclusiones {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+        
+        .conclusiones h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        .conclusiones ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .conclusiones ul li {
+            padding: 12px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .conclusiones ul li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #4CAF50;
+            font-weight: 900;
+            font-size: 1.2rem;
+        }
+        
+        @media (max-width: 992px) {
+            .tabla-comparacion {
+                overflow-x: auto;
+            }
+            
+            table {
+                min-width: 800px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-balance-scale"></i> Comparación Detallada de Roles</h1>
+            <p>Análisis lado a lado: Científico vs Analista vs Ingeniero de Datos</p>
+            <div style="margin-top: 20px;">
+                <a href="/" class="btn-volver">
+                    <i class="fas fa-arrow-left"></i> Volver al Inicio
+                </a>
+            </div>
+        </div>
+        
+        <div class="tabla-comparacion">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 20%;">Aspecto</th>
+                        <th style="width: 26%; background: #4CAF50;">
+                            <i class="fas fa-brain"></i> Científico de Datos
+                        </th>
+                        <th style="width: 27%; background: #2196F3;">
+                            <i class="fas fa-chart-bar"></i> Analista de Datos
+                        </th>
+                        <th style="width: 27%; background: #FF9800;">
+                            <i class="fas fa-database"></i> Ingeniero de Datos
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="aspecto">Enfoque Principal</td>
+                        <td>Predicción, modelos, insights complejos</td>
+                        <td>Interpretación, reportes, dashboards</td>
+                        <td>Infraestructura, pipelines, escalabilidad</td>
+                    </tr>
+                    <tr>
+                        <td class="aspecto">Nivel Técnico</td>
+                        <td>⭐⭐⭐⭐⭐ Muy Alto</td>
+                        <td>⭐⭐⭐ Medio</td>
+                        <td>⭐⭐⭐⭐⭐ Muy Alto</td>
+                    </tr>
+                    <tr>
+                        <td class="aspecto">Estadística/ML</td>
+                        <td>⭐⭐⭐⭐⭐ Experto</td>
+                        <td>⭐⭐ Básico</td>
+                        <td>⭐ Conocimiento general</td>
+                    </tr>
+                    <tr>
+                        <td class="aspecto">Programación</td>
+                        <td>⭐⭐⭐⭐ Alta (Python, R)</td>
+                        <td>⭐⭐ Básica (SQL, Python)</td>
+                        <td>⭐⭐⭐⭐⭐ Muy Alta (múltiples lenguajes)</td>
+                    </tr>
+                    <tr>
+                        <td class="aspecto">Objetivo</td>
+                        <td>Descubrir patrones, predecir</td>
+                        <td>Explicar qué pasó</td>
+                        <td>Hacer que los datos fluyan</td>
+                    </tr>
+                    <tr>
+                        <td class="aspecto">Pregunta típica</td>
+                        <td>"¿Qué pasará?" (predictivo)</td>
+                        <td>"¿Qué pasó?" (descriptivo)</td>
+                        <td>"¿Cómo movemos los datos?"</td>
+                    </tr>
+                    <tr>
+                        <td class="aspecto">Formación</td>
+                        <td>Maestría/PhD (Matemáticas, Estadística)</td>
+                        <td>Licenciatura (Negocios, Economía)</td>
+                        <td>Licenciatura (Ingeniería, CS)</td>
+                    </tr>
+                    <tr>
+                        <td class="aspecto">Salario Promedio</td>
+                        <td style="font-weight: 700; color: #4CAF50;">{{ roles.cientifico_datos.salario_promedio }}</td>
+                        <td style="font-weight: 700; color: #2196F3;">{{ roles.analista_datos.salario_promedio }}</td>
+                        <td style="font-weight: 700; color: #FF9800;">{{ roles.ingeniero_datos.salario_promedio }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Conclusiones -->
+        <div class="conclusiones">
+            <h2><i class="fas fa-lightbulb"></i> Conclusiones Clave</h2>
+            <ul>
+                <li>
+                    <strong>El Científico de Datos</strong> se enfoca en crear <strong>modelos predictivos</strong> 
+                    y descubrir insights complejos mediante machine learning y estadística avanzada.
+                </li>
+                <li>
+                    <strong>El Analista de Datos</strong> se especializa en <strong>interpretar datos existentes</strong> 
+                    y comunicar resultados mediante visualizaciones y reportes para decisiones de negocio.
+                </li>
+                <li>
+                    <strong>El Ingeniero de Datos</strong> construye la <strong>infraestructura y pipelines</strong> 
+                    que permiten que los datos estén disponibles, limpios y listos para análisis.
+                </li>
+                <li>
+                    Los tres roles son <strong>complementarios</strong> y trabajan juntos en el ecosistema de datos.
+                </li>
+                <li>
+                    El Científico de Datos requiere la <strong>formación más avanzada</strong> (típicamente maestría o doctorado).
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPCIÓN 2: San Valentín - Salud con Amor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #fff0f3 50%, #fef5f7 100%);
+        }
+        
+        .valentine-banner {
+            background: linear-gradient(135deg, #DC143C 0%, #FF1493 50%, #FF69B4 100%);
+            color: white;
+            text-align: center;
+            padding: 15px 20px;
+            font-size: 16px;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(220, 20, 60, 0.4);
+            overflow: hidden;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .textos-rotativos {
+            position: relative;
+            width: 100%;
+            height: 25px;
+            overflow: hidden;
+        }
+        
+        .texto-item {
+            position: absolute;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+        
+        .texto-item.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .hero-section {
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Corazones y rosas flotantes combinados */
+        .elemento-amor-flotante {
+            position: absolute;
+            font-size: 55px;
+            opacity: 0.1;
+            animation: flotar-amor 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .elemento-amor-flotante:nth-child(1) {
+            left: 8%;
+            color: #FF1493;
+            animation-duration: 18s;
+            animation-delay: -5s;
+        }
+        
+        .elemento-amor-flotante:nth-child(2) {
+            left: 28%;
+            color: #DC143C;
+            font-size: 45px;
+            animation-duration: 22s;
+            animation-delay: -12s;
+        }
+        
+        .elemento-amor-flotante:nth-child(3) {
+            right: 28%;
+            color: #FF69B4;
+            font-size: 50px;
+            animation-duration: 19s;
+            animation-delay: -8s;
+        }
+        
+        .elemento-amor-flotante:nth-child(4) {
+            right: 8%;
+            color: #FF1493;
+            animation-duration: 23s;
+            animation-delay: -15s;
+        }
+        
+        @keyframes flotar-amor {
+            from {
+                bottom: -100px;
+                transform: translateX(0) rotate(0deg);
+            }
+            to {
+                bottom: 110vh;
+                transform: translateX(50px) rotate(360deg);
+            }
+        }
+        
+        .hero-image-wrapper {
+            position: relative;
+            margin-bottom: 40px;
+            z-index: 10;
+        }
+        
+        /* Borde con degradado de amor girando */
+        .borde-amor-girando {
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            right: -15px;
+            bottom: -15px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #DC143C 0deg 90deg,
+                #FF1493 90deg 180deg,
+                #FF69B4 180deg 270deg,
+                #FF1493 270deg 360deg
+            );
+            z-index: 0;
+            animation: rotar-amor 12s linear infinite;
+        }
+        
+        @keyframes rotar-amor {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .borde-amor-girando::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            background: transparent;
+            border-radius: 50%;
+        }
+        
+        .hero-image {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            border: 5px solid white;
+            box-shadow: 0 20px 60px rgba(255, 20, 147, 0.4);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .hero-title {
+            font-size: 3rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 800;
+            text-align: center;
+            z-index: 10;
+            position: relative;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-tagline {
+            font-size: 1.3rem;
+            color: #6c757d;
+            margin-bottom: 30px;
+            text-align: center;
+            z-index: 10;
+            position: relative;
+        }
+        
+        .demo-info {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="valentine-banner">
+        <div class="textos-rotativos">
+            <div class="texto-item active"><i class="fas fa-heart" style="color: #FFB6C1;"></i> FELIZ SAN VALENTÍN <i class="fas fa-heart" style="color: #FFB6C1;"></i></div>
+            <div class="texto-item">💕 "Cuida tu salud con amor - Ama tu cuerpo" 💕</div>
+            <div class="texto-item">14 de Febrero - Día del Amor y la Amistad</div>
+        </div>
+    </div>
+    
+    <section class="hero-section">
+        <!-- Corazones y elementos de amor -->
+        <div class="elemento-amor-flotante"><i class="fas fa-heart"></i></div>
+        <div class="elemento-amor-flotante"><i class="fas fa-heart-pulse"></i></div>
+        <div class="elemento-amor-flotante"><i class="fas fa-heart"></i></div>
+        <div class="elemento-amor-flotante"><i class="fas fa-heartbeat"></i></div>
+        
+        <div class="hero-image-wrapper">
+            <div class="borde-amor-girando"></div>
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Crect fill='%23CEB0B7' width='300' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='20' text-anchor='middle' dy='.3em' fill='white'%3EDra. Shirley%3C/text%3E%3C/svg%3E" 
+                 alt="Dra. Shirley" 
+                 class="hero-image">
+        </div>
+        
+        <h1 class="hero-title">
+            Dra. Shirley Ramírez<br>
+            <span class="hero-gradient">Cuidado Integral de la Salud Femenina</span>
+        </h1>
+        
+        <p class="hero-tagline">
+            Ginecóloga y Obstetra | Gineco-Estética
+        </p>
+    </section>
+    
+    <div class="demo-info">
+        <h2 style="color: #DC143C; text-align: center; font-size: 26px; font-weight: 800; margin-bottom: 20px;">
+            💕 OPCIÓN 2: Salud con Amor (Recomendada)
+        </h2>
+        
+        <div style="background: #ffe6f0; padding: 20px; border-radius: 12px; border-left: 5px solid #DC143C; margin-bottom: 20px;">
+            <h3 style="color: #C71585; margin-bottom: 12px;">✨ Elementos:</h3>
+            <ul style="color: #495057; line-height: 2; padding-left: 20px;">
+                <li>💕 Banner rojo/rosa con degradado dinámico</li>
+                <li>💖 Borde con tonos de amor girando</li>
+                <li>❤️ Corazones Font Awesome (diferentes tipos)</li>
+                <li>💗 Mensaje: "Cuida tu salud con amor"</li>
+                <li>📱 100% responsive</li>
+            </ul>
+        </div>
+        
+        <div style="background: #d4edda; padding: 20px; border-radius: 12px; border-left: 5px solid #28a745;">
+            <h3 style="color: #155724; margin-bottom: 12px;">🎯 Ventajas:</h3>
+            <ul style="color: #155724; line-height: 2; padding-left: 20px;">
+                <li>✅ Conecta San Valentín con salud femenina</li>
+                <li>✅ Profesional pero romántico</li>
+                <li>✅ Usa Font Awesome (sin problemas de color)</li>
+                <li>✅ Diferentes íconos de corazón (variedad)</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        const textos = document.querySelectorAll('.texto-item');
+        let idx = 0;
+        setInterval(() => {
+            textos[idx].classList.remove('active');
+            idx = (idx + 1) % textos.length;
+            textos[idx].classList.add('active');
+        }, 4000);
+    </script>
+</body>
+</html>

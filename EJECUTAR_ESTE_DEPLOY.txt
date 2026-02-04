@@ -1,0 +1,72 @@
+================================================
+🚀 DESPLIEGUE FINAL - COPIAR Y PEGAR
+================================================
+
+PASO 1: Abre Git Bash
+------------------------------------------------
+1. Ve a la carpeta: Z:\Pagina web shirley
+2. Click derecho → "Git Bash Here"
+
+PASO 2: Copia y pega ESTOS 3 COMANDOS:
+------------------------------------------------
+
+git add app_simple.py templates/
+
+git commit -m "MEGA Update 2026: 5 temas estacionales + Fechas dd-mm-yyyy + Validaciones + ARS clickeables + Doble click editar + Excel download + Scroll + Cedula PDF + Auditoria"
+
+git push origin main
+
+================================================
+DESPUÉS DEL PUSH:
+================================================
+
+✅ Verás: "Enumerating objects..."
+✅ Espera 2-3 minutos
+✅ Railway desplegará automáticamente
+
+================================================
+VERIFICAR (después de 3 minutos):
+================================================
+
+1. Ir a: https://www.draramirez.com/admin/visor-pagina
+   → Ver 5 opciones de tema ✅
+
+2. Ir a: https://www.draramirez.com/facturacion/historico
+   → Ver fechas: 17/11/2025 ✅
+
+3. Ir a: https://www.draramirez.com/facturacion/dashboard
+   → Click en una ARS pendiente
+   → Ver formulario pre-llenado ✅
+
+4. Generar factura (Paso 2)
+   → Doble click en paciente
+   → Editar y volver ✅
+
+5. Ir a: https://www.draramirez.com/facturacion/pacientes
+   → Ver botón "Descargar Excel" ✅
+
+================================================
+SI HAY PROBLEMAS:
+================================================
+
+- Limpiar caché: Ctrl + Shift + R
+- Modo incógnito: Ctrl + Shift + N
+- Revisar logs en Railway
+
+================================================
+FEATURES DESPLEGADAS (8):
+================================================
+✅ Sistema 5 Temas
+✅ Fechas dd/mm/yyyy
+✅ Validaciones
+✅ ARS Clickeables
+✅ Doble Click Editar
+✅ Scroll Servicios
+✅ Excel Pacientes
+✅ Cédula en PDF
+
+Total: 35 archivos, ~950 líneas código
+
+================================================
+
+¡ÉXITO! 🎉

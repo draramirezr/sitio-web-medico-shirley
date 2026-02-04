@@ -1,0 +1,37 @@
+================================================
+COMANDOS PARA FORZAR DEPLOY - COPIAR EXACTOS
+================================================
+
+EJECUTA EN GIT BASH UNO POR UNO:
+================================================
+
+COMANDO 1: Forzar agregar app_simple.py
+------------------------------------------------
+git add app_simple.py --force
+
+COMANDO 2: Agregar templates
+------------------------------------------------
+git add templates/
+
+COMANDO 3: Ver qué se va a commitear
+------------------------------------------------
+git status
+
+COMANDO 4: Crear commit
+------------------------------------------------
+git commit -m "MEGA Update: 5 temas + Fechas dd/mm/yyyy + Validaciones + Features ambiciosas"
+
+COMANDO 5: Push
+------------------------------------------------
+git push origin main
+
+================================================
+SI COMANDO 3 MUESTRA app_simple.py:
+    ✅ PERFECTO - Continúa con commit y push
+
+SI NO LO MUESTRA:
+    Ejecuta: git add -A --force
+    Luego: git status
+    Luego: git commit...
+
+================================================

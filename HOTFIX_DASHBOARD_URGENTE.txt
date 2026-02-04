@@ -1,0 +1,53 @@
+================================================
+🚨 HOTFIX URGENTE - DASHBOARD CAÍDO
+================================================
+
+PROBLEMA:
+Dashboard muestra "Internal Server Error"
+
+CAUSA PROBABLE:
+Código en Railway (antiguo) vs código local (nuevo)
+
+SOLUCIÓN INMEDIATA:
+================================================
+
+OPCIÓN A: Desplegar el fix ahora (RECOMENDADO)
+------------------------------------------------
+En Git Bash:
+
+git add app_simple.py
+
+git commit -m "HOTFIX: Dashboard error - Manejo robusto de errores en ARS pendientes"
+
+git push origin main
+
+Espera 2 minutos y el dashboard volverá a funcionar.
+
+OPCIÓN B: Ver logs de error en Railway
+------------------------------------------------
+1. Ir a: https://railway.app/
+2. Tu proyecto → Click en "Logs"
+3. Buscar el error exacto
+4. Copiar el error y decírmelo
+
+================================================
+CAMBIO APLICADO:
+================================================
+
+Agregué try/except robusto en línea ~6697:
+- Captura errores en query ARS pendientes
+- Usa fallback si falla
+- Dashboard no se cae (muestra "Sin ARS Pendientes")
+- Imprime error en logs para debug
+
+================================================
+DESPUÉS DEL FIX:
+================================================
+
+✅ Dashboard funciona (aunque ARS esté vacía)
+✅ Puedes continuar usando el sistema
+✅ Luego desplegamos el resto de features
+
+================================================
+
+¿Qué opción eliges: A (deploy fix ahora) o B (ver logs)?

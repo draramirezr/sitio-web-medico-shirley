@@ -1,0 +1,45 @@
+================================================
+CÓMO EJECUTAR EL INFORME DE CIENCIA DE DATOS
+================================================
+
+PASO 1: Abrir terminal/PowerShell
+================================================
+1. Presiona Win + R
+2. Escribe: cmd
+3. Presiona Enter
+
+================================================
+PASO 2: Navegar a la carpeta del proyecto
+================================================
+cd "Z:\Pagina web shirley\informe_ciencia_datos"
+
+================================================
+PASO 3: Instalar Flask (solo la primera vez)
+================================================
+pip install Flask
+
+================================================
+PASO 4: Ejecutar la aplicación
+================================================
+python app.py
+
+================================================
+PASO 5: Abrir en el navegador
+================================================
+Abre tu navegador y ve a:
+http://localhost:5001
+
+================================================
+RESULTADO:
+================================================
+Verás el informe interactivo con:
+- Página principal con 3 tarjetas (roles)
+- Comparación detallada en tabla
+- Perfil completo de cada rol
+
+================================================
+PARA DETENER LA APLICACIÓN:
+================================================
+En la terminal, presiona: Ctrl + C
+
+================================================

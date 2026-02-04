@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPCIÓN 3: San Valentín - Ámate, Cuídate</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #fff0f3 0%, #ffe6eb 50%, #fef5f7 100%);
+        }
+        
+        .valentine-banner-especial {
+            background: linear-gradient(135deg, #C41E3A 0%, #FF1493 50%, #C41E3A 100%);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 18px;
+            font-weight: 800;
+            box-shadow: 0 6px 20px rgba(196, 30, 58, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .banner-corazon-grande {
+            font-size: 35px;
+            margin-bottom: 8px;
+            animation: latido 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes latido {
+            0%, 100% { transform: scale(1); }
+            14%, 28% { transform: scale(1.15); }
+            21%, 35% { transform: scale(1); }
+        }
+        
+        .banner-title {
+            font-size: 20px;
+            letter-spacing: 1px;
+        }
+        
+        .hero-section {
+            min-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Corazones de diferentes tamaños */
+        .corazon-especial {
+            position: absolute;
+            animation: flotar-especial 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .corazon-especial:nth-child(1) {
+            left: 5%;
+            font-size: 40px;
+            color: #FFB6C1;
+            opacity: 0.15;
+            animation-duration: 18s;
+            animation-delay: -5s;
+        }
+        
+        .corazon-especial:nth-child(2) {
+            left: 20%;
+            font-size: 60px;
+            color: #FF69B4;
+            opacity: 0.12;
+            animation-duration: 24s;
+            animation-delay: -12s;
+        }
+        
+        .corazon-especial:nth-child(3) {
+            right: 20%;
+            font-size: 50px;
+            color: #DC143C;
+            opacity: 0.1;
+            animation-duration: 20s;
+            animation-delay: -8s;
+        }
+        
+        .corazon-especial:nth-child(4) {
+            right: 5%;
+            font-size: 45px;
+            color: #FF1493;
+            opacity: 0.13;
+            animation-duration: 22s;
+            animation-delay: -16s;
+        }
+        
+        @keyframes flotar-especial {
+            from {
+                bottom: -100px;
+                transform: translateX(0) rotate(-10deg);
+            }
+            to {
+                bottom: 110vh;
+                transform: translateX(40px) rotate(350deg);
+            }
+        }
+        
+        .hero-image-wrapper {
+            position: relative;
+            margin-bottom: 40px;
+            z-index: 10;
+        }
+        
+        /* Anillo de corazones girando */
+        .anillo-corazones {
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            border-radius: 50%;
+            z-index: 0;
+        }
+        
+        .anillo-corazones::before {
+            content: '❤️';
+            position: absolute;
+            font-size: 25px;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: girar-anillo 10s linear infinite;
+        }
+        
+        @keyframes girar-anillo {
+            from {
+                transform: translateX(-50%) rotate(0deg) translateY(-140px) rotate(0deg);
+            }
+            to {
+                transform: translateX(-50%) rotate(360deg) translateY(-140px) rotate(-360deg);
+            }
+        }
+        
+        /* Borde pulsante rosa */
+        .borde-rosa-pulsante {
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            right: -15px;
+            bottom: -15px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #FF1493 0%, #FF69B4 50%, #FFB6C1 100%);
+            opacity: 0.5;
+            z-index: 0;
+            animation: pulsar 2.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulsar {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+            50% {
+                transform: scale(1.06);
+                opacity: 0.7;
+            }
+        }
+        
+        .borde-rosa-pulsante::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            background: transparent;
+            border-radius: 50%;
+        }
+        
+        .hero-image {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            border: 6px solid white;
+            box-shadow: 0 25px 70px rgba(220, 20, 60, 0.5);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .hero-title {
+            font-size: 3rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 800;
+            text-align: center;
+            z-index: 10;
+            position: relative;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-tagline {
+            font-size: 1.3rem;
+            color: #6c757d;
+            margin-bottom: 30px;
+            text-align: center;
+            z-index: 10;
+            position: relative;
+        }
+        
+        .demo-info {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="valentine-banner-especial">
+        <div class="banner-corazon-grande">❤️</div>
+        <div class="banner-title">SAN VALENTÍN - ÁMATE, CUÍDATE</div>
+    </div>
+    
+    <section class="hero-section">
+        <!-- Corazones de colores flotantes -->
+        <div class="corazon-especial"><i class="fas fa-heart"></i></div>
+        <div class="corazon-especial"><i class="fas fa-heart"></i></div>
+        <div class="corazon-especial"><i class="fas fa-heart"></i></div>
+        <div class="corazon-especial"><i class="fas fa-heart"></i></div>
+        
+        <div class="hero-image-wrapper">
+            <div class="anillo-corazones"></div>
+            <div class="borde-rosa-pulsante"></div>
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Crect fill='%23CEB0B7' width='300' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='20' text-anchor='middle' dy='.3em' fill='white'%3EDra. Shirley%3C/text%3E%3C/svg%3E" 
+                 alt="Dra. Shirley" 
+                 class="hero-image">
+        </div>
+        
+        <h1 class="hero-title">
+            Dra. Shirley Ramírez<br>
+            <span class="hero-gradient">Cuidado Integral de la Salud Femenina</span>
+        </h1>
+        
+        <p class="hero-tagline">
+            Ginecóloga y Obstetra | Gineco-Estética
+        </p>
+    </section>
+    
+    <div class="demo-info">
+        <h2 style="color: #C41E3A; text-align: center; font-size: 26px; font-weight: 800; margin-bottom: 20px;">
+            💗 OPCIÓN 3: Ámate, Cuídate
+        </h2>
+        
+        <div style="background: #ffe6f0; padding: 20px; border-radius: 12px; border-left: 5px solid #C41E3A; margin-bottom: 20px;">
+            <h3 style="color: #C71585; margin-bottom: 12px;">✨ Elementos:</h3>
+            <ul style="color: #495057; line-height: 2; padding-left: 20px;">
+                <li>❤️ Banner estático con corazón pulsante (latido)</li>
+                <li>💗 Mensaje: "Ámate, Cuídate" (autocuidado)</li>
+                <li>💕 Borde rosa pulsante (efecto suave)</li>
+                <li>❤️ Anillo de corazones orbitando la foto</li>
+                <li>💖 Corazones de diferentes colores flotando</li>
+            </ul>
+        </div>
+        
+        <div style="background: #fff3cd; padding: 20px; border-radius: 12px; border-left: 5px solid #ffc107;">
+            <h3 style="color: #856404; margin-bottom: 12px;">🎯 Características:</h3>
+            <ul style="color: #856404; line-height: 2; padding-left: 20px;">
+                <li>⭐⭐⭐⭐⭐ Impacto Visual (Máximo - muy llamativo)</li>
+                <li>⭐⭐⭐⭐ Profesionalismo (Bueno - más festivo)</li>
+                <li>⭐⭐⭐⭐⭐ Romántico (Muy apropiado)</li>
+                <li>💝 Mensaje de autocuidado (apropiado para ginecología)</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

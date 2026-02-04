@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe: Perfil Profesional del Científico de Datos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            font-weight: 800;
+        }
+        
+        .header p {
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+        
+        .fecha {
+            color: #95a5a6;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+        
+        .intro {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+        
+        .intro h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .roles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .role-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            border-top: 5px solid;
+        }
+        
+        .role-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.25);
+        }
+        
+        .role-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+        
+        .role-card .subtitle {
+            color: #6c757d;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+        
+        .role-card p {
+            color: #495057;
+            margin-bottom: 20px;
+        }
+        
+        .role-card ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .role-card ul li {
+            padding: 8px 0;
+            color: #495057;
+            display: flex;
+            align-items: start;
+            gap: 10px;
+        }
+        
+        .role-card ul li i {
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+        
+        .salario {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 700;
+        }
+        
+        .btn-ver-mas {
+            display: block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-align: center;
+            margin-top: 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-ver-mas:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .comparacion-link {
+            display: block;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            text-decoration: none;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+        
+        .comparacion-link:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.25);
+        }
+        
+        .comparacion-link h2 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .comparacion-link p {
+            color: #6c757d;
+        }
+        
+        @media (max-width: 768px) {
+            .roles-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <i class="fas fa-chart-line"></i>
+                Perfil Profesional del Científico de Datos
+            </h1>
+            <p>Análisis comparativo con roles afines en el ecosistema de datos</p>
+            <div class="fecha">
+                <i class="fas fa-calendar"></i> {{ fecha_actual }}
+            </div>
+        </div>
+        
+        <!-- Introducción -->
+        <div class="intro">
+            <h2><i class="fas fa-info-circle"></i> Introducción</h2>
+            <p>
+                En la era digital actual, los datos se han convertido en el activo más valioso de las organizaciones. 
+                Sin embargo, trabajar con datos requiere diferentes especialidades profesionales, cada una con su 
+                rol específico en el ecosistema de datos.
+            </p>
+            <p style="margin-top: 15px;">
+                Este informe analiza el <strong>perfil profesional del Científico de Datos</strong>, diferenciándolo 
+                claramente de otros roles afines como el Analista de Datos y el Ingeniero de Datos, estableciendo 
+                las competencias, responsabilidades y valor único que cada uno aporta a una organización.
+            </p>
+        </div>
+        
+        <!-- Cards de Roles -->
+        <div class="roles-grid">
+            <!-- Científico de Datos -->
+            <div class="role-card" style="border-top-color: {{ roles.cientifico_datos.color }}">
+                <h3 style="color: {{ roles.cientifico_datos.color }}">
+                    <i class="fas fa-brain"></i> {{ roles.cientifico_datos.nombre }}
+                </h3>
+                <div class="subtitle">{{ roles.cientifico_datos.nombre_ingles }}</div>
+                <p>{{ roles.cientifico_datos.descripcion }}</p>
+                
+                <strong style="color: {{ roles.cientifico_datos.color }}">
+                    <i class="fas fa-star"></i> Habilidades Clave:
+                </strong>
+                <ul>
+                    {% for habilidad in roles.cientifico_datos.habilidades[:4] %}
+                    <li>
+                        <i class="fas fa-check-circle" style="color: {{ roles.cientifico_datos.color }}"></i>
+                        <span>{{ habilidad }}</span>
+                    </li>
+                    {% endfor %}
+                    <li style="color: #95a5a6; font-style: italic;">
+                        + {{ roles.cientifico_datos.habilidades|length - 4 }} más...
+                    </li>
+                </ul>
+                
+                <div class="salario" style="border-left: 4px solid {{ roles.cientifico_datos.color }}">
+                    💰 Salario: {{ roles.cientifico_datos.salario_promedio }}
+                </div>
+                
+                <a href="/perfil/cientifico_datos" class="btn-ver-mas">
+                    Ver Perfil Completo <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <!-- Analista de Datos -->
+            <div class="role-card" style="border-top-color: {{ roles.analista_datos.color }}">
+                <h3 style="color: {{ roles.analista_datos.color }}">
+                    <i class="fas fa-chart-bar"></i> {{ roles.analista_datos.nombre }}
+                </h3>
+                <div class="subtitle">{{ roles.analista_datos.nombre_ingles }}</div>
+                <p>{{ roles.analista_datos.descripcion }}</p>
+                
+                <strong style="color: {{ roles.analista_datos.color }}">
+                    <i class="fas fa-star"></i> Habilidades Clave:
+                </strong>
+                <ul>
+                    {% for habilidad in roles.analista_datos.habilidades[:4] %}
+                    <li>
+                        <i class="fas fa-check-circle" style="color: {{ roles.analista_datos.color }}"></i>
+                        <span>{{ habilidad }}</span>
+                    </li>
+                    {% endfor %}
+                    <li style="color: #95a5a6; font-style: italic;">
+                        + {{ roles.analista_datos.habilidades|length - 4 }} más...
+                    </li>
+                </ul>
+                
+                <div class="salario" style="border-left: 4px solid {{ roles.analista_datos.color }}">
+                    💰 Salario: {{ roles.analista_datos.salario_promedio }}
+                </div>
+                
+                <a href="/perfil/analista_datos" class="btn-ver-mas">
+                    Ver Perfil Completo <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <!-- Ingeniero de Datos -->
+            <div class="role-card" style="border-top-color: {{ roles.ingeniero_datos.color }}">
+                <h3 style="color: {{ roles.ingeniero_datos.color }}">
+                    <i class="fas fa-database"></i> {{ roles.ingeniero_datos.nombre }}
+                </h3>
+                <div class="subtitle">{{ roles.ingeniero_datos.nombre_ingles }}</div>
+                <p>{{ roles.ingeniero_datos.descripcion }}</p>
+                
+                <strong style="color: {{ roles.ingeniero_datos.color }}">
+                    <i class="fas fa-star"></i> Habilidades Clave:
+                </strong>
+                <ul>
+                    {% for habilidad in roles.ingeniero_datos.habilidades[:4] %}
+                    <li>
+                        <i class="fas fa-check-circle" style="color: {{ roles.ingeniero_datos.color }}"></i>
+                        <span>{{ habilidad }}</span>
+                    </li>
+                    {% endfor %}
+                    <li style="color: #95a5a6; font-style: italic;">
+                        + {{ roles.ingeniero_datos.habilidades|length - 4 }} más...
+                    </li>
+                </ul>
+                
+                <div class="salario" style="border-left: 4px solid {{ roles.ingeniero_datos.color }}">
+                    💰 Salario: {{ roles.ingeniero_datos.salario_promedio }}
+                </div>
+                
+                <a href="/perfil/ingeniero_datos" class="btn-ver-mas">
+                    Ver Perfil Completo <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Link a comparación -->
+        <a href="/comparacion" class="comparacion-link">
+            <h2><i class="fas fa-balance-scale"></i> Ver Comparación Detallada</h2>
+            <p>Tabla comparativa lado a lado de los tres roles</p>
+        </a>
+    </div>
+</body>
+</html>
