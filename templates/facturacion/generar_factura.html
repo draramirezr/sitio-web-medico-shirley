@@ -300,19 +300,20 @@
                 Fecha de Facturación
                 <span class="required">*</span>
             </label>
-            <input type="date" 
+            <input type="text" 
                    class="form-control" 
                    id="fecha_factura" 
-                   name="fecha_factura" 
-                   value="{{ fecha_actual }}" 
+                   name="fecha_factura_visual" 
+                   value="{{ fecha_actual_visual }}" 
                    required 
                    onchange="checkForm()" 
-                   max="{{ fecha_actual }}"
-                   data-formato="dd/mm/yyyy"
-                   placeholder="dd/mm/yyyy">
+                   placeholder="dd/mm/yyyy"
+                   pattern="\d{2}/\d{2}/\d{4}"
+                   title="Formato: dd/mm/yyyy">
+            <input type="hidden" id="fecha_factura_sql" name="fecha_factura" value="{{ fecha_actual }}">
             <small class="text-muted">
                 <i class="fas fa-info-circle"></i>
-                Formato: dd/mm/yyyy (Hoy por defecto) -
+                Formato: dd/mm/yyyy - Fecha actual pre-llenada -
                 Por defecto: fecha actual (puede modificarla si es necesario)
             </small>
         </div>
@@ -334,11 +335,46 @@
 </div>
 
 <script>
+// Sincronizar fecha visual con fecha SQL
+document.addEventListener('DOMContentLoaded', function() {
+    const fechaVisual = document.getElementById('fecha_factura_visual');
+    const fechaSQL = document.getElementById('fecha_factura_sql');
+    
+    if (fechaVisual && fechaSQL) {
+        fechaVisual.addEventListener('input', function() {
+            let value = this.value.replace(/[^0-9/]/g, '');
+            
+            // Auto-agregar barras
+            if (value.length === 2 && !value.includes('/')) {
+                value += '/';
+            } else if (value.length === 5 && value.split('/').length === 2) {
+                value += '/';
+            }
+            
+            if (value.length > 10) {
+                value = value.substring(0, 10);
+            }
+            
+            this.value = value;
+            
+            // Si está completo, convertir a yyyy-mm-dd
+            if (value.length === 10) {
+                const match = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+                if (match) {
+                    const [, dia, mes, ano] = match;
+                    fechaSQL.value = `${ano}-${mes}-${dia}`;
+                    checkForm();
+                }
+            }
+        });
+    }
+});
+
 function checkForm() {
     const ars = document.getElementById('ars_id').value;
     const ncf = document.getElementById('ncf_id').value;
     const medico = document.getElementById('medico_factura_id').value;
-    const fecha = document.getElementById('fecha_factura').value;
+    const fecha = document.getElementById('fecha_factura_sql') ? document.getElementById('fecha_factura_sql').value : document.getElementById('fecha_factura').value;
     
     const btnContinuar = document.getElementById('btnContinuar');
     if (ars && ncf && medico && fecha) {

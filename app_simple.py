@@ -5565,13 +5565,15 @@ def facturacion_generar():
     conn.close()
     
     # Fecha actual por defecto
-    fecha_actual = date.today().strftime('%Y-%m-%d')
+    fecha_actual_sql = date.today().strftime('%Y-%m-%d')  # Para input type="date"
+    fecha_actual_visual = date.today().strftime('%d/%m/%Y')  # Para mostrar dd/mm/yyyy
     
     return render_template('facturacion/generar_factura.html', 
                          ars_list=ars_list, 
                          ncf_list=ncf_list,
                          medicos_habilitados=medicos_habilitados,
-                         fecha_actual=fecha_actual,
+                         fecha_actual=fecha_actual_sql,
+                         fecha_actual_visual=fecha_actual_visual,
                          ars_id_prefill=ars_id_prefill,
                          medico_id_prefill=medico_id_prefill,
                          ncf_id_prefill=ncf_id_prefill,
