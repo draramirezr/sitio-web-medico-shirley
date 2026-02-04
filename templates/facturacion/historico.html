@@ -242,13 +242,25 @@
                     <label style="color: #666; font-weight: 600; margin-bottom: 0.5rem;">
                         <i class="fas fa-calendar"></i> Desde
                     </label>
-                    <input type="date" class="form-control" name="fecha_desde" value="{{ fecha_desde or '' }}">
+                    <input type="date" 
+                           class="form-control" 
+                           name="fecha_desde" 
+                           value="{{ fecha_desde or '' }}"
+                           data-formato="dd/mm/yyyy"
+                           placeholder="dd/mm/yyyy">
+                    <small class="text-muted" style="font-size: 0.75rem;">dd/mm/yyyy</small>
                 </div>
                 <div class="col-md-2 mb-3">
                     <label style="color: #666; font-weight: 600; margin-bottom: 0.5rem;">
                         <i class="fas fa-calendar"></i> Hasta
                     </label>
-                    <input type="date" class="form-control" name="fecha_hasta" value="{{ fecha_hasta or '' }}">
+                    <input type="date" 
+                           class="form-control" 
+                           name="fecha_hasta" 
+                           value="{{ fecha_hasta or '' }}"
+                           data-formato="dd/mm/yyyy"
+                           placeholder="dd/mm/yyyy">
+                    <small class="text-muted" style="font-size: 0.75rem;">dd/mm/yyyy</small>
                 </div>
             </div>
             <div class="text-end">
@@ -377,6 +389,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+<!-- Script para filtros de fecha dd/mm/yyyy -->
+<script src="{{ url_for('static', filename='js/filtros-fecha.js') }}"></script>
+
 {% endblock %}
 
 
