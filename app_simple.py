@@ -7755,4 +7755,8 @@ if __name__ == '__main__':
     print(f"🔒 Seguridad: {'✅ ACTIVADA' if not debug else '⚠️ DESARROLLO'}")
     print("="*60 + "\n")
     
+    
+    
     app.run(debug=debug, host=host, port=port)
+    
+    
