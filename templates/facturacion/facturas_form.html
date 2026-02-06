@@ -422,36 +422,6 @@
 </div>
 
 <script>
-// Confirmación antes de agregar pacientes pendientes
-document.getElementById('formFactura').addEventListener('submit', function(e) {
-    e.preventDefault(); // Detener envío temporalmente
-    
-    // Obtener nombre de la ARS seleccionada
-    const arsSelect = document.getElementById('ars');
-    const arsNombre = arsSelect.options[arsSelect.selectedIndex].text;
-    
-    // Contar pacientes a agregar
-    const pacientesRows = document.querySelectorAll('#tablaPacientes tbody tr').length;
-    
-    if (pacientesRows === 0) {
-        alert('⚠️ Debe agregar al menos un paciente antes de continuar.');
-        return;
-    }
-    
-    // Mostrar confirmación
-    const mensaje = `¿Está seguro que todas las ${pacientesRows} consulta(s) agregada(s) corresponden a la ARS seleccionada?\n\n📋 ARS: ${arsNombre}\n👥 Total pacientes: ${pacientesRows}\n\n✅ Sí → Continuar\n❌ No → Cancelar y revisar`;
-    
-    if (confirm(mensaje)) {
-        // Usuario confirmó → Enviar formulario
-        this.submit();
-    } else {
-        // Usuario canceló → No hacer nada (puede revisar)
-        console.log('❌ Usuario canceló el envío para revisar');
-    }
-});
-</script>
-
-<script>
 // Datos de centros médicos por médico (del backend)
 const centrosPorMedico = {};
 
@@ -766,157 +736,220 @@ async function procesarExcel(input) {
         });
         
         const data = await response.json();
-        
-        // Si hay errores, NO cargar nada y mostrar modal de error
-        if (data.error) {
+
+        // Si el backend respondió con error HTTP, mostrar modal y salir
+        if (!response.ok) {
             document.getElementById('loading-excel').remove();
-            
-            let errorHTML = `
-                <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                            background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 30px rgba(0,0,0,0.3); 
-                            z-index: 9999; max-width: 700px; max-height: 85vh; overflow-y: auto;">
-                    <div style="text-align: center; margin-bottom: 1.5rem;">
-                        <div style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); 
-                                    width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 1rem; 
-                                    display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-times-circle" style="font-size: 3rem; color: white;"></i>
-                        </div>
-                        <h4 style="color: #dc3545; font-weight: 800; margin-bottom: 0.5rem;">
-                            ❌ No se Cargó Ningún Paciente
-                        </h4>
-                        <p style="color: #666; font-size: 1rem;">
-                            Debe corregir TODOS los errores en la plantilla Excel antes de cargar
-                        </p>
-                    </div>
-                    
-                    <div style="background: #f8d7da; border-left: 4px solid #dc3545; padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem;">
-                        <h6 style="color: #721c24; font-weight: 700; margin-bottom: 1rem;">
-                            <i class="fas fa-exclamation-triangle me-2"></i>Errores Encontrados (${data.total_errores || data.errores.length})
-                        </h6>
-                        <div style="max-height: 300px; overflow-y: auto; font-size: 0.9rem;">
-            `;
-            
-            data.errores.forEach(error => {
-                errorHTML += `<p style="margin: 0.5rem 0; color: #721c24; font-weight: 500;">${error}</p>`;
-            });
-            
-            errorHTML += `
-                        </div>
-                    </div>
-                    
-                    <div style="background: rgba(242, 226, 230, 0.4); padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem; border: 1px solid #F2E2E6;">
-                        <p style="margin: 0; color: #666; font-size: 0.9rem; line-height: 1.6;">
-                            <i class="fas fa-info-circle me-2" style="color: #CEB0B7;"></i>
-                            <strong>Instrucciones:</strong> Abra nuevamente su archivo Excel, corrija los errores indicados arriba, guarde el archivo y vuelva a cargarlo.
-                        </p>
-                    </div>
-                    
-                    <button onclick="cerrarModalError()" 
-                            style="background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%); 
-                                   color: white; border: none; padding: 0.8rem 2rem; border-radius: 10px; 
-                                   font-weight: 600; cursor: pointer; width: 100%;">
-                        <i class="fas fa-check me-2"></i>Entendido, Voy a Corregir
-                    </button>
-                </div>
-                <div onclick="cerrarModalError()" 
-                     style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-                            background: rgba(0,0,0,0.7); z-index: 9998;"></div>
-            `;
-            
-            const errorDiv = document.createElement('div');
-            errorDiv.id = 'modal-error-excel';
-            errorDiv.innerHTML = errorHTML;
-            document.body.appendChild(errorDiv);
-            
-            window.cerrarModalError = function() {
-                const modal = document.getElementById('modal-error-excel');
-                if (modal) modal.remove();
-            };
-            
+            const erroresHttp = Array.isArray(data?.errores) ? data.errores : [];
+            mostrarModalErrorExcel(data?.error || 'Error al procesar el Excel', erroresHttp);
             input.value = '';
             return;
         }
         
-        // Si NO hay errores, cargar los pacientes
-        // Limpiar tabla actual
-        const tbody = document.getElementById('tbody-lineas');
-        tbody.innerHTML = '';
-        
-        // Agregar cada paciente del Excel
-        let pacientesAgregados = 0;
-        for (const paciente of data.pacientes) {
-            numeroLinea++;
-            const tr = document.createElement('tr');
-            tr.id = `linea-${numeroLinea}`;
-            tr.dataset.numero = numeroLinea;
+        // Helpers
+        const totalExcel = Number.isFinite(data?.total_excel) ? data.total_excel : (data?.total || data?.pacientes?.length || 0);
+        const totalValidos = Number.isFinite(data?.total_validos) ? data.total_validos : (data?.total || data?.pacientes?.length || 0);
+        const totalOmitidos = Number.isFinite(data?.total_omitidos) ? data.total_omitidos : Math.max(totalExcel - totalValidos, 0);
+        const errores = Array.isArray(data?.errores) ? data.errores : [];
+
+        const cargarPacientesEnTabla = () => {
+            // Limpiar tabla actual
+            const tbody = document.getElementById('tbody-lineas');
+            tbody.innerHTML = '';
+            // Resetear numeración para evitar confusión
+            numeroLinea = 0;
             
-            tr.innerHTML = `
-                <td class="text-center"><strong>${numeroLinea}</strong></td>
-                <td>
-                    <input type="text" class="form-control form-control-sm" data-campo="nss" 
-                           placeholder="NSS" 
-                           value="${paciente.nss}"
-                           onblur="buscarPaciente(this, ${numeroLinea})"
-                           oninput="this.value = this.value.replace(/[^0-9-]/g, '')"
-                           maxlength="20">
-                    <div id="sugerencia-${numeroLinea}"></div>
-                </td>
-                <td><input type="text" class="form-control form-control-sm" data-campo="nombre" placeholder="NOMBRE COMPLETO" value="${paciente.nombre}"></td>
-                <td><input type="date" class="form-control form-control-sm" data-campo="fecha" value="${paciente.fecha}" max="${new Date().toISOString().split('T')[0]}"></td>
-                <td>
-                    <input type="text" 
-                           class="form-control form-control-sm" 
-                           data-campo="autorizacion" 
-                           placeholder="AUTORIZACIÓN" 
-                           value="${paciente.autorizacion}"
-                           maxlength="50"
-                           onblur="validarAutorizacionUnica(this)"
-                           style="text-transform: uppercase;">
-                    <small class="error-autorizacion" style="display: none; color: #dc3545; font-size: 0.75rem; margin-top: 0.25rem;"></small>
-                </td>
-                <td>
-                    <input type="text" 
-                           class="form-control form-control-sm" 
-                           data-campo="servicio" 
-                           placeholder="BUSCAR O ESCRIBIR NUEVO" 
-                           value="${paciente.servicio}"
-                           list="servicios-list"
-                           autocomplete="off"
-                           oninput="this.value = this.value.replace(/[0-9]/g, '');">
-                </td>
-                <td>
-                    <input type="number" 
-                           class="form-control form-control-sm no-spinner" 
-                           data-campo="monto" 
-                           placeholder="0.00" 
-                           value="${paciente.monto}" 
-                           step="0.01" 
-                           onchange="calcularTotal()">
-                </td>
-                <td class="text-center">
-                    <div class="d-flex justify-content-center gap-2">
-                        <button type="button" class="btn btn-agregar-linea-mini" onclick="agregarLinea()" title="Agregar línea nueva (Ctrl+Enter)">
-                            <i class="fas fa-plus"></i>
+            // Agregar cada paciente del Excel
+            let pacientesAgregados = 0;
+            for (const paciente of data.pacientes) {
+                numeroLinea++;
+                const tr = document.createElement('tr');
+                tr.id = `linea-${numeroLinea}`;
+                tr.dataset.numero = numeroLinea;
+                
+                tr.innerHTML = `
+                    <td class="text-center"><strong>${numeroLinea}</strong></td>
+                    <td>
+                        <input type="text" class="form-control form-control-sm" data-campo="nss" 
+                               placeholder="NSS" 
+                               value="${paciente.nss}"
+                               onblur="buscarPaciente(this, ${numeroLinea})"
+                               oninput="this.value = this.value.replace(/[^0-9-]/g, '')"
+                               maxlength="20">
+                        <div id="sugerencia-${numeroLinea}"></div>
+                    </td>
+                    <td><input type="text" class="form-control form-control-sm" data-campo="nombre" placeholder="NOMBRE COMPLETO" value="${paciente.nombre}"></td>
+                    <td><input type="date" class="form-control form-control-sm" data-campo="fecha" value="${paciente.fecha}" max="${new Date().toISOString().split('T')[0]}"></td>
+                    <td>
+                        <input type="text" 
+                               class="form-control form-control-sm" 
+                               data-campo="autorizacion" 
+                               placeholder="AUTORIZACIÓN" 
+                               value="${paciente.autorizacion}"
+                               maxlength="50"
+                               onblur="validarAutorizacionUnica(this)"
+                               style="text-transform: uppercase;">
+                        <small class="error-autorizacion" style="display: none; color: #dc3545; font-size: 0.75rem; margin-top: 0.25rem;"></small>
+                    </td>
+                    <td>
+                        <input type="text" 
+                               class="form-control form-control-sm" 
+                               data-campo="servicio" 
+                               placeholder="BUSCAR O ESCRIBIR NUEVO" 
+                               value="${paciente.servicio}"
+                               list="servicios-list"
+                               autocomplete="off"
+                               oninput="this.value = this.value.replace(/[0-9]/g, '');">
+                    </td>
+                    <td>
+                        <input type="number" 
+                               class="form-control form-control-sm no-spinner" 
+                               data-campo="monto" 
+                               placeholder="0.00" 
+                               value="${paciente.monto}" 
+                               step="0.01" 
+                               onchange="calcularTotal()">
+                    </td>
+                    <td class="text-center">
+                        <div class="d-flex justify-content-center gap-2">
+                            <button type="button" class="btn btn-agregar-linea-mini" onclick="agregarLinea()" title="Agregar línea nueva (Ctrl+Enter)">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button type="button" class="btn btn-eliminar-linea" onclick="eliminarLinea(${numeroLinea})" title="Eliminar línea">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                
+                tbody.appendChild(tr);
+                pacientesAgregados++;
+            }
+            
+            // Recalcular total
+            calcularTotal();
+            return pacientesAgregados;
+        };
+        
+        // Quitar loader antes de mostrar modales
+        document.getElementById('loading-excel').remove();
+
+        // Confirmación: validar que corresponde a la ARS seleccionada
+        const arsSelect = document.getElementById('ars_id');
+        const arsNombre = arsSelect && arsSelect.selectedIndex >= 0
+            ? arsSelect.options[arsSelect.selectedIndex].text
+            : '';
+        const confirmarArs = await mostrarConfirmacionArsExcel(arsNombre, totalExcel);
+        if (!confirmarArs) {
+            input.value = '';
+            return;
+        }
+
+        // Si hay diferencia entre válidos y total en Excel, preguntar si desea detener o continuar
+        if (totalOmitidos > 0 && errores.length > 0) {
+            let erroresHTML = '';
+            errores.slice(0, 50).forEach(err => {
+                erroresHTML += `<p style="margin: 0.4rem 0; color: #721c24; font-weight: 500; font-size: 0.9rem;">${err}</p>`;
+            });
+            if (errores.length > 50) {
+                erroresHTML += `<p style="margin: 0.6rem 0 0 0; color: #666; font-size: 0.85rem;">... y ${errores.length - 50} más</p>`;
+            }
+            
+            const modalHTML = `
+                <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                            background: white; padding: 2.5rem; border-radius: 15px; box-shadow: 0 4px 30px rgba(0,0,0,0.3); 
+                            z-index: 9999; max-width: 750px; width: calc(100% - 2rem); max-height: 85vh; overflow-y: auto;">
+                    <div style="text-align: center; margin-bottom: 1.25rem;">
+                        <div style="background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%); 
+                                    width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 1rem; 
+                                    display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: white;"></i>
+                        </div>
+                        <h4 style="color: #B89BA3; font-weight: 800; margin-bottom: 0.4rem;">
+                            ⚠️ Carga Incompleta Detectada
+                        </h4>
+                        <p style="color: #666; font-size: 1rem; margin: 0;">
+                            <strong>${totalValidos}</strong> paciente(s) cargado(s) de <strong>${totalExcel}</strong> paciente(s) que tiene tu Excel.
+                        </p>
+                        <p style="color: #666; font-size: 0.95rem; margin: 0.5rem 0 0 0;">
+                            Se omitieron <strong>${totalOmitidos}</strong> fila(s). ¿Deseas detener para verificar o continuar con los válidos?
+                        </p>
+                    </div>
+                    
+                    <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; border-radius: 10px; margin-bottom: 1.25rem;">
+                        <h6 style="color: #856404; font-weight: 700; margin-bottom: 0.75rem;">
+                            <i class="fas fa-list me-2"></i>Detalle de filas omitidas (${errores.length})
+                        </h6>
+                        <div style="max-height: 260px; overflow-y: auto;">
+                            ${erroresHTML}
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button onclick="detenerCargaExcel()" 
+                                style="background: #ACACAD; 
+                                       color: white; border: none; padding: 0.9rem 1.2rem; border-radius: 10px; 
+                                       font-weight: 700; cursor: pointer; flex: 1; min-width: 220px;">
+                            <i class="fas fa-stop-circle me-2"></i>Detener y Revisar
                         </button>
-                        <button type="button" class="btn btn-eliminar-linea" onclick="eliminarLinea(${numeroLinea})" title="Eliminar línea">
-                            <i class="fas fa-trash"></i>
+                        <button onclick="continuarCargaExcel()" 
+                                style="background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%); 
+                                       color: white; border: none; padding: 0.9rem 1.2rem; border-radius: 10px; 
+                                       font-weight: 700; cursor: pointer; flex: 1; min-width: 220px;">
+                            <i class="fas fa-play-circle me-2"></i>Continuar (Cargar Válidos)
                         </button>
                     </div>
-                </td>
+                </div>
+                <div onclick="detenerCargaExcel()" 
+                     style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                            background: rgba(0,0,0,0.6); z-index: 9998;"></div>
             `;
             
-            tbody.appendChild(tr);
-            pacientesAgregados++;
+            const modalDiv = document.createElement('div');
+            modalDiv.id = 'modal-resultado-excel';
+            modalDiv.innerHTML = modalHTML;
+            document.body.appendChild(modalDiv);
+            
+            window.detenerCargaExcel = function() {
+                const modal = document.getElementById('modal-resultado-excel');
+                if (modal) modal.remove();
+                // No tocar la tabla, solo limpiar input
+                input.value = '';
+            };
+            
+            window.continuarCargaExcel = function() {
+                const modal = document.getElementById('modal-resultado-excel');
+                if (modal) modal.remove();
+                const pacientesAgregados = cargarPacientesEnTabla();
+                // Mostrar mini modal de confirmación (con X de Y)
+                mostrarModalExitoExcel(pacientesAgregados, totalExcel, totalOmitidos);
+                input.value = '';
+            };
+            
+            return;
         }
         
-        // Recalcular total
-        calcularTotal();
-        
-        // Mostrar mensaje de éxito (solo si NO hay errores)
-        document.getElementById('loading-excel').remove();
-        
-        // Crear modal de éxito
-        let mensajeHTML = `
+        // Cargar directamente y mostrar éxito
+        const pacientesAgregados = cargarPacientesEnTabla();
+        mostrarModalExitoExcel(pacientesAgregados, totalExcel, 0);
+        input.value = '';
+        return;
+
+    } catch (error) {
+        console.error('Error al procesar Excel:', error);
+        alert('❌ Error al procesar el archivo Excel: ' + error.message);
+        const loadingEl = document.getElementById('loading-excel');
+        if (loadingEl) loadingEl.remove();
+        input.value = '';
+    }
+}
+
+function mostrarModalExitoExcel(pacientesAgregados, totalExcel, omitidos) {
+    const textoSecundario = omitidos > 0
+        ? `Cargados ${pacientesAgregados} de ${totalExcel}. Se omitieron ${omitidos} fila(s).`
+        : `Cargados ${pacientesAgregados} de ${totalExcel} paciente(s) que tiene tu Excel.`;
+
+    let mensajeHTML = `
             <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
                         background: white; padding: 2.5rem; border-radius: 15px; box-shadow: 0 4px 30px rgba(0,0,0,0.3); 
                         z-index: 9999; max-width: 500px; text-align: center;">
@@ -934,7 +967,7 @@ async function procesarExcel(input) {
                         <i class="fas fa-users me-2"></i>${pacientesAgregados} paciente(s)
                     </p>
                     <p style="color: #666; font-size: 0.9rem; margin: 0.5rem 0 0 0;">
-                        Cargados correctamente en la tabla
+                        ${textoSecundario}
                     </p>
                 </div>
                 <p style="color: #666; font-size: 0.9rem; margin-bottom: 1.5rem;">
@@ -960,16 +993,123 @@ async function procesarExcel(input) {
         window.cerrarModal = function() {
             document.getElementById('modal-resultado').remove();
         };
-        
-        // Limpiar input file
-        input.value = '';
-        
-    } catch (error) {
-        console.error('Error al procesar Excel:', error);
-        alert('❌ Error al procesar el archivo Excel: ' + error.message);
-        document.getElementById('loading-excel').remove();
-        input.value = '';
+}
+
+function mostrarModalErrorExcel(mensaje, errores) {
+    const lista = Array.isArray(errores) ? errores : [];
+    let erroresHTML = '';
+    if (lista.length > 0) {
+        lista.slice(0, 60).forEach(err => {
+            erroresHTML += `<p style="margin: 0.4rem 0; color: #721c24; font-weight: 500; font-size: 0.9rem;">${err}</p>`;
+        });
+        if (lista.length > 60) {
+            erroresHTML += `<p style="margin: 0.6rem 0 0 0; color: #666; font-size: 0.85rem;">... y ${lista.length - 60} más</p>`;
+        }
     }
+
+    const modalHTML = `
+        <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                    background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 30px rgba(0,0,0,0.3); 
+                    z-index: 9999; max-width: 720px; width: calc(100% - 2rem); max-height: 85vh; overflow-y: auto;">
+            <div style="text-align: center; margin-bottom: 1.25rem;">
+                <div style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); 
+                            width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 1rem; 
+                            display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-times-circle" style="font-size: 3rem; color: white;"></i>
+                </div>
+                <h4 style="color: #dc3545; font-weight: 800; margin-bottom: 0.5rem;">
+                    ❌ No se pudo procesar el Excel
+                </h4>
+                <p style="color: #666; font-size: 1rem; margin: 0;">
+                    ${mensaje}
+                </p>
+            </div>
+            ${lista.length > 0 ? `
+                <div style="background: #f8d7da; border-left: 4px solid #dc3545; padding: 1rem; border-radius: 10px; margin-bottom: 1.25rem;">
+                    <h6 style="color: #721c24; font-weight: 700; margin-bottom: 0.75rem;">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Detalle (${lista.length})
+                    </h6>
+                    <div style="max-height: 280px; overflow-y: auto;">
+                        ${erroresHTML}
+                    </div>
+                </div>
+            ` : ''}
+            <button onclick="cerrarModalErrorExcel()" 
+                    style="background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%); 
+                           color: white; border: none; padding: 0.8rem 2rem; border-radius: 10px; 
+                           font-weight: 700; cursor: pointer; width: 100%;">
+                <i class="fas fa-check me-2"></i>Entendido
+            </button>
+        </div>
+        <div onclick="cerrarModalErrorExcel()" 
+             style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                    background: rgba(0,0,0,0.7); z-index: 9998;"></div>
+    `;
+
+    const modalDiv = document.createElement('div');
+    modalDiv.id = 'modal-error-excel';
+    modalDiv.innerHTML = modalHTML;
+    document.body.appendChild(modalDiv);
+
+    window.cerrarModalErrorExcel = function() {
+        const modal = document.getElementById('modal-error-excel');
+        if (modal) modal.remove();
+    };
+}
+
+function mostrarConfirmacionArsExcel(arsNombre, totalExcel) {
+    return new Promise((resolve) => {
+        const arsLabel = arsNombre ? arsNombre : '—';
+        const modalHTML = `
+            <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                        background: white; padding: 2.5rem; border-radius: 15px; box-shadow: 0 4px 30px rgba(0,0,0,0.3); 
+                        z-index: 9999; max-width: 650px; width: calc(100% - 2rem); text-align: center;">
+                <div style="background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%); 
+                            width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 1.25rem; 
+                            display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-question-circle" style="font-size: 3rem; color: white;"></i>
+                </div>
+                <h4 style="color: #B89BA3; font-weight: 800; margin-bottom: 0.75rem;">
+                    Confirmación antes de cargar
+                </h4>
+                <p style="color: #666; font-size: 1rem; margin: 0 0 0.75rem 0;">
+                    ¿Está seguro que los pacientes de este Excel corresponden a la ARS seleccionada?
+                </p>
+                <div style="background: rgba(242, 226, 230, 0.35); padding: 1rem; border-radius: 10px; margin-bottom: 1.25rem; text-align: left;">
+                    <p style="margin: 0.25rem 0; color: #666; font-weight: 600;"><i class="fas fa-hospital me-2" style="color: #CEB0B7;"></i>ARS: ${arsLabel}</p>
+                    <p style="margin: 0.25rem 0; color: #666; font-weight: 600;"><i class="fas fa-users me-2" style="color: #CEB0B7;"></i>Pacientes detectados en Excel: ${totalExcel}</p>
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <button onclick="confirmarArsExcel(false)" 
+                            style="background: #ACACAD; 
+                                   color: white; border: none; padding: 0.9rem 1.2rem; border-radius: 10px; 
+                                   font-weight: 700; cursor: pointer; flex: 1; min-width: 220px;">
+                        <i class="fas fa-times me-2"></i>No, Cancelar
+                    </button>
+                    <button onclick="confirmarArsExcel(true)" 
+                            style="background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%); 
+                                   color: white; border: none; padding: 0.9rem 1.2rem; border-radius: 10px; 
+                                   font-weight: 700; cursor: pointer; flex: 1; min-width: 220px;">
+                        <i class="fas fa-check me-2"></i>Sí, Continuar
+                    </button>
+                </div>
+            </div>
+            <div onclick="confirmarArsExcel(false)" 
+                 style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                        background: rgba(0,0,0,0.6); z-index: 9998;"></div>
+        `;
+
+        const modalDiv = document.createElement('div');
+        modalDiv.id = 'modal-confirm-ars-excel';
+        modalDiv.innerHTML = modalHTML;
+        document.body.appendChild(modalDiv);
+
+        window.confirmarArsExcel = function(ok) {
+            const modal = document.getElementById('modal-confirm-ars-excel');
+            if (modal) modal.remove();
+            resolve(Boolean(ok));
+        };
+    });
 }
 
 // Validar que la autorización sea única en toda la factura
@@ -1048,6 +1188,16 @@ document.getElementById('formFactura').addEventListener('submit', function(e) {
             alert(`La línea ${i + 1} tiene campos vacíos. Complete NSS, Nombre, Servicio y Monto.`);
             return false;
         }
+    }
+
+    // Confirmación: ¿corresponden a la ARS seleccionada?
+    const arsSelect = document.getElementById('ars_id');
+    const arsNombre = arsSelect && arsSelect.selectedIndex >= 0
+        ? arsSelect.options[arsSelect.selectedIndex].text
+        : '';
+    const mensajeConfirm = `¿Está seguro que los ${lineas.length} paciente(s) agregados corresponden a la ARS seleccionada?\n\n📋 ARS: ${arsNombre}\n👥 Total pacientes: ${lineas.length}\n\n✅ Sí → Continuar\n❌ No → Cancelar y revisar`;
+    if (!confirm(mensajeConfirm)) {
+        return false;
     }
     
     // Guardar JSON en campo oculto

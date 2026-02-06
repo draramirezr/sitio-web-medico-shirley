@@ -5184,12 +5184,15 @@ def procesar_excel():
         pacientes = []
         errores = []
         autorizaciones_usadas = set()
+        total_filas_con_datos = 0
         
         # Leer filas (saltar encabezado)
         for row_num, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
             # Saltar filas vacías
             if not any(row):
                 continue
+
+            total_filas_con_datos += 1
             
             nss_raw, nombre_raw, fecha_raw, autorizacion_raw, servicio_raw, monto_raw = row[0], row[1], row[2], row[3], row[4], row[5]
             
@@ -5313,22 +5316,27 @@ def procesar_excel():
                 'monto': monto,
                 'fila': row_num
             })
-        
-        # Validación final: SI HAY ERRORES, NO CARGAR NADA
-        if errores:
-            return jsonify({
-                'error': 'Debe corregir TODOS los errores antes de cargar el Excel',
-                'errores': errores,
-                'total_errores': len(errores)
-            }), 400
-        
+
         if not pacientes:
-            return jsonify({'error': 'El archivo no contiene datos válidos'}), 400
+            # Si no hay ninguna fila válida, devolver error (no tiene sentido continuar)
+            return jsonify({
+                'error': 'El archivo no contiene datos válidos',
+                'errores': errores,
+                'total_errores': len(errores),
+                'total_excel': total_filas_con_datos
+            }), 400
         
         return jsonify({
             'success': True,
             'pacientes': pacientes,
-            'total': len(pacientes)
+            # Compatibilidad (existente)
+            'total': len(pacientes),
+            # Nuevos campos para UX/alertas
+            'total_validos': len(pacientes),
+            'total_excel': total_filas_con_datos,
+            'total_omitidos': max(total_filas_con_datos - len(pacientes), 0),
+            'errores': errores,
+            'total_errores': len(errores)
         })
         
     except Exception as e:
