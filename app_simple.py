@@ -4217,6 +4217,13 @@ def facturacion_pacientes_pendientes():
     ars_id = request.args.get('ars_id', type=int)
     estado = request.args.get('estado', default='pendiente')  # Por defecto: pendiente
     
+    # IDs recién agregados (para resaltar 1 sola vez)
+    highlight_ids = session.pop('highlight_pendientes_ids', [])
+    if highlight_ids is None:
+        highlight_ids = []
+    # Link disponible si hay registros recientes (PDF constancia)
+    tiene_recientes = bool(session.get('ultimos_pacientes_agregados', []))
+
     conn = get_db_connection()
     
     # Construir query con filtros opcionales
@@ -4299,7 +4306,9 @@ def facturacion_pacientes_pendientes():
                          ars_id_filtro=ars_id,
                          estado_filtro=estado,
                          medico_seleccionado=medico_seleccionado,
-                         ars_seleccionada=ars_seleccionada)
+                         ars_seleccionada=ars_seleccionada,
+                         highlight_ids=highlight_ids,
+                         tiene_recientes=tiene_recientes)
 
 @app.route('/facturacion/pacientes-pendientes/pdf')
 @login_required
@@ -4940,23 +4949,45 @@ def facturacion_facturas_nueva():
                 # Guardar el ID del registro creado
                 ids_creados.append(cursor.lastrowid)
             
-            # Si hubo errores de duplicados, informar al usuario
-            if errores:
+            # Si no se creó ningún registro, no confirmar cambios
+            if not ids_creados:
                 conn.rollback()
-                for error in errores:
-                    flash(error, 'error')
+                if errores:
+                    # Mostrar un resumen + primeros errores (evita spam)
+                    flash(f'❌ No se agregó ningún paciente. Se detectaron {len(errores)} registro(s) duplicado(s).', 'error')
+                    for error in errores[:5]:
+                        flash(error, 'error')
+                    if len(errores) > 5:
+                        flash(f'... y {len(errores) - 5} más. Revise su Excel/tabla antes de reintentar.', 'warning')
+                else:
+                    flash('❌ No se agregó ningún paciente. Verifique los datos e intente nuevamente.', 'error')
                 return redirect(url_for('facturacion_facturas_nueva'))
-            
+
+            # Confirmar registros creados (aunque existan duplicados omitidos)
             conn.commit()
             
             # Guardar los IDs en la sesión para generar el PDF
             session['ultimos_pacientes_agregados'] = ids_creados
+            # IDs para resaltar en el listado (solo 1 vez)
+            session['highlight_pendientes_ids'] = ids_creados
             session['descargar_pdf_pacientes'] = True  # Flag para disparar descarga automática
             
-            flash(f'✅ {len(lineas)} paciente(s) agregado(s) como PENDIENTES DE FACTURACIÓN', 'success')
+            total_enviado = len(lineas)
+            total_creado = len(ids_creados)
+            flash(f'✅ {total_creado} de {total_enviado} paciente(s) agregado(s) como PENDIENTES DE FACTURACIÓN', 'success')
+
+            if errores:
+                flash(f'⚠️ Se omitieron {len(errores)} registro(s) por duplicados. Puede revisar los detalles en los mensajes de error.', 'warning')
+                for error in errores[:5]:
+                    flash(error, 'warning')
+                if len(errores) > 5:
+                    flash(f'... y {len(errores) - 5} más.', 'warning')
             
-            # Redirigir de vuelta al formulario (limpio) con flag para descargar PDF
-            return redirect(url_for('facturacion_facturas_nueva'))
+            # Redirigir al estado de facturación filtrado para que el usuario vea lo guardado
+            return redirect(url_for('facturacion_pacientes_pendientes',
+                                    estado='pendiente',
+                                    medico_id=medico_id,
+                                    ars_id=ars_id))
             
         except Exception as e:
             if conn:

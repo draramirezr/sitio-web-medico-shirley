@@ -507,7 +507,17 @@ function agregarLinea() {
             <div id="sugerencia-${numeroLinea}"></div>
         </td>
         <td><input type="text" class="form-control form-control-sm" data-campo="nombre" placeholder="NOMBRE COMPLETO"></td>
-        <td><input type="date" class="form-control form-control-sm" data-campo="fecha" value="${new Date().toISOString().split('T')[0]}" max="${new Date().toISOString().split('T')[0]}"></td>
+        <td>
+            <input type="text"
+                   class="form-control form-control-sm"
+                   data-campo="fecha"
+                   placeholder="DD/MM/AAAA"
+                   value="${isoAEs(hoyIso())}"
+                   inputmode="numeric"
+                   maxlength="10"
+                   oninput="formatearFechaEsInput(this)"
+                   onblur="validarFechaEsInput(this)">
+        </td>
         <td>
             <input type="text" 
                    class="form-control form-control-sm" 
@@ -779,7 +789,17 @@ async function procesarExcel(input) {
                         <div id="sugerencia-${numeroLinea}"></div>
                     </td>
                     <td><input type="text" class="form-control form-control-sm" data-campo="nombre" placeholder="NOMBRE COMPLETO" value="${paciente.nombre}"></td>
-                    <td><input type="date" class="form-control form-control-sm" data-campo="fecha" value="${paciente.fecha}" max="${new Date().toISOString().split('T')[0]}"></td>
+                    <td>
+                        <input type="text"
+                               class="form-control form-control-sm"
+                               data-campo="fecha"
+                               placeholder="DD/MM/AAAA"
+                               value="${isoAEs(paciente.fecha)}"
+                               inputmode="numeric"
+                               maxlength="10"
+                               oninput="formatearFechaEsInput(this)"
+                               onblur="validarFechaEsInput(this)">
+                    </td>
                     <td>
                         <input type="text" 
                                class="form-control form-control-sm" 
@@ -1112,6 +1132,72 @@ function mostrarConfirmacionArsExcel(arsNombre, totalExcel) {
     });
 }
 
+// =========================
+// FECHAS EN ESPAÑOL (DD/MM/AAAA)
+// =========================
+function hoyIso() {
+    return new Date().toISOString().split('T')[0];
+}
+
+function isoAEs(valor) {
+    const v = (valor || '').toString().trim();
+    if (!v) return '';
+    // Ya está en DD/MM/AAAA
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(v)) return v;
+    // ISO YYYY-MM-DD -> DD/MM/YYYY
+    if (/^\d{4}-\d{2}-\d{2}$/.test(v)) {
+        const [y, m, d] = v.split('-');
+        return `${d}/${m}/${y}`;
+    }
+    return v;
+}
+
+function fechaEsAISO(valor) {
+    const v = (valor || '').toString().trim();
+    if (!v) return '';
+    // Ya está en ISO
+    if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+    const m = v.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+    if (!m) return '';
+    const d = parseInt(m[1], 10);
+    const mo = parseInt(m[2], 10);
+    const y = parseInt(m[3], 10);
+    if (mo < 1 || mo > 12 || d < 1 || d > 31) return '';
+    const dt = new Date(y, mo - 1, d);
+    if (dt.getFullYear() !== y || dt.getMonth() !== (mo - 1) || dt.getDate() !== d) return '';
+    return `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+}
+
+function formatearFechaEsInput(input) {
+    let v = (input.value || '').replace(/\D/g, '').slice(0, 8);
+    if (v.length >= 5) {
+        input.value = `${v.slice(0, 2)}/${v.slice(2, 4)}/${v.slice(4)}`;
+    } else if (v.length >= 3) {
+        input.value = `${v.slice(0, 2)}/${v.slice(2)}`;
+    } else {
+        input.value = v;
+    }
+}
+
+function validarFechaEsInput(input) {
+    const v = (input.value || '').trim();
+    if (!v) {
+        input.style.borderColor = '';
+        input.style.backgroundColor = '';
+        return;
+    }
+    const iso = fechaEsAISO(v);
+    if (!iso) {
+        input.style.borderColor = '#dc3545';
+        input.style.backgroundColor = '#ffe6e6';
+    } else {
+        input.style.borderColor = '';
+        input.style.backgroundColor = '';
+        // Normalizar a DD/MM/AAAA con ceros si hace falta
+        input.value = isoAEs(iso);
+    }
+}
+
 // Validar que la autorización sea única en toda la factura
 function validarAutorizacionUnica(input) {
     const autorizacion = input.value.trim();
@@ -1166,10 +1252,13 @@ document.getElementById('formFactura').addEventListener('submit', function(e) {
     // Recolectar todas las líneas
     lineas = [];
     document.querySelectorAll('#tbody-lineas tr[id^="linea-"]').forEach(tr => {
+        const fechaEs = (tr.querySelector('[data-campo="fecha"]').value || '').trim();
+        const fechaIso = fechaEsAISO(fechaEs) || hoyIso();
+
         const linea = {
             nss: tr.querySelector('[data-campo="nss"]').value,
             nombre: tr.querySelector('[data-campo="nombre"]').value.toUpperCase(),
-            fecha: tr.querySelector('[data-campo="fecha"]').value,
+            fecha: fechaIso,
             autorizacion: tr.querySelector('[data-campo="autorizacion"]').value,
             servicio: tr.querySelector('[data-campo="servicio"]').value.toUpperCase(),
             monto: parseFloat(tr.querySelector('[data-campo="monto"]').value) || 0

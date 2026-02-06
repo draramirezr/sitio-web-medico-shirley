@@ -206,6 +206,19 @@
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(172, 172, 173, 0.3);
     }
+
+    /* Resaltado de registros recién agregados */
+    .fila-nueva {
+        background: rgba(206, 176, 183, 0.18) !important;
+        outline: 2px solid rgba(206, 176, 183, 0.55);
+        outline-offset: -2px;
+        animation: resaltarFila 2.5s ease-in-out 1;
+    }
+
+    @keyframes resaltarFila {
+        0% { background: rgba(206, 176, 183, 0.45); }
+        100% { background: rgba(206, 176, 183, 0.18); }
+    }
 </style>
 
 <div class="container mt-4">
@@ -222,6 +235,11 @@
                 <a href="{{ url_for('facturacion_facturas_nueva') }}" class="btn btn-agregar" {% if estado_filtro == 'facturado' %}style="pointer-events: none; opacity: 0.4; cursor: not-allowed;" title="No disponible para registros facturados"{% endif %}>
                     <i class="fas fa-user-plus me-2"></i>Agregar Pacientes
                 </a>
+                {% if tiene_recientes %}
+                <a href="{{ url_for('facturacion_pacientes_agregados_pdf') }}" class="btn btn-pdf">
+                    <i class="fas fa-file-pdf me-2"></i>Constancia Recién Agregados
+                </a>
+                {% endif %}
                 <a href="{{ url_for('facturacion_pacientes_pendientes_pdf', medico_id=medico_id_filtro or '', ars_id=ars_id_filtro or '', estado=estado_filtro or 'pendiente') }}" class="btn btn-pdf" {% if pendientes|length == 0 %}style="pointer-events: none; opacity: 0.5;"{% endif %}>
                     <i class="fas fa-file-pdf me-2"></i>Descargar PDF
                 </a>
@@ -327,7 +345,7 @@
             </thead>
             <tbody>
                 {% for paciente in pendientes %}
-                <tr>
+                <tr id="fd-{{ paciente['id'] }}" class="{% if paciente['id'] in highlight_ids %}fila-nueva{% endif %}">
                     <td><strong>{{ paciente['id'] }}</strong></td>
                     <td>{{ paciente['nss'] }}</td>
                     <td>{{ paciente['nombre_paciente'] }}</td>
@@ -380,5 +398,17 @@
         </div>
     </div>
 </div>
+
+{% if highlight_ids and highlight_ids|length > 0 %}
+<script>
+// Scroll automático al primer registro recién agregado
+document.addEventListener('DOMContentLoaded', function () {
+    const firstNew = document.querySelector('tr.fila-nueva');
+    if (firstNew && typeof firstNew.scrollIntoView === 'function') {
+        firstNew.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+});
+</script>
+{% endif %}
 {% endblock %}
 
