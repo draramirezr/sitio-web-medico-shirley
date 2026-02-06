@@ -155,23 +155,50 @@ app = Flask(__name__)
 # CONFIGURACIÓN DE SEGURIDAD CRÍTICA
 # ============================================
 
-# Clave secreta segura (Railway proporcionará SECRET_KEY)
-app.secret_key = os.getenv('SECRET_KEY', secrets.token_hex(32))
+# Detectar entorno de producción (Railway/hosting)
+PRODUCTION = (
+    (os.getenv('FLASK_ENV') or '').lower() == 'production'
+    or (os.getenv('ENV') or '').lower() == 'production'
+    or (os.getenv('RAILWAY_ENVIRONMENT') or '').lower() == 'production'
+)
+
+# Clave secreta (CRÍTICO): debe ser estable en producción.
+# Si SECRET_KEY cambia entre requests/instancias, el usuario "pierde" la sesión y vuelve al login.
+_secret_key_env = os.getenv('SECRET_KEY')
+if not _secret_key_env:
+    if PRODUCTION:
+        raise RuntimeError(
+            "Falta SECRET_KEY en producción. Configure una SECRET_KEY fija en variables de entorno "
+            "para evitar que las sesiones se invaliden y se muestre el login repetidamente."
+        )
+    # Dev/local: permitir clave aleatoria
+    _secret_key_env = secrets.token_hex(32)
+
+app.secret_key = _secret_key_env
 
 # Google reCAPTCHA v2 - Configuración
 RECAPTCHA_SITE_KEY = os.getenv('RECAPTCHA_SITE_KEY', '')
 RECAPTCHA_SECRET_KEY = os.getenv('RECAPTCHA_SECRET_KEY', '')
 
 # Configuración de seguridad y sesiones
-app.config['SESSION_COOKIE_SECURE'] = os.getenv('FLASK_ENV') == 'production'  # True en producción
+app.config['SESSION_COOKIE_SECURE'] = PRODUCTION  # True en producción
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_DOMAIN'] = '.draramirez.com'  # Permite cookies en www y sin www
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=8)
 app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=7)
-app.config['REMEMBER_COOKIE_SECURE'] = os.getenv('FLASK_ENV') == 'production'
+app.config['REMEMBER_COOKIE_SECURE'] = PRODUCTION
 app.config['REMEMBER_COOKIE_HTTPONLY'] = True
 app.config['REMEMBER_COOKIE_DOMAIN'] = '.draramirez.com'  # Permite cookies en www y sin www
+
+# Si está detrás de un proxy/reverse proxy (Railway/Nginx/Cloudflare),
+# esto hace que Flask vea correctamente IP/proto/host.
+# Sin esto, Flask-Login puede invalidar sesión (session_protection) por cambios de IP.
+try:
+    from werkzeug.middleware.proxy_fix import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+except Exception as _e:
+    print(f"⚠️ ProxyFix no disponible o falló: {_e}")
 
 # Desactivar caché de templates para desarrollo
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -289,7 +316,9 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 login_manager.login_message = None  # Desactivar mensaje automático para evitar duplicación
 login_manager.login_message_category = 'warning'
-login_manager.session_protection = 'strong'  # Protección fuerte contra secuestro de sesión
+# IMPORTANTE: "strong" puede forzar logout si cambia la IP (común detrás de proxies/CDNs).
+# Usamos "basic" para reducir logouts inesperados sin perder seguridad de cookie.
+login_manager.session_protection = 'basic'
 login_manager.refresh_view = 'login'  # Vista para refrescar autenticación si expira
 
 # Configuración de compresión Gzip/Brotli para máxima velocidad
@@ -447,6 +476,42 @@ def sanitize_input(text, max_length=500):
     text = str(text).strip()
     text = re.sub(r'<[^>]*>', '', text)  # Remover tags HTML
     return text[:max_length]
+
+# =========================
+# VALIDACIONES DE INTEGRIDAD (FACTURACIÓN)
+# =========================
+# Permitidos:
+# - Nombres: letras (incl. acentos), espacios y punto
+# - Servicios / ARS / Centro: letras (incl. acentos), espacios, /, -, .
+# - NSS: números y guiones
+# - Autorización: alfanumérico y guiones
+
+_RE_NSS = re.compile(r'^[0-9\-]+$')
+_RE_AUTORIZACION = re.compile(r'^[A-Z0-9\-]+$')
+_RE_NOMBRE = re.compile(r'^[A-ZÁÉÍÓÚÜÑ\s\.\-]+$')
+_RE_TEXTO_GENERAL = re.compile(r'^[A-ZÁÉÍÓÚÜÑ\s\.\-/]+$')
+_RE_RNC = re.compile(r'^[0-9\-]+$')
+
+def _upper_clean_spaces(value: str) -> str:
+    value = (value or '').strip().upper()
+    value = re.sub(r'\s+', ' ', value).strip()
+    return value
+
+def _validate_or_raise(value: str, pattern: re.Pattern, field_name: str, idx=None, max_len=None, required: bool = True) -> str:
+    """Valida y retorna valor (ya limpiado). Lanza ValueError si inválido."""
+    v = _upper_clean_spaces(value)
+    if max_len is not None and len(v) > max_len:
+        prefix = f'Línea {idx}: ' if idx else ''
+        raise ValueError(f'{prefix}{field_name} supera el máximo de {max_len} caracteres')
+    if not v:
+        if not required:
+            return ''
+        prefix = f'Línea {idx}: ' if idx else ''
+        raise ValueError(f'{prefix}{field_name} es obligatorio')
+    if not pattern.fullmatch(v):
+        prefix = f'Línea {idx}: ' if idx else ''
+        raise ValueError(f'{prefix}{field_name} contiene caracteres no permitidos')
+    return v
 
 def validate_email(email):
     """Validar formato de email"""
@@ -3238,6 +3303,14 @@ def facturacion_ars_nuevo():
     if request.method == 'POST':
         nombre_ars = sanitize_input(request.form['nombre_ars'], 200)
         rnc = sanitize_input(request.form['rnc'], 50)
+
+        # Validación de caracteres (integridad)
+        try:
+            nombre_ars = _validate_or_raise(nombre_ars, _RE_TEXTO_GENERAL, 'Nombre del ARS', max_len=200)
+            rnc = _validate_or_raise(rnc, _RE_RNC, 'RNC', max_len=50)
+        except ValueError as ve:
+            flash(f'❌ {str(ve)}', 'error')
+            return redirect(url_for('facturacion_ars_nuevo'))
         
         if not nombre_ars or not rnc:
             flash('Todos los campos son obligatorios', 'error')
@@ -3262,6 +3335,14 @@ def facturacion_ars_editar(ars_id):
     if request.method == 'POST':
         nombre_ars = sanitize_input(request.form['nombre_ars'], 200)
         rnc = sanitize_input(request.form['rnc'], 50)
+
+        # Validación de caracteres (integridad)
+        try:
+            nombre_ars = _validate_or_raise(nombre_ars, _RE_TEXTO_GENERAL, 'Nombre del ARS', max_len=200)
+            rnc = _validate_or_raise(rnc, _RE_RNC, 'RNC', max_len=50)
+        except ValueError as ve:
+            flash(f'❌ {str(ve)}', 'error')
+            return redirect(url_for('facturacion_ars_editar', ars_id=ars_id))
         
         if not nombre_ars or not rnc:
             flash('Todos los campos son obligatorios', 'error')
@@ -3656,6 +3737,14 @@ def facturacion_centros_medicos_nuevo():
         direccion = sanitize_input(request.form['direccion'], 500)
         rnc = sanitize_input(request.form['rnc'], 50)
         telefono = sanitize_input(request.form.get('telefono', ''), 50)
+
+        # Validación de caracteres (integridad)
+        try:
+            nombre = _validate_or_raise(nombre, _RE_TEXTO_GENERAL, 'Nombre del Centro Médico', max_len=255)
+            rnc = _validate_or_raise(rnc, _RE_RNC, 'RNC', max_len=50)
+        except ValueError as ve:
+            flash(f'❌ {str(ve)}', 'error')
+            return redirect(url_for('facturacion_centros_medicos_nuevo'))
         
         if not nombre or not direccion or not rnc:
             flash('Nombre, dirección y RNC son obligatorios', 'error')
@@ -3691,6 +3780,14 @@ def facturacion_centros_medicos_editar(centro_id):
         direccion = sanitize_input(request.form['direccion'], 500)
         rnc = sanitize_input(request.form['rnc'], 50)
         telefono = sanitize_input(request.form.get('telefono', ''), 50)
+
+        # Validación de caracteres (integridad)
+        try:
+            nombre = _validate_or_raise(nombre, _RE_TEXTO_GENERAL, 'Nombre del Centro Médico', max_len=255)
+            rnc = _validate_or_raise(rnc, _RE_RNC, 'RNC', max_len=50)
+        except ValueError as ve:
+            flash(f'❌ {str(ve)}', 'error')
+            return redirect(url_for('facturacion_centros_medicos_editar', centro_id=centro_id))
         
         if not nombre or not direccion or not rnc:
             flash('Nombre, dirección y RNC son obligatorios', 'error')
@@ -5019,15 +5116,33 @@ def facturacion_facturas_nueva():
             # Lista para guardar los IDs de los registros creados
             ids_creados = []
             errores = []
+            errores_validacion = []
             
             # Procesar cada línea como PENDIENTE (sin factura_id)
             for idx, linea in enumerate(lineas, start=1):
-                nss = linea.get('nss', '').strip()
-                nombre = linea.get('nombre', '').strip().upper()
+                nss_raw = linea.get('nss', '')
+                nombre_raw = linea.get('nombre', '')
                 fecha_servicio = linea.get('fecha', '')
-                autorizacion = linea.get('autorizacion', '').strip()
-                servicio_desc = linea.get('servicio', '').strip().upper()
-                monto = float(linea.get('monto', 0))
+                autorizacion_raw = linea.get('autorizacion', '')
+                servicio_raw = linea.get('servicio', '')
+                monto_raw = linea.get('monto', 0)
+
+                # Validaciones de caracteres (integridad)
+                try:
+                    nss = _validate_or_raise(nss_raw, _RE_NSS, 'NSS', idx=idx, max_len=20)
+                    nombre = _validate_or_raise(nombre_raw, _RE_NOMBRE, 'Nombre del paciente', idx=idx, max_len=200)
+                    servicio_desc = _validate_or_raise(servicio_raw, _RE_TEXTO_GENERAL, 'Servicio', idx=idx, max_len=200)
+                    autorizacion = _validate_or_raise(autorizacion_raw, _RE_AUTORIZACION, 'Autorización', idx=idx, max_len=50, required=False)
+                except ValueError as ve:
+                    errores_validacion.append(str(ve))
+                    continue
+
+                # Monto numérico
+                try:
+                    monto = float(monto_raw or 0)
+                except Exception:
+                    errores_validacion.append(f'Línea {idx}: Monto inválido')
+                    continue
                 
                 # VALIDACIÓN: Verificar si ya existe el mismo registro (NSS + FECHA + AUTORIZACIÓN + ARS)
                 duplicado = conn.execute('''
@@ -5077,6 +5192,16 @@ def facturacion_facturas_nueva():
                 
                 # Guardar el ID del registro creado
                 ids_creados.append(cursor.lastrowid)
+
+            # Si hubo errores de validación, NO guardar nada (integridad)
+            if errores_validacion:
+                conn.rollback()
+                flash('❌ No se guardó nada. Corrige los caracteres inválidos en los campos.', 'error')
+                for err in errores_validacion[:8]:
+                    flash(err, 'error')
+                if len(errores_validacion) > 8:
+                    flash(f'... y {len(errores_validacion) - 8} más.', 'warning')
+                return redirect(url_for('facturacion_facturas_nueva'))
             
             # Si no se creó ningún registro, no confirmar cambios
             if not ids_creados:
@@ -7646,12 +7771,23 @@ def facturacion_paciente_editar(paciente_id):
     if request.method == 'POST':
         try:
             # Obtener datos del formulario
-            nss = request.form.get('nss', '').strip().upper()
-            nombre = request.form.get('nombre', '').strip().upper()
+            nss_raw = request.form.get('nss', '')
+            nombre_raw = request.form.get('nombre', '')
             fecha = request.form.get('fecha', '').strip()
-            autorizacion = request.form.get('autorizacion', '').strip()
-            servicio = request.form.get('servicio', '').strip().upper()
+            autorizacion_raw = request.form.get('autorizacion', '')
+            servicio_raw = request.form.get('servicio', '')
             monto = request.form.get('monto', type=float, default=0)
+
+            # Validar caracteres (integridad)
+            try:
+                nss = _validate_or_raise(nss_raw, _RE_NSS, 'NSS', max_len=20)
+                nombre = _validate_or_raise(nombre_raw, _RE_NOMBRE, 'Nombre del paciente', max_len=200)
+                servicio = _validate_or_raise(servicio_raw, _RE_TEXTO_GENERAL, 'Servicio', max_len=200)
+                autorizacion = _validate_or_raise(autorizacion_raw, _RE_AUTORIZACION, 'Autorización', max_len=50)
+            except ValueError as ve:
+                flash(f'❌ {str(ve)}', 'error')
+                conn.close()
+                return redirect(url_for('facturacion_paciente_editar', paciente_id=paciente_id))
             
             # Validaciones
             if not nss or not nombre:

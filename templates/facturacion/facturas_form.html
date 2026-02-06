@@ -661,6 +661,56 @@ document.addEventListener('input', function(e) {
     }
 });
 
+// =========================
+// Integridad de datos: bloquear caracteres especiales
+// =========================
+function _limpiarConRegex(valor, regexNoPermitido) {
+    return (valor || '').replace(regexNoPermitido, '');
+}
+
+function _limpiarCampoSegunTipo(input) {
+    if (!input || !input.dataset) return;
+    const campo = input.dataset.campo;
+    if (!campo) return;
+
+    let v = input.value || '';
+
+    if (campo === 'nss') {
+        // Solo números y guiones
+        v = _limpiarConRegex(v, /[^0-9-]/g);
+    } else if (campo === 'autorizacion') {
+        // Alfanumérico y guiones
+        v = v.toUpperCase();
+        v = _limpiarConRegex(v, /[^A-Z0-9-]/g);
+    } else if (campo === 'nombre') {
+        // Letras (incluye acentos), espacios y punto
+        v = v.toUpperCase();
+        v = _limpiarConRegex(v, /[^A-ZÁÉÍÓÚÜÑ\s\.\-]/g);
+        v = v.replace(/\s+/g, ' ');
+    } else if (campo === 'servicio') {
+        // Letras (incluye acentos), espacios, /, -, .
+        v = v.toUpperCase();
+        v = _limpiarConRegex(v, /[^A-ZÁÉÍÓÚÜÑ\s\.\-\/]/g);
+        v = v.replace(/\s+/g, ' ');
+    }
+
+    input.value = v;
+}
+
+document.addEventListener('input', function (e) {
+    const el = e.target;
+    if (el && el.matches && el.matches('[data-campo]')) {
+        _limpiarCampoSegunTipo(el);
+    }
+});
+
+document.addEventListener('paste', function (e) {
+    const el = e.target;
+    if (el && el.matches && el.matches('[data-campo]')) {
+        setTimeout(() => _limpiarCampoSegunTipo(el), 0);
+    }
+});
+
 // Procesar archivo Excel cargado
 async function procesarExcel(input) {
     const medicoId = document.getElementById('medico_id').value;

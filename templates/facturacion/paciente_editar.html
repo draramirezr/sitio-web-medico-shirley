@@ -155,8 +155,8 @@
                                id="nombre" 
                                name="nombre" 
                                value="{{ paciente['nombre_paciente'] }}"
-                           pattern="[A-Za-zÀ-ÿ\s\.]+"
-                           title="Solo letras, espacios y puntos"
+                           pattern="[A-Za-zÀ-ÿ\s\.\-]+"
+                           title="Solo letras, espacios, puntos y guiones"
                            required>
                     </div>
                 </div>
@@ -168,13 +168,32 @@
                             <i class="fas fa-calendar me-1"></i>
                             Fecha de Consulta *
                         </label>
-                        <input type="date" 
-                               class="form-control" 
-                               id="fecha" 
-                               name="fecha" 
+                        <!--
+                          IMPORTANTE:
+                          - El backend espera ISO (YYYY-MM-DD)
+                          - El usuario debe ver DD/MM/AAAA siempre (sin depender del locale del navegador)
+                          Por eso usamos:
+                            1) input visible (dd/mm/yyyy)
+                            2) input real (type=date) oculto que se envía al backend
+                        -->
+                        <input type="text"
+                               class="form-control"
+                               id="fecha_visual"
+                               value="{{ paciente['fecha_servicio']|fecha_es }}"
+                               required
+                               placeholder="DD/MM/AAAA"
+                               inputmode="numeric"
+                               maxlength="10"
+                               pattern="\\d{2}/\\d{2}/\\d{4}"
+                               title="Formato: DD/MM/AAAA (ejemplo: 05/02/2026)">
+                        <input type="date"
+                               class="form-control"
+                               id="fecha"
+                               name="fecha"
                                value="{{ fecha_servicio_iso }}"
                                required
-                               max="{{ fecha_actual if fecha_actual else '' }}">
+                               max="{{ fecha_actual if fecha_actual else '' }}"
+                               style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0;">
                         <small class="text-muted" style="font-size: 0.8rem;">
                             <i class="fas fa-exclamation-circle"></i> No se permiten fechas futuras
                         </small>
@@ -288,7 +307,7 @@ document.getElementById('nss').addEventListener('input', function() {
 // Validación NOMBRE: Solo letras
 document.getElementById('nombre').addEventListener('input', function() {
     // Primero remover números y caracteres no permitidos
-    this.value = this.value.replace(/[^A-Za-zÀ-ÿ\s\.]/g, '');
+    this.value = this.value.replace(/[^A-Za-zÀ-ÿ\s\.\-]/g, '');
     // Luego convertir a mayúsculas
     this.value = this.value.toUpperCase();
 });
@@ -296,7 +315,7 @@ document.getElementById('nombre').addEventListener('input', function() {
 // Validación SERVICIO: Solo letras
 document.getElementById('servicio').addEventListener('input', function() {
     // Primero remover números
-    this.value = this.value.replace(/[^A-Za-zÀ-ÿ\s\/\-]/g, '');
+    this.value = this.value.replace(/[^A-Za-zÀ-ÿ\s\.\-\/]/g, '');
     // Luego convertir a mayúsculas
     this.value = this.value.toUpperCase();
 });
@@ -331,6 +350,91 @@ document.getElementById('autorizacion').addEventListener('input', function() {
         }, 10);
     });
 });
+</script>
+
+<script>
+// =========================
+// FECHA (DD/MM/AAAA visible) + calendario nativo
+// =========================
+(function () {
+    const inputVisual = document.getElementById('fecha_visual');
+    const inputDate = document.getElementById('fecha'); // ISO YYYY-MM-DD (se envía)
+    if (!inputVisual || !inputDate) return;
+
+    const isoToEs = (iso) => {
+        const s = (iso || '').toString().trim();
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return '';
+        return `${s.slice(8, 10)}/${s.slice(5, 7)}/${s.slice(0, 4)}`;
+    };
+
+    const esToIso = (es) => {
+        const v = (es || '').toString().trim();
+        const m = v.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        if (!m) return '';
+        const d = parseInt(m[1], 10);
+        const mo = parseInt(m[2], 10);
+        const y = parseInt(m[3], 10);
+        if (mo < 1 || mo > 12 || d < 1 || d > 31) return '';
+        const dt = new Date(y, mo - 1, d);
+        if (dt.getFullYear() !== y || dt.getMonth() !== (mo - 1) || dt.getDate() !== d) return '';
+        return `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    };
+
+    const formatear = (raw) => {
+        let digits = (raw || '').replace(/\D/g, '').slice(0, 8);
+        if (digits.length >= 5) return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+        if (digits.length >= 3) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+        return digits;
+    };
+
+    // Inicializar visual desde ISO si hace falta
+    if (!inputVisual.value && inputDate.value) {
+        inputVisual.value = isoToEs(inputDate.value);
+    }
+
+    // Click/focus en visual abre calendario nativo (si está soportado)
+    const openPicker = () => {
+        if (typeof inputDate.showPicker === 'function') {
+            try { inputDate.showPicker(); } catch (_) {}
+        } else {
+            // Fallback: enfocar el input date (aunque esté fuera de vista)
+            inputDate.focus();
+        }
+    };
+    inputVisual.addEventListener('focus', openPicker);
+    inputVisual.addEventListener('click', openPicker);
+
+    // Cuando cambia el datepicker, refrescar visual
+    inputDate.addEventListener('change', () => {
+        inputVisual.value = isoToEs(inputDate.value);
+        inputVisual.style.borderColor = '';
+        inputVisual.style.backgroundColor = '';
+    });
+
+    // Formateo y validación al escribir
+    inputVisual.addEventListener('input', () => {
+        inputVisual.value = formatear(inputVisual.value);
+        const iso = esToIso(inputVisual.value);
+        if (iso) {
+            inputDate.value = iso;
+            inputVisual.style.borderColor = '';
+            inputVisual.style.backgroundColor = '';
+        }
+    });
+
+    inputVisual.addEventListener('blur', () => {
+        const iso = esToIso(inputVisual.value);
+        if (!iso) {
+            inputVisual.style.borderColor = '#dc3545';
+            inputVisual.style.backgroundColor = '#ffe6e6';
+        } else {
+            inputDate.value = iso;
+            inputVisual.value = isoToEs(iso);
+            inputVisual.style.borderColor = '';
+            inputVisual.style.backgroundColor = '';
+        }
+    });
+})();
 </script>
 
 {% endblock %}
