@@ -234,12 +234,21 @@
                             <a href="{{ url_for('facturacion_ncf_editar', ncf_id=ncf['id']) }}" class="btn btn-action btn-editar">
                                 <i class="fas fa-edit"></i> Editar
                             </a>
-                            <form method="POST" action="{{ url_for('facturacion_ncf_eliminar', ncf_id=ncf['id']) }}" style="display: inline; margin: 0;" 
-                                  onsubmit="return confirm('¿Está seguro de eliminar este NCF?');">
-                                <button type="submit" class="btn btn-action btn-eliminar">
-                                    <i class="fas fa-trash"></i> Eliminar
+                            {% if ncf['facturas_asignadas'] and ncf['facturas_asignadas'] > 0 %}
+                                <button type="button"
+                                        class="btn btn-action btn-eliminar"
+                                        disabled
+                                        title="No se puede eliminar: asignado a {{ ncf['facturas_asignadas'] }} factura(s)">
+                                    <i class="fas fa-lock"></i> En uso ({{ ncf['facturas_asignadas'] }})
                                 </button>
-                            </form>
+                            {% else %}
+                                <form method="POST" action="{{ url_for('facturacion_ncf_eliminar', ncf_id=ncf['id']) }}" style="display: inline; margin: 0;" 
+                                      onsubmit="return confirm('¿Está seguro de eliminar este NCF?');">
+                                    <button type="submit" class="btn btn-action btn-eliminar">
+                                        <i class="fas fa-trash"></i> Eliminar
+                                    </button>
+                                </form>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>

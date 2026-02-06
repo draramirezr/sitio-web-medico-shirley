@@ -3945,6 +3945,8 @@ def facturacion_servicios_eliminar(servicio_id):
 def facturacion_pacientes():
     """Lista de Pacientes Únicos"""
     search = request.args.get('search', '')
+    similitud = request.args.get('similitud') in ('1', 'true', 'True', 'on', 'yes', 'si')
+    umbral_similitud = 80
     conn = get_db_connection()
     
     if search:
@@ -3967,7 +3969,118 @@ def facturacion_pacientes():
         ''').fetchall()
     
     conn.close()
-    return render_template('facturacion/pacientes.html', pacientes_list=pacientes_list, search=search)
+
+    # Filtro opcional: pacientes con similitud >= 80% (NSS + NOMBRE)
+    # Nota: se aplica sobre el resultado actual (respetando la búsqueda).
+    pacientes_out = [dict(p) for p in pacientes_list] if pacientes_list else []
+    total_base = len(pacientes_out)
+    total_similares = None
+
+    if similitud and pacientes_out:
+        from difflib import SequenceMatcher
+        import re
+        import unicodedata
+
+        def _strip_accents(s: str) -> str:
+            return ''.join(
+                c for c in unicodedata.normalize('NFKD', s)
+                if not unicodedata.combining(c)
+            )
+
+        def _norm_nss(v) -> str:
+            s = '' if v is None else str(v)
+            return re.sub(r'[^0-9]', '', s)
+
+        def _norm_nombre(v) -> str:
+            s = '' if v is None else str(v)
+            s = _strip_accents(s).upper()
+            # mantener letras/espacios
+            s = re.sub(r'[^A-Z\s]', ' ', s)
+            s = re.sub(r'\s+', ' ', s).strip()
+            return s
+
+        def _combo(p) -> str:
+            return f"{p['_nss_norm']} {p['_nombre_norm']}".strip()
+
+        # Pre-normalización
+        for p in pacientes_out:
+            p['_nss_norm'] = _norm_nss(p.get('nss'))
+            p['_nombre_norm'] = _norm_nombre(p.get('nombre'))
+            p['_combo'] = _combo(p)
+
+        # Buckets para evitar O(n^2) full
+        buckets = {}
+        for idx, p in enumerate(pacientes_out):
+            nss = p['_nss_norm']
+            nom = p['_nombre_norm']
+            keys = set()
+            if nss:
+                keys.add(f"nss6:{nss[:6]}")
+                keys.add(f"nss4:{nss[-4:]}")
+            if nom:
+                keys.add(f"nom3:{nom[:3]}")
+                # primer token
+                first = nom.split(' ', 1)[0]
+                if first:
+                    keys.add(f"tok:{first[:5]}")
+            for k in keys:
+                buckets.setdefault(k, []).append(idx)
+
+        compared = set()
+        best = {}  # idx -> (score, other_idx)
+
+        def _score(a: str, b: str) -> int:
+            if not a or not b:
+                return 0
+            return int(round(SequenceMatcher(None, a, b).ratio() * 100))
+
+        # Comparar dentro de buckets (limitando buckets enormes)
+        for _, idxs in buckets.items():
+            if len(idxs) < 2:
+                continue
+            # Si el bucket es demasiado grande, saltar para evitar degradación
+            if len(idxs) > 400:
+                continue
+            for i_pos in range(len(idxs) - 1):
+                i = idxs[i_pos]
+                for j_pos in range(i_pos + 1, len(idxs)):
+                    j = idxs[j_pos]
+                    a, b = (i, j) if i < j else (j, i)
+                    pair = (a, b)
+                    if pair in compared:
+                        continue
+                    compared.add(pair)
+                    s = _score(pacientes_out[i]['_combo'], pacientes_out[j]['_combo'])
+                    if s >= umbral_similitud:
+                        if (i not in best) or (s > best[i][0]):
+                            best[i] = (s, j)
+                        if (j not in best) or (s > best[j][0]):
+                            best[j] = (s, i)
+
+        # Anotar y filtrar salida
+        filtrados = []
+        for idx, p in enumerate(pacientes_out):
+            if idx in best:
+                s, other_idx = best[idx]
+                other = pacientes_out[other_idx]
+                p['similitud_score'] = s
+                p['similitud_con_id'] = other.get('id')
+                p['similitud_con_nss'] = other.get('nss')
+                p['similitud_con_nombre'] = other.get('nombre')
+                p['similitud_con_ars'] = other.get('nombre_ars')
+                filtrados.append(p)
+        pacientes_out = sorted(filtrados, key=lambda x: (-int(x.get('similitud_score', 0)), str(x.get('nombre', ''))))
+        total_similares = len(pacientes_out)
+
+    return render_template(
+        'facturacion/pacientes.html',
+        pacientes_list=pacientes_out,
+        search=search,
+        similitud=similitud,
+        umbral_similitud=umbral_similitud,
+        total_base=total_base,
+        total_similares=total_similares
+    )
 
 @app.route('/facturacion/pacientes/excel')
 @login_required
@@ -4081,11 +4194,16 @@ def facturacion_ncf():
     else:
         ncf_list = conn.execute('SELECT * FROM ncf WHERE activo = 1 ORDER BY tipo').fetchall()
     
+    # Mapa de uso en facturas (para bloquear eliminación en UI)
+    usados_rows = conn.execute('SELECT ncf_id, COUNT(*) as total FROM facturas GROUP BY ncf_id').fetchall()
+    ncf_usados = {row['ncf_id']: row['total'] for row in usados_rows} if usados_rows else {}
+
     # Calcular el próximo número para cada registro
     ncf_with_proximo = []
     for ncf in ncf_list:
         ncf_dict = dict(ncf)
         ncf_dict['proximo_numero'] = ncf_dict['ultimo_numero'] + 1
+        ncf_dict['facturas_asignadas'] = int(ncf_usados.get(ncf_dict['id'], 0) or 0)
         ncf_with_proximo.append(ncf_dict)
     
     conn.close()
@@ -4200,12 +4318,23 @@ def facturacion_ncf_editar(ncf_id):
 def facturacion_ncf_eliminar(ncf_id):
     """Eliminar NCF (soft delete)"""
     conn = get_db_connection()
-    conn.execute('UPDATE ncf SET activo = 0 WHERE id = %s', (ncf_id,))
-    conn.commit()
-    conn.close()
-    
-    flash('NCF eliminado exitosamente', 'success')
-    return redirect(url_for('facturacion_ncf'))
+    try:
+        # No permitir eliminar si ya está asignado a alguna factura
+        uso = conn.execute(
+            'SELECT COUNT(*) as total FROM facturas WHERE ncf_id = %s',
+            (ncf_id,)
+        ).fetchone()
+        total_uso = uso['total'] if uso and 'total' in uso else 0
+        if total_uso and int(total_uso) > 0:
+            flash(f'❌ No se puede eliminar este NCF porque ya está asignado a {total_uso} factura(s).', 'error')
+            return redirect(url_for('facturacion_ncf'))
+
+        conn.execute('UPDATE ncf SET activo = 0 WHERE id = %s', (ncf_id,))
+        conn.commit()
+        flash('NCF eliminado exitosamente', 'success')
+        return redirect(url_for('facturacion_ncf'))
+    finally:
+        conn.close()
 
 # ========== PACIENTES A FACTURAR ==========
 @app.route('/facturacion/pacientes-pendientes')
@@ -5502,6 +5631,82 @@ def facturacion_generar():
             if not pacientes:
                 flash('No se encontraron pacientes pendientes válidos', 'error')
                 return redirect(url_for('facturacion_generar'))
+
+            # VALIDACIÓN: La fecha de la factura debe ser >= fecha de consulta más reciente
+            try:
+                from datetime import date, datetime
+
+                fecha_factura_date = date.fromisoformat(str(fecha_factura)[:10])
+                fechas_pacientes = []
+                for p in pacientes:
+                    fs = p.get('fecha_servicio')
+                    if not fs:
+                        continue
+                    if hasattr(fs, 'date'):
+                        # datetime -> date, date -> date
+                        fs_date = fs.date() if hasattr(fs, 'hour') else fs
+                        fechas_pacientes.append(fs_date)
+                    elif isinstance(fs, str):
+                        fs_str = fs.strip()
+                        # intentar varios formatos comunes
+                        for fmt in ['%Y-%m-%d', '%Y-%m-%d %H:%M:%S', '%d/%m/%Y']:
+                            try:
+                                fechas_pacientes.append(datetime.strptime(fs_str, fmt).date())
+                                break
+                            except Exception:
+                                continue
+
+                if fechas_pacientes:
+                    max_fecha_paciente = max(fechas_pacientes)
+                    if fecha_factura_date < max_fecha_paciente:
+                        flash(
+                            f'❌ La fecha de la factura ({fecha_factura_date.strftime("%d/%m/%Y")}) debe ser mayor o igual a '
+                            f'la fecha de consulta más reciente ({max_fecha_paciente.strftime("%d/%m/%Y")}).',
+                            'error'
+                        )
+
+                        # Re-render PASO 2 manteniendo selección
+                        ars = conn.execute('SELECT * FROM ars WHERE id = %s', (ars_id,)).fetchone()
+                        ncf = conn.execute('SELECT * FROM ncf WHERE id = %s', (ncf_id,)).fetchone()
+                        medico = conn.execute('SELECT * FROM medicos WHERE id = %s AND activo = 1 AND factura = 1', (medico_factura_id,)).fetchone()
+
+                        pendientes = conn.execute('''
+                            SELECT fd.*, 
+                                   COALESCE(m.nombre, 'Sin médico asignado') as medico_nombre, 
+                                   a.nombre_ars, 
+                                   COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
+                            FROM facturas_detalle fd
+                            LEFT JOIN medicos m ON fd.medico_consulta = m.id
+                            JOIN ars a ON fd.ars_id = a.id
+                            LEFT JOIN pacientes p ON fd.paciente_id = p.id
+                            WHERE fd.estado = 'pendiente' AND fd.ars_id = %s
+                            ORDER BY fd.fecha_servicio DESC
+                        ''', (ars_id,)).fetchall()
+
+                        medicos = conn.execute('''
+                            SELECT DISTINCT m.id, m.nombre 
+                            FROM facturas_detalle fd
+                            LEFT JOIN medicos m ON fd.medico_consulta = m.id
+                            WHERE fd.estado = 'pendiente' AND fd.ars_id = %s AND m.id IS NOT NULL
+                            ORDER BY m.nombre
+                        ''', (ars_id,)).fetchall()
+
+                        conn.close()
+
+                        return render_template(
+                            'facturacion/generar_factura_step2.html',
+                            pendientes=pendientes,
+                            ars=ars,
+                            ncf=ncf,
+                            fecha_factura=fecha_factura,
+                            medicos=medicos,
+                            medico_factura_id=medico_factura_id,
+                            medico_factura_nombre=(medico['nombre'] if medico else ''),
+                            selected_ids=ids_list
+                        )
+            except Exception:
+                # Si falla el parseo, no bloquear (se valida más adelante)
+                pass
             
             # Obtener info del MÉDICO QUE FACTURA
             medico = conn.execute('''
@@ -5708,6 +5913,38 @@ def facturacion_generar_final():
         if not pacientes:
             flash('No se encontraron pacientes pendientes válidos', 'error')
             return redirect(url_for('facturacion_generar'))
+
+        # VALIDACIÓN (seguridad): Fecha factura >= fecha paciente más reciente
+        try:
+            from datetime import date, datetime
+            fecha_factura_date = date.fromisoformat(str(fecha_factura)[:10])
+            fechas_pacientes = []
+            for p in pacientes:
+                fs = p.get('fecha_servicio')
+                if not fs:
+                    continue
+                if hasattr(fs, 'date'):
+                    fs_date = fs.date() if hasattr(fs, 'hour') else fs
+                    fechas_pacientes.append(fs_date)
+                elif isinstance(fs, str):
+                    fs_str = fs.strip()
+                    for fmt in ['%Y-%m-%d', '%Y-%m-%d %H:%M:%S', '%d/%m/%Y']:
+                        try:
+                            fechas_pacientes.append(datetime.strptime(fs_str, fmt).date())
+                            break
+                        except Exception:
+                            continue
+            if fechas_pacientes:
+                max_fecha_paciente = max(fechas_pacientes)
+                if fecha_factura_date < max_fecha_paciente:
+                    flash(
+                        f'❌ No se puede generar la factura. La fecha de la factura ({fecha_factura_date.strftime("%d/%m/%Y")}) '
+                        f'debe ser mayor o igual a la fecha de consulta más reciente ({max_fecha_paciente.strftime("%d/%m/%Y")}).',
+                        'error'
+                    )
+                    return redirect(url_for('facturacion_generar', ars_id=ars_id))
+        except Exception:
+            pass
         
         # Calcular total
         total = sum(p['monto'] for p in pacientes)
@@ -7482,6 +7719,30 @@ def facturacion_paciente_editar(paciente_id):
     
     # Fecha actual para validación (no permitir fechas futuras) - Zona horaria RD
     fecha_actual = obtener_fecha_rd().strftime('%Y-%m-%d')
+
+    # Normalizar fecha_servicio para input type="date" (debe ser YYYY-MM-DD)
+    fecha_servicio_iso = ''
+    try:
+        from datetime import datetime
+        fs = paciente.get('fecha_servicio')
+        if fs:
+            if hasattr(fs, 'strftime'):
+                fecha_servicio_iso = fs.strftime('%Y-%m-%d')
+            elif isinstance(fs, str):
+                fs = fs.strip()
+                for fmt in ['%Y-%m-%d', '%Y-%m-%d %H:%M:%S', '%d/%m/%Y']:
+                    try:
+                        fecha_servicio_iso = datetime.strptime(fs, fmt).strftime('%Y-%m-%d')
+                        break
+                    except Exception:
+                        continue
+                if not fecha_servicio_iso and len(fs) >= 10:
+                    # Último intento: tomar primeros 10 chars si parece ISO
+                    candidato = fs[:10]
+                    if candidato.count('-') == 2:
+                        fecha_servicio_iso = candidato
+    except Exception:
+        fecha_servicio_iso = ''
     
     return render_template('facturacion/paciente_editar.html', 
                          paciente=paciente,
@@ -7492,7 +7753,8 @@ def facturacion_paciente_editar(paciente_id):
                          ncf_id_return=ncf_id_return,
                          medico_id_return=medico_id_return,
                          fecha_return=fecha_return,
-                         fecha_actual=fecha_actual)
+                         fecha_actual=fecha_actual,
+                         fecha_servicio_iso=fecha_servicio_iso)
 
 @app.route('/facturacion/paciente/<int:paciente_id>/eliminar')
 @login_required

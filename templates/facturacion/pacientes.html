@@ -226,7 +226,7 @@
     <!-- Búsqueda -->
     <div class="search-box">
         <form method="GET" action="{{ url_for('facturacion_pacientes') }}" class="row g-3 align-items-end">
-            <div class="col-md-10">
+            <div class="col-md-8">
                 <label class="form-label" style="color: #666; font-weight: 600;">
                     <i class="fas fa-search me-1"></i>Buscar Paciente
                 </label>
@@ -236,6 +236,22 @@
                        value="{{ search }}" 
                        placeholder="Buscar por NSS o Nombre..."
                        style="border-radius: 10px; border: 2px solid rgba(206, 176, 183, 0.3);">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" style="color: #666; font-weight: 600;">
+                    <i class="fas fa-clone me-1"></i>Similitud
+                </label>
+                <div class="form-control" style="border-radius: 10px; border: 2px solid rgba(206, 176, 183, 0.3); padding: 0.65rem 0.75rem;">
+                    <div class="form-check" style="margin: 0;">
+                        <input class="form-check-input" type="checkbox" id="similitud" name="similitud" value="1" {% if similitud %}checked{% endif %}>
+                        <label class="form-check-label" for="similitud" style="font-weight: 600; color: #666;">
+                            ≥ {{ umbral_similitud }}%
+                        </label>
+                    </div>
+                    <small style="display:block; color:#999; font-size:0.75rem; margin-top:0.25rem;">
+                        NSS + Nombre
+                    </small>
+                </div>
             </div>
             <div class="col-md-2">
                 <button type="submit" 
@@ -257,14 +273,24 @@
     <!-- Tabla de Pacientes -->
     <div class="table-facturacion">
         {% if pacientes_list %}
+        {% if similitud %}
+        <div class="px-3 pt-3" style="color:#666;">
+            <i class="fas fa-info-circle me-1"></i>
+            Mostrando <strong>{{ total_similares }}</strong> paciente(s) con similitud <strong>≥ {{ umbral_similitud }}%</strong>
+            {% if search %} (dentro de tu búsqueda){% endif %}.
+        </div>
+        {% endif %}
         <div class="table-scroll-wrapper">
             <table class="table mb-0">
                 <thead>
                     <tr>
                         <th style="width: 10%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">ID</th>
                         <th style="width: 20%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">NSS</th>
-                        <th style="width: 45%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Nombre Completo</th>
-                        <th style="width: 25%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">ARS</th>
+                        <th style="width: 35%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Nombre Completo</th>
+                        {% if similitud %}
+                        <th style="width: 15%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Similitud</th>
+                        {% endif %}
+                        <th style="width: 20%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">ARS</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -279,6 +305,22 @@
                         <td>
                             <strong style="color: #282828;">{{ paciente['nombre'] }}</strong>
                         </td>
+                        {% if similitud %}
+                        <td>
+                            {% if paciente.get('similitud_score') %}
+                                <span class="badge" style="background:#CEB0B7; color:white; padding:0.35rem 0.6rem; border-radius:8px; font-weight:700;">
+                                    {{ paciente['similitud_score'] }}%
+                                </span>
+                                <div style="font-size:0.78rem; color:#666; margin-top:0.35rem; line-height:1.25;">
+                                    con ID <strong>{{ paciente['similitud_con_id'] }}</strong>
+                                    <br>
+                                    <span style="color:#999;">{{ paciente['similitud_con_nss'] }} · {{ paciente['similitud_con_nombre'] }}</span>
+                                </div>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        {% endif %}
                         <td>
                             {% if paciente['nombre_ars'] %}
                                 <span style="color: #666;">{{ paciente['nombre_ars'] }}</span>

@@ -387,6 +387,7 @@
                             <input type="checkbox" class="checkbox-custom paciente-check" 
                                    value="{{ paciente['id'] }}" 
                                    data-monto="{{ paciente['monto'] }}"
+                                   {% if selected_ids is defined and paciente['id'] in selected_ids %}checked{% endif %}
                                    onchange="calcularTotal()">
                         </td>
                         <td>{{ paciente['nss'] }}</td>
@@ -589,18 +590,45 @@ function calcularTotal() {
 document.getElementById('formGenerar').addEventListener('submit', function(e) {
     e.preventDefault();
     
+    // VALIDACIÓN: Fecha factura debe ser >= fecha más reciente de pacientes seleccionados
+    const fechaFactura = (document.querySelector('input[name="fecha_factura"]')?.value || '').toString().trim(); // YYYY-MM-DD
+    const parseFecha = (raw) => {
+        if (!raw) return null;
+        let s = raw.toString().trim();
+        if (!s) return null;
+        // si viene con hora, tomar los primeros 10
+        if (s.length >= 10 && s[4] === '-' && s[7] === '-') s = s.slice(0, 10);
+        // ISO YYYY-MM-DD
+        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+        // DD/MM/YYYY
+        const m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        if (m) return `${m[3]}-${m[2]}-${m[1]}`;
+        return null;
+    };
+
     const checkboxes = document.querySelectorAll('.paciente-check:checked');
     const ids = [];
+    let maxFechaPaciente = null;
     
     checkboxes.forEach(cb => {
         const fila = cb.closest('tr');
         if (fila.style.display !== 'none') {
             ids.push(parseInt(cb.value));
+            const f = parseFecha(fila.dataset.fecha);
+            if (f && (!maxFechaPaciente || f > maxFechaPaciente)) {
+                maxFechaPaciente = f;
+            }
         }
     });
     
     if (ids.length === 0) {
         alert('Debe seleccionar al menos un paciente para generar la factura');
+        return false;
+    }
+
+    if (fechaFactura && maxFechaPaciente && fechaFactura < maxFechaPaciente) {
+        const aEs = (iso) => iso ? `${iso.slice(8,10)}/${iso.slice(5,7)}/${iso.slice(0,4)}` : '';
+        alert(`❌ La fecha de la factura (${aEs(fechaFactura)}) debe ser mayor o igual a la fecha de consulta más reciente (${aEs(maxFechaPaciente)}).\n\nAjuste la fecha de la factura o edite la fecha del paciente.`);
         return false;
     }
     

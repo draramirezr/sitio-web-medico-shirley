@@ -53,6 +53,10 @@
         font-weight: 700;
         font-size: 1.1rem;
         transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
     }
     
     .btn-guardar:hover {
@@ -72,7 +76,10 @@
         font-size: 1.1rem;
         transition: all 0.3s ease;
         text-decoration: none;
-        display: inline-block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
     }
     
     .btn-cancelar:hover {
@@ -107,21 +114,6 @@
 
     <!-- Formulario -->
     <div class="form-container">
-        {% if from_factura %}
-        <!-- Mensaje de edición rápida -->
-        <div style="background: linear-gradient(135deg, rgba(23, 162, 184, 0.1) 0%, rgba(23, 162, 184, 0.05) 100%); border: 2px solid #17a2b8; border-radius: 12px; padding: 15px 20px; margin-bottom: 25px;">
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <i class="fas fa-bolt" style="font-size: 24px; color: #17a2b8;"></i>
-                <div>
-                    <strong style="color: #0c5460; font-size: 1.1rem;">⚡ Edición Rápida desde Facturación</strong>
-                    <p style="margin: 5px 0 0 0; color: #0c5460; font-size: 0.9rem;">
-                        Al guardar, volverás automáticamente a continuar facturando.
-                    </p>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-        
         <form method="POST" autocomplete="off">
             {% if from_factura %}
             <!-- Campos ocultos para volver a facturación -->
@@ -180,11 +172,9 @@
                                class="form-control" 
                                id="fecha" 
                                name="fecha" 
-                               value="{{ paciente['fecha_servicio'] }}"
+                               value="{{ fecha_servicio_iso }}"
                                required
-                               max="{{ fecha_actual if fecha_actual else '' }}"
-                               data-formato="dd/mm/yyyy"
-                               placeholder="dd/mm/yyyy">
+                               max="{{ fecha_actual if fecha_actual else '' }}">
                         <small class="text-muted" style="font-size: 0.8rem;">
                             <i class="fas fa-exclamation-circle"></i> No se permiten fechas futuras
                         </small>
@@ -275,7 +265,7 @@
             <!-- Botones -->
             <div class="row mt-4">
                 <div class="col-md-6 mb-3">
-                    <a href="{{ url_for('facturacion_pacientes_pendientes') }}" class="btn-cancelar w-100 text-center">
+                    <a href="{{ url_for('facturacion_pacientes_pendientes') }}" class="btn-cancelar w-100">
                         <i class="fas fa-times me-2"></i>Cancelar
                     </a>
                 </div>
@@ -342,9 +332,6 @@ document.getElementById('autorizacion').addEventListener('input', function() {
     });
 });
 </script>
-
-<!-- Script para zona horaria y fechas -->
-<script src="{{ url_for('static', filename='js/filtros-fecha.js') }}"></script>
 
 {% endblock %}
 
