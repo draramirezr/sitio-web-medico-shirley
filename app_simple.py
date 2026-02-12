@@ -8040,7 +8040,8 @@ def sitemap():
     
     today = datetime.now().strftime('%Y-%m-%d')
     
-    sitemap_xml = '< %sxml version="1.0" encoding="UTF-8"?>\n'
+    # XML válido (esto impacta directamente a Google Search Console)
+    sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     sitemap_xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     
     for url in urls:
@@ -8051,10 +8052,10 @@ def sitemap():
         sitemap_xml += f'    <priority>{url["priority"]}</priority>\n'
         sitemap_xml += '  </url>\n'
     
-    sitemap_xml += '</urlset>'
+    sitemap_xml += '</urlset>\n'
     
     response = make_response(sitemap_xml)
-    response.headers['Content-Type'] = 'application/xml'
+    response.headers['Content-Type'] = 'application/xml; charset=utf-8'
     return response
 
 @app.route('/robots.txt')
@@ -8062,21 +8063,35 @@ def robots_txt():
     """Archivo robots.txt dinámico para control de crawlers"""
     base_url = request.url_root.rstrip('/')
     
+    # IMPORTANTE: NO bloquear /static/ porque ahí vive /static/sitemap.xml y otros recursos que Google necesita leer.
     content = f"""User-agent: *
 Allow: /
-Allow: /about
-Allow: /services
-Allow: /appointment
-Allow: /contact
-Allow: /testimonials
-Disallow: /admin
-Disallow: /facturacion
-Disallow: /login
-Disallow: /static/
 
+# Permitir acceso a recursos estáticos
+Allow: /static/
+Allow: /images/
+Allow: /css/
+Allow: /js/
+
+# Bloquear acceso a secciones privadas
+Disallow: /admin/
+Disallow: /login
+Disallow: /cambiar-password-obligatorio
+Disallow: /solicitar-recuperacion
+Disallow: /recuperar-contrasena/
+Disallow: /facturacion/
+
+# Bloquear acceso a archivos sensibles
+Disallow: /*.env
+Disallow: /*.log
+Disallow: /database.db
+Disallow: /requirements.txt
+Disallow: /Procfile
+
+# Sitemap
 Sitemap: {base_url}/sitemap.xml
 
-# Configuración de crawl delay (opcional)
+# Crawl-delay para ser respetuosos (algunos bots lo ignoran)
 Crawl-delay: 1
 """
     response = make_response(content)
