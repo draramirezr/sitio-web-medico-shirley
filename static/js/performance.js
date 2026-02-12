@@ -113,9 +113,10 @@ function handleScroll() {
 function prefetchPages() {
   // Prefetch de páginas importantes inmediato
   const importantPages = [
-    '/services',
-    '/appointment',
-    '/about'
+    // Rutas reales del sitio (ES)
+    '/servicios',
+    '/solicitar-cita',
+    '/sobre-mi'
   ];
   
   importantPages.forEach(page => {
