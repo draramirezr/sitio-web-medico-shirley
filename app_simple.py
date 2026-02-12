@@ -8103,7 +8103,9 @@ def sitemap():
     
     # XML válido (esto impacta directamente a Google Search Console)
     sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
-    sitemap_xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    sitemap_xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
+    sitemap_xml += 'xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n'
+    og_image = url_for('static', filename='images/dra-shirley-profesional.jpg', _external=True)
     
     for url in urls:
         sitemap_xml += '  <url>\n'
@@ -8111,6 +8113,9 @@ def sitemap():
         sitemap_xml += f'    <lastmod>{today}</lastmod>\n'
         sitemap_xml += f'    <changefreq>{url["changefreq"]}</changefreq>\n'
         sitemap_xml += f'    <priority>{url["priority"]}</priority>\n'
+        sitemap_xml += '    <image:image>\n'
+        sitemap_xml += f'      <image:loc>{og_image}</image:loc>\n'
+        sitemap_xml += '    </image:image>\n'
         sitemap_xml += '  </url>\n'
     
     sitemap_xml += '</urlset>\n'

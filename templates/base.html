@@ -27,7 +27,7 @@
     <meta name="description" content="{% block description %}Ginecóloga y Obstetra en Santo Domingo Este. Experta en Ginecología Estética Láser: Rejuvenecimiento vaginal, tensado vaginal y labioplastia. Control prenatal, embarazo y salud femenina integral. Citas: 829-740-5073{% endblock %}">
     <meta name="keywords" content="ginecóloga Santo Domingo Este, doctora ginecóloga, ginecologa cerca de mi, ginecólogo zona oriental, obstetra Santo Domingo Este, doctora gineco obstetra, medico obstetra, ginecología estética, ginecología estética y funcional, doctora ginecologia estetica, rejuvenecimiento íntimo femenino, tratamientos íntimos femeninos, ginecología atención femenino, salud femenina, salud obstétrica, control prenatal, seguimiento embarazo, atención gineco obstétrica, consulta gineco obstetra, consulta para ginecología, consultorio obstetricia, especialista obstetra, mejores obstetras, obstetra cerca de mi, ginecologo cerca de mi, atención de ginecología, áreas de ginecología, medicina obstetricia, obstetricia medico, para que sirve un ginecologo obstetra, gineco obstetra para que sirve, qué es un gineco obstetra, para que es obstetricia, obstetra que hace, ginecología Santo Domingo, futura obstetra, mi doctora ginecóloga">
     <meta name="author" content="Dra. Shirley Ramírez">
-    <meta name="robots" content="{% block robots %}index, follow{% endblock %}">
+    <meta name="robots" content="{% block robots %}index, follow, max-image-preview:large{% endblock %}">
     <link rel="canonical" href="https://www.draramirez.com{{ request.path }}">
     {% block extra_meta %}{% endblock %}
     
@@ -36,7 +36,7 @@
     <meta property="og:url" content="https://www.draramirez.com{{ request.path }}">
     <meta property="og:title" content="{% block og_title %}Dra. Shirley Ramírez - Ginecóloga y Obstetra en Santo Domingo Este{% endblock %}">
     <meta property="og:description" content="{% block og_description %}Experta en Ginecología Estética Láser: Rejuvenecimiento vaginal, tensado y labioplastia. Control prenatal y salud femenina integral.{% endblock %}">
-    <meta property="og:image" content="{{ url_for('static', filename='images/dra-shirley-profesional.webp', _external=True) }}">
+    <meta property="og:image" content="{{ url_for('static', filename='images/dra-shirley-profesional.jpg', _external=True) }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="Dra. Shirley Ramírez - Ginecóloga y Obstetra">
@@ -46,7 +46,7 @@
     <meta property="twitter:url" content="https://www.draramirez.com{{ request.path }}">
     <meta property="twitter:title" content="{% block twitter_title %}Dra. Shirley Ramírez - Ginecóloga y Obstetra en Santo Domingo Este{% endblock %}">
     <meta property="twitter:description" content="{% block twitter_description %}Experta en Ginecología Estética Láser: Rejuvenecimiento vaginal, tensado y labioplastia. Control prenatal.{% endblock %}">
-    <meta property="twitter:image" content="{{ url_for('static', filename='images/dra-shirley-profesional.webp', _external=True) }}">
+    <meta property="twitter:image" content="{{ url_for('static', filename='images/dra-shirley-profesional.jpg', _external=True) }}">
     <meta property="twitter:image:alt" content="Dra. Shirley Ramírez - Ginecóloga y Obstetra">
     
     <!-- Schema.org Structured Data para SEO Médico - Optimizado para Google -->
@@ -58,7 +58,7 @@
       "alternateName": "Dra. Shirley Ramírez",
       "image": {
         "@type": "ImageObject",
-        "url": "{{ url_for('static', filename='images/dra-shirley-profesional.webp', _external=True) }}",
+        "url": "{{ url_for('static', filename='images/dra-shirley-profesional.jpg', _external=True) }}",
         "width": 1200,
         "height": 630,
         "caption": "Dra. Shirley Ramírez - Ginecóloga y Obstetra"
