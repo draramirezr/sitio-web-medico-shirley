@@ -8184,6 +8184,22 @@ def favicon_ico():
         # Fallback: si no existiera, usar el PNG
         return send_file(os.path.join(app.static_folder, 'favicon.png'), mimetype='image/png')
 
+# Forzar mimetype correcto para WebP en URLs específicas usadas por <picture>.
+# Algunos entornos/proxies sirven .webp como octet-stream; esto evita fallos de render/caché.
+def _send_webp_or_jpg(webp_filename: str, jpg_filename: str):
+    webp_path = os.path.join(app.static_folder, 'images', webp_filename)
+    if os.path.exists(webp_path):
+        return send_file(webp_path, mimetype='image/webp')
+    return send_file(os.path.join(app.static_folder, 'images', jpg_filename), mimetype='image/jpeg')
+
+@app.route('/static/images/97472.webp')
+def image_97472_webp():
+    return _send_webp_or_jpg('97472.webp', '97472.jpg')
+
+@app.route('/static/images/dra-shirley-profesional.webp')
+def image_dra_shirley_profesional_webp():
+    return _send_webp_or_jpg('dra-shirley-profesional.webp', 'dra-shirley-profesional.jpg')
+
 # ============================================================================
 # GESTIÓN DE USUARIOS
 # ============================================================================
