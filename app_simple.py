@@ -1883,6 +1883,11 @@ def about():
     """Página sobre la doctora"""
     return render_template('about.html')
 
+@app.route('/ginecologa-santo-domingo')
+def seo_ginecologa_santo_domingo():
+    """Landing SEO para búsqueda amplia en Santo Domingo"""
+    return render_template('seo_ginecologa_santo_domingo.html')
+
 @app.route('/testimonios')
 def testimonials():
     """Página de testimonios con rotación diaria y fechas dinámicas"""
@@ -8103,6 +8108,7 @@ def sitemap():
         {'loc': url_for('testimonials', _external=True), 'priority': '0.8', 'changefreq': 'weekly'},
         {'loc': url_for('contact', _external=True), 'priority': '0.9', 'changefreq': 'monthly'},
         {'loc': url_for('request_appointment', _external=True), 'priority': '1.0', 'changefreq': 'daily'},
+        {'loc': url_for('seo_ginecologa_santo_domingo', _external=True), 'priority': '0.85', 'changefreq': 'weekly'},
     ]
     
     today = datetime.now().strftime('%Y-%m-%d')

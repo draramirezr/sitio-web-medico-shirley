@@ -1,58 +1,82 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
     <!-- Página principal -->
     <url>
         <loc>https://www.draramirez.com/</loc>
-        <lastmod>2025-12-09</lastmod>
-        <changefreq>weekly</changefreq>
+        <lastmod>2026-02-12</lastmod>
+        <changefreq>daily</changefreq>
         <priority>1.0</priority>
+        <image:image>
+            <image:loc>https://www.draramirez.com/static/images/dra-shirley-profesional.jpg</image:loc>
+        </image:image>
     </url>
     
     <!-- Servicios -->
     <url>
-        <loc>https://www.draramirez.com/services</loc>
-        <lastmod>2025-12-09</lastmod>
-        <changefreq>monthly</changefreq>
+        <loc>https://www.draramirez.com/servicios</loc>
+        <lastmod>2026-02-12</lastmod>
+        <changefreq>weekly</changefreq>
         <priority>0.9</priority>
+        <image:image>
+            <image:loc>https://www.draramirez.com/static/images/dra-shirley-profesional.jpg</image:loc>
+        </image:image>
     </url>
     
     <!-- Tratamientos Estéticos -->
     <url>
         <loc>https://www.draramirez.com/tratamientos-esteticos</loc>
-        <lastmod>2025-12-09</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.9</priority>
+        <lastmod>2026-02-12</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.95</priority>
+        <image:image>
+            <image:loc>https://www.draramirez.com/static/images/dra-shirley-profesional.jpg</image:loc>
+        </image:image>
     </url>
     
     <!-- Sobre mí -->
     <url>
-        <loc>https://www.draramirez.com/about</loc>
-        <lastmod>2025-12-09</lastmod>
+        <loc>https://www.draramirez.com/sobre-mi</loc>
+        <lastmod>2026-02-12</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+        <image:image>
+            <image:loc>https://www.draramirez.com/static/images/dra-shirley-profesional.jpg</image:loc>
+        </image:image>
     </url>
     
     <!-- Contacto -->
     <url>
-        <loc>https://www.draramirez.com/contact</loc>
-        <lastmod>2025-12-09</lastmod>
+        <loc>https://www.draramirez.com/contacto</loc>
+        <lastmod>2026-02-12</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     
     <!-- Solicitar cita -->
     <url>
-        <loc>https://www.draramirez.com/request-appointment</loc>
-        <lastmod>2025-12-09</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.9</priority>
+        <loc>https://www.draramirez.com/solicitar-cita</loc>
+        <lastmod>2026-02-12</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
     </url>
     
     <!-- Testimonios -->
     <url>
-        <loc>https://www.draramirez.com/testimonials</loc>
-        <lastmod>2025-12-09</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
+        <loc>https://www.draramirez.com/testimonios</loc>
+        <lastmod>2026-02-12</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+    <!-- SEO: Ginecóloga en Santo Domingo -->
+    <url>
+        <loc>https://www.draramirez.com/ginecologa-santo-domingo</loc>
+        <lastmod>2026-02-12</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.85</priority>
+        <image:image>
+            <image:loc>https://www.draramirez.com/static/images/dra-shirley-profesional.jpg</image:loc>
+        </image:image>
     </url>
 </urlset>

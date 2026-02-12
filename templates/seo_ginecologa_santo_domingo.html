@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Ginecóloga en Santo Domingo | Dra. Shirley Ramírez (Santo Domingo Este){% endblock %}
+
+{% block description %}Ginecóloga y Obstetra en Santo Domingo (Zona Oriental / Santo Domingo Este). Atención integral: consulta ginecológica, control prenatal, planificación familiar y ginecología estética. Agenda tu cita por WhatsApp: 829-740-5073.{% endblock %}
+
+{% block og_title %}Ginecóloga en Santo Domingo | Dra. Shirley Ramírez{% endblock %}
+{% block og_description %}Consulta ginecológica y obstétrica en Santo Domingo (Zona Oriental / Santo Domingo Este). Agenda tu cita por WhatsApp: 829-740-5073.{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <h1 class="display-5 fw-bold mb-3" style="color: var(--title-color);">Ginecóloga en Santo Domingo</h1>
+      <p class="lead text-muted mb-4">
+        Soy la <strong>Dra. Shirley Ramírez</strong>, <strong>Ginecóloga y Obstetra</strong>. Atiendo pacientes en la
+        <strong>Zona Oriental (Santo Domingo Este)</strong> y recibo consultas de <strong>Santo Domingo</strong> y zonas cercanas.
+      </p>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <div class="p-3 h-100" style="background: rgba(206, 176, 183, 0.10); border-radius: 12px; border-left: 4px solid var(--primary-color);">
+            <h2 class="h5 fw-bold mb-2" style="color: var(--title-color);">Agenda rápida</h2>
+            <p class="text-muted mb-3">Escríbeme por WhatsApp y coordinamos tu cita.</p>
+            <a class="btn btn-primary" href="https://wa.me/18297405073?text=Hola,%20quiero%20agendar%20una%20cita%20de%20ginecolog%C3%ADa" target="_blank" rel="noopener noreferrer">
+              <i class="fab fa-whatsapp me-2"></i>WhatsApp 829-740-5073
+            </a>
+            <a class="btn btn-outline-primary ms-2" href="{{ url_for('request_appointment') }}">
+              <i class="fas fa-calendar-plus me-2"></i>Solicitar cita
+            </a>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="p-3 h-100" style="background: rgba(206, 176, 183, 0.10); border-radius: 12px; border-left: 4px solid var(--primary-color);">
+            <h2 class="h5 fw-bold mb-2" style="color: var(--title-color);">Ubicación</h2>
+            <p class="text-muted mb-2">
+              Centro Oriental de Ginecología y Obstetricia, <strong>Zona Oriental</strong>.
+            </p>
+            <a class="text-decoration-none" href="https://www.google.com/maps/place/Centro+Oriental+de+Ginecolog%C3%ADa+y+Obstetricia/@18.4975225,-69.8651385,17z/data=!3m1!4b1!4m6!3m5!1s0x8eaf887e90af3bd9:0x5a34a05877ad0b13!8m2!3d18.4975225!4d-69.8651385!16s%2Fg%2F1tcx2l68?entry=ttu" target="_blank" rel="noopener noreferrer">
+              <i class="fas fa-map-marker-alt me-2"></i>Ver en Google Maps
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="h4 fw-bold mt-4" style="color: var(--title-color);">Servicios principales</h2>
+      <ul class="text-muted" style="line-height: 1.9;">
+        <li><strong>Consulta ginecológica</strong> y chequeo anual.</li>
+        <li><strong>Control prenatal</strong> y seguimiento de embarazo.</li>
+        <li><strong>Planificación familiar</strong> y orientación anticonceptiva.</li>
+        <li><strong>Ginecología estética</strong> (evaluación y orientación según el caso).</li>
+      </ul>
+
+      <h2 class="h4 fw-bold mt-4" style="color: var(--title-color);">Preguntas frecuentes</h2>
+      <div class="accordion" id="faqSeoSd">
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="q1">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#a1" aria-expanded="true" aria-controls="a1">
+              ¿Atiendes pacientes de Santo Domingo aunque estés en Santo Domingo Este?
+            </button>
+          </h3>
+          <div id="a1" class="accordion-collapse collapse show" aria-labelledby="q1" data-bs-parent="#faqSeoSd">
+            <div class="accordion-body text-muted">
+              Sí. Recibo pacientes de Santo Domingo y zonas cercanas. La ubicación está en la Zona Oriental (Santo Domingo Este).
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="q2">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a2" aria-expanded="false" aria-controls="a2">
+              ¿Cómo agendo una cita?
+            </button>
+          </h3>
+          <div id="a2" class="accordion-collapse collapse" aria-labelledby="q2" data-bs-parent="#faqSeoSd">
+            <div class="accordion-body text-muted">
+              Puedes agendar por WhatsApp al <strong>829-740-5073</strong> o usar el formulario de “Solicitar cita”.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="q3">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a3" aria-expanded="false" aria-controls="a3">
+              ¿Qué debo llevar a la consulta?
+            </button>
+          </h3>
+          <div id="a3" class="accordion-collapse collapse" aria-labelledby="q3" data-bs-parent="#faqSeoSd">
+            <div class="accordion-body text-muted">
+              Si tienes estudios previos, resultados de laboratorios o historial médico, tráelos para una evaluación más completa.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center mt-5">
+        <a class="btn btn-primary btn-lg" href="https://wa.me/18297405073?text=Hola,%20quiero%20agendar%20una%20cita%20de%20ginecolog%C3%ADa" target="_blank" rel="noopener noreferrer">
+          <i class="fab fa-whatsapp me-2"></i>Agendar por WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
