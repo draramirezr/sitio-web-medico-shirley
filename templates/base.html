@@ -188,8 +188,10 @@
     
     <!-- Favicon -->
     <!-- Usar SVG para evitar faltantes de .ico/.png y asegurar icono visible -->
+    <!-- Nota: Google Search usa PNG/ICO. Dejamos PNG como principal y SVG como alternativo -->
+    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png" sizes="48x48">
+    <link rel="icon" href="{{ url_for('static', filename='favicon-96.png') }}" type="image/png" sizes="96x96">
     <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
-    <link rel="alternate icon" href="{{ url_for('static', filename='favicon.svg') }}">
     
     <!-- DNS Prefetch y Preconnect para máxima velocidad -->
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
