@@ -226,6 +226,48 @@ try:
 except Exception as _e:
     print(f"⚠️ ProxyFix no disponible o falló: {_e}")
 
+# ============================================
+# EQUIVALENTES FLASK A SETTINGS TIPO DJANGO
+# - SECURE_SSL_REDIRECT
+# - PREPEND_WWW
+# - ALLOWED_HOSTS
+# ============================================
+def _env_bool(name: str, default: bool = False) -> bool:
+    v = (os.getenv(name) or '').strip().lower()
+    if v == '':
+        return default
+    return v in ('1', 'true', 't', 'yes', 'y', 'on')
+
+# Activar solo en producción (por defecto) para evitar loops en local.
+# Si necesitas forzarlo en staging/dev, define explícitamente estas variables.
+SECURE_SSL_REDIRECT = _env_bool('SECURE_SSL_REDIRECT', default=PRODUCTION)
+PREPEND_WWW = _env_bool('PREPEND_WWW', default=PRODUCTION)
+
+# Lista de hosts permitidos (equivalente a Django ALLOWED_HOSTS)
+_allowed_hosts_env = (os.getenv('ALLOWED_HOSTS') or '').strip()
+if _allowed_hosts_env:
+    ALLOWED_HOSTS = [h.strip().lower() for h in _allowed_hosts_env.split(',') if h.strip()]
+else:
+    # Default seguro para este proyecto
+    ALLOWED_HOSTS = [
+        'draramirez.com',
+        'www.draramirez.com',
+        'localhost',
+        '127.0.0.1',
+    ]
+
+PREFERRED_WWW_HOST = os.getenv('PREFERRED_WWW_HOST', 'www.draramirez.com').strip().lower()
+
+def _request_host_no_port() -> str:
+    # ProxyFix ya ajusta request.host, pero dejamos fallback por headers.
+    host = (request.headers.get('X-Forwarded-Host') or request.host or '').split(',')[0].strip()
+    host = host.split(':')[0].lower()
+    return host
+
+def _request_proto() -> str:
+    proto = (request.headers.get('X-Forwarded-Proto') or request.scheme or '').split(',')[0].strip().lower()
+    return proto
+
 # Desactivar caché de templates para desarrollo
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
@@ -777,8 +819,27 @@ def check_password_temporal():
     """
     Verificar si el usuario tiene contraseña temporal y forzar cambio
     """
-    # NOTA: Redirección HTTPS/WWW deshabilitada temporalmente por bucle infinito
-    # Railway maneja HTTPS automáticamente con su proxy
+    # Seguridad/SEO: ALLOWED_HOSTS + redirección HTTPS/WWW (equivalentes tipo Django)
+    req_host = _request_host_no_port()
+    if req_host and (req_host not in ALLOWED_HOSTS):
+        return ("Host no permitido", 400)
+
+    if PRODUCTION:
+        proto = _request_proto()
+        path = request.path or '/'
+        qs = request.query_string.decode('utf-8', errors='ignore') if request.query_string else ''
+        path_qs = f"{path}?{qs}" if qs else path
+
+        # Forzar www primero (si aplica)
+        if PREPEND_WWW and req_host == 'draramirez.com' and PREFERRED_WWW_HOST:
+            code = 301 if request.method in ('GET', 'HEAD') else 308
+            scheme = 'https' if (SECURE_SSL_REDIRECT or proto == 'https') else (proto or 'http')
+            return redirect(f"{scheme}://{PREFERRED_WWW_HOST}{path_qs}", code=code)
+
+        # Forzar HTTPS (si aplica)
+        if SECURE_SSL_REDIRECT and proto and proto != 'https':
+            code = 301 if request.method in ('GET', 'HEAD') else 308
+            return redirect(f"https://{req_host}{path_qs}", code=code)
     
     # Verificar contraseña temporal (solo para usuarios autenticados)
     if current_user.is_authenticated:
