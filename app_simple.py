@@ -6,6 +6,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from datetime import datetime, timedelta
+import hashlib
 import json
 import functools
 import smtplib
@@ -162,17 +163,42 @@ PRODUCTION = (
     or (os.getenv('RAILWAY_ENVIRONMENT') or '').lower() == 'production'
 )
 
-# Clave secreta (CRÍTICO): debe ser estable en producción.
+# Clave secreta (CRÍTICO): debe ser estable SIEMPRE (sobre todo con múltiples instancias).
 # Si SECRET_KEY cambia entre requests/instancias, el usuario "pierde" la sesión y vuelve al login.
-_secret_key_env = os.getenv('SECRET_KEY')
+#
+# Estrategia:
+# - Si existe SECRET_KEY, usarla.
+# - Si NO existe, derivar una clave estable desde otros secretos ya configurados (MySQL/SendGrid),
+#   para evitar el bug de "re-login" repetido por balanceo.
+# - Si no hay nada para derivar, en producción fallar (para no desplegar roto).
+def _derive_stable_secret_key() -> str:
+    candidates = [
+        os.getenv('MYSQL_URL', ''),
+        os.getenv('MYSQLPASSWORD', ''),
+        os.getenv('MYSQL_ROOT_PASSWORD', ''),
+        os.getenv('MYSQL_PASSWORD', ''),
+        os.getenv('SENDGRID_API_KEY', ''),
+        os.getenv('RECAPTCHA_SECRET_KEY', ''),
+    ]
+    seed = next((c for c in candidates if c), '')
+    if not seed:
+        return ''
+    # 64 hex chars
+    return hashlib.sha256(seed.encode('utf-8')).hexdigest()
+
+_secret_key_env = os.getenv('SECRET_KEY', '').strip()
 if not _secret_key_env:
-    if PRODUCTION:
-        raise RuntimeError(
-            "Falta SECRET_KEY en producción. Configure una SECRET_KEY fija en variables de entorno "
-            "para evitar que las sesiones se invaliden y se muestre el login repetidamente."
-        )
-    # Dev/local: permitir clave aleatoria
-    _secret_key_env = secrets.token_hex(32)
+    derived = _derive_stable_secret_key()
+    if derived:
+        _secret_key_env = derived
+        print("⚠️ SECRET_KEY no configurada: usando clave derivada estable (recomendado: configurar SECRET_KEY fija).")
+    else:
+        if PRODUCTION:
+            raise RuntimeError(
+                "Falta SECRET_KEY en producción y no hay secretos para derivarla. "
+                "Configure SECRET_KEY fija en variables de entorno para evitar que las sesiones se invaliden."
+            )
+        _secret_key_env = secrets.token_hex(32)
 
 app.secret_key = _secret_key_env
 

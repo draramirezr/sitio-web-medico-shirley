@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <!-- Google Tag Manager - Optimizado para Performance -->
@@ -187,8 +187,9 @@
     </script>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='logos/favicon.ico') }}">
-    <link rel="apple-touch-icon" href="{{ url_for('static', filename='logos/logo-dra-shirley.png') }}">
+    <!-- Usar SVG para evitar faltantes de .ico/.png y asegurar icono visible -->
+    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+    <link rel="alternate icon" href="{{ url_for('static', filename='favicon.svg') }}">
     
     <!-- DNS Prefetch y Preconnect para máxima velocidad -->
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
