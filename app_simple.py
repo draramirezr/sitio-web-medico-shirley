@@ -8167,7 +8167,7 @@ Crawl-delay: 1
 # ====================
 # Compatibilidad SEO / cachés antiguos
 # - Algunos bots y Google piden /favicon.ico en la raíz
-# - Versiones antiguas del HTML referenciaban .webp que ya no usamos
+# - /favicon.ico debe existir aunque haya <link rel="icon"> en HTML
 # ====================
 @app.route('/favicon.ico')
 def favicon_ico():
@@ -8177,15 +8177,6 @@ def favicon_ico():
     except Exception:
         # Fallback: si no existiera, usar el PNG
         return send_file(os.path.join(app.static_folder, 'favicon.png'), mimetype='image/png')
-
-@app.route('/static/images/dra-shirley-profesional.webp')
-def compat_dra_shirley_webp():
-    # Si Google tiene cacheada la URL .webp, devolvemos el JPG (200)
-    return send_file(os.path.join(app.static_folder, 'images', 'dra-shirley-profesional.jpg'), mimetype='image/jpeg')
-
-@app.route('/static/images/97472.webp')
-def compat_97472_webp():
-    return send_file(os.path.join(app.static_folder, 'images', '97472.jpg'), mimetype='image/jpeg')
 
 # ============================================================================
 # GESTIÓN DE USUARIOS

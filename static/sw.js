@@ -1,5 +1,5 @@
 // Service Worker para PWA y cache offline
-const CACHE_NAME = 'drashirley-v3.2'; // Bump: limpiar cache viejo (imágenes/HTML antiguos)
+const CACHE_NAME = 'drashirley-v3.3'; // Bump: limpiar cache viejo (imágenes)
 const urlsToCache = [
   '/static/css/critical.min.css',
   '/static/logos/logo-dra-shirley.png',
@@ -8,8 +8,10 @@ const urlsToCache = [
   '/static/favicon.ico',
   '/static/favicon.png',
   '/static/favicon-96.png',
-  // Imágenes reales (evitar .webp para no romper <picture> cacheado)
+  // Imágenes reales (WebP + fallback JPG)
+  '/static/images/dra-shirley-profesional.webp',
   '/static/images/dra-shirley-profesional.jpg',
+  '/static/images/97472.webp',
   '/static/images/97472.jpg',
   'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
