@@ -19,6 +19,7 @@ import re
 from markupsafe import escape
 from io import BytesIO
 import threading
+import mimetypes
 
 # SendGrid para envío de emails (API en lugar de SMTP bloqueado por Railway)
 try:
@@ -149,6 +150,11 @@ except ImportError:
 
 # Cargar variables de entorno
 load_dotenv()
+
+# Asegurar tipos MIME correctos para assets modernos
+# (Evita que .webp salga como image/jpeg o application/octet-stream en algunos entornos)
+mimetypes.add_type('image/webp', '.webp')
+mimetypes.add_type('image/avif', '.avif')
 
 app = Flask(__name__)
 
