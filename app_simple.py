@@ -264,6 +264,26 @@ else:
 
 PREFERRED_WWW_HOST = os.getenv('PREFERRED_WWW_HOST', 'www.draramirez.com').strip().lower()
 
+def _canonical_base_url() -> str:
+    """
+    URL base canónica para SEO (sitemap/robots/canonical).
+    - En producción: por defecto https://www.draramirez.com
+    - En dev: permite sobreescribir con SITE_URL/CANONICAL_BASE_URL
+    """
+    env = (os.getenv('CANONICAL_BASE_URL') or os.getenv('SITE_URL') or '').strip()
+    if env:
+        return env.rstrip('/')
+    if PRODUCTION:
+        host = (PREFERRED_WWW_HOST or 'www.draramirez.com').strip().lower()
+        return f"https://{host}".rstrip('/')
+    # Local/dev fallback
+    return "http://localhost:5000"
+
+def _canonicalize_path(path: str) -> str:
+    if not path:
+        return "/"
+    return path if path.startswith("/") else f"/{path}"
+
 def _request_host_no_port() -> str:
     # ProxyFix ya ajusta request.host, pero dejamos fallback por headers.
     host = (request.headers.get('X-Forwarded-Host') or request.host or '').split(',')[0].strip()
@@ -287,7 +307,22 @@ def security_and_performance_headers(response):
     response.headers['X-Frame-Options'] = 'DENY'
     response.headers['X-XSS-Protection'] = '1; mode=block'
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
-    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.googletagmanager.com https://www.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.google-analytics.com https://www.googletagmanager.com https://www.google.com; frame-src https://www.googletagmanager.com https://www.google.com;"
+    # CSP: permitir GTM/Analytics + Google Ads (DoubleClick) sin abrir de más.
+    # Nota: Google Ads puede cargar scripts desde googleads.g.doubleclick.net y googleadservices.com
+    response.headers['Content-Security-Policy'] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' "
+        "https://cdn.jsdelivr.net https://cdnjs.cloudflare.com "
+        "https://www.googletagmanager.com https://www.google.com https://www.gstatic.com "
+        "https://www.googleadservices.com https://googleads.g.doubleclick.net; "
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; "
+        "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; "
+        "img-src 'self' data: https:; "
+        "connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com "
+        "https://www.google-analytics.com https://www.googletagmanager.com https://www.google.com "
+        "https://googleads.g.doubleclick.net https://www.googleadservices.com; "
+        "frame-src https://www.googletagmanager.com https://www.google.com;"
+    )
     
     # Headers de caché
     if response.content_type:
@@ -8098,17 +8133,17 @@ def sitemap():
     from datetime import datetime
     from flask import make_response
     
-    pages = []
     # Páginas principales (optimizadas para SEO)
+    base_url = _canonical_base_url()
     urls = [
-        {'loc': url_for('index', _external=True), 'priority': '1.0', 'changefreq': 'daily'},
-        {'loc': url_for('services', _external=True), 'priority': '0.9', 'changefreq': 'weekly'},
-        {'loc': url_for('aesthetic_treatments', _external=True), 'priority': '0.95', 'changefreq': 'weekly'},
-        {'loc': url_for('about', _external=True), 'priority': '0.85', 'changefreq': 'monthly'},
-        {'loc': url_for('testimonials', _external=True), 'priority': '0.8', 'changefreq': 'weekly'},
-        {'loc': url_for('contact', _external=True), 'priority': '0.9', 'changefreq': 'monthly'},
-        {'loc': url_for('request_appointment', _external=True), 'priority': '1.0', 'changefreq': 'daily'},
-        {'loc': url_for('seo_ginecologa_santo_domingo', _external=True), 'priority': '0.85', 'changefreq': 'weekly'},
+        {'path': url_for('index'), 'priority': '1.0', 'changefreq': 'daily'},
+        {'path': url_for('services'), 'priority': '0.9', 'changefreq': 'weekly'},
+        {'path': url_for('aesthetic_treatments'), 'priority': '0.95', 'changefreq': 'weekly'},
+        {'path': url_for('about'), 'priority': '0.85', 'changefreq': 'monthly'},
+        {'path': url_for('testimonials'), 'priority': '0.8', 'changefreq': 'weekly'},
+        {'path': url_for('contact'), 'priority': '0.9', 'changefreq': 'monthly'},
+        {'path': url_for('request_appointment'), 'priority': '1.0', 'changefreq': 'daily'},
+        {'path': url_for('seo_ginecologa_santo_domingo'), 'priority': '0.85', 'changefreq': 'weekly'},
     ]
     
     today = datetime.now().strftime('%Y-%m-%d')
@@ -8117,11 +8152,12 @@ def sitemap():
     sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     sitemap_xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
     sitemap_xml += 'xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n'
-    og_image = url_for('static', filename='images/dra-shirley-profesional.jpg', _external=True)
+    og_image = f"{base_url}{_canonicalize_path(url_for('static', filename='images/dra-shirley-profesional.jpg'))}"
     
     for url in urls:
+        loc = f"{base_url}{_canonicalize_path(url.get('path', '/'))}"
         sitemap_xml += '  <url>\n'
-        sitemap_xml += f'    <loc>{url["loc"]}</loc>\n'
+        sitemap_xml += f'    <loc>{loc}</loc>\n'
         sitemap_xml += f'    <lastmod>{today}</lastmod>\n'
         sitemap_xml += f'    <changefreq>{url["changefreq"]}</changefreq>\n'
         sitemap_xml += f'    <priority>{url["priority"]}</priority>\n'
@@ -8134,12 +8170,13 @@ def sitemap():
     
     response = make_response(sitemap_xml)
     response.headers['Content-Type'] = 'application/xml; charset=utf-8'
+    response.headers['Cache-Control'] = 'public, max-age=3600'
     return response
 
 @app.route('/robots.txt')
 def robots_txt():
     """Archivo robots.txt dinámico para control de crawlers"""
-    base_url = request.url_root.rstrip('/')
+    base_url = _canonical_base_url()
     
     # IMPORTANTE: NO bloquear /static/ porque ahí vive /static/sitemap.xml y otros recursos que Google necesita leer.
     content = f"""User-agent: *
@@ -8174,6 +8211,7 @@ Crawl-delay: 1
 """
     response = make_response(content)
     response.headers["Content-Type"] = "text/plain"
+    response.headers['Cache-Control'] = 'public, max-age=3600'
     return response
 
 # ====================
@@ -8183,12 +8221,16 @@ Crawl-delay: 1
 # ====================
 @app.route('/favicon.ico')
 def favicon_ico():
-    # Servir el favicon desde /static/favicon.ico
-    try:
-        return send_file(os.path.join(app.static_folder, 'favicon.ico'), mimetype='image/x-icon')
-    except Exception:
-        # Fallback: si no existiera, usar el PNG
-        return send_file(os.path.join(app.static_folder, 'favicon.png'), mimetype='image/png')
+    """
+    Algunos bots y navegadores piden /favicon.ico.
+    Este repo solo incluye favicon.svg, así que redirigimos para evitar 404.
+    """
+    return redirect(url_for('static', filename='favicon.svg'), code=301)
+
+@app.route('/static/logos/logo-dra-shirley.png')
+def logo_dra_shirley_png():
+    """Fallback: evitar 404 si falta el logo PNG en /static/logos/."""
+    return redirect(url_for('static', filename='favicon.svg'), code=302)
 
 # Forzar mimetype correcto para WebP en URLs específicas usadas por <picture>.
 # Algunos entornos/proxies sirven .webp como octet-stream; esto evita fallos de render/caché.
@@ -8196,7 +8238,33 @@ def _send_webp_or_jpg(webp_filename: str, jpg_filename: str):
     webp_path = os.path.join(app.static_folder, 'images', webp_filename)
     if os.path.exists(webp_path):
         return send_file(webp_path, mimetype='image/webp')
-    return send_file(os.path.join(app.static_folder, 'images', jpg_filename), mimetype='image/jpeg')
+    jpg_path = os.path.join(app.static_folder, 'images', jpg_filename)
+    if os.path.exists(jpg_path):
+        return send_file(jpg_path, mimetype='image/jpeg')
+
+    # Fallback: devolver un SVG simple en vez de 404/500
+    from flask import make_response
+    title = "Imagen no disponible"
+    subtitle = f"{jpg_filename} / {webp_filename}"
+    svg = f"""<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#F2E2E6"/>
+      <stop offset="1" stop-color="#DBC4CA"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#g)"/>
+  <rect x="40" y="40" width="1120" height="550" rx="24" fill="#fff" opacity="0.85"/>
+  <text x="80" y="160" font-family="Arial, sans-serif" font-size="48" fill="#4A4A4A">{title}</text>
+  <text x="80" y="230" font-family="Arial, sans-serif" font-size="28" fill="#6B6B6B">{subtitle}</text>
+  <text x="80" y="320" font-family="Arial, sans-serif" font-size="24" fill="#6B6B6B">
+    Sube los archivos a /static/images/ para ver la imagen real.
+  </text>
+</svg>"""
+    resp = make_response(svg)
+    resp.headers["Content-Type"] = "image/svg+xml; charset=utf-8"
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
 
 @app.route('/static/images/97472.webp')
 def image_97472_webp():
