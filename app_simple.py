@@ -5226,6 +5226,7 @@ def facturacion_facturas_nueva():
         conn = None
         try:
             conn = get_db_connection()
+            fecha_hoy_rd = obtener_fecha_rd()
             
             # Datos del encabezado
             medico_id = request.form.get('medico_id')
@@ -5275,6 +5276,23 @@ def facturacion_facturas_nueva():
                     monto = float(monto_raw or 0)
                 except Exception:
                     errores_validacion.append(f'Línea {idx}: Monto inválido')
+                    continue
+
+                # VALIDACIÓN: Fecha no puede ser futura (zona horaria RD)
+                try:
+                    from datetime import date
+                    fecha_str = str(fecha_servicio or '').strip()
+                except Exception:
+                    fecha_str = ''
+                try:
+                    fecha_obj = date.fromisoformat(fecha_str[:10]) if fecha_str else None
+                except Exception:
+                    fecha_obj = None
+                if not fecha_obj:
+                    errores_validacion.append(f'Línea {idx}: Fecha de consulta inválida (use YYYY-MM-DD)')
+                    continue
+                if fecha_obj > fecha_hoy_rd:
+                    errores_validacion.append(f'Línea {idx}: La fecha de consulta no puede ser futura')
                     continue
                 
                 # VALIDACIÓN: Verificar si ya existe el mismo registro (NSS + FECHA + AUTORIZACIÓN + ARS)
@@ -5416,7 +5434,8 @@ def facturacion_facturas_nueva():
                              ars_list=ars_list, 
                              servicios_list=servicios_list,
                              centros_medicos=centros_medicos,
-                             descargar_pdf=descargar_pdf)
+                             descargar_pdf=descargar_pdf,
+                             fecha_hoy_rd=obtener_fecha_rd().strftime('%Y-%m-%d'))
     finally:
         conn.close()
 

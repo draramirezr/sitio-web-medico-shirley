@@ -94,18 +94,59 @@ def optimize_database_connection():
 
 def compress_response(response):
     """Comprimir respuesta HTTP"""
-    if response.content_type and 'text/' in response.content_type:
-        # Comprimir contenido de texto
+    try:
+        # No tocar respuestas streaming / send_file
+        if getattr(response, "direct_passthrough", False):
+            return response
+
+        # Si ya viene comprimida, no recomprimir
+        if response.headers.get('Content-Encoding'):
+            return response
+
+        # Solo comprimir si el cliente lo acepta
+        try:
+            from flask import request  # Import local para no depender de Flask fuera de la app
+            accept_encoding = (request.headers.get('Accept-Encoding') or '').lower()
+            if 'gzip' not in accept_encoding:
+                return response
+        except Exception:
+            # Si no hay request (ej. uso fuera de Flask), no comprimir
+            return response
+
+        # Tipos comprimibles
+        mimetype = (getattr(response, "mimetype", None) or '').lower()
+        if not mimetype:
+            return response
+        if not (
+            mimetype.startswith('text/')
+            or mimetype in ('application/javascript', 'application/json', 'application/xml', 'image/svg+xml')
+        ):
+            return response
+
         content = response.get_data()
-        if len(content) > 1024:  # Solo comprimir si es mayor a 1KB
-            import gzip
-            compressed = gzip.compress(content)
-            if len(compressed) < len(content):
-                response.set_data(compressed)
-                response.headers['Content-Encoding'] = 'gzip'
-                response.headers['Content-Length'] = str(len(compressed))
-    
-    return response
+        if not content or len(content) <= 1024:
+            return response
+
+        import gzip
+        compressed = gzip.compress(content, compresslevel=6)
+        if len(compressed) >= len(content):
+            return response
+
+        response.set_data(compressed)
+        response.headers['Content-Encoding'] = 'gzip'
+        response.headers['Content-Length'] = str(len(compressed))
+
+        # Asegurar que caches no mezclen variantes comprimidas/no comprimidas
+        vary = response.headers.get('Vary')
+        if not vary:
+            response.headers['Vary'] = 'Accept-Encoding'
+        elif 'accept-encoding' not in vary.lower():
+            response.headers['Vary'] = f"{vary}, Accept-Encoding"
+
+        return response
+    except Exception:
+        # Ante cualquier error, no romper la respuesta
+        return response
 
 def add_security_headers(response):
     """Agregar headers de seguridad"""

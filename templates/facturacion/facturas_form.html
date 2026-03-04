@@ -482,6 +482,7 @@ let numeroLinea = 0;
 let lineas = [];
 
 // La fecha se establece automáticamente al generar la factura
+const FECHA_HOY_RD = "{{ fecha_hoy_rd if fecha_hoy_rd else '' }}";
 
 function agregarLinea() {
     numeroLinea++;
@@ -508,15 +509,12 @@ function agregarLinea() {
         </td>
         <td><input type="text" class="form-control form-control-sm" data-campo="nombre" placeholder="NOMBRE COMPLETO"></td>
         <td>
-            <input type="text"
+            <input type="date"
                    class="form-control form-control-sm"
                    data-campo="fecha"
-                   placeholder="DD/MM/AAAA"
-                   value="${isoAEs(hoyIso())}"
-                   inputmode="numeric"
-                   maxlength="10"
-                   oninput="formatearFechaEsInput(this)"
-                   onblur="validarFechaEsInput(this)">
+                   value="${hoyIso()}"
+                   max="${hoyIso()}"
+                   onchange="validarFechaNoFutura(this)">
         </td>
         <td>
             <input type="text" 
@@ -840,15 +838,12 @@ async function procesarExcel(input) {
                     </td>
                     <td><input type="text" class="form-control form-control-sm" data-campo="nombre" placeholder="NOMBRE COMPLETO" value="${paciente.nombre}"></td>
                     <td>
-                        <input type="text"
+                        <input type="date"
                                class="form-control form-control-sm"
                                data-campo="fecha"
-                               placeholder="DD/MM/AAAA"
-                               value="${isoAEs(paciente.fecha)}"
-                               inputmode="numeric"
-                               maxlength="10"
-                               oninput="formatearFechaEsInput(this)"
-                               onblur="validarFechaEsInput(this)">
+                               value="${fechaEsAISO(paciente.fecha) || hoyIso()}"
+                               max="${hoyIso()}"
+                               onchange="validarFechaNoFutura(this)">
                     </td>
                     <td>
                         <input type="text" 
@@ -1186,6 +1181,7 @@ function mostrarConfirmacionArsExcel(arsNombre, totalExcel) {
 // FECHAS EN ESPAÑOL (DD/MM/AAAA)
 // =========================
 function hoyIso() {
+    if (FECHA_HOY_RD && /^\d{4}-\d{2}-\d{2}$/.test(FECHA_HOY_RD)) return FECHA_HOY_RD;
     // IMPORTANTE: no usar toISOString() porque usa UTC y puede dar "mañana"
     // si la zona horaria local (ej. RD) está detrás de UTC.
     const d = new Date();
@@ -1193,6 +1189,24 @@ function hoyIso() {
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     return `${y}-${m}-${day}`;
+}
+
+function validarFechaNoFutura(input) {
+    const maxIso = hoyIso();
+    const v = (input?.value || '').toString().trim();
+    if (!v) return;
+    const iso = fechaEsAISO(v);
+    if (!iso) {
+        input.style.borderColor = '#dc3545';
+        input.style.backgroundColor = '#ffe6e6';
+        return;
+    }
+    if (iso > maxIso) {
+        alert(`❌ La fecha de consulta no puede ser futura.\n\nFecha seleccionada: ${isoAEs(iso)}\nMáximo permitido: ${isoAEs(maxIso)}`);
+        input.value = maxIso;
+    }
+    input.style.borderColor = '';
+    input.style.backgroundColor = '';
 }
 
 function isoAEs(valor) {
@@ -1307,9 +1321,16 @@ document.getElementById('formFactura').addEventListener('submit', function(e) {
     
     // Recolectar todas las líneas
     lineas = [];
+    let errorFechaFutura = null;
     document.querySelectorAll('#tbody-lineas tr[id^="linea-"]').forEach(tr => {
+        if (errorFechaFutura) return;
         const fechaEs = (tr.querySelector('[data-campo="fecha"]').value || '').trim();
         const fechaIso = fechaEsAISO(fechaEs) || hoyIso();
+        const maxIso = hoyIso();
+        if (fechaIso > maxIso) {
+            errorFechaFutura = { fechaIso, maxIso };
+            return;
+        }
 
         const linea = {
             nss: tr.querySelector('[data-campo="nss"]').value,
@@ -1321,6 +1342,11 @@ document.getElementById('formFactura').addEventListener('submit', function(e) {
         };
         lineas.push(linea);
     });
+
+    if (errorFechaFutura) {
+        alert(`❌ La fecha de consulta no puede ser futura.\n\nFecha seleccionada: ${isoAEs(errorFechaFutura.fechaIso)}\nMáximo permitido: ${isoAEs(errorFechaFutura.maxIso)}`);
+        return false;
+    }
     
     if (lineas.length === 0) {
         alert('Debe agregar al menos un paciente');
