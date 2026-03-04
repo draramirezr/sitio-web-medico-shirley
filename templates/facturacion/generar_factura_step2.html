@@ -285,9 +285,14 @@
             Configuración Actual
         </h5>
         <div>
-            <div class="config-item">
-                <i class="fas fa-hospital-symbol"></i>
-                <span><strong>ARS:</strong> {{ ars['nombre_ars'] }}</span>
+            <div class="config-item" style="align-items: flex-start;">
+                <i class="fas fa-hospital-symbol" style="margin-top: 2px;"></i>
+                <span>
+                    <strong>ARS:</strong> {{ ars['nombre_ars'] }}
+                    {% if ars and ars['nombre_ars'] and ('SENASA' in (ars['nombre_ars']|upper)) %}
+                    <br><span style="color: #666; font-weight: 800;">REGIMEN CONTRIBUTIVO</span>
+                    {% endif %}
+                </span>
             </div>
             <div class="config-item">
                 <i class="fas fa-file-invoice"></i>

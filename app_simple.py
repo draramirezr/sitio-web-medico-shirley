@@ -6420,6 +6420,7 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None,
         # Extraer datos dinámicos
         ars_nombre = pacientes[0].get('nombre_ars', 'N/A')
         ars_rnc = pacientes[0].get('ars_rnc', 'N/A')
+        es_senasa = 'SENASA' in (str(ars_nombre or '')).upper()
         medico_nombre = pacientes[0].get('medico_nombre', 'N/A')
         medico_especialidad = pacientes[0].get('medico_especialidad', 'N/A')
         codigo_ars = pacientes[0].get('codigo_ars', 'N/A')
@@ -6429,7 +6430,8 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None,
         ncf_fecha_fin = ncf_data.get('fecha_fin', '') if ncf_data else ''
         
         # Construir las 3 columnas (sin etiquetas de título, letras más grandes)
-        col1_text = f"<font size='10'>Fecha: {formato_fecha_pdf(fecha)}<br/>Cliente: {ars_nombre}<br/>RNC: {ars_rnc}</font>"
+        regimen_line = "<br/><b>REGIMEN CONTRIBUTIVO</b>" if es_senasa else ""
+        col1_text = f"<font size='10'>Fecha: {formato_fecha_pdf(fecha)}<br/>Cliente: {ars_nombre}{regimen_line}<br/>RNC: {ars_rnc}</font>"
         
         col2_text = f"<b>NCF</b><br/><font size='11' color='#CEB0B7'><b>{ncf}</b></font><br/><font size='10'>Tipo: {ncf_tipo}"
         if ncf_fecha_fin:
@@ -6615,6 +6617,7 @@ def generar_excel_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=Non
         # Extraer datos
         ars_nombre = pacientes[0].get('nombre_ars', 'N/A')
         ars_rnc = pacientes[0].get('ars_rnc', 'N/A')
+        es_senasa = 'SENASA' in (str(ars_nombre or '')).upper()
         medico_nombre = pacientes[0].get('medico_nombre', 'N/A')
         medico_especialidad = pacientes[0].get('medico_especialidad', 'N/A')
         medico_cedula = pacientes[0].get('medico_cedula', 'N/A')
@@ -6657,9 +6660,13 @@ def generar_excel_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=Non
         row += 1
         
         ws.merge_cells(f'A{row}:B{row}')
-        ws[f'A{row}'] = f'Cliente (ARS): {ars_nombre}'
+        cliente_text = f'Cliente (ARS): {ars_nombre}'
+        if es_senasa:
+            cliente_text += '\nREGIMEN CONTRIBUTIVO'
+        ws[f'A{row}'] = cliente_text
         ws[f'A{row}'].font = normal_font
         ws[f'A{row}'].border = thin_border
+        ws[f'A{row}'].alignment = Alignment(wrap_text=True, horizontal='left', vertical='center')
         row += 1
         
         ws.merge_cells(f'A{row}:B{row}')

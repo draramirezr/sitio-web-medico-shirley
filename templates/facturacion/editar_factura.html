@@ -542,7 +542,12 @@
             </div>
             <div class="info-item">
                 <label>ARS</label>
-                <div class="valor">{{ factura['nombre_ars'] }}</div>
+                <div class="valor">
+                    {{ factura['nombre_ars'] }}
+                    {% if factura['nombre_ars'] and ('SENASA' in (factura['nombre_ars']|upper)) %}
+                    <div style="font-size: 0.9rem; color: #666; font-weight: 800; margin-top: 0.2rem;">REGIMEN CONTRIBUTIVO</div>
+                    {% endif %}
+                </div>
             </div>
             <div class="info-item">
                 <label>NCF</label>

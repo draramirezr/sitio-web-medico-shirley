@@ -285,6 +285,9 @@
                 <h6>Información de Factura</h6>
                 <p><strong>Fecha:</strong> {{ fecha_factura|fecha_es }}</p>
                 <p><strong>Cliente (ARS):</strong> {{ ars['nombre_ars'] }}</p>
+                {% if ars and ars['nombre_ars'] and ('SENASA' in (ars['nombre_ars']|upper)) %}
+                <p style="margin-top: -0.15rem; margin-bottom: 0.15rem; color: #666; font-weight: 800;">REGIMEN CONTRIBUTIVO</p>
+                {% endif %}
                 {% if ars['rnc'] %}
                 <p><strong>RNC:</strong> {{ ars['rnc'] }}</p>
                 {% endif %}

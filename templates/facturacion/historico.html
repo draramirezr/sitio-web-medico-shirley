@@ -302,7 +302,12 @@
                             {{ factura['ncf_numero'] if factura['ncf_numero'] else factura['ncf'] }}
                         </span>
                     </td>
-                    <td>{{ factura['nombre_ars'] }}</td>
+                    <td>
+                        {{ factura['nombre_ars'] }}
+                        {% if factura['nombre_ars'] and ('SENASA' in (factura['nombre_ars']|upper)) %}
+                        <div style="font-size: 0.75rem; color: #666; font-weight: 800; margin-top: 0.15rem;">REGIMEN CONTRIBUTIVO</div>
+                        {% endif %}
+                    </td>
                     <td><small>{{ factura['medico_nombre'] }}</small></td>
                     <td class="text-center"><strong style="color: #B89BA3;"> {{ factura['total']|formato_moneda }}</strong></td>
                     <td class="text-center">
