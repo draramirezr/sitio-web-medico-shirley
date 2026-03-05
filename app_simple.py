@@ -5227,6 +5227,10 @@ def facturacion_facturas_nueva():
         try:
             conn = get_db_connection()
             fecha_hoy_rd = obtener_fecha_rd()
+            # Regla: no permitir fechas con más de 12 meses hacia atrás.
+            # Interpretación: si hoy es 2026-01-XX, mínimo permitido es 2025-01-01 (inicio del mes).
+            from datetime import date
+            fecha_minima_rd = date(fecha_hoy_rd.year - 1, fecha_hoy_rd.month, 1)
             
             # Datos del encabezado
             medico_id = request.form.get('medico_id')
@@ -5293,6 +5297,9 @@ def facturacion_facturas_nueva():
                     continue
                 if fecha_obj > fecha_hoy_rd:
                     errores_validacion.append(f'Línea {idx}: La fecha de consulta no puede ser futura')
+                    continue
+                if fecha_obj < fecha_minima_rd:
+                    errores_validacion.append(f'Línea {idx}: La fecha de consulta no puede ser anterior a 12 meses (mínimo {fecha_minima_rd.strftime("%Y-%m-%d")})')
                     continue
                 
                 # VALIDACIÓN: Verificar si ya existe el mismo registro (NSS + FECHA + AUTORIZACIÓN + ARS)
@@ -5435,7 +5442,8 @@ def facturacion_facturas_nueva():
                              servicios_list=servicios_list,
                              centros_medicos=centros_medicos,
                              descargar_pdf=descargar_pdf,
-                             fecha_hoy_rd=obtener_fecha_rd().strftime('%Y-%m-%d'))
+                             fecha_hoy_rd=obtener_fecha_rd().strftime('%Y-%m-%d'),
+                             fecha_min_rd=(lambda h: __import__('datetime').date(h.year - 1, h.month, 1))(obtener_fecha_rd()).strftime('%Y-%m-%d'))
     finally:
         conn.close()
 
@@ -5451,6 +5459,8 @@ def descargar_plantilla_excel():
         from openpyxl.worksheet.datavalidation import DataValidation
         from io import BytesIO
         hoy_rd = obtener_fecha_rd()
+        from datetime import date
+        min_rd = date(hoy_rd.year - 1, hoy_rd.month, 1)
         
         # Crear un nuevo workbook
         wb = Workbook()
@@ -5531,13 +5541,13 @@ def descargar_plantilla_excel():
         dv_fecha = DataValidation(
             type="date",
             operator="between",
-            formula1="DATE(2000,1,1)",
+            formula1=f"DATE({min_rd.year},{min_rd.month},{min_rd.day})",
             formula2=f"DATE({hoy_rd.year},{hoy_rd.month},{hoy_rd.day})",
             allow_blank=False
         )
-        dv_fecha.error = 'La FECHA debe ser válida y no puede ser futura.'
+        dv_fecha.error = 'La FECHA debe ser válida. No puede ser futura ni mayor a 12 meses hacia atrás.'
         dv_fecha.errorTitle = 'Fecha inválida'
-        dv_fecha.prompt = 'Seleccione una fecha (DD/MM/AAAA). Máximo permitido: hoy.'
+        dv_fecha.prompt = 'Seleccione una fecha (DD/MM/AAAA). Rango permitido: últimos 12 meses (desde inicio del mes) hasta hoy.'
         dv_fecha.promptTitle = 'Fecha de consulta'
         ws_pacientes.add_data_validation(dv_fecha)
         dv_fecha.add('C2:C1000')
@@ -5570,7 +5580,7 @@ def descargar_plantilla_excel():
             ['1. Complete la hoja "Pacientes" con los datos de los pacientes'],
             ['2. NSS: Solo números y guiones (ej: 001-234-5678)'],
             ['3. NOMBRE: Nombre completo del paciente'],
-            ['4. FECHA: Formato DD/MM/AAAA (ej: 16/10/2025). No se permiten fechas futuras.'],
+            ['4. FECHA: Formato DD/MM/AAAA (ej: 16/10/2025). Rango permitido: últimos 12 meses (desde inicio del mes) hasta hoy.'],
             ['5. AUTORIZACIÓN: Solo números, debe ser única para cada paciente'],
             ['6. SERVICIO: Seleccione de la lista desplegable (se alimenta de la hoja "Servicios Disponibles")'],
             ['7. MONTO: Cantidad en pesos (solo números)'],
@@ -5637,6 +5647,8 @@ def procesar_excel():
         wb = load_workbook(file, data_only=True)
         ws = wb['Pacientes']
         hoy_rd = obtener_fecha_rd()
+        from datetime import date
+        min_rd = date(hoy_rd.year - 1, hoy_rd.month, 1)
         
         pacientes = []
         errores = []
@@ -5717,6 +5729,9 @@ def procesar_excel():
 
             if fecha_obj_date > hoy_rd:
                 errores.append(f'❌ Fila {row_num}: FECHA {fecha_obj_date.strftime("%d/%m/%Y")} no puede ser futura (máximo hoy)')
+                continue
+            if fecha_obj_date < min_rd:
+                errores.append(f'❌ Fila {row_num}: FECHA {fecha_obj_date.strftime("%d/%m/%Y")} no puede ser anterior a 12 meses (mínimo {min_rd.strftime("%d/%m/%Y")})')
                 continue
             
             # ========== VALIDACIÓN 5: AUTORIZACIÓN (Alfanumérico y única) ==========

@@ -483,6 +483,7 @@ let lineas = [];
 
 // La fecha se establece automáticamente al generar la factura
 const FECHA_HOY_RD = "{{ fecha_hoy_rd if fecha_hoy_rd else '' }}";
+const FECHA_MIN_RD = "{{ fecha_min_rd if fecha_min_rd else '' }}";
 
 function agregarLinea() {
     numeroLinea++;
@@ -513,8 +514,11 @@ function agregarLinea() {
                    class="form-control form-control-sm"
                    data-campo="fecha"
                    value="${hoyIso()}"
+                   min="${minIso()}"
                    max="${hoyIso()}"
-                   onchange="validarFechaNoFutura(this)">
+                   oninput="validarFechaNoFutura(this)"
+                   onchange="validarFechaNoFutura(this)"
+                   onblur="validarFechaNoFutura(this)">
         </td>
         <td>
             <input type="text" 
@@ -842,8 +846,11 @@ async function procesarExcel(input) {
                                class="form-control form-control-sm"
                                data-campo="fecha"
                                value="${fechaEsAISO(paciente.fecha) || hoyIso()}"
+                               min="${minIso()}"
                                max="${hoyIso()}"
-                               onchange="validarFechaNoFutura(this)">
+                               oninput="validarFechaNoFutura(this)"
+                               onchange="validarFechaNoFutura(this)"
+                               onblur="validarFechaNoFutura(this)">
                     </td>
                     <td>
                         <input type="text" 
@@ -1191,8 +1198,18 @@ function hoyIso() {
     return `${y}-${m}-${day}`;
 }
 
+function minIso() {
+    if (FECHA_MIN_RD && /^\d{4}-\d{2}-\d{2}$/.test(FECHA_MIN_RD)) return FECHA_MIN_RD;
+    const h = hoyIso();
+    // fallback: mismo mes del año anterior, día 01
+    const y = parseInt(h.slice(0, 4), 10) - 1;
+    const m = h.slice(5, 7);
+    return `${y}-${m}-01`;
+}
+
 function validarFechaNoFutura(input) {
     const maxIso = hoyIso();
+    const min = minIso();
     const v = (input?.value || '').toString().trim();
     if (!v) return;
     const iso = fechaEsAISO(v);
@@ -1201,9 +1218,27 @@ function validarFechaNoFutura(input) {
         input.style.backgroundColor = '#ffe6e6';
         return;
     }
+    if (iso < min) {
+        alert(`❌ La fecha de consulta no puede ser anterior a 12 meses.\n\nFecha seleccionada: ${isoAEs(iso)}\nMínimo permitido: ${isoAEs(min)}`);
+        input.value = min;
+        input.style.borderColor = '#dc3545';
+        input.style.backgroundColor = '#ffe6e6';
+        setTimeout(() => {
+            input.style.borderColor = '';
+            input.style.backgroundColor = '';
+        }, 1200);
+        return;
+    }
     if (iso > maxIso) {
         alert(`❌ La fecha de consulta no puede ser futura.\n\nFecha seleccionada: ${isoAEs(iso)}\nMáximo permitido: ${isoAEs(maxIso)}`);
         input.value = maxIso;
+        input.style.borderColor = '#dc3545';
+        input.style.backgroundColor = '#ffe6e6';
+        setTimeout(() => {
+            input.style.borderColor = '';
+            input.style.backgroundColor = '';
+        }, 1200);
+        return;
     }
     input.style.borderColor = '';
     input.style.backgroundColor = '';
@@ -1327,8 +1362,13 @@ document.getElementById('formFactura').addEventListener('submit', function(e) {
         const fechaEs = (tr.querySelector('[data-campo="fecha"]').value || '').trim();
         const fechaIso = fechaEsAISO(fechaEs) || hoyIso();
         const maxIso = hoyIso();
+        const min = minIso();
+        if (fechaIso < min) {
+            errorFechaFutura = { fechaIso, maxIso, minIso: min, tipo: 'min' };
+            return;
+        }
         if (fechaIso > maxIso) {
-            errorFechaFutura = { fechaIso, maxIso };
+            errorFechaFutura = { fechaIso, maxIso, minIso: min, tipo: 'max' };
             return;
         }
 
@@ -1344,7 +1384,11 @@ document.getElementById('formFactura').addEventListener('submit', function(e) {
     });
 
     if (errorFechaFutura) {
-        alert(`❌ La fecha de consulta no puede ser futura.\n\nFecha seleccionada: ${isoAEs(errorFechaFutura.fechaIso)}\nMáximo permitido: ${isoAEs(errorFechaFutura.maxIso)}`);
+        if (errorFechaFutura.tipo === 'min') {
+            alert(`❌ La fecha de consulta no puede ser anterior a 12 meses.\n\nFecha seleccionada: ${isoAEs(errorFechaFutura.fechaIso)}\nMínimo permitido: ${isoAEs(errorFechaFutura.minIso)}`);
+        } else {
+            alert(`❌ La fecha de consulta no puede ser futura.\n\nFecha seleccionada: ${isoAEs(errorFechaFutura.fechaIso)}\nMáximo permitido: ${isoAEs(errorFechaFutura.maxIso)}`);
+        }
         return false;
     }
     
