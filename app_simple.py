@@ -5450,6 +5450,7 @@ def descargar_plantilla_excel():
         from openpyxl.utils import get_column_letter
         from openpyxl.worksheet.datavalidation import DataValidation
         from io import BytesIO
+        hoy_rd = obtener_fecha_rd()
         
         # Crear un nuevo workbook
         wb = Workbook()
@@ -5525,6 +5526,21 @@ def descargar_plantilla_excel():
             # Aplicar la validación a la columna E (SERVICIO) desde la fila 2 hasta la 1000
             ws_pacientes.add_data_validation(dv)
             dv.add('E2:E1000')
+
+        # Validación de FECHA (columna C): no permitir fechas futuras.
+        dv_fecha = DataValidation(
+            type="date",
+            operator="between",
+            formula1="DATE(2000,1,1)",
+            formula2=f"DATE({hoy_rd.year},{hoy_rd.month},{hoy_rd.day})",
+            allow_blank=False
+        )
+        dv_fecha.error = 'La FECHA debe ser válida y no puede ser futura.'
+        dv_fecha.errorTitle = 'Fecha inválida'
+        dv_fecha.prompt = 'Seleccione una fecha (DD/MM/AAAA). Máximo permitido: hoy.'
+        dv_fecha.promptTitle = 'Fecha de consulta'
+        ws_pacientes.add_data_validation(dv_fecha)
+        dv_fecha.add('C2:C1000')
         
         # Agregar filas vacías para poder aplicar protección
         # Agregamos al menos 100 filas vacías para que el usuario pueda trabajar
@@ -5538,6 +5554,8 @@ def descargar_plantilla_excel():
                 cell = ws_pacientes.cell(row=row, column=col)
                 cell.protection = Protection(locked=False)
                 cell.alignment = alineacion_izquierda
+                if col == 3:  # FECHA
+                    cell.number_format = 'DD/MM/YYYY'
         
         # Proteger la hoja de Pacientes (solo el encabezado quedará bloqueado)
         ws_pacientes.protection.sheet = True
@@ -5552,7 +5570,7 @@ def descargar_plantilla_excel():
             ['1. Complete la hoja "Pacientes" con los datos de los pacientes'],
             ['2. NSS: Solo números y guiones (ej: 001-234-5678)'],
             ['3. NOMBRE: Nombre completo del paciente'],
-            ['4. FECHA: Formato AAAA-MM-DD (ej: 2025-10-16)'],
+            ['4. FECHA: Formato DD/MM/AAAA (ej: 16/10/2025). No se permiten fechas futuras.'],
             ['5. AUTORIZACIÓN: Solo números, debe ser única para cada paciente'],
             ['6. SERVICIO: Seleccione de la lista desplegable (se alimenta de la hoja "Servicios Disponibles")'],
             ['7. MONTO: Cantidad en pesos (solo números)'],
@@ -5601,6 +5619,7 @@ def procesar_excel():
     """Procesar archivo Excel cargado y retornar JSON con los datos"""
     try:
         from openpyxl import load_workbook
+        from datetime import datetime, date
         
         # Verificar que se subió un archivo
         if 'archivo_excel' not in request.files:
@@ -5617,6 +5636,7 @@ def procesar_excel():
         # Leer el archivo Excel
         wb = load_workbook(file, data_only=True)
         ws = wb['Pacientes']
+        hoy_rd = obtener_fecha_rd()
         
         pacientes = []
         errores = []
@@ -5663,32 +5683,41 @@ def procesar_excel():
                 continue
             
             # ========== VALIDACIÓN 4: FECHA (Formato válido) ==========
+            if not fecha_raw:
+                errores.append(f'❌ Fila {row_num}: FECHA es obligatoria (formato DD/MM/AAAA)')
+                continue
+
             fecha = ''
-            if fecha_raw:
-                try:
-                    if hasattr(fecha_raw, 'strftime'):
-                        fecha = fecha_raw.strftime('%Y-%m-%d')
-                    else:
-                        fecha_str = str(fecha_raw).strip()
-                        # Intentar parsear varios formatos
-                        from datetime import datetime
-                        for fmt in ['%Y-%m-%d', '%d/%m/%Y', '%d-%m-%Y']:
-                            try:
-                                fecha_obj = datetime.strptime(fecha_str, fmt)
-                                fecha = fecha_obj.strftime('%Y-%m-%d')
-                                break
-                            except:
-                                continue
-                        if not fecha:
-                            errores.append(f'⚠️ Fila {row_num}: FECHA "{fecha_str}" formato inválido (use AAAA-MM-DD)')
-                            fecha = datetime.now().strftime('%Y-%m-%d')  # Usar fecha actual como fallback
-                except:
-                    errores.append(f'⚠️ Fila {row_num}: Error al procesar FECHA, usando fecha actual')
-                    from datetime import datetime
-                    fecha = datetime.now().strftime('%Y-%m-%d')
-            else:
-                from datetime import datetime
-                fecha = datetime.now().strftime('%Y-%m-%d')
+            fecha_obj_date = None
+            try:
+                # Si Excel la trae como date/datetime
+                if hasattr(fecha_raw, 'strftime'):
+                    fecha = fecha_raw.strftime('%Y-%m-%d')
+                    try:
+                        fecha_obj_date = date.fromisoformat(fecha)
+                    except Exception:
+                        fecha_obj_date = None
+                else:
+                    fecha_str = str(fecha_raw).strip()
+                    # Requerido: DD/MM/AAAA
+                    import re
+                    if not re.match(r'^\d{2}/\d{2}/\d{4}$', fecha_str):
+                        errores.append(f'❌ Fila {row_num}: FECHA "{fecha_str}" debe ser DD/MM/AAAA')
+                        continue
+                    fecha_dt = datetime.strptime(fecha_str, '%d/%m/%Y')
+                    fecha_obj_date = fecha_dt.date()
+                    fecha = fecha_dt.strftime('%Y-%m-%d')
+            except Exception:
+                errores.append(f'❌ Fila {row_num}: FECHA inválida. Use DD/MM/AAAA (ej: 05/02/2026)')
+                continue
+
+            if not fecha_obj_date:
+                errores.append(f'❌ Fila {row_num}: FECHA inválida. Use DD/MM/AAAA')
+                continue
+
+            if fecha_obj_date > hoy_rd:
+                errores.append(f'❌ Fila {row_num}: FECHA {fecha_obj_date.strftime("%d/%m/%Y")} no puede ser futura (máximo hoy)')
+                continue
             
             # ========== VALIDACIÓN 5: AUTORIZACIÓN (Alfanumérico y única) ==========
             autorizacion = ''
@@ -5754,8 +5783,18 @@ def procesar_excel():
                 'fila': row_num
             })
 
+        # Si hay errores en el Excel, no cargar nada (validación previa obligatoria)
+        if errores:
+            return jsonify({
+                'error': 'El archivo tiene errores. Corrija FECHA (DD/MM/AAAA) y vuelva a cargar.',
+                'errores': errores,
+                'total_errores': len(errores),
+                'total_excel': total_filas_con_datos,
+                'total_validos': len(pacientes),
+                'total_omitidos': max(total_filas_con_datos - len(pacientes), 0),
+            }), 400
+
         if not pacientes:
-            # Si no hay ninguna fila válida, devolver error (no tiene sentido continuar)
             return jsonify({
                 'error': 'El archivo no contiene datos válidos',
                 'errores': errores,
@@ -7128,7 +7167,8 @@ def facturacion_editar_factura(factura_id):
     
     # Verificar si la tabla servicios existe
     try:
-        conn.execute("SELECT 1 FROM servicios LIMIT 1")
+        # En este sistema la maestra se llama tipos_servicios (no "servicios")
+        conn.execute("SELECT 1 FROM tipos_servicios LIMIT 1")
         servicios_existe = True
     except:
         servicios_existe = False
@@ -7138,10 +7178,10 @@ def facturacion_editar_factura(factura_id):
         pacientes_factura = conn.execute('''
             SELECT fd.*, 
                    COALESCE(m.nombre, 'Sin médico') as medico_nombre,
-                   COALESCE(s.nombre, 'N/A') as servicio_nombre
+                   COALESCE(ts.descripcion, fd.descripcion_servicio, 'N/A') as servicio_nombre
             FROM facturas_detalle fd
             LEFT JOIN medicos m ON fd.medico_consulta = m.id
-            LEFT JOIN servicios s ON fd.servicio_id = s.id
+            LEFT JOIN tipos_servicios ts ON fd.servicio_id = ts.id
             WHERE fd.factura_id = %s AND fd.estado = 'facturado'
             ORDER BY fd.fecha_servicio DESC
         ''', (factura_id,)).fetchall()
@@ -7149,7 +7189,7 @@ def facturacion_editar_factura(factura_id):
         pacientes_factura = conn.execute('''
             SELECT fd.*, 
                    COALESCE(m.nombre, 'Sin médico') as medico_nombre,
-                   'N/A' as servicio_nombre
+                   COALESCE(fd.descripcion_servicio, 'N/A') as servicio_nombre
             FROM facturas_detalle fd
             LEFT JOIN medicos m ON fd.medico_consulta = m.id
             WHERE fd.factura_id = %s AND fd.estado = 'facturado'
@@ -7161,11 +7201,11 @@ def facturacion_editar_factura(factura_id):
         pacientes_pendientes = conn.execute('''
             SELECT fd.*, 
                    COALESCE(m.nombre, 'Sin médico') as medico_nombre,
-                   COALESCE(s.nombre, 'N/A') as servicio_nombre,
+                   COALESCE(ts.descripcion, fd.descripcion_servicio, 'N/A') as servicio_nombre,
                    COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
             FROM facturas_detalle fd
             LEFT JOIN medicos m ON fd.medico_consulta = m.id
-            LEFT JOIN servicios s ON fd.servicio_id = s.id
+            LEFT JOIN tipos_servicios ts ON fd.servicio_id = ts.id
             LEFT JOIN pacientes p ON fd.paciente_id = p.id
             WHERE fd.estado = 'pendiente' AND fd.ars_id = %s
             ORDER BY fd.fecha_servicio DESC
@@ -7174,7 +7214,7 @@ def facturacion_editar_factura(factura_id):
         pacientes_pendientes = conn.execute('''
             SELECT fd.*, 
                    COALESCE(m.nombre, 'Sin médico') as medico_nombre,
-                   'N/A' as servicio_nombre,
+                   COALESCE(fd.descripcion_servicio, 'N/A') as servicio_nombre,
                    COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
             FROM facturas_detalle fd
             LEFT JOIN medicos m ON fd.medico_consulta = m.id
