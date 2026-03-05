@@ -250,6 +250,77 @@
         </div>
     </div>
 
+    {% if resumen_carga %}
+    <div class="card mb-4" style="background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(206, 176, 183, 0.15); border: 1px solid rgba(206, 176, 183, 0.2);">
+        <div class="card-body">
+            <h5 style="color: var(--primary-color); font-weight: 800; margin-bottom: 0.75rem;">
+                <i class="fas fa-info-circle me-2"></i>Resultado de la última carga
+            </h5>
+            <div class="d-flex flex-wrap gap-2 align-items-center" style="margin-bottom: 0.75rem;">
+                <span class="badge" style="background: #ACACAD; color: white; padding: 0.45rem 0.8rem; border-radius: 10px; font-weight: 700;">
+                    Enviados: {{ resumen_carga.total_enviado }}
+                </span>
+                <span class="badge" style="background: #CEB0B7; color: white; padding: 0.45rem 0.8rem; border-radius: 10px; font-weight: 700;">
+                    Guardados: {{ resumen_carga.total_creado }}
+                </span>
+                {% if resumen_carga.total_enviado and resumen_carga.total_creado is not none and resumen_carga.total_creado < resumen_carga.total_enviado %}
+                <span class="badge" style="background: #dc3545; color: white; padding: 0.45rem 0.8rem; border-radius: 10px; font-weight: 700;">
+                    Omitidos: {{ resumen_carga.total_enviado - resumen_carga.total_creado }}
+                </span>
+                {% endif %}
+            </div>
+
+            {% if resumen_carga.lineas %}
+            <details>
+                <summary style="cursor: pointer; font-weight: 700; color: #666;">
+                    Ver detalle (primeras {{ resumen_carga.lineas|length }} líneas)
+                </summary>
+                <div class="table-responsive mt-3">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Línea</th>
+                                <th>ID</th>
+                                <th>NSS</th>
+                                <th>Nombre</th>
+                                <th>Fecha</th>
+                                <th>Servicio</th>
+                                <th>Monto</th>
+                                <th>Resultado</th>
+                                <th>Detalle</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for it in resumen_carga.lineas %}
+                            <tr>
+                                <td><strong>{{ it.linea }}</strong></td>
+                                <td>{{ it.id if it.id is defined else '' }}</td>
+                                <td>{{ it.nss }}</td>
+                                <td>{{ it.nombre }}</td>
+                                <td>{{ it.fecha }}</td>
+                                <td>{{ it.servicio }}</td>
+                                <td>{{ it.monto }}</td>
+                                <td>
+                                    {% if it.resultado == 'creado' %}
+                                    <span class="badge" style="background: #28a745;">CREADO</span>
+                                    {% elif it.resultado == 'omitido' %}
+                                    <span class="badge" style="background: #f39c12;">OMITIDO</span>
+                                    {% else %}
+                                    <span class="badge" style="background: #dc3545;">ERROR</span>
+                                    {% endif %}
+                                </td>
+                                <td style="max-width: 320px;">{{ it.detalle }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Filtros -->
     <div class="card mb-4" style="background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(206, 176, 183, 0.15); border: 1px solid rgba(206, 176, 183, 0.2);">
         <div class="card-body">

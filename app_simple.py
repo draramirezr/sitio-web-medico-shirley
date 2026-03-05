@@ -4582,6 +4582,7 @@ def facturacion_pacientes_pendientes():
         highlight_ids = []
     # Link disponible si hay registros recientes (PDF constancia)
     tiene_recientes = bool(session.get('ultimos_pacientes_agregados', []))
+    resumen_carga = session.pop('resumen_carga_pendientes', None)
 
     conn = get_db_connection()
     
@@ -4667,7 +4668,8 @@ def facturacion_pacientes_pendientes():
                          medico_seleccionado=medico_seleccionado,
                          ars_seleccionada=ars_seleccionada,
                          highlight_ids=highlight_ids,
-                         tiene_recientes=tiene_recientes)
+                         tiene_recientes=tiene_recientes,
+                         resumen_carga=resumen_carga)
 
 @app.route('/facturacion/pacientes-pendientes/pdf')
 @login_required
@@ -5255,6 +5257,7 @@ def facturacion_facturas_nueva():
             ids_creados = []
             errores = []
             errores_validacion = []
+            resumen_lineas = []  # Para feedback detallado al usuario (se mostrará al volver al listado)
             
             # Procesar cada línea como PENDIENTE (sin factura_id)
             for idx, linea in enumerate(lineas, start=1):
@@ -5273,6 +5276,17 @@ def facturacion_facturas_nueva():
                     autorizacion = _validate_or_raise(autorizacion_raw, _RE_AUTORIZACION, 'Autorización', idx=idx, max_len=50, required=False)
                 except ValueError as ve:
                     errores_validacion.append(str(ve))
+                    resumen_lineas.append({
+                        'linea': idx,
+                        'nss': str(nss_raw or '').strip(),
+                        'nombre': str(nombre_raw or '').strip(),
+                        'fecha': str(fecha_servicio or '').strip(),
+                        'autorizacion': str(autorizacion_raw or '').strip(),
+                        'servicio': str(servicio_raw or '').strip(),
+                        'monto': monto_raw,
+                        'resultado': 'error',
+                        'detalle': str(ve),
+                    })
                     continue
 
                 # Monto numérico
@@ -5280,6 +5294,17 @@ def facturacion_facturas_nueva():
                     monto = float(monto_raw or 0)
                 except Exception:
                     errores_validacion.append(f'Línea {idx}: Monto inválido')
+                    resumen_lineas.append({
+                        'linea': idx,
+                        'nss': nss,
+                        'nombre': nombre,
+                        'fecha': str(fecha_servicio or '').strip(),
+                        'autorizacion': autorizacion,
+                        'servicio': servicio_desc,
+                        'monto': monto_raw,
+                        'resultado': 'error',
+                        'detalle': 'Monto inválido',
+                    })
                     continue
 
                 # VALIDACIÓN: Fecha no puede ser futura (zona horaria RD)
@@ -5294,12 +5319,45 @@ def facturacion_facturas_nueva():
                     fecha_obj = None
                 if not fecha_obj:
                     errores_validacion.append(f'Línea {idx}: Fecha de consulta inválida (use YYYY-MM-DD)')
+                    resumen_lineas.append({
+                        'linea': idx,
+                        'nss': nss,
+                        'nombre': nombre,
+                        'fecha': str(fecha_servicio or '').strip(),
+                        'autorizacion': autorizacion,
+                        'servicio': servicio_desc,
+                        'monto': monto,
+                        'resultado': 'error',
+                        'detalle': 'Fecha inválida (use YYYY-MM-DD)',
+                    })
                     continue
                 if fecha_obj > fecha_hoy_rd:
                     errores_validacion.append(f'Línea {idx}: La fecha de consulta no puede ser futura')
+                    resumen_lineas.append({
+                        'linea': idx,
+                        'nss': nss,
+                        'nombre': nombre,
+                        'fecha': fecha_obj.strftime('%Y-%m-%d'),
+                        'autorizacion': autorizacion,
+                        'servicio': servicio_desc,
+                        'monto': monto,
+                        'resultado': 'error',
+                        'detalle': 'Fecha futura no permitida',
+                    })
                     continue
                 if fecha_obj < fecha_minima_rd:
                     errores_validacion.append(f'Línea {idx}: La fecha de consulta no puede ser anterior a 12 meses (mínimo {fecha_minima_rd.strftime("%Y-%m-%d")})')
+                    resumen_lineas.append({
+                        'linea': idx,
+                        'nss': nss,
+                        'nombre': nombre,
+                        'fecha': fecha_obj.strftime('%Y-%m-%d'),
+                        'autorizacion': autorizacion,
+                        'servicio': servicio_desc,
+                        'monto': monto,
+                        'resultado': 'error',
+                        'detalle': f'Fecha fuera de rango (mínimo {fecha_minima_rd.strftime("%Y-%m-%d")})',
+                    })
                     continue
                 
                 # VALIDACIÓN: Verificar si ya existe el mismo registro (NSS + FECHA + AUTORIZACIÓN + ARS)
@@ -5310,6 +5368,17 @@ def facturacion_facturas_nueva():
                 
                 if duplicado:
                     errores.append(f'Línea {idx}: Registro duplicado - NSS {nss}, Fecha {fecha_servicio}, Autorización {autorizacion} ya existe')
+                    resumen_lineas.append({
+                        'linea': idx,
+                        'nss': nss,
+                        'nombre': nombre,
+                        'fecha': str(fecha_servicio or '').strip(),
+                        'autorizacion': autorizacion,
+                        'servicio': servicio_desc,
+                        'monto': monto,
+                        'resultado': 'omitido',
+                        'detalle': 'Registro duplicado (ya existe)',
+                    })
                     continue
                 
                 # Buscar o crear paciente (llave única: NSS + ARS)
@@ -5349,11 +5418,32 @@ def facturacion_facturas_nueva():
                      servicio_id, servicio_desc, monto, medico_id, ars_id))
                 
                 # Guardar el ID del registro creado
-                ids_creados.append(cursor.lastrowid)
+                creado_id = cursor.lastrowid
+                ids_creados.append(creado_id)
+                resumen_lineas.append({
+                    'linea': idx,
+                    'id': creado_id,
+                    'nss': nss,
+                    'nombre': nombre,
+                    'fecha': str(fecha_servicio or '').strip(),
+                    'autorizacion': autorizacion,
+                    'servicio': servicio_desc,
+                    'monto': monto,
+                    'resultado': 'creado',
+                    'detalle': 'OK',
+                })
 
             # Si hubo errores de validación, NO guardar nada (integridad)
             if errores_validacion:
                 conn.rollback()
+                # Guardar resumen para mostrar al volver (solo primeras 25 líneas para no inflar sesión)
+                session['resumen_carga_pendientes'] = {
+                    'total_enviado': len(lineas),
+                    'total_creado': 0,
+                    'ids_creados': [],
+                    'lineas': resumen_lineas[:25],
+                    'nota': 'No se guardó nada por errores de validación.',
+                }
                 flash('❌ No se guardó nada. Corrige los caracteres inválidos en los campos.', 'error')
                 for err in errores_validacion[:8]:
                     flash(err, 'error')
@@ -5364,6 +5454,13 @@ def facturacion_facturas_nueva():
             # Si no se creó ningún registro, no confirmar cambios
             if not ids_creados:
                 conn.rollback()
+                session['resumen_carga_pendientes'] = {
+                    'total_enviado': len(lineas),
+                    'total_creado': 0,
+                    'ids_creados': [],
+                    'lineas': resumen_lineas[:25],
+                    'nota': 'No se guardó nada.',
+                }
                 if errores:
                     # Mostrar un resumen + primeros errores (evita spam)
                     flash(f'❌ No se agregó ningún paciente. Se detectaron {len(errores)} registro(s) duplicado(s).', 'error')
@@ -5383,6 +5480,14 @@ def facturacion_facturas_nueva():
             # IDs para resaltar en el listado (solo 1 vez)
             session['highlight_pendientes_ids'] = ids_creados
             session['descargar_pdf_pacientes'] = True  # Flag para disparar descarga automática
+            # Resumen para mostrar al volver al listado (y que no se “pierdan” pacientes sin explicación)
+            session['resumen_carga_pendientes'] = {
+                'total_enviado': len(lineas),
+                'total_creado': len(ids_creados),
+                'ids_creados': ids_creados[:25],
+                'lineas': resumen_lineas[:25],
+                'nota': 'Resumen de la última carga.',
+            }
             
             total_enviado = len(lineas)
             total_creado = len(ids_creados)
