@@ -21,15 +21,19 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Dra. Shirley Ramírez - Ginecóloga y Obstetra en Santo Domingo | Salud Femenina{% endblock %}</title>
+    <title>{% block title %}Ginecóloga en Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}</title>
     
     <!-- Meta Tags SEO -->
-    <meta name="description" content="{% block description %}Ginecóloga y Obstetra en Santo Domingo Este. Experta en Ginecología Estética Láser: Rejuvenecimiento vaginal, tensado vaginal y labioplastia. Control prenatal, embarazo y salud femenina integral. Citas: 829-740-5073{% endblock %}">
-    <meta name="keywords" content="ginecóloga Santo Domingo Este, doctora ginecóloga, ginecologa cerca de mi, ginecólogo zona oriental, obstetra Santo Domingo Este, doctora gineco obstetra, medico obstetra, ginecología estética, ginecología estética y funcional, doctora ginecologia estetica, rejuvenecimiento íntimo femenino, tratamientos íntimos femeninos, ginecología atención femenino, salud femenina, salud obstétrica, control prenatal, seguimiento embarazo, atención gineco obstétrica, consulta gineco obstetra, consulta para ginecología, consultorio obstetricia, especialista obstetra, mejores obstetras, obstetra cerca de mi, ginecologo cerca de mi, atención de ginecología, áreas de ginecología, medicina obstetricia, obstetricia medico, para que sirve un ginecologo obstetra, gineco obstetra para que sirve, qué es un gineco obstetra, para que es obstetricia, obstetra que hace, ginecología Santo Domingo, futura obstetra, mi doctora ginecóloga">
+    <meta name="description" content="{% block description %}Ginecóloga-obstetra en Santo Domingo Este (Zona Oriental). Chequeo ginecológico, control de embarazo y anticonceptivos. Agenda tu cita.{% endblock %}">
+    <meta name="keywords" content="{% block keywords %}ginecóloga en Santo Domingo Este, ginecologa en santo domingo este, ginecóloga en Santo Domingo, ginecologa en santo domingo, ginecólogo zona oriental, ginecologo zona oriental, ginecólogo cerca de mí, ginecologo cerca de mi, obstetra en Santo Domingo, control de embarazo, chequeo ginecológico, chequeo ginecologico, salud femenina, consulta ginecológica, consulta ginecologica, control prenatal, planificación familiar, planificacion familiar, anticonceptivos, métodos anticonceptivos, metodos anticonceptivos{% endblock %}">
     <meta name="author" content="Dra. Shirley Ramírez">
     <meta name="robots" content="{% block robots %}index, follow, max-image-preview:large{% endblock %}">
     <link rel="canonical" href="https://www.draramirez.com{{ request.path }}">
     {% block extra_meta %}{% endblock %}
+    <meta name="geo.placename" content="Santo Domingo Este, República Dominicana">
+    <meta name="geo.region" content="DO-32">
+    <meta name="geo.position" content="18.489719;-69.865385">
+    <meta name="ICBM" content="18.489719, -69.865385">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -37,9 +41,13 @@
     <meta property="og:title" content="{% block og_title %}Dra. Shirley Ramírez - Ginecóloga y Obstetra en Santo Domingo Este{% endblock %}">
     <meta property="og:description" content="{% block og_description %}Experta en Ginecología Estética Láser: Rejuvenecimiento vaginal, tensado y labioplastia. Control prenatal y salud femenina integral.{% endblock %}">
     <meta property="og:image" content="{{ url_for('static', filename='images/dra-shirley-profesional.jpg', _external=True) }}">
+    <meta property="og:image:secure_url" content="{{ url_for('static', filename='images/dra-shirley-profesional.jpg', _external=True) }}">
+    <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="Dra. Shirley Ramírez - Ginecóloga y Obstetra">
+    <meta property="og:locale" content="es_DO">
+    <meta property="og:site_name" content="Dra. Shirley Ramírez">
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
@@ -48,13 +56,14 @@
     <meta property="twitter:description" content="{% block twitter_description %}Experta en Ginecología Estética Láser: Rejuvenecimiento vaginal, tensado y labioplastia. Control prenatal.{% endblock %}">
     <meta property="twitter:image" content="{{ url_for('static', filename='images/dra-shirley-profesional.jpg', _external=True) }}">
     <meta property="twitter:image:alt" content="Dra. Shirley Ramírez - Ginecóloga y Obstetra">
+    <meta property="twitter:domain" content="draramirez.com">
     
     <!-- Schema.org Structured Data para SEO Médico - Optimizado para Google -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": ["Physician", "MedicalBusiness", "LocalBusiness"],
-      "name": "Dra. Shirley Ramírez Montero - Ginecóloga y Obstetra",
+      "name": "Dra. Shirley Ramírez - Ginecóloga y Obstetra",
       "alternateName": "Dra. Shirley Ramírez",
       "image": {
         "@type": "ImageObject",
@@ -65,11 +74,11 @@
       },
       "logo": {
         "@type": "ImageObject",
-        "url": "{{ url_for('static', filename='favicon.svg', _external=True) }}",
+        "url": "{{ url_for('static', filename='logos/logo.png', _external=True) }}",
         "width": 250,
         "height": 250
       },
-      "description": "Ginecóloga y Obstetra en Santo Domingo Este. Experta en Ginecología Estética Láser: Rejuvenecimiento vaginal, tensado vaginal, labioplastia. Control prenatal, embarazo y salud femenina integral con tecnología de vanguardia.",
+      "description": "Ginecóloga y obstetra en Santo Domingo Este (Zona Oriental). Chequeo ginecológico, control de embarazo, planificación familiar y salud femenina. Agenda tu cita.",
       "medicalSpecialty": ["Gynecology", "Obstetrics", "Women's Health", "Reproductive Medicine", "Aesthetic Gynecology", "Laser Gynecology"],
       "availableService": [
         {
@@ -121,22 +130,23 @@
       "priceRange": "$$",
       "address": {
         "@type": "PostalAddress",
-        "streetAddress": "Zona Oriental",
+        "streetAddress": "Av. Sabana Larga 123",
         "addressLocality": "Santo Domingo Este",
         "addressRegion": "Santo Domingo",
+        "postalCode": "11901",
         "addressCountry": "DO"
       },
-      "hasMap": "https://www.google.com/maps/place/Centro+Oriental+de+Ginecolog%C3%ADa+y+Obstetricia/@18.4975225,-69.8651385,17z/data=!3m1!4b1!4m6!3m5!1s0x8eaf887e90af3bd9:0x5a34a05877ad0b13!8m2!3d18.4975225!4d-69.8651385!16s%2Fg%2F1tcx2l68?entry=ttu",
+      "hasMap": "https://www.google.com/maps/search/?api=1&query=Av.%20Sabana%20Larga%20123%2C%20Santo%20Domingo%20Este%2011901",
       "areaServed": [
         "Santo Domingo Este",
         "Santo Domingo"
       ],
       "geo": {
         "@type": "GeoCoordinates",
-        "latitude": "18.4861",
-        "longitude": "-69.9312"
+        "latitude": "18.489719",
+        "longitude": "-69.865385"
       },
-      "telephone": "829-740-5073",
+      "telephone": "+1-829-740-5073",
       "email": "dra.ramirezr@gmail.com",
       "url": "https://www.draramirez.com",
       "sameAs": [
@@ -193,9 +203,10 @@
     
     <!-- Favicon -->
     <!-- Favicon -->
-    <!-- Este repo incluye favicon.svg; /favicon.ico redirige a ese SVG para evitar 404 -->
-    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
-    <link rel="alternate icon" href="{{ url_for('favicon_ico') }}" type="image/x-icon">
+    <!-- Favicon / Logo -->
+    <link rel="icon" href="{{ url_for('static', filename='logos/logo.png') }}" type="image/png">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='logos/logo.png') }}">
+    <link rel="alternate icon" href="{{ url_for('static', filename='logos/favicon.ico') }}" type="image/x-icon">
     
     <!-- DNS Prefetch y Preconnect para máxima velocidad -->
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
@@ -443,7 +454,7 @@
         .navbar-brand {
             font-weight: 700;
             font-size: 1.5rem;
-            color: var(--primary-color) !important;
+            color: #8B5A6B !important;
         }
         
         .navbar-nav .nav-link {
@@ -458,16 +469,33 @@
         }
         
         .navbar-nav .nav-link:hover {
-            color: var(--primary-color) !important;
+            color: #8B5A6B !important;
             background-color: rgba(206, 176, 183, 0.1);
             transform: translateY(-2px);
         }
         
         .navbar-nav .nav-link.active {
-            color: var(--primary-color) !important;
+            color: #8B5A6B !important;
             background-color: rgba(206, 176, 183, 0.15);
             box-shadow: 0 4px 12px rgba(206, 176, 183, 0.3);
             border: 2px solid rgba(206, 176, 183, 0.3);
+        }
+
+        /* Menú superior (links): quitar efectos extra.
+           Nota: NO aplica al botón "Solicitar Cita" (es .btn) */
+        .navbar-nav .nav-link::after {
+            display: none !important;
+        }
+
+        .navbar-nav .nav-link:hover {
+            background-color: transparent !important;
+            transform: none !important;
+        }
+
+        .navbar-nav .nav-link.active {
+            background-color: transparent !important;
+            box-shadow: none !important;
+            border: none !important;
         }
         
         /* Dropdown menu con bordes redondeados */
@@ -524,6 +552,15 @@
         .btn-cita-animated {
             animation: pulse-soft 2s ease-in-out infinite;
         }
+
+        /* Solicitar Cita (navbar): mismo color que botón flotante de cita */
+        .navbar .btn.btn-primary.btn-cita-animated {
+            background: linear-gradient(135deg, #8B5A6B 0%, #6B3A4B 100%) !important;
+        }
+        
+        .navbar .btn.btn-primary.btn-cita-animated:hover {
+            background: linear-gradient(135deg, #6B3A4B 0%, #5A2F3E 100%) !important;
+        }
         
         .btn-primary {
             background: var(--gradient-primary);
@@ -566,7 +603,7 @@
             border-radius: 50%;
             text-align: center;
             font-size: 28px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: none !important;
             z-index: 1000;
             transition: all 0.3s ease;
             display: flex;
@@ -577,7 +614,7 @@
         
         .float-button:hover {
             transform: scale(1.15) translateY(-2px);
-            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.4);
+            box-shadow: none !important;
             color: white;
         }
         
@@ -590,7 +627,7 @@
         
         .whatsapp-float:hover {
             background: linear-gradient(135deg, #20ba5a 0%, #1ea952 100%);
-            box-shadow: 0 6px 30px rgba(37, 211, 102, 0.5);
+            box-shadow: none !important;
             color: white !important;
         }
         
@@ -607,7 +644,7 @@
         
         .instagram-float:hover {
             background: linear-gradient(135deg, #a14cc9 0%, #ff3838 50%, #ffc166 100%);
-            box-shadow: 0 6px 30px rgba(253, 29, 29, 0.5);
+            box-shadow: none !important;
             color: white !important;
         }
         
@@ -615,25 +652,675 @@
             color: white !important;
         }
         
-        /* Citas Button - SILVER CHALICE */
-        .citas-float {
+        /* Appointment Floating Button (restaurado) */
+        .appointment-float {
             bottom: 170px;
-            background: linear-gradient(135deg, #ACACAD 0%, #949495 100%);
-            color: white !important;
+            background: linear-gradient(135deg, #8B5A6B 0%, #6B3A4B 100%);
+            color: #fff !important;
+            border: none;
         }
-        
-        .citas-float:hover {
-            background: linear-gradient(135deg, #949495 0%, #808081 100%);
-            box-shadow: 0 6px 30px rgba(172, 172, 173, 0.5);
-            color: white !important;
+
+        .appointment-float:hover {
+            background: linear-gradient(135deg, #6B3A4B 0%, #5A2F3E 100%);
+            box-shadow: none !important;
+            color: #fff !important;
         }
-        
-        .citas-float i {
-            color: white !important;
+
+        .appointment-float svg {
+            width: 26px;
+            height: 26px;
+            display: block;
+            color: #fff;
+        }
+
+        /* Sin etiqueta lateral (solo icono) */
+        .appointment-float::after { display: none; }
+
+        .chatbot-panel {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            width: min(380px, calc(100vw - 40px));
+            height: min(540px, calc(100vh - 120px));
+            border-radius: 22px;
+            overflow: hidden;
+            background: var(--chat-bg);
+            border: 1px solid var(--chat-border);
+            box-shadow: 0 26px 66px rgba(17, 24, 39, 0.22);
+            z-index: 1100;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateY(14px) scale(0.98);
+            transform-origin: bottom right;
+            transition: opacity 180ms ease, transform 220ms cubic-bezier(.2,.8,.2,1), visibility 0ms linear 220ms;
+            font-family: inherit;
+        }
+
+        .chatbot-panel.is-open {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: translateY(0) scale(1);
+            transition: opacity 180ms ease, transform 220ms cubic-bezier(.2,.8,.2,1), visibility 0ms linear 0ms;
+        }
+
+        .chatbot-header {
+            background: linear-gradient(135deg, var(--chat-primary) 0%, var(--chat-primary-dark) 100%);
+            color: #fff;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .chatbot-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            line-height: 1.2;
+            min-width: 0;
+        }
+
+        .chatbot-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 999px;
+            flex: 0 0 auto;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            background: rgba(255, 255, 255, 0.20);
+            object-fit: cover;
+            display: block;
+        }
+
+        .chatbot-title-text {
+            display: grid;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .chatbot-title-name {
+            font-weight: 900;
+            font-size: 0.92rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chatbot-title-sub {
+            font-size: 0.76rem;
+            opacity: 0.92;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chatbot-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 800;
+            font-size: 0.74rem;
+            letter-spacing: 0.01em;
+            opacity: 0.92;
+        }
+
+        .chatbot-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: #34d399;
+            box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.55);
+            animation: chatbotPulse 1.6s ease-out infinite;
+        }
+
+        @keyframes chatbotPulse {
+            0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.55); }
+            70% { box-shadow: 0 0 0 8px rgba(52, 211, 153, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+        }
+
+        .chatbot-header-actions {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .chatbot-header-btn {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+            transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+        }
+
+        .chatbot-header-btn:hover,
+        .chatbot-close:hover {
+            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.35);
+        }
+
+        .chatbot-header-btn:active,
+        .chatbot-close:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .chatbot-header-btn svg {
+            width: 18px;
+            height: 18px;
+            color: #fff;
+        }
+
+        .chatbot-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .chatbot-close svg {
+            width: 18px;
+            height: 18px;
+            color: #fff;
+        }
+
+        .chatbot-messages {
+            padding: 14px 12px 12px;
+            overflow: auto;
+            flex: 1 1 auto;
+            display: grid;
+            gap: 10px;
+            background:
+                radial-gradient(600px 300px at 20% 0%, rgba(139, 90, 107, 0.10), transparent 55%),
+                linear-gradient(180deg, var(--chat-soft-2) 0%, var(--chat-bg) 68%);
+        }
+
+        .chatbot-disclaimer {
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.86);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            color: var(--chat-muted);
+            font-size: 0.82rem;
+            line-height: 1.35;
+        }
+
+        .chatbot-disclaimer-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .chatbot-disclaimer-actions {
+            flex: 0 0 auto;
+            display: inline-flex;
+            gap: 8px;
+        }
+
+        .chatbot-link-btn {
+            border: 1px solid rgba(139, 90, 107, 0.18);
+            background: rgba(253, 248, 249, 0.9);
+            color: var(--chat-primary);
+            font-weight: 800;
+            font-size: 0.76rem;
+            padding: 6px 10px;
+            border-radius: 999px;
+            cursor: pointer;
+        }
+
+        .chatbot-day-sep {
+            justify-self: center;
+            align-self: center;
+            margin: 4px 0 2px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(139, 90, 107, 0.22);
+            color: var(--chat-muted);
+            font-weight: 800;
+            font-size: 0.76rem;
+            letter-spacing: 0.02em;
+            box-shadow: 0 10px 20px rgba(17, 24, 39, 0.06);
+        }
+
+        .chatbot-messages::-webkit-scrollbar { width: 10px; }
+        .chatbot-messages::-webkit-scrollbar-track { background: transparent; }
+        .chatbot-messages::-webkit-scrollbar-thumb {
+            background: rgba(139, 90, 107, 0.22);
+            border-radius: 999px;
+            border: 3px solid transparent;
+            background-clip: content-box;
+        }
+
+        .chatbot-typing {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .chatbot-typing span {
+            width: 6px;
+            height: 6px;
+            border-radius: 999px;
+            background: rgba(139, 90, 107, 0.9);
+            display: inline-block;
+            animation: chatbotDot 1.1s ease-in-out infinite;
+        }
+
+        .chatbot-typing span:nth-child(2) { animation-delay: 0.15s; }
+        .chatbot-typing span:nth-child(3) { animation-delay: 0.30s; }
+
+        @keyframes chatbotDot {
+            0%, 100% { transform: translateY(0); opacity: 0.55; }
+            50% { transform: translateY(-3px); opacity: 1; }
+        }
+
+        .chatbot-msg {
+            max-width: 92%;
+            border-radius: 16px;
+            padding: 11px 12px;
+            border: 1px solid rgba(224, 208, 212, 0.55);
+            line-height: 1.55;
+            font-size: 0.95rem;
+            color: var(--chat-text);
+            background: var(--chat-bg);
+            white-space: pre-wrap;
+            box-shadow: 0 8px 20px rgba(17, 24, 39, 0.08);
+            position: relative;
+        }
+
+        .chatbot-msg.bot {
+            justify-self: start;
+            background: var(--chat-soft);
+            border-color: rgba(139, 90, 107, 0.18);
+        }
+
+        .chatbot-msg.user {
+            justify-self: end;
+            background: var(--chat-soft-2);
+            color: var(--chat-text);
+            border-color: rgba(0, 0, 0, 0.06);
+            box-shadow: 0 8px 20px rgba(17, 24, 39, 0.06);
+        }
+
+        /* “Tail” (cola) estilo WhatsApp/Intercom */
+        .chatbot-msg.bot::before {
+            content: "";
+            position: absolute;
+            left: -6px;
+            bottom: 10px;
+            width: 12px;
+            height: 12px;
+            background: var(--chat-soft);
+            border-left: 1px solid rgba(139, 90, 107, 0.18);
+            border-bottom: 1px solid rgba(139, 90, 107, 0.18);
+            transform: rotate(45deg);
+            border-bottom-left-radius: 3px;
+        }
+
+        .chatbot-msg.user::before {
+            content: "";
+            position: absolute;
+            right: -6px;
+            bottom: 10px;
+            width: 12px;
+            height: 12px;
+            background: #F5F5F5;
+            border-right: 1px solid rgba(0, 0, 0, 0.06);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            transform: rotate(45deg);
+            border-bottom-right-radius: 3px;
+        }
+
+        .chatbot-time {
+            display: block;
+            margin-top: 6px;
+            font-size: 0.72rem;
+            color: rgba(45, 45, 45, 0.62);
+            text-align: right;
+            letter-spacing: 0.01em;
+        }
+
+        /* Links dentro del texto (no botones) */
+        .chatbot-msg a:not(.chatbot-action-btn) {
+            color: var(--chat-primary) !important;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        /* Botones (son <a> también): forzar texto blanco */
+        .chatbot-msg a.chatbot-action-btn--book,
+        .chatbot-msg a.chatbot-action-btn--wa {
+            color: #fff !important;
+        }
+
+        .chatbot-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .chatbot-action-btn {
+            border-radius: 999px;
+            padding: 8px 12px;
+            border: 1px solid rgba(139, 90, 107, 0.22);
+            background: rgba(255, 255, 255, 0.92);
+            color: var(--chat-text);
+            font-weight: 800;
+            font-size: 0.82rem;
+            cursor: pointer;
+            user-select: none;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 160ms ease, filter 160ms ease, background 160ms ease;
+        }
+
+        .chatbot-action-btn:hover { transform: translateY(-1px); filter: brightness(0.98); }
+        .chatbot-action-btn:active { transform: translateY(0) scale(0.98); }
+
+        .chatbot-action-btn--book {
+            background: var(--chat-primary);
+            border-color: rgba(139, 90, 107, 0.35);
+            color: #fff !important;
+        }
+
+        .chatbot-action-btn--wa {
+            background: #20b26b;
+            border-color: rgba(32, 178, 107, 0.35);
+            color: #fff !important;
+        }
+
+        .chatbot-action-btn--choice {
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .chatbot-action-btn--book svg,
+        .chatbot-action-btn--wa svg {
+            color: #fff !important;
+        }
+
+        .chatbot-action-btn[type="button"] {
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .chatbot-action-btn svg {
+            width: 16px;
+            height: 16px;
+            color: currentColor;
+            display: block;
+        }
+
+        .chatbot-chips {
+            padding: 0 12px 12px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            background: #fff;
+        }
+
+        /* El usuario prefirió sin quick replies */
+        .chatbot-chips { display: none !important; }
+
+        .chatbot-chip {
+            border-radius: 14px;
+            padding: 10px 12px;
+            border: 1px solid rgba(139, 90, 107, 0.28);
+            background: var(--chat-primary);
+            color: #fff;
+            font-weight: 800;
+            font-size: 0.82rem;
+            cursor: pointer;
+            user-select: none;
+            text-align: left;
+            box-shadow: 0 8px 18px rgba(17, 24, 39, 0.06);
+            transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+        }
+
+        .chatbot-chip:hover { transform: translateY(-1px); background: var(--chat-primary-dark); border-color: rgba(107, 58, 75, 0.55); }
+        .chatbot-chip:active { transform: translateY(0) scale(0.99); }
+
+        .chatbot-input {
+            padding: 12px 14px 14px;
+            border-top: 1px solid rgba(224, 208, 212, 0.7);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: #fff;
+        }
+
+        .chatbot-input input {
+            flex: 1 1 auto;
+            border-radius: 999px;
+            border: 1px solid rgba(224, 208, 212, 0.9);
+            padding: 12px 14px;
+            outline: none;
+            font-size: 0.95rem;
+            transition: box-shadow 160ms ease, border-color 160ms ease;
+        }
+
+        .chatbot-input input:focus {
+            border-color: rgba(139, 90, 107, 0.55);
+            box-shadow: 0 0 0 4px rgba(139, 90, 107, 0.18);
+        }
+
+        .chatbot-send {
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: none;
+            background: linear-gradient(135deg, var(--chat-primary) 0%, var(--chat-primary-dark) 100%);
+            color: #fff;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 160ms ease, filter 160ms ease;
+        }
+
+        .chatbot-send:hover { transform: translateY(-1px); filter: brightness(0.98); }
+        .chatbot-send:active { transform: translateY(0) scale(0.98); }
+
+        .chatbot-send svg {
+            width: 20px;
+            height: 20px;
+            color: #fff;
+        }
+
+        @media (max-width: 576px) {
+            .chatbot-panel { right: 12px; width: calc(100vw - 24px); }
+            .chatbot-float { right: 12px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .chatbot-float,
+            .chatbot-float:hover {
+                transition: none !important;
+                transform: none !important;
+            }
+            .chatbot-panel,
+            .chatbot-action-btn,
+            .chatbot-chip,
+            .chatbot-send,
+            .chatbot-header-btn,
+            .chatbot-close {
+                transition: none !important;
+                animation: none !important;
+                transform: none !important;
+            }
+        }
+
+        /* Footer CTA (replica del pie de /servicios) */
+        .site-footer-cta {
+            padding: 74px 0;
+            background: linear-gradient(135deg, #8B5A6B 0%, #6B3A4B 100%);
+            color: #fff;
+            text-align: center;
+            margin-top: 48px;
+        }
+
+        .site-footer-cta h2 {
+            font-family: "Playfair Display", serif !important;
+            font-weight: 700 !important;
+            color: #fff !important;
+            font-size: clamp(1.9rem, 2.5vw, 2.2rem) !important;
+            margin: 0 0 18px;
+        }
+
+        .site-footer-actions {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .site-footer-btn {
+            background: #fff;
+            color: #8B5A6B !important;
+            border: 1px solid rgba(139, 90, 107, 0.18);
+            border-radius: 999px;
+            padding: 14px 22px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+            box-shadow: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-transform: none !important;
+            letter-spacing: 0 !important;
+            font-family: var(--font-body, inherit) !important;
+            text-shadow: none !important;
+            -webkit-text-stroke: 0 !important;
+            filter: none !important;
+            min-width: 210px;
+            position: relative;
+            overflow: hidden;
+            will-change: transform;
+            animation: siteFooterBtnFloat 2.8s ease-in-out infinite;
+        }
+
+        .site-footer-btn:visited {
+            color: #8B5A6B !important;
+        }
+
+        .site-footer-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -140%;
+            width: 140%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.55) 45%, transparent 100%);
+            transform: skewX(-18deg);
+            opacity: 0.0;
+            pointer-events: none;
+            animation: siteFooterBtnShine 4.2s ease-in-out infinite;
+        }
+
+        .site-footer-btn svg {
+            width: 18px;
+            height: 18px;
+            display: block;
+            flex: 0 0 auto;
+            color: inherit !important;
+            filter: none !important;
+        }
+
+        .site-footer-btn:hover {
+            transform: scale(1.08) translateY(-2px);
+            background: #fff;
+            color: #8B5A6B !important;
+            border-color: rgba(139, 90, 107, 0.18);
+            text-decoration: none;
+            box-shadow: none;
+        }
+
+        .site-footer-btn:hover::after {
+            opacity: 0.9;
+        }
+
+        .site-footer-btn:active {
+            transform: scale(0.98) translateY(0);
+            box-shadow: none;
+        }
+
+        .site-footer-btn:focus,
+        .site-footer-btn:focus-visible {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .site-footer-insurance {
+            margin-top: 28px;
+            text-align: center;
+        }
+
+        .site-footer-insurance-title {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 700 !important;
+            font-size: 0.98rem !important;
+            margin-bottom: 14px;
+        }
+
+        .site-footer-copy {
+            margin-top: 12px;
+            color: rgba(255, 255, 255, 0.70) !important;
+            font-size: 0.85rem !important;
+        }
+
+        @keyframes siteFooterBtnFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-1px); }
+        }
+
+        @keyframes siteFooterBtnShine {
+            0%, 55% { left: -140%; opacity: 0; }
+            65% { opacity: 0.65; }
+            82% { left: 140%; opacity: 0; }
+            100% { left: 140%; opacity: 0; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .site-footer-btn,
+            .site-footer-btn::after {
+                animation: none !important;
+                transition: none !important;
+            }
+            .site-footer-btn:hover,
+            .site-footer-btn:active {
+                transform: none !important;
+            }
         }
         
         .footer {
-            background: var(--gradient-hero);
+            /* Igual al botón flotante "Solicitar Cita" */
+            background: linear-gradient(135deg, #8B5A6B 0%, #6B3A4B 100%);
             color: white;
             padding: 3rem 0 1rem;
         }
@@ -869,7 +1556,7 @@
     <nav class="navbar navbar-expand-lg navbar-light shadow-sm" style="background-color: rgba(255, 255, 255, 0.9); backdrop-filter: blur(15px);">
         <div class="container">
             <a class="navbar-brand d-flex flex-column" href="{{ url_for('index') }}" style="line-height: 1.2;">
-                <span style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">Dra. Shirley Ramírez</span>
+                <span style="font-size: 1.5rem; font-weight: 700; color: #8B5A6B;">Dra. Shirley Ramírez</span>
                 <span style="font-size: 0.85rem; font-weight: 400; color: var(--title-color);">Ginecóloga-Obstetra</span>
             </a>
             
@@ -922,142 +1609,44 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
-    <footer class="text-light py-4 mt-5" style="background-color: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); color: var(--text-dark);">
+    {# Pie de página estilo /servicios (solo en páginas públicas) #}
+    {% set SHOW_SITE_FOOTER = request.endpoint in ['index', 'services', 'about', 'contact', 'request_appointment', 'aesthetic_treatments'] %}
+    {% if SHOW_SITE_FOOTER %}
+    <footer class="site-footer-cta" role="contentinfo">
         <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-5 col-md-6 mb-3">
-                    <!-- Seguros Médicos -->
-                    <div class="p-2 h-100" style="background: rgba(206, 176, 183, 0.1); border-radius: 10px; border-left: 4px solid var(--primary-color);">
-                        <h6 class="text-primary mb-2" style="font-weight: 700; font-size: 0.9rem;">
-                            <i class="fas fa-shield-alt me-2"></i>
-                            Trabajamos con los Principales Seguros Médicos
-                        </h6>
-                        <div class="row g-1">
-                            <div class="col-6 col-sm-4">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-check-circle text-primary me-1" style="font-size: 0.75rem;"></i>
-                                    <span class="text-muted" style="font-size: 0.85rem;">Universal</span>
-                                </div>
-                            </div>
-                            <div class="col-6 col-sm-4">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-check-circle text-primary me-1" style="font-size: 0.75rem;"></i>
-                                    <span class="text-muted" style="font-size: 0.85rem;">Reservas</span>
-                                </div>
-                            </div>
-                            <div class="col-6 col-sm-4">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-check-circle text-primary me-1" style="font-size: 0.75rem;"></i>
-                                    <span class="text-muted" style="font-size: 0.85rem;">Humano ARS</span>
-                                </div>
-                            </div>
-                            <div class="col-6 col-sm-4">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-check-circle text-primary me-1" style="font-size: 0.75rem;"></i>
-                                    <span class="text-muted" style="font-size: 0.85rem;">Primera</span>
-                                </div>
-                            </div>
-                            <div class="col-6 col-sm-4">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-check-circle text-primary me-1" style="font-size: 0.75rem;"></i>
-                                    <span class="text-muted" style="font-size: 0.85rem;">Mapfre</span>
-                                </div>
-                            </div>
-                            <div class="col-6 col-sm-4">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-check-circle text-primary me-1" style="font-size: 0.75rem;"></i>
-                                    <span class="text-muted" style="font-size: 0.85rem;">Futuro</span>
-                                </div>
-                            </div>
-                            <div class="col-6 col-sm-4">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-check-circle text-primary me-1" style="font-size: 0.75rem;"></i>
-                                    <span class="text-muted" style="font-size: 0.85rem;">Senasa</span>
-                                </div>
-                            </div>
-                            <div class="col-6 col-sm-4">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-check-circle text-primary me-1" style="font-size: 0.75rem;"></i>
-                                    <span class="text-muted" style="font-size: 0.85rem;">Monumental</span>
-                                </div>
-                            </div>
-                            <div class="col-6 col-sm-4">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-check-circle text-primary me-1" style="font-size: 0.75rem;"></i>
-                                    <span class="text-muted" style="font-size: 0.85rem;">Semma</span>
-                                </div>
-                            </div>
-                            <div class="col-6 col-sm-4">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-check-circle text-primary me-1" style="font-size: 0.75rem;"></i>
-                                    <span class="text-muted" style="font-size: 0.85rem;">Renacer</span>
-                                </div>
-                            </div>
-                            <div class="col-6 col-sm-4">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-check-circle text-primary me-1" style="font-size: 0.75rem;"></i>
-                                    <span class="text-muted" style="font-size: 0.85rem;">APS</span>
-                                </div>
-                            </div>
-                            <div class="col-6 col-sm-4">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-check-circle text-primary me-1" style="font-size: 0.75rem;"></i>
-                                    <span class="text-muted" style="font-size: 0.85rem;">Asemap</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <div style="max-width: 860px; margin: 0 auto;">
+                <h2>¿Lista para Cuidar tu Salud?</h2>
+                <div class="site-footer-actions">
+                    <a class="site-footer-btn" href="{{ url_for('request_appointment') }}">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill="currentColor" d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1h1.5A2.5 2.5 0 0 1 22 6.5v13A2.5 2.5 0 0 1 19.5 22h-15A2.5 2.5 0 0 1 2 19.5v-13A2.5 2.5 0 0 1 4.5 4H6V3a1 1 0 0 1 1-1zm0 5H4v12.5c0 .28.22.5.5.5h15c.28 0 .5-.22.5-.5V7h-3v1a1 1 0 1 1-2 0V7H8v1a1 1 0 1 1-2 0V7z"/>
+                            <path fill="currentColor" d="M6.5 10.5h3v3h-3v-3zm4.5 0h3v3h-3v-3zm4.5 0h3v3h-3v-3zM6.5 15h3v3h-3v-3zm4.5 0h3v3h-3v-3z"/>
+                        </svg>
+                        Agendar Consulta
+                    </a>
+                    <a class="site-footer-btn"
+                       href="https://wa.me/18297405073?text=Hola,%20me%20gustar%C3%ADa%20agendar%20una%20consulta"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       aria-label="Agendar por WhatsApp">
+                        <svg viewBox="0 0 32 32" aria-hidden="true">
+                            <path fill="currentColor" d="M19.11 17.2c-.26-.13-1.54-.76-1.78-.85-.24-.09-.42-.13-.6.13-.18.26-.69.85-.85 1.03-.15.18-.31.2-.57.07-.26-.13-1.11-.41-2.12-1.3-.78-.7-1.31-1.56-1.46-1.82-.15-.26-.02-.4.11-.53.11-.11.26-.31.39-.46.13-.15.18-.26.26-.44.09-.18.04-.33-.02-.46-.07-.13-.6-1.45-.82-1.99-.22-.53-.44-.46-.6-.46h-.52c-.18 0-.46.07-.7.33-.24.26-.93.91-.93 2.23 0 1.32.95 2.59 1.09 2.77.13.18 1.87 2.86 4.54 4.01.64.28 1.14.44 1.52.56.64.2 1.22.17 1.68.1.51-.08 1.54-.63 1.76-1.24.22-.61.22-1.13.15-1.24-.06-.11-.24-.18-.5-.31z"/>
+                            <path fill="currentColor" d="M16.02 3.2c-7.05 0-12.8 5.75-12.8 12.8 0 2.26.6 4.47 1.73 6.41L3.2 28.8l6.56-1.72a12.75 12.75 0 0 0 6.26 1.64h.01c7.05 0 12.8-5.75 12.8-12.8s-5.75-12.8-12.81-12.8zm0 22.2h-.01c-1.94 0-3.84-.52-5.5-1.51l-.39-.23-3.89 1.02 1.04-3.79-.25-.39a9.98 9.98 0 0 1-1.55-5.4c0-5.52 4.49-10.01 10.01-10.01 5.52 0 10.01 4.49 10.01 10.01s-4.49 10.01-10.01 10.01z"/>
+                        </svg>
+                        WhatsApp
+                    </a>
                 </div>
-                
-                <div class="col-lg-5 col-md-6 mb-3">
-                    <!-- Contacto -->
-                    <div class="p-2 h-100" style="background: rgba(206, 176, 183, 0.1); border-radius: 10px; border-left: 4px solid var(--primary-color);">
-                        <h6 class="text-primary mb-2" style="font-weight: 700; font-size: 0.9rem;">
-                            <i class="fas fa-phone-alt me-2"></i>
-                            Contacto
-                        </h6>
-                        <div>
-                            <p class="text-muted mb-2" style="font-size: 0.85rem; line-height: 1.3;">
-                                <i class="fas fa-map-marker-alt me-2"></i>
-                                <a href="https://www.google.com/maps/place/Centro+Oriental+de+Ginecolog%C3%ADa+y+Obstetricia/@18.4975225,-69.8651385,17z/data=!3m1!4b1!4m6!3m5!1s0x8eaf887e90af3bd9:0x5a34a05877ad0b13!8m2!3d18.4975225!4d-69.8651385!16s%2Fg%2F1tcx2l68?entry=ttu&g_ep=EgoyMDI1MTAwOC4wIKXMDSoASAFQAw%3D%3D" 
-                                   target="_blank" 
-                                   rel="noopener noreferrer" 
-                                   class="text-muted text-decoration-none">
-                                    Centro Oriental de Ginecología y Obstetricia, Zona Oriental, República Dominicana
-                                </a>
-                            </p>
-                            <p class="text-muted mb-2" style="font-size: 0.85rem;">
-                                <i class="fas fa-phone me-2"></i>
-                                <a href="tel:+18297405073" class="text-muted text-decoration-none">(829) 740-5073</a>
-                            </p>
-                            <p class="text-muted mb-0" style="font-size: 0.85rem;">
-                                <i class="fas fa-envelope me-2"></i>
-                                <a href="mailto:dra.ramirezr@gmail.com" class="text-muted text-decoration-none" data-nosnippet>Contacto por email</a>
-                            </p>
-                            <p class="text-muted mb-0 mt-2" style="font-size: 0.85rem;">
-                                <i class="fas fa-search me-2"></i>
-                                <a href="{{ url_for('seo_ginecologa_santo_domingo') }}" class="text-muted text-decoration-none">
-                                    Ginecóloga en Santo Domingo
-                                </a>
-                            </p>
-                        </div>
+
+                <div class="site-footer-insurance" aria-label="Seguros médicos disponibles">
+                    <div class="site-footer-insurance-title">Trabajamos con los principales seguros médicos</div>
+                    <div class="site-footer-copy" data-nosnippet>
+                        &copy; 2026 Dra. Shirley Ramírez. Todos los derechos reservados.
                     </div>
-                </div>
-            </div>
-            
-            <hr class="my-3">
-            
-            
-            <div class="row align-items-center">
-                <div class="col-md-12 text-center">
-                    <p class="text-muted mb-0" style="font-size: 0.85rem;" data-nosnippet>
-                        &copy; 2025 Dra. Shirley Ramírez. Todos los derechos reservados.
-                    </p>
                 </div>
             </div>
         </div>
     </footer>
+    {% endif %}
 
     <!-- Floating Action Buttons -->
     <!-- WhatsApp Button -->
@@ -1078,11 +1667,13 @@
         <i class="fab fa-instagram"></i>
     </a>
 
-    <!-- Citas Button -->
-    <a href="{{ url_for('request_appointment') }}" 
-       class="float-button citas-float"
-       title="Solicitar Cita">
-        <i class="fas fa-calendar-plus"></i>
+    <!-- Appointment Floating Button (restaurado) -->
+    <a href="{{ url_for('request_appointment') }}"
+       class="float-button appointment-float"
+       title="Agendar cita">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M19 4h-1V2h-2v2H8V2H6v2H5a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3zm1 15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8h16v8zM4 9V7a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2H4z"/>
+        </svg>
     </a>
 
     <!-- JavaScript - Carga optimizada con defer para máxima velocidad -->
@@ -1090,11 +1681,1829 @@
     
     <!-- Script de optimización de rendimiento -->
     <script src="{{ url_for('static', filename='js/performance.js') }}?v=2" defer></script>
+
+    <script>
+        (function () {
+            const WA_NUMBER = '18297405073';
+            const DEFAULT_ADDRESS = 'Av. Sabana Larga 123, Santo Domingo Este 11901';
+            const SITE_EMAIL = 'dra.ramirezr@gmail.com';
+            const SITE_PHONE_DISPLAY = '(829) 740-5073';
+            // Link público solicitado (conversión). En local, el link interno también funciona.
+            const APPT_URL_PUBLIC = 'https://www.draramirez.com/solicitar-cita';
+            const APPT_URL_INTERNAL = '{{ url_for('request_appointment') }}';
+            const APPT_URL = APPT_URL_PUBLIC || APPT_URL_INTERNAL;
+            const FAQ_URL = "{{ url_for('static', filename='data/chatbot_faq_dataset.json') }}?v=5";
+
+            const toggleBtn = document.getElementById('chatbotToggle');
+            const panel = document.getElementById('chatbotPanel');
+            const closeBtn = document.getElementById('chatbotClose');
+            const clearBtn = document.getElementById('chatbotClear');
+            const waBtn = document.getElementById('chatbotWhatsApp');
+            const messagesEl = document.getElementById('chatbotMessages');
+            const chipsEl = document.getElementById('chatbotChips');
+            const form = document.getElementById('chatbotForm');
+            const input = document.getElementById('chatbotInput');
+
+            if (!toggleBtn || !panel || !closeBtn || !messagesEl || !chipsEl || !form || !input || !clearBtn) return;
+
+            const STORAGE_KEY = 'shirley_chatbot_v2';
+            const FLOW_KEY = 'shirley_chatbot_flow_v2';
+            const SCHEDULE_PROMPT_KEY = 'shirley_chatbot_schedule_prompt_v1';
+            const LAST_ACTIVITY_KEY = 'shirley_chatbot_last_activity_v1';
+            const CONTEXT_KEY = 'shirley_chatbot_context_v1';
+            const STATS_KEY = 'shirley_chatbot_stats_v1';
+
+            const normalize = (s) => (s || '')
+                .toString()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase()
+                .trim();
+
+            const makeWaLink = (text) => {
+                const msg = encodeURIComponent(text || '');
+                return `https://wa.me/${WA_NUMBER}?text=${msg}`;
+            };
+
+            const pagePath = (window.location && window.location.pathname) ? window.location.pathname : '/';
+            const pageName =
+                pagePath === '/' ? 'Inicio' :
+                pagePath.includes('solicitar-cita') ? 'Solicitar Cita' :
+                pagePath.includes('servicios') ? 'Servicios' :
+                pagePath.includes('contacto') ? 'Contacto' :
+                pagePath.includes('sobre-mi') ? 'Sobre mí' :
+                pagePath.includes('tratamientos-esteticos') ? 'Tratamientos estéticos' :
+                'Página';
+
+            // Emergencias (priorizar seguridad). Evitamos marcar "sangrado" genérico como urgencia.
+            const dangerKeywords = [
+                'hemorragia', 'sangrado abundante', 'dolor intenso', 'dolor incontrolable',
+                'fiebre alta', 'desmayo', 'me desmaye', 'convulsion', 'convulsiones',
+                'urgencia', 'emergencia'
+            ];
+
+            // Síntomas frecuentes (no diagnóstico): orienta + recomienda consulta.
+            const symptomKeywords = {
+                pelvic_pain: ['dolor pelvico', 'dolor pélvico', 'dolor en el bajo vientre', 'dolor ovarios', 'dolor de ovarios', 'dolor en la pelvis'],
+                bleeding: ['sangrado', 'manchado', 'spotting', 'sangrado vaginal', 'sangro', 'sangrando'],
+                discharge: ['flujo', 'flujo anormal', 'secrecion', 'secreción', 'olor', 'mal olor', 'picazon', 'picazón', 'ardor', 'comezon', 'comezón']
+            };
+
+            const affirmativeKeywords = ['si', 'sí', 'ok', 'okay', 'dale', 'quiero', 'me gustaria', 'me gustaría', 'vamos', 'agendar', 'cita', 'agenda'];
+
+            const keywordSets = {
+                cita: ['agendar', 'agenda', 'cita', 'consulta', 'turno', 'reservar', 'formulario'],
+                embarazo: ['embarazo', 'embarazada', 'gestacion', 'gestación', 'prenatal', 'control prenatal', 'bebe', 'bebé', 'semanas'],
+                anticonceptivos: ['anticonceptivo', 'anticonceptivos', 'pastillas', 'pildora', 'píldora', 'inyeccion', 'inyección', 'implante', 'diu', 'condon', 'condón', 'planificar'],
+                resultados: ['resultado', 'resultados', 'seguimiento', 'laboratorio', 'pap', 'papanicolau', 'citologia', 'citología', 'biopsia', 'estudio'],
+            };
+
+            let FAQ_ITEMS = [];
+            let FAQ_LOADED = false;
+
+            const loadFaqDataset = async () => {
+                if (FAQ_LOADED) return FAQ_ITEMS;
+                FAQ_LOADED = true;
+                try {
+                    const res = await fetch(FAQ_URL, { cache: 'no-store' });
+                    if (!res.ok) throw new Error(`faq_http_${res.status}`);
+                    const json = await res.json();
+                    const arr = (json && Array.isArray(json.faq_dataset)) ? json.faq_dataset : [];
+                    FAQ_ITEMS = arr
+                        .filter(x => x && typeof x === 'object')
+                        .map((x, idx) => ({
+                            id: String(idx),
+                            categoria: (x.categoria || '').toString().toLowerCase(),
+                            intencion: (x.intencion || '').toString().toLowerCase(),
+                            pregunta: (x.pregunta || '').toString(),
+                            respuesta: (x.respuesta || '').toString(),
+                            variaciones: Array.isArray(x.variaciones) ? x.variaciones.map(v => (v || '').toString()).filter(Boolean).slice(0, 12) : [],
+                            // Compat: algunos datasets traen urgencia como boolean o como nivel ("baja|media|alta")
+                            urgenciaNivel: (x.urgencia === true ? 'alta' : normalize((x.urgencia || '').toString())),
+                            urgencia: (
+                                x.urgencia === true ||
+                                normalize((x.urgencia || '').toString()) === 'alta' ||
+                                normalize((x.urgencia || '').toString()) === 'urgencia' ||
+                                normalize((x.urgencia || '').toString()) === 'urgente' ||
+                                normalize((x.urgencia || '').toString()) === 'emergencia' ||
+                                (normalize(x.intencion || '') === 'urgencia')
+                            ),
+                            conversion: (x.conversion || '').toString().toLowerCase(),
+                            _nq: normalize(x.pregunta || ''),
+                            _nv: Array.isArray(x.variaciones) ? x.variaciones.map(v => normalize(v || '')).filter(Boolean).slice(0, 12) : [],
+                            _nr: normalize(x.respuesta || '')
+                        }));
+                } catch (_) {
+                    FAQ_ITEMS = [];
+                }
+                return FAQ_ITEMS;
+            };
+
+            const setLastActivity = () => {
+                try { localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now())); } catch (_) {}
+            };
+
+            const nowMs = () => Date.now ? Date.now() : (new Date()).getTime();
+            const AUTO_CLEAR_MS = 10 * 60 * 1000; // 10 minutos sin interacción => limpiar chat
+
+            const intents = [
+                {
+                    id: 'agendar',
+                    title: 'Agendar cita',
+                    keywords: ['agendar', 'agenda', 'cita', 'consulta', 'turno', 'reservar', 'citas'],
+                    answer: () => ({
+                        text: [
+                            `Claro 😊`,
+                            `Para agendar en línea, abre el formulario de citas.`,
+                            `Si prefieres, también puedo llevarte a WhatsApp.`
+                        ].join('\n'),
+                        actions: [
+                            { type: 'book', label: 'Agendar cita', href: APPT_URL },
+                            { type: 'wa', label: 'WhatsApp', message: `Hola Dra. Shirley, me gustaría agendar una cita. Motivo:` }
+                        ]
+                    })
+                },
+                {
+                    id: 'resultados',
+                    title: 'Resultados o seguimiento',
+                    keywords: ['resultado', 'resultados', 'seguimiento', 'laboratorio', 'pap', 'papanicolau', 'citologia', 'citología', 'biopsia', 'estudio'],
+                    answer: () => ({
+                        text: [
+                            `Para resultados o seguimiento 😊`,
+                            `Puedes escribir por WhatsApp o agendar consulta.`,
+                            `¿Cómo prefieres?`
+                        ].join('\n'),
+                        actions: [
+                            { type: 'wa', label: 'WhatsApp', message: `Hola Dra. Shirley, escribo por resultados/seguimiento. (Desde ${pageName})` },
+                            { type: 'book', label: 'Agendar cita', href: APPT_URL }
+                        ]
+                    })
+                },
+                {
+                    id: 'chequeo',
+                    title: 'Chequeo ginecológico',
+                    keywords: ['chequeo', 'chequeo ginecologico', 'chequeo ginecológico', 'papanicolau', 'pap', 'citologia', 'citología', 'control anual', 'revision', 'revisión'],
+                    answer: () => ({
+                        text: [
+                            `Un chequeo ginecológico ayuda a prevenir y detectar a tiempo 💗`,
+                            `Lo ideal es evaluarte en consulta según tu edad e historial.`,
+                            `¿Te gustaría agendar tu cita?`
+                        ].join('\n'),
+                        actions: [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                    })
+                },
+                {
+                    id: 'embarazo',
+                    title: 'Embarazo',
+                    keywords: ['embarazo', 'embarazada', 'prenatal', 'control prenatal', 'gestacion', 'gestación', 'semanas', 'eco', 'ecografia', 'ecografía'],
+                    answer: () => ({
+                        text: [
+                            `Si estás embarazada, el control prenatal es clave para cuidar de ti y tu bebé 😊`,
+                            `Si presentas sangrado abundante, dolor intenso o fiebre alta, acude a urgencias.`,
+                            `¿Deseas agendar una cita?`
+                        ].join('\n'),
+                        actions: [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                    })
+                },
+                {
+                    id: 'anticonceptivos',
+                    title: 'Anticonceptivos',
+                    keywords: ['anticonceptivo', 'anticonceptivos', 'pastillas', 'inyeccion', 'inyección', 'implante', 'diu', 'condon', 'condón', 'planificar', 'metodo', 'método'],
+                    answer: () => ({
+                        text: [
+                            `Hay varios métodos anticonceptivos y el mejor depende de tu salud y tus objetivos 💗`,
+                            `En consulta podemos elegir el más adecuado para ti.`,
+                            `¿Te gustaría agendar tu cita?`
+                        ].join('\n'),
+                        actions: [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                    })
+                },
+                {
+                    id: 'infecciones',
+                    title: 'Infecciones vaginales',
+                    keywords: ['infeccion', 'infección', 'vaginal', 'flujo', 'mal olor', 'picazon', 'picazón', 'ardor', 'hongos', 'vaginosis', 'candidiasis', 'secrecion', 'secreción'],
+                    answer: () => ({
+                        text: [
+                            `El flujo anormal, mal olor o picazón pueden tener varias causas (por ejemplo, cambios de flora o infecciones) 😊`,
+                            `Lo más seguro es evaluarte en consulta para orientar el manejo adecuado.`,
+                            `¿Deseas agendar una cita?`
+                        ].join('\n'),
+                        actions: [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                    })
+                },
+                {
+                    id: 'estetica',
+                    title: 'Estética ginecológica',
+                    keywords: ['estetica', 'estética', 'ginecologia estetica', 'ginecología estética', 'laser', 'láser', 'rejuvenecimiento', 'blanqueamiento'],
+                    answer: () => ({
+                        text: [
+                            `La estética ginecológica incluye opciones con tecnología láser y otros procedimientos 💗`,
+                            `Para recomendarte lo ideal, es importante una valoración.`,
+                            `¿Te gustaría agendar tu cita?`
+                        ].join('\n'),
+                        actions: [
+                            { type: 'link', label: 'Ver tratamientos', href: '{{ url_for('aesthetic_treatments') }}' },
+                            { type: 'book', label: 'Agendar cita', href: APPT_URL }
+                        ]
+                    })
+                },
+                {
+                    id: 'ubicacion',
+                    title: 'Ubicación',
+                    keywords: ['ubicacion', 'ubicación', 'direccion', 'dirección', 'mapa', 'llegar', 'donde', 'cómo llego', 'como llego'],
+                    answer: () => ({
+                        text: `📍 ${DEFAULT_ADDRESS}\n\n¿Deseas agendar una cita?`,
+                        actions: [
+                            { type: 'maps', label: 'Ver en Google Maps', address: DEFAULT_ADDRESS },
+                            { type: 'book', label: 'Agendar cita', href: APPT_URL }
+                        ]
+                    })
+                },
+                {
+                    id: 'pagos',
+                    title: 'Pagos',
+                    keywords: ['pago', 'pagos', 'tarjeta', 'credito', 'crédito', 'debito', 'débito', 'efectivo', 'transferencia'],
+                    answer: () => ({
+                        text: `Aceptamos tarjetas de crédito.\n\nSi quieres, te ayudo a agendar tu cita 😊`,
+                        actions: [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                    })
+                },
+                {
+                    id: 'seguros',
+                    title: 'Seguros',
+                    keywords: ['seguro', 'seguros', 'ars', 'aseguradora', 'cobertura', 'senasa', 'humano', 'mapfre', 'asemap', 'reservas'],
+                    answer: () => ({
+                        text: `Trabajamos con los principales seguros médicos.\n\n¿Te gustaría agendar tu cita?`,
+                        actions: [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                    })
+                },
+                {
+                    id: 'contacto',
+                    title: 'Contacto',
+                    keywords: ['telefono', 'teléfono', 'whatsapp', 'email', 'correo', 'contacto'],
+                    answer: () => ({
+                        text: `WhatsApp: ${SITE_PHONE_DISPLAY}\nEmail: ${SITE_EMAIL}\nDirección: ${DEFAULT_ADDRESS}\n\n¿Deseas agendar tu cita?`,
+                        actions: [
+                            { type: 'book', label: 'Agendar cita', href: APPT_URL },
+                            { type: 'wa', label: 'WhatsApp', message: `Hola Dra. Shirley, escribo desde ${pageName}.` }
+                        ]
+                    })
+                }
+            ];
+
+            const quickChips = [
+                { id: 'menu_agendar', label: '1️⃣ Agendar cita' },
+                { id: 'menu_duda', label: '2️⃣ Tengo una duda' },
+                { id: 'menu_embarazo', label: '3️⃣ Estoy embarazada' },
+                { id: 'menu_anticonceptivos', label: '4️⃣ Anticonceptivos' },
+                { id: 'menu_resultados', label: '5️⃣ Resultados/seguimiento' },
+                { id: 'menu_otro', label: '6️⃣ Otro' }
+            ];
+
+            const addMessage = (role, text, html) => {
+                ensureDaySeparator();
+                const el = document.createElement('div');
+                el.className = `chatbot-msg ${role}`;
+                if (html) el.innerHTML = html;
+                else el.textContent = text || '';
+                attachTimestamp(el);
+                messagesEl.appendChild(el);
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+            };
+
+            const addTyping = () => {
+                ensureDaySeparator();
+                const el = document.createElement('div');
+                el.className = 'chatbot-msg bot';
+                el.dataset.typing = '1';
+                el.innerHTML = `<div class="chatbot-typing" aria-label="Escribiendo"><span></span><span></span><span></span></div>`;
+                messagesEl.appendChild(el);
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+                return el;
+            };
+
+            const ensureDaySeparator = () => {
+                if (!messagesEl) return;
+                const first = messagesEl.firstElementChild;
+                const labelFromTs = () => {
+                    const firstMsg = messagesEl.querySelector('.chatbot-msg .chatbot-time[data-chatbot-ts]');
+                    const ts = firstMsg ? parseInt(firstMsg.getAttribute('data-chatbot-ts') || '0', 10) : 0;
+                    return formatDayLabel(ts || Date.now());
+                };
+
+                if (first && first.classList && first.classList.contains('chatbot-day-sep')) {
+                    first.textContent = labelFromTs();
+                    return;
+                }
+
+                const sep = document.createElement('div');
+                sep.className = 'chatbot-day-sep';
+                sep.textContent = labelFromTs();
+                messagesEl.prepend(sep);
+            };
+
+            const formatTime = (ms) => {
+                try {
+                    return new Intl.DateTimeFormat('es-DO', { hour: 'numeric', minute: '2-digit' }).format(new Date(ms));
+                } catch (_) {
+                    const d = new Date(ms);
+                    const hh = String(d.getHours()).padStart(2, '0');
+                    const mm = String(d.getMinutes()).padStart(2, '0');
+                    return `${hh}:${mm}`;
+                }
+            };
+
+            const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+
+            const formatDayLabel = (ms) => {
+                const now = new Date();
+                const today = startOfDay(now);
+                const that = startOfDay(new Date(ms));
+                const diffDays = Math.round((today - that) / 86400000);
+                if (diffDays === 0) return 'Hoy';
+                if (diffDays === 1) return 'Ayer';
+                try {
+                    return new Intl.DateTimeFormat('es-DO', { day: 'numeric', month: 'short' }).format(new Date(ms));
+                } catch (_) {
+                    const d = new Date(ms);
+                    const day = d.getDate();
+                    const month = d.toLocaleString('es', { month: 'short' });
+                    return `${day} ${month}`;
+                }
+            };
+
+            const attachTimestamp = (msgEl) => {
+                if (!msgEl || msgEl.dataset.typing === '1') return;
+                if (msgEl.querySelector('.chatbot-time')) return; // evita duplicar al cargar historial
+                const ms = Date.now();
+                const t = document.createElement('span');
+                t.className = 'chatbot-time';
+                t.setAttribute('data-chatbot-time', '1');
+                t.setAttribute('data-chatbot-ts', String(ms));
+                t.textContent = formatTime(ms);
+                msgEl.appendChild(t);
+                // Actualiza el separador según la fecha real
+                const sep = messagesEl.firstElementChild;
+                if (sep && sep.classList && sep.classList.contains('chatbot-day-sep')) {
+                    sep.textContent = formatDayLabel(ms);
+                }
+            };
+
+            const removeTyping = () => {
+                const el = messagesEl.querySelector('[data-typing="1"]');
+                if (el) el.remove();
+            };
+
+            const showWelcomeIfEmpty = () => {
+                if (messagesEl.childElementCount > 0) return;
+                const ctx = getContext();
+                if (!ctx.name) {
+                    setFlow({ mode: 'onboarding', step: 'name', data: {} });
+                    addMessage('bot', [
+                        `Hola 💕`,
+                        `Soy el asistente virtual de la Dra. Shirley Ramírez.`,
+                        ``,
+                        `Para atenderte mejor, ¿cómo te llamas? 😊`
+                    ].join('\n'));
+                } else {
+                    addMessage('bot', [
+                        `Hola ${ctx.name} 💕`,
+                        `Estoy aquí para ayudarte con tu salud femenina 😊`,
+                        ``,
+                        `¿Deseas agendar una cita o tienes alguna duda?`
+                    ].join('\n'));
+                }
+                try { localStorage.setItem(SCHEDULE_PROMPT_KEY, '0'); } catch (_) {}
+                setLastActivity();
+            };
+
+            const renderChips = () => {
+                chipsEl.innerHTML = '';
+                quickChips.forEach(c => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'chatbot-chip';
+                    btn.dataset.chipId = c.id;
+                    btn.textContent = c.label;
+                    chipsEl.appendChild(btn);
+                });
+            };
+
+            const saveHistory = () => {
+                try {
+                    const items = [];
+                    messagesEl.querySelectorAll('.chatbot-msg').forEach(m => {
+                        if (m.dataset.typing === '1') return;
+                        items.push({ role: m.classList.contains('user') ? 'user' : 'bot', html: m.innerHTML });
+                    });
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(items.slice(-40)));
+                } catch (_) {}
+            };
+
+            const getFlow = () => {
+                try {
+                    const raw = localStorage.getItem(FLOW_KEY);
+                    if (!raw) return null;
+                    const f = JSON.parse(raw);
+                    if (!f || typeof f !== 'object') return null;
+                    return f;
+                } catch (_) { return null; }
+            };
+
+            const setFlow = (flow) => {
+                try {
+                    if (!flow) localStorage.removeItem(FLOW_KEY);
+                    else localStorage.setItem(FLOW_KEY, JSON.stringify(flow));
+                } catch (_) {}
+            };
+
+            const getContext = () => {
+                try {
+                    const raw = localStorage.getItem(CONTEXT_KEY);
+                    if (!raw) return { name: '', pregnant: false, symptoms: [], interestedInAppointment: false, lastIntent: null, awaitingFaqOffer: false, messagesSinceCTA: 0, lastCTAMs: 0 };
+                    const c = JSON.parse(raw);
+                    if (!c || typeof c !== 'object') throw new Error('bad ctx');
+                    return {
+                        name: (c.name || '').toString().slice(0, 40),
+                        pregnant: !!c.pregnant,
+                        symptoms: Array.isArray(c.symptoms) ? c.symptoms.slice(0, 10) : [],
+                        interestedInAppointment: !!c.interestedInAppointment,
+                        lastIntent: c.lastIntent || null,
+                        awaitingFaqOffer: !!c.awaitingFaqOffer,
+                        messagesSinceCTA: Number.isFinite(c.messagesSinceCTA) ? c.messagesSinceCTA : 0,
+                        lastCTAMs: Number.isFinite(c.lastCTAMs) ? c.lastCTAMs : 0,
+                    };
+                } catch (_) {
+                    return { name: '', pregnant: false, symptoms: [], interestedInAppointment: false, lastIntent: null, awaitingFaqOffer: false, messagesSinceCTA: 0, lastCTAMs: 0 };
+                }
+            };
+
+            const setContext = (ctx) => {
+                try { localStorage.setItem(CONTEXT_KEY, JSON.stringify(ctx || {})); } catch (_) {}
+            };
+
+            const bumpStat = (intentId) => {
+                try {
+                    const raw = localStorage.getItem(STATS_KEY);
+                    const s = raw ? JSON.parse(raw) : {};
+                    const k = (intentId || 'otro').toString();
+                    s[k] = (s[k] || 0) + 1;
+                    localStorage.setItem(STATS_KEY, JSON.stringify(s));
+                } catch (_) {}
+            };
+
+            const hasAny = (nt, arr) => (arr || []).some(k => nt.includes(normalize(k)));
+
+            const faqTokens = (nt) => (nt || '')
+                .split(/[^a-zA-ZÀ-ÿÑñ0-9]+/g)
+                .map(w => normalize(w))
+                .filter(w => w && w.length >= 3)
+                .slice(0, 24);
+
+            const matchFaq = async (userText, intentClass, ctx) => {
+                const items = await loadFaqDataset();
+                if (!items || items.length === 0) return null;
+
+                const nt = normalize(userText);
+                const toks = new Set(faqTokens(nt));
+                if (toks.size === 0) return null;
+
+                const preferCat = ctx?.pregnant ? 'embarazo' : null;
+                let best = null;
+                let bestScore = 0;
+
+                for (const it of items) {
+                    let score = 0;
+                    if (intentClass && it.intencion && intentClass === it.intencion) score += 3;
+                    if (intentClass === 'urgencia' && it.urgencia) score += 4;
+                    if (preferCat && it.categoria === preferCat) score += 2;
+                    if (it.conversion === 'alta') score += 2;
+                    else if (it.conversion === 'media') score += 1;
+                    // overlap tokens with pregunta
+                    const qWords = faqTokens(it._nq);
+                    let overlap = 0;
+                    for (const w of qWords) if (toks.has(w)) overlap++;
+                    score += Math.min(6, overlap);
+
+                    // overlap tokens with variaciones (si existen)
+                    if (it._nv && it._nv.length) {
+                        let vOverlap = 0;
+                        for (const v of it._nv) {
+                            const vWords = faqTokens(v);
+                            let o = 0;
+                            for (const w of vWords) if (toks.has(w)) o++;
+                            vOverlap = Math.max(vOverlap, o);
+                            // match frase completa
+                            if (v && nt.includes(v)) score += 3;
+                        }
+                        score += Math.min(5, vOverlap);
+                    }
+
+                    // bonus: si menciona una categoría explícita
+                    if (it.categoria && nt.includes(it.categoria)) score += 1;
+
+                    if (score > bestScore) {
+                        bestScore = score;
+                        best = it;
+                    }
+                }
+
+                // umbral: evita respuestas “random”
+                if (bestScore < 4) return null;
+                return best;
+            };
+
+            const formatName = (raw) => {
+                const s = (raw || '').toString().trim().replace(/\s+/g, ' ');
+                if (!s) return '';
+                const safe = s.replace(/[^a-zA-ZÀ-ÿÑñ\s'-]/g, '').trim();
+                if (!safe) return '';
+                const parts = safe.split(' ').filter(Boolean).slice(0, 2);
+                return parts.map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join(' ');
+            };
+
+            const isLikelyName = (raw) => {
+                const s = (raw || '').toString().trim();
+                if (!s) return false;
+                if (s.length < 2 || s.length > 30) return false;
+                const nt = normalize(s);
+                if (!/[a-záéíóúñ]/i.test(nt)) return false;
+                if (dangerKeywords.some(k => nt.includes(normalize(k)))) return false;
+                if (hasAny(nt, keywordSets.embarazo) || hasAny(nt, keywordSets.anticonceptivos) || hasAny(nt, keywordSets.resultados) || hasAny(nt, keywordSets.cita)) return false;
+                const hit = (arr) => (arr || []).some(k => nt.includes(normalize(k)));
+                if (hit(symptomKeywords.pelvic_pain) || hit(symptomKeywords.bleeding) || hit(symptomKeywords.discharge)) return false;
+                return true;
+            };
+
+            const loadHistory = () => {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    if (!raw) return;
+                    const items = JSON.parse(raw);
+                    if (!Array.isArray(items) || items.length === 0) return;
+                    messagesEl.innerHTML = '';
+                    items.forEach(it => {
+                        addMessage(it.role === 'user' ? 'user' : 'bot', null, it.html);
+                    });
+                } catch (_) {}
+            };
+
+            const clearConversation = ({ keepName } = { keepName: true }) => {
+                const ctx = getContext();
+                const name = keepName ? (ctx.name || '') : '';
+                messagesEl.innerHTML = '';
+                setFlow(null);
+                setSchedulePrompt(false);
+                try {
+                    localStorage.removeItem(STORAGE_KEY);
+                    localStorage.removeItem(FLOW_KEY);
+                    localStorage.removeItem(SCHEDULE_PROMPT_KEY);
+                } catch (_) {}
+                setContext({ name, pregnant: false, symptoms: [], interestedInAppointment: false, lastIntent: null, awaitingFaqOffer: false, messagesSinceCTA: 0, lastCTAMs: 0 });
+                showWelcomeIfEmpty();
+                saveHistory();
+                setLastActivity();
+            };
+
+            const open = () => {
+                panel.classList.add('is-open');
+                toggleBtn.setAttribute('aria-expanded', 'true');
+                // Cargar avatar pesado solo al abrir (mejora LCP/velocidad inicial)
+                try {
+                    const avatar = panel.querySelector('img.chatbot-avatar[data-src]');
+                    if (avatar && avatar.dataset && avatar.dataset.src && avatar.getAttribute('data-loaded') !== '1') {
+                        avatar.src = avatar.dataset.src;
+                        avatar.setAttribute('data-loaded', '1');
+                    }
+                } catch (_) {}
+                // Si pasó mucho tiempo sin interacción, limpiamos automáticamente.
+                const last = (() => {
+                    try { return parseInt(localStorage.getItem(LAST_ACTIVITY_KEY) || '0', 10) || 0; } catch (_) { return 0; }
+                })();
+                if (last && (nowMs() - last) > AUTO_CLEAR_MS) {
+                    clearConversation({ keepName: true });
+                    loadFaqDataset();
+                    setTimeout(() => input.focus(), 0);
+                    return;
+                }
+                loadHistory();
+                showWelcomeIfEmpty();
+                setTimeout(() => input.focus(), 0);
+                setLastActivity();
+                // Cargar dataset FAQ en background (no bloqueante)
+                loadFaqDataset();
+            };
+
+            const close = () => {
+                panel.classList.remove('is-open');
+                toggleBtn.setAttribute('aria-expanded', 'false');
+            };
+
+            const matchIntent = (userText) => {
+                const t = normalize(userText);
+                if (!t) return null;
+                let best = null;
+                let bestScore = 0;
+                intents.forEach(intent => {
+                    let score = 0;
+                    intent.keywords.forEach(k => {
+                        const nk = normalize(k);
+                        if (nk && t.includes(nk)) score += Math.min(3, Math.ceil(nk.length / 4));
+                    });
+                    if (score > bestScore) {
+                        bestScore = score;
+                        best = intent;
+                    }
+                });
+                return bestScore >= 2 ? best : null;
+            };
+
+            const buildActionsHtml = (actions, waTextFallback) => {
+                if (!actions || actions.length === 0) return '';
+                const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(DEFAULT_ADDRESS)}`;
+                const buttons = actions.map(a => {
+                    if (a.type === 'book') {
+                        const href = a.href || APPT_URL;
+                        return `<a class="chatbot-action-btn chatbot-action-btn--book" href="${href}">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19 4h-1V2h-2v2H8V2H6v2H5a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3zm1 15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8h16v8zM4 9V7a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2H4z"/></svg>
+                            ${a.label || 'Agendar cita'}</a>`;
+                    }
+                    if (a.type === 'wa') {
+                        const url = makeWaLink(a.message || waTextFallback || '');
+                        return `<a class="chatbot-action-btn chatbot-action-btn--wa" href="${url}" target="_blank" rel="noopener noreferrer">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.52 3.48A11.85 11.85 0 0 0 12.07 0C5.46 0 .08 5.38.08 12c0 2.1.55 4.15 1.6 5.97L0 24l6.22-1.63A11.9 11.9 0 0 0 12.07 24h.01c6.62 0 12-5.38 12-12 0-3.2-1.25-6.2-3.56-8.52z"/></svg>
+                            ${a.label || 'WhatsApp'}</a>`;
+                    }
+                    if (a.type === 'maps') {
+                        const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a.address || DEFAULT_ADDRESS)}`;
+                        return `<a class="chatbot-action-btn chatbot-action-btn--choice" href="${url}" target="_blank" rel="noopener noreferrer">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 1 7 7c0 5.25-7 13-7 13S5 14.25 5 9a7 7 0 0 1 7-7zm0 9.5A2.5 2.5 0 1 0 12 6.5a2.5 2.5 0 0 0 0 5z"/></svg>
+                            ${a.label || 'Maps'}</a>`;
+                    }
+                    if (a.type === 'link') {
+                        return `<a class="chatbot-action-btn chatbot-action-btn--choice" href="${a.href}" target="_blank" rel="noopener noreferrer">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10.59 13.41a1 1 0 0 0 1.41 1.41l5-5A3 3 0 0 0 12.76 6.6l-1.1 1.1a1 1 0 1 0 1.41 1.41l1.1-1.1a1 1 0 1 1 1.41 1.41l-5 5z"/><path fill="currentColor" d="M13.41 10.59a1 1 0 0 0-1.41-1.41l-5 5A3 3 0 0 0 11.24 17.4l1.1-1.1a1 1 0 1 0-1.41-1.41l-1.1 1.1a1 1 0 1 1-1.41-1.41l5-5z"/></svg>
+                            ${a.label || 'Abrir'}</a>`;
+                    }
+                    return '';
+                }).filter(Boolean).join('');
+                return `<div class="chatbot-actions">${buttons}</div>`;
+            };
+
+            const buildSummaryToWa = (userText) => {
+                return `Hola Dra. Shirley, escribo desde ${pageName}.\n\nConsulta: ${userText}`;
+            };
+
+            const buildBookingSummary = (data) => {
+                const lines = [];
+                lines.push(`Hola Dra. Shirley, escribo desde ${pageName}.`);
+                lines.push('');
+                lines.push('Quiero agendar una consulta.');
+                if (data?.type) lines.push(`- Motivo: ${data.type}`);
+                if (data?.when) lines.push(`- Preferencia: ${data.when}`);
+                if (data?.insurance) lines.push(`- Seguro: ${data.insurance}`);
+                if (data?.notes) lines.push(`- Detalles: ${data.notes}`);
+                lines.push('');
+                lines.push('Gracias.');
+                return lines.join('\n');
+            };
+
+            const getSchedulePrompt = () => {
+                try { return localStorage.getItem(SCHEDULE_PROMPT_KEY) === '1'; } catch (_) { return false; }
+            };
+            const setSchedulePrompt = (on) => {
+                try { localStorage.setItem(SCHEDULE_PROMPT_KEY, on ? '1' : '0'); } catch (_) {}
+            };
+
+            const renderBotCard = (title, bodyLines, actions) => {
+                const titleHtml = title
+                    ? `<strong style="display:block;margin-bottom:6px;color:#2D2D2D;">${title}</strong>`
+                    : '';
+                const bodyHtml = (bodyLines || [])
+                    .map(l => (l || '').toString().replace(/</g, '&lt;').replace(/>/g, '&gt;'))
+                    .join('<br>');
+                const actionsHtml = (actions && actions.length)
+                    ? `<div class="chatbot-actions">${
+                        actions.map(a => {
+                            if (a.type === 'button') {
+                                const safeValue = (a.value ?? '').toString().replace(/"/g, '&quot;');
+                                return `<button type="button" class="chatbot-action-btn chatbot-action-btn--choice" data-bot-action="${a.action}" data-bot-value="${safeValue}">${a.label}</button>`;
+                            }
+                            if (a.type === 'book') {
+                                const href = a.href || APPT_URL;
+                                return `<a class="chatbot-action-btn chatbot-action-btn--book" href="${href}">${a.label || 'Agendar cita'}</a>`;
+                            }
+                            if (a.type === 'wa') {
+                                const url = makeWaLink(a.message || '');
+                                return `<a class="chatbot-action-btn chatbot-action-btn--wa" href="${url}" target="_blank" rel="noopener noreferrer">${a.label}</a>`;
+                            }
+                            if (a.type === 'maps') {
+                                const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a.address || DEFAULT_ADDRESS)}`;
+                                return `<a class="chatbot-action-btn chatbot-action-btn--choice" href="${url}" target="_blank" rel="noopener noreferrer">${a.label}</a>`;
+                            }
+                            if (a.type === 'link') {
+                                return `<a class="chatbot-action-btn chatbot-action-btn--choice" href="${a.href}" target="_blank" rel="noopener noreferrer">${a.label}</a>`;
+                            }
+                            return '';
+                        }).join('')
+                    }</div>`
+                    : '';
+                addMessage('bot', null, `${titleHtml}${bodyHtml}${actionsHtml}`);
+                saveHistory();
+                setLastActivity();
+            };
+
+            const startSchedule = () => {
+                const ctx = getContext();
+                setContext({ ...ctx, interestedInAppointment: true, lastIntent: 'cita' });
+                const flow = { mode: 'schedule', step: 'type', data: {} };
+                setFlow(flow);
+                renderBotCard(
+                    'Agendar cita',
+                    ['¿Qué tipo de consulta necesitas? 💗'],
+                    [
+                        { type: 'button', label: 'Chequeo ginecológico', action: 'schedule_type', value: 'chequeo' },
+                        { type: 'button', label: 'Embarazo / control prenatal', action: 'schedule_type', value: 'embarazo' },
+                        { type: 'button', label: 'Infección o malestar', action: 'schedule_type', value: 'infeccion' },
+                        { type: 'button', label: 'Estética ginecológica', action: 'schedule_type', value: 'estetica' },
+                        { type: 'button', label: 'Emergencia', action: 'schedule_type', value: 'emergencia' },
+                        { type: 'button', label: 'Cancelar', action: 'schedule_cancel', value: '' }
+                    ]
+                );
+            };
+
+            const startTopics = async () => {
+                const ctx = getContext();
+                setContext({ ...ctx, awaitingFaqOffer: false });
+                const items = await loadFaqDataset();
+                const cats = Array.from(new Set((items || []).map(x => x.categoria).filter(Boolean)));
+                if (cats.length === 0) {
+                    renderBotCard(null, ['Puedo ayudarte 😊 ¿Me cuentas en una frase qué te preocupa?'], []);
+                    return;
+                }
+                const pretty = (c) => {
+                    if (c === 'ginecologia') return 'Ginecología';
+                    if (c === 'anticonceptivos') return 'Anticonceptivos';
+                    if (c === 'infecciones') return 'Infecciones';
+                    if (c === 'embarazo') return 'Embarazo';
+                    if (c === 'urgencias') return 'Urgencias';
+                    if (c === 'fertilidad') return 'Fertilidad';
+                    if (c === 'postparto') return 'Postparto';
+                    return c.charAt(0).toUpperCase() + c.slice(1);
+                };
+                const preferred = ['embarazo', 'ginecologia', 'infecciones', 'anticonceptivos', 'postparto', 'fertilidad', 'urgencias'];
+                const ordered = preferred.filter(p => cats.includes(p)).concat(cats.filter(c => !preferred.includes(c)));
+                const actions = ordered.slice(0, 6).map(c => ({ type: 'button', label: pretty(c), action: 'faq_cat', value: c }));
+                actions.push({ type: 'button', label: 'Síntomas', action: 'faq_pick', value: 'sintomas' });
+                actions.push({ type: 'button', label: 'Agendar cita', action: 'faq_pick', value: 'cita' });
+                renderBotCard(null, [ctx.name ? `Claro, ${ctx.name} 😊 ¿Qué tema deseas ver?` : 'Claro 😊 ¿Qué tema deseas ver?'], actions);
+            };
+
+            const startMedical = () => {
+                const ctx = getContext();
+                setContext({ ...ctx, lastIntent: 'sintomas' });
+                const flow = { mode: 'medical', step: 'symptom', data: {} };
+                setFlow(flow);
+                renderBotCard(
+                    'Dudas médicas',
+                    ['Cuéntame qué te preocupa. Elige una opción para orientarte 😊'],
+                    [
+                        { type: 'button', label: 'Dolor pélvico', action: 'med_symptom', value: 'pelvic_pain' },
+                        { type: 'button', label: 'Sangrado', action: 'med_symptom', value: 'bleeding' },
+                        { type: 'button', label: 'Flujo / picazón / mal olor', action: 'med_symptom', value: 'discharge' },
+                        { type: 'button', label: 'Retraso menstrual', action: 'med_symptom', value: 'late_period' },
+                        { type: 'button', label: 'Otro', action: 'med_other', value: '' },
+                        { type: 'button', label: 'Cancelar', action: 'med_cancel', value: '' }
+                    ]
+                );
+            };
+
+            const startPregnancy = () => {
+                const ctx = getContext();
+                setContext({ ...ctx, pregnant: true, lastIntent: 'embarazo' });
+                const flow = { mode: 'pregnancy', step: 'stage', data: {} };
+                setFlow(flow);
+                renderBotCard(
+                    'Embarazo',
+                    ['¿En qué etapa estás? 💗'],
+                    [
+                        { type: 'button', label: 'Sospecha de embarazo', action: 'preg_stage', value: 'sospecha' },
+                        { type: 'button', label: 'Embarazo confirmado', action: 'preg_stage', value: 'confirmado' },
+                        { type: 'button', label: 'Alto riesgo', action: 'preg_stage', value: 'alto_riesgo' },
+                        { type: 'button', label: 'Molestias', action: 'preg_stage', value: 'molestias' },
+                        { type: 'button', label: 'Cancelar', action: 'preg_cancel', value: '' }
+                    ]
+                );
+            };
+
+            const startContraceptives = () => {
+                const ctx = getContext();
+                setContext({ ...ctx, lastIntent: 'anticonceptivos' });
+                const flow = { mode: 'contraceptives', step: 'method', data: {} };
+                setFlow(flow);
+                renderBotCard(
+                    'Anticonceptivos',
+                    ['¿Sobre qué método deseas información? 😊'],
+                    [
+                        { type: 'button', label: 'Pastillas', action: 'contra_method', value: 'Pastillas' },
+                        { type: 'button', label: 'DIU', action: 'contra_method', value: 'DIU' },
+                        { type: 'button', label: 'Implante', action: 'contra_method', value: 'Implante' },
+                        { type: 'button', label: 'Asesoría', action: 'contra_method', value: 'Asesoría' },
+                        { type: 'button', label: 'Cancelar', action: 'contra_cancel', value: '' }
+                    ]
+                );
+            };
+
+            const startResults = () => {
+                const ctx = getContext();
+                setContext({ ...ctx, lastIntent: 'resultados' });
+                const flow = { mode: 'results', step: 'choice', data: {} };
+                setFlow(flow);
+                renderBotCard(
+                    'Resultados o seguimiento',
+                    ['Puedes:'],
+                    [
+                        { type: 'button', label: '1️⃣ Contactar por WhatsApp', action: 'results_choice', value: 'wa' },
+                        { type: 'button', label: '2️⃣ Agendar consulta', action: 'results_choice', value: 'book' },
+                        { type: 'button', label: 'Cancelar', action: 'results_cancel', value: '' }
+                    ]
+                );
+            };
+
+            const startOther = () => {
+                const ctx = getContext();
+                setContext({ ...ctx, lastIntent: 'otro' });
+                const flow = { mode: 'other', step: 'describe', data: {} };
+                setFlow(flow);
+                renderBotCard(
+                    'Cuéntame',
+                    ['Escríbeme en una frase cómo puedo ayudarte 😊 (Solo temas de salud femenina).'],
+                    [{ type: 'button', label: 'Cancelar', action: 'other_cancel', value: '' }]
+                );
+            };
+
+            const send = (text) => {
+                const trimmed = (text || '').trim();
+                if (!trimmed) return;
+                addMessage('user', trimmed);
+                saveHistory();
+                setLastActivity();
+
+                const t = normalize(trimmed);
+                const typingEl = addTyping();
+
+                const delay = 1000 + Math.floor(Math.random() * 900); // 1.0s – 1.9s (más humano)
+                window.setTimeout(async () => {
+                    removeTyping();
+
+                    const looksAffirmative = (txt) => {
+                        const nt = normalize(txt);
+                        if (!nt) return false;
+                        return affirmativeKeywords.some(k => nt === normalize(k) || nt.includes(normalize(k)));
+                    };
+
+                    const isEmergency = (nt) => {
+                        if (!nt) return false;
+                        if (dangerKeywords.some(k => nt.includes(normalize(k)))) return true;
+                        const hasBleeding = nt.includes('sangrado') || nt.includes('hemorrag');
+                        const heavy = nt.includes('abund') || nt.includes('mucho') || nt.includes('empap') || nt.includes('coag');
+                        const hasPainSevere = nt.includes('dolor intenso') || nt.includes('dolor incontrolable') || (nt.includes('dolor') && (nt.includes('muy fuerte') || nt.includes('insoportable')));
+                        const hasFeverHigh = nt.includes('fiebre alta') || (nt.includes('fiebre') && (nt.includes('39') || nt.includes('40')));
+                        return (hasBleeding && heavy) || hasPainSevere || hasFeverHigh;
+                    };
+
+                    const detectSymptom = (nt) => {
+                        const hit = (arr) => arr.some(k => nt.includes(normalize(k)));
+                        if (hit(symptomKeywords.pelvic_pain)) return 'pelvic_pain';
+                        if (hit(symptomKeywords.bleeding)) return 'bleeding';
+                        if (hit(symptomKeywords.discharge)) return 'discharge';
+                        return null;
+                    };
+
+                    const classify = (nt) => {
+                        if (isEmergency(nt)) return 'urgencia';
+                        if (hasAny(nt, keywordSets.embarazo)) return 'embarazo';
+                        if (hasAny(nt, keywordSets.anticonceptivos)) return 'anticonceptivos';
+                        if (hasAny(nt, keywordSets.resultados)) return 'resultados';
+                        if (hasAny(nt, keywordSets.cita)) return 'cita';
+                        if (detectSymptom(nt)) return 'sintomas';
+                        return 'otro';
+                    };
+
+                    const isOutsideScope = (nt) => {
+                        // Permitimos temas operativos del consultorio (cita/ubicación/seguros/pagos/contacto).
+                        const allow = ['cita', 'cita', 'agendar', 'ubicacion', 'ubicación', 'direccion', 'dirección', 'whatsapp', 'telefono', 'teléfono', 'seguro', 'ars', 'pago', 'tarjeta', 'correo', 'email', 'horario'];
+                        if (hasAny(nt, allow)) return false;
+                        // Si menciona claramente temas no relacionados (muy básico para evitar falsos positivos)
+                        const out = ['futbol', 'fútbol', 'politica', 'política', 'tarea', 'deber', 'matematica', 'matemática', 'carro', 'computadora', 'receta cocina', 'clima'];
+                        return hasAny(nt, out);
+                    };
+
+                    const negativeKeywords = ['no', 'nop', 'no gracias', 'ahora no', 'despues', 'después'];
+
+                    const ctx = getContext();
+                    ctx.messagesSinceCTA = (ctx.messagesSinceCTA || 0) + 1;
+
+                    // Si el bot ofreció mostrar opciones y la paciente responde, actuamos.
+                    if (ctx.awaitingFaqOffer) {
+                        const nt = t;
+                        const saidNo = negativeKeywords.some(k => nt === normalize(k) || nt.includes(normalize(k)));
+                        if (looksAffirmative(trimmed)) {
+                            setContext({ ...ctx, awaitingFaqOffer: false });
+                        const showFaqCats = async () => {
+                            const items = await loadFaqDataset();
+                            const cats = Array.from(new Set((items || []).map(x => x.categoria).filter(Boolean)));
+                            const pretty = (c) => {
+                                if (c === 'ginecologia') return 'Ginecología';
+                                if (c === 'anticonceptivos') return 'Anticonceptivos';
+                                if (c === 'infecciones') return 'Infecciones';
+                                if (c === 'embarazo') return 'Embarazo';
+                                if (c === 'urgencias') return 'Urgencias';
+                                if (c === 'fertilidad') return 'Fertilidad';
+                                if (c === 'postparto') return 'Postparto';
+                                return c.charAt(0).toUpperCase() + c.slice(1);
+                            };
+
+                            const preferred = ['embarazo', 'ginecologia', 'infecciones', 'anticonceptivos', 'postparto', 'fertilidad', 'urgencias'];
+                            const ordered = preferred.filter(p => cats.includes(p)).concat(cats.filter(c => !preferred.includes(c)));
+                            const actions = ordered.slice(0, 6).map(c => ({ type: 'button', label: pretty(c), action: 'faq_cat', value: c }));
+                            actions.push({ type: 'button', label: 'Agendar cita', action: 'faq_pick', value: 'cita' });
+
+                            renderBotCard(
+                                null,
+                                [ctx.name ? `Claro, ${ctx.name} 😊 ¿Qué tema deseas ver?` : 'Claro 😊 ¿Qué tema deseas ver?'],
+                                actions
+                            );
+                        };
+                        showFaqCats();
+                            return;
+                        }
+                        if (saidNo) {
+                            setContext({ ...ctx, awaitingFaqOffer: false });
+                            // seguimos el flujo normal
+                        }
+                        // Si respondió otra cosa (no sí/no), cerramos la oferta y seguimos normal.
+                        if (!saidNo) {
+                            setContext({ ...ctx, awaitingFaqOffer: false });
+                        }
+                    }
+
+                    // Si aún no tenemos nombre, lo pedimos primero (sin bloquear la ayuda).
+                    if (!ctx.name && isLikelyName(trimmed)) {
+                        const name = formatName(trimmed);
+                        setContext({ ...ctx, name });
+                        renderBotCard(
+                            null,
+                            [
+                                `Encantada, ${name} 💗`,
+                                `¿Deseas agendar una cita o tienes alguna duda? 😊`
+                            ],
+                            []
+                        );
+                        return;
+                    }
+
+                    // Si el bot acaba de sugerir agendar y responden "sí", llevamos directo al enlace.
+                    if (getSchedulePrompt() && looksAffirmative(trimmed)) {
+                        setSchedulePrompt(false);
+                        setContext({ ...ctx, interestedInAppointment: true, lastIntent: 'cita', messagesSinceCTA: 0, lastCTAMs: nowMs() });
+                        bumpStat('cita');
+                        renderBotCard(
+                            null,
+                            [ctx.name ? `Perfecto, ${ctx.name} 😊 Puedes agendar aquí:` : 'Perfecto 😊 Puedes agendar aquí:'],
+                            [
+                                { type: 'book', label: 'Agendar cita', href: APPT_URL },
+                                { type: 'wa', label: 'WhatsApp', message: `Hola Dra. Shirley, mi nombre es ${ctx.name || ''}. Me gustaría agendar una cita. Escribo desde ${pageName}.` }
+                            ]
+                        );
+                        return;
+                    }
+
+                    if (isEmergency(t)) {
+                        setSchedulePrompt(false);
+                        setContext({ ...ctx, lastIntent: 'urgencia', messagesSinceCTA: 0, lastCTAMs: nowMs() });
+                        bumpStat('urgencia');
+                        renderBotCard(
+                            'Importante',
+                            [
+                                'Por los síntomas que mencionas ⚠️',
+                                'Te recomendamos acudir de inmediato a un centro de salud.',
+                                'Tu seguridad es lo más importante 💗'
+                            ],
+                            [{ type: 'wa', label: 'Escribir a WhatsApp', message: `Hola Dra. Shirley, mi nombre es ${ctx.name || ''}. Necesito orientación. Mi situación es: ${trimmed}` }]
+                        );
+                        return;
+                    }
+
+                    const intentClass = classify(t);
+                    bumpStat(intentClass);
+                    const nextCtxBase = { ...ctx, lastIntent: intentClass };
+
+                    // Si el dataset FAQ tiene una respuesta muy parecida, la usamos (manteniendo seguridad/CTA).
+                    try {
+                        const faqHit = await matchFaq(trimmed, intentClass, ctx);
+                        if (faqHit) {
+                            setSchedulePrompt(true);
+                            setContext({ ...nextCtxBase, messagesSinceCTA: 0, lastCTAMs: nowMs() });
+                            const lines = (faqHit.respuesta || '').split('\n').map(s => s.trim()).filter(Boolean);
+                            // Asegurar CTA a cita si no hay link/CTA explícito
+                            const hasLink = (faqHit.respuesta || '').includes('draramirez.com/solicitar-cita') || (faqHit.respuesta || '').includes('solicitar-cita');
+                            const hasPregunta = /¿/g.test(faqHit.respuesta || '');
+                            const extra = (!hasLink && !hasPregunta)
+                                ? ['¿Te gustaría agendar una cita?']
+                                : [];
+                            const isUrgentFaq = !!faqHit.urgencia || (faqHit.intencion === 'urgencia');
+                            renderBotCard(
+                                null,
+                                // No recortar de más: estas respuestas incluyen empatía + micro-pregunta + cierre
+                                lines.concat(extra).slice(0, 8),
+                                isUrgentFaq
+                                    ? [
+                                        { type: 'wa', label: 'Escribir a WhatsApp', message: `Hola Dra. Shirley, mi nombre es ${ctx.name || ''}. Necesito orientación. Mi situación es: ${trimmed}` },
+                                        { type: 'book', label: 'Agendar cita', href: APPT_URL }
+                                      ]
+                                    : [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                            );
+                            return;
+                        }
+                    } catch (_) {}
+
+                    if (intentClass === 'embarazo') {
+                        setContext({ ...nextCtxBase, pregnant: true });
+                        startPregnancy();
+                        return;
+                    }
+                    if (intentClass === 'anticonceptivos') {
+                        setContext({ ...nextCtxBase });
+                        startContraceptives();
+                        return;
+                    }
+                    if (intentClass === 'resultados') {
+                        setContext({ ...nextCtxBase });
+                        startResults();
+                        return;
+                    }
+                    if (intentClass === 'cita') {
+                        setContext({ ...nextCtxBase, interestedInAppointment: true, messagesSinceCTA: 0, lastCTAMs: nowMs() });
+                        startSchedule();
+                        return;
+                    }
+
+                    const symptom = detectSymptom(t);
+                    if (symptom) {
+                        setSchedulePrompt(true);
+                        const symptoms = Array.isArray(ctx.symptoms) ? ctx.symptoms.slice(0, 10) : [];
+                        if (!symptoms.includes(symptom)) symptoms.push(symptom);
+                        setContext({ ...nextCtxBase, symptoms, messagesSinceCTA: 0, lastCTAMs: nowMs() });
+                        if (symptom === 'pelvic_pain') {
+                            renderBotCard(
+                                null,
+                                [
+                                    'Entiendo cómo te sientes 💗',
+                                    'Puede tener varias causas (infecciones, quistes o cambios hormonales) 😊',
+                                    'Lo ideal es evaluarlo en consulta. ¿Deseas agendar una cita?'
+                                ],
+                                [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                            );
+                            return;
+                        }
+                        if (symptom === 'bleeding') {
+                            renderBotCard(
+                                null,
+                                [
+                                    'El sangrado o manchado puede tener varias causas 💗',
+                                    'Si es abundante o con dolor intenso/fiebre, acude a urgencias.',
+                                    '¿Deseas agendar una cita?'
+                                ],
+                                [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                            );
+                            return;
+                        }
+                        renderBotCard(
+                            null,
+                            [
+                                'Los cambios de flujo, olor o picazón pueden indicar infección o desbalance 😊',
+                                'Lo más seguro es evaluarte en consulta para orientar el manejo.',
+                                '¿Te gustaría agendar tu cita?'
+                            ],
+                            [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                        );
+                        return;
+                    }
+
+                    if (isOutsideScope(t)) {
+                        setSchedulePrompt(false);
+                        setContext({ ...nextCtxBase });
+                        renderBotCard(
+                            null,
+                            [
+                                'Puedo ayudarte con salud femenina y agendar cita 💗',
+                                'Si me dices tu consulta relacionada, con gusto te orientaré 😊',
+                                '¿Deseas agendar tu cita?'
+                            ],
+                            [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                        );
+                        return;
+                    }
+
+                    const intent = matchIntent(trimmed);
+                    if (!intent) {
+                        setSchedulePrompt(false);
+                        const shouldCta = (ctx.messagesSinceCTA >= 3) && ((nowMs() - (ctx.lastCTAMs || 0)) > 120000);
+                        setContext({ ...nextCtxBase, messagesSinceCTA: shouldCta ? 0 : ctx.messagesSinceCTA, lastCTAMs: shouldCta ? nowMs() : (ctx.lastCTAMs || 0) });
+                        renderBotCard(
+                            null,
+                            shouldCta
+                                ? ['Entiendo 💗 ¿Te gustaría agendar tu cita para evaluarte con calma?']
+                                : [
+                                    'Entiendo 💗 ¿Me cuentas en una frase qué te preocupa?',
+                                    'Si prefieres, también puedo mostrarte las dudas con las que puedo ayudarte 😊',
+                                    '¿Quieres que te las muestre?'
+                                ],
+                            shouldCta ? [{ type: 'book', label: 'Agendar cita', href: APPT_URL }] : []
+                        );
+                        if (!shouldCta) setContext({ ...getContext(), awaitingFaqOffer: true });
+                        return;
+                    }
+
+                    const payload = intent.answer();
+                    const waText = buildSummaryToWa(trimmed);
+                    const html = (payload.text || '').replace(/\n/g, '<br>') + buildActionsHtml(payload.actions || [], waText);
+                    addMessage('bot', null, html);
+                    setSchedulePrompt(!!(payload.actions || []).some(a => a.type === 'book'));
+                    const offered = !!(payload.actions || []).some(a => a.type === 'book');
+                    setContext({
+                        ...nextCtxBase,
+                        messagesSinceCTA: offered ? 0 : ctx.messagesSinceCTA,
+                        lastCTAMs: offered ? nowMs() : (ctx.lastCTAMs || 0),
+                    });
+                    saveHistory();
+                    setLastActivity();
+                }, delay);
+            };
+
+            toggleBtn.addEventListener('click', () => {
+                if (panel.classList.contains('is-open')) close();
+                else open();
+            });
+
+            closeBtn.addEventListener('click', close);
+
+            clearBtn.addEventListener('click', () => {
+                // Limpiar manual (mantiene el nombre para trato cordial)
+                try {
+                    localStorage.removeItem(CONTEXT_KEY);
+                    localStorage.removeItem(STATS_KEY);
+                } catch (_) {}
+                clearConversation({ keepName: true });
+            });
+
+            if (waBtn) {
+                waBtn.addEventListener('click', () => {
+                    const waText = `Hola Dra. Shirley, escribo desde ${pageName}.`;
+                    window.open(makeWaLink(waText), '_blank', 'noopener,noreferrer');
+                    setLastActivity();
+                });
+            }
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && panel.classList.contains('is-open')) close();
+            });
+
+            // Reactivación suave si hay inactividad con el panel abierto.
+            window.setInterval(() => {
+                if (!panel.classList.contains('is-open')) return;
+                const last = (() => {
+                    try { return parseInt(localStorage.getItem(LAST_ACTIVITY_KEY) || '0', 10) || 0; } catch (_) { return 0; }
+                })();
+                if (!last) return;
+                const idleMs = nowMs() - last;
+                if (idleMs > AUTO_CLEAR_MS) {
+                    clearConversation({ keepName: true });
+                    return;
+                }
+                if (idleMs < 70000) return; // ~70s
+                // Evitar spam: si ya hay un prompt de reactivación reciente, no repetir.
+                try { localStorage.setItem(LAST_ACTIVITY_KEY, String(nowMs())); } catch (_) {}
+                const ctx = getContext();
+                renderBotCard(
+                    null,
+                    [
+                        ctx.name ? `Estoy aquí para ayudarte, ${ctx.name} 😊` : 'Estoy aquí para ayudarte 😊',
+                        '',
+                        '¿Deseas agendar una cita o hacer una consulta?'
+                    ],
+                    [
+                        { type: 'button', label: 'Agendar cita', action: 'reactivate', value: 'agendar' },
+                        { type: 'button', label: 'Hacer una consulta', action: 'reactivate', value: 'duda' },
+                        { type: 'wa', label: 'WhatsApp', message: `Hola Dra. Shirley, escribo desde ${pageName}.` }
+                    ]
+                );
+            }, 15000);
+
+            // Quick replies deshabilitados por preferencia del usuario.
+
+            messagesEl.addEventListener('click', async (e) => {
+                const btn = e.target.closest('button[data-bot-action]');
+                if (!btn) return;
+                const action = btn.dataset.botAction;
+                const value = btn.dataset.botValue || '';
+
+                if (action === 'reactivate') {
+                    if (value === 'agendar') return startSchedule();
+                    if (value === 'duda') return startTopics();
+                }
+
+                if (action === 'faq_pick') {
+                    const ctx = getContext();
+                    setContext({ ...ctx, awaitingFaqOffer: false });
+                    if (value === 'cita') return startSchedule();
+                    if (value === 'sintomas') return startMedical();
+                    if (value === 'embarazo') return startPregnancy();
+                    if (value === 'anticonceptivos') return startContraceptives();
+                    if (value === 'resultados') return startResults();
+                    return startOther();
+                }
+
+                if (action === 'faq_cat') {
+                    const ctx = getContext();
+                    setContext({ ...ctx, awaitingFaqOffer: false });
+                    // Renderizar preguntas del dataset por categoría (máx 6)
+                    const show = async () => {
+                        const items = await loadFaqDataset();
+                        const convRank = (c) => (c === 'alta' ? 3 : c === 'media' ? 2 : c === 'baja' ? 1 : 0);
+                        const inCat = (items || []).filter(x => x.categoria === value);
+                        // Deduplicar preguntas (por texto normalizado) y priorizar conversión + urgencia
+                        const seen = new Set();
+                        const sorted = inCat.slice().sort((a, b) => {
+                            const au = a.urgencia ? 1 : 0;
+                            const bu = b.urgencia ? 1 : 0;
+                            if (bu !== au) return bu - au;
+                            return convRank(b.conversion) - convRank(a.conversion);
+                        });
+                        const list = [];
+                        for (const it of sorted) {
+                            const key = normalize(it.pregunta || '');
+                            if (!key || seen.has(key)) continue;
+                            seen.add(key);
+                            list.push(it);
+                            if (list.length >= 6) break;
+                        }
+                        if (list.length === 0) {
+                            renderBotCard(null, ['Puedo ayudarte 😊 ¿Me cuentas en una frase qué te preocupa?'], []);
+                            return;
+                        }
+                        const shortText = (s, max = 52) => {
+                            const t = (s || '').toString().trim();
+                            if (t.length <= max) return t;
+                            return t.slice(0, max - 1).trim() + '…';
+                        };
+                        renderBotCard(
+                            null,
+                            ['Perfecto 😊 Elige una pregunta:'],
+                            list.map(it => ({ type: 'button', label: shortText(it.pregunta), action: 'faq_q', value: it.id }))
+                                .concat([{ type: 'button', label: 'Volver', action: 'faq_back', value: '' }])
+                        );
+                    };
+                    show();
+                    return;
+                }
+
+                if (action === 'faq_back') {
+                    startTopics();
+                    return;
+                }
+
+                if (action === 'faq_q') {
+                    const items = await loadFaqDataset();
+                    const it = (items || []).find(x => x.id === value);
+                    if (!it) {
+                        renderBotCard(null, ['Entiendo 💗 ¿Me cuentas en una frase qué te preocupa?'], []);
+                        return;
+                    }
+                    setSchedulePrompt(true);
+                    const lines = (it.respuesta || '').split('\n').map(s => s.trim()).filter(Boolean);
+                    if (it.urgencia || it.intencion === 'urgencia') {
+                        renderBotCard(
+                            null,
+                            lines.slice(0, 4),
+                            [
+                                { type: 'wa', label: 'Escribir a WhatsApp', message: `Hola Dra. Shirley, mi nombre es ${(getContext().name || '')}. Necesito orientación. Mi situación es: ${it.pregunta}` },
+                                { type: 'book', label: 'Agendar cita', href: APPT_URL }
+                            ]
+                        );
+                        return;
+                    }
+                    renderBotCard(null, lines.slice(0, 4), [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]);
+                    return;
+                }
+
+                const flow = getFlow();
+                if (!flow) return;
+                setLastActivity();
+
+                if (flow.mode === 'schedule') {
+                    if (action === 'schedule_cancel') {
+                        setFlow(null);
+                        setSchedulePrompt(false);
+                        renderBotCard(null, ['Entendido 😊 ¿Deseas agendar tu cita?'], [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]);
+                        return;
+                    }
+                    if (action === 'schedule_type') {
+                        if (value === 'chequeo') {
+                            setFlow({ mode: 'schedule', step: 'chequeo_help', data: { type: 'Chequeo ginecológico' } });
+                            setSchedulePrompt(true);
+                            renderBotCard(
+                                null,
+                                [
+                                    'Excelente decisión 💗 Los chequeos son clave para tu salud.',
+                                    'Puedes agendar aquí:',
+                                    APPT_URL_PUBLIC,
+                                    '¿Deseas ayuda con la disponibilidad?'
+                                ],
+                                [
+                                    { type: 'button', label: 'Sí', action: 'schedule_help', value: 'si' },
+                                    { type: 'button', label: 'No', action: 'schedule_help', value: 'no' },
+                                    { type: 'book', label: 'Agendar cita', href: APPT_URL }
+                                ]
+                            );
+                            return;
+                        }
+                        if (value === 'infeccion') {
+                            setFlow(null);
+                            setSchedulePrompt(true);
+                            renderBotCard(
+                                null,
+                                [
+                                    'Es importante evaluar tus síntomas a tiempo 😊',
+                                    'La Dra. puede ayudarte con un diagnóstico adecuado.',
+                                    'Agenda aquí:',
+                                    APPT_URL_PUBLIC
+                                ],
+                                [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                            );
+                            return;
+                        }
+                        if (value === 'estetica') {
+                            setFlow(null);
+                            setSchedulePrompt(true);
+                            renderBotCard(
+                                null,
+                                [
+                                    'Podemos orientarte según tu caso y lo que deseas lograr 💗',
+                                    'Lo ideal es una valoración en consulta.',
+                                    'Agenda aquí:',
+                                    APPT_URL_PUBLIC
+                                ],
+                                [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                            );
+                            return;
+                        }
+                        if (value === 'embarazo') {
+                            setFlow(null);
+                            setSchedulePrompt(true);
+                            renderBotCard(
+                                null,
+                                [
+                                    'El control prenatal es clave para tu salud y la del bebé 💗',
+                                    'Agenda aquí:',
+                                    APPT_URL_PUBLIC
+                                ],
+                                [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                            );
+                            return;
+                        }
+                        if (value === 'emergencia') {
+                            setFlow(null);
+                            setSchedulePrompt(false);
+                            renderBotCard(
+                                null,
+                                [
+                                    'Si presentas dolor intenso, sangrado abundante o fiebre ⚠️',
+                                    'Te recomendamos acudir de inmediato a un centro de salud.',
+                                    'También puedes intentar agendar aquí:',
+                                    APPT_URL_PUBLIC
+                                ],
+                                [
+                                    { type: 'book', label: 'Agendar cita', href: APPT_URL },
+                                    { type: 'wa', label: 'WhatsApp', message: `Hola Dra. Shirley, necesito orientación. (Desde ${pageName})` }
+                                ]
+                            );
+                            return;
+                        }
+                        return;
+                    }
+                    if (action === 'schedule_help') {
+                        const msg = `Hola Dra. Shirley, me gustaría agendar un chequeo ginecológico. ¿Tienen disponibilidad? (Desde ${pageName})`;
+                        setFlow(null);
+                        setSchedulePrompt(false);
+                        renderBotCard(
+                            null,
+                            ['Perfecto 😊 Te llevo a WhatsApp para coordinar.'],
+                            [{ type: 'wa', label: 'Ir a WhatsApp', message: msg }, { type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                        );
+                        return;
+                    }
+                }
+
+                if (flow.mode === 'medical') {
+                    if (action === 'med_cancel') {
+                        setFlow(null);
+                        setSchedulePrompt(false);
+                        renderBotCard(
+                            null,
+                            ['Entendido 😊 Si deseas, puedo ayudarte a agendar una cita.'],
+                            [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                        );
+                        return;
+                    }
+
+                    if (action === 'med_other') {
+                        flow.step = 'describe';
+                        setFlow(flow);
+                        setSchedulePrompt(false);
+                        renderBotCard(
+                            'Cuéntame',
+                            ['Escríbeme en una frase qué sientes o qué te preocupa (por ejemplo: “flujo con mal olor”, “dolor pélvico”, “sangrado”).'],
+                            [{ type: 'button', label: 'Cancelar', action: 'med_cancel', value: '' }]
+                        );
+                        return;
+                    }
+
+                    if (action === 'med_symptom') {
+                        setFlow(null);
+                        setSchedulePrompt(true);
+                        if (value === 'pelvic_pain') {
+                            renderBotCard(
+                                null,
+                                [
+                                    'El dolor pélvico puede tener varias causas y conviene evaluarlo en consulta 💗',
+                                    'Si es intenso o viene con fiebre o sangrado abundante, acude a urgencias.',
+                                    '¿Te gustaría agendar tu cita?'
+                                ],
+                                [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                            );
+                            return;
+                        }
+                        if (value === 'bleeding') {
+                            renderBotCard(
+                                null,
+                                [
+                                    'El sangrado o manchado puede ocurrir por diferentes razones 😊',
+                                    'Si es abundante o con dolor intenso o fiebre alta, acude a urgencias.',
+                                    '¿Deseas agendar una cita?'
+                                ],
+                                [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                            );
+                            return;
+                        }
+                        if (value === 'late_period') {
+                            renderBotCard(
+                                null,
+                                [
+                                    'El retraso menstrual puede deberse a embarazo, estrés o cambios hormonales 😊',
+                                    'Te recomiendo evaluación para mayor claridad.',
+                                    '¿Deseas agendar consulta?'
+                                ],
+                                [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                            );
+                            return;
+                        }
+                        renderBotCard(
+                            null,
+                            [
+                                'El flujo anormal, picazón o mal olor puede tener varias causas (por ejemplo: cambios de flora o infecciones) 😊',
+                                'Lo más seguro es una valoración en consulta.',
+                                '¿Te gustaría agendar tu cita?'
+                            ],
+                            [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                        );
+                        return;
+                    }
+
+                    return;
+                }
+
+                if (flow.mode === 'pregnancy') {
+                    if (action === 'preg_cancel') {
+                        setFlow(null);
+                        setSchedulePrompt(false);
+                        renderBotCard(null, ['Entendido 😊 ¿Deseas agendar tu cita?'], [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]);
+                        return;
+                    }
+                    if (action === 'preg_stage') {
+                        setFlow(null);
+                        setSchedulePrompt(true);
+                        if (value === 'sospecha') {
+                            renderBotCard(
+                                null,
+                                [
+                                    'Puedes iniciar con una prueba 😊',
+                                    'Si es positiva, es importante iniciar control prenatal.',
+                                    '¿Deseas agendar tu consulta?'
+                                ],
+                                [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                            );
+                            return;
+                        }
+                        if (value === 'confirmado') {
+                            renderBotCard(
+                                null,
+                                [
+                                    '¡Felicidades! 💗',
+                                    'El control prenatal es clave para tu salud y la del bebé.',
+                                    'Agenda aquí:',
+                                    APPT_URL_PUBLIC
+                                ],
+                                [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                            );
+                            return;
+                        }
+                        if (value === 'molestias') {
+                            renderBotCard(
+                                null,
+                                [
+                                    'Algunas molestias pueden ser normales, pero deben evaluarse.',
+                                    'Te recomiendo consulta para mayor seguridad 😊',
+                                    '¿Deseas agendar?'
+                                ],
+                                [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                            );
+                            return;
+                        }
+                        renderBotCard(
+                            null,
+                            [
+                                'En embarazo de alto riesgo es importante un seguimiento cercano 💗',
+                                'Te recomiendo valoración para orientar el plan de control.',
+                                '¿Deseas agendar tu cita?'
+                            ],
+                            [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                        );
+                        return;
+                    }
+                }
+
+                if (flow.mode === 'contraceptives') {
+                    if (action === 'contra_cancel') {
+                        setFlow(null);
+                        setSchedulePrompt(false);
+                        renderBotCard(null, ['Entendido 😊 ¿Deseas agendar tu cita?'], [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]);
+                        return;
+                    }
+                    if (action === 'contra_method') {
+                        setFlow(null);
+                        setSchedulePrompt(true);
+                        renderBotCard(
+                            null,
+                            [
+                                'Cada método depende de tu cuerpo y estilo de vida 😊',
+                                'Lo mejor es elegirlo en consulta para mayor seguridad 💗',
+                                'Agenda aquí:',
+                                APPT_URL_PUBLIC
+                            ],
+                            [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                        );
+                        return;
+                    }
+                }
+
+                if (flow.mode === 'results') {
+                    if (action === 'results_cancel') {
+                        setFlow(null);
+                        setSchedulePrompt(false);
+                        renderBotCard(null, ['Entendido 😊 ¿Deseas agendar tu cita?'], [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]);
+                        return;
+                    }
+                    if (action === 'results_choice') {
+                        setFlow(null);
+                        setSchedulePrompt(false);
+                        if (value === 'wa') {
+                            const msg = `Hola Dra. Shirley, escribo por resultados/seguimiento. (Desde ${pageName})`;
+                            renderBotCard(null, ['Perfecto 😊 Te llevo a WhatsApp.'], [{ type: 'wa', label: 'Ir a WhatsApp', message: msg }, { type: 'book', label: 'Agendar cita', href: APPT_URL }]);
+                            return;
+                        }
+                        renderBotCard(null, ['Perfecto 😊 Puedes agendar aquí:'], [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]);
+                        return;
+                    }
+                }
+
+                if (flow.mode === 'other') {
+                    if (action === 'other_cancel') {
+                        setFlow(null);
+                        setSchedulePrompt(false);
+                        renderBotCard(null, ['Entendido 😊 ¿Deseas agendar tu cita?'], [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]);
+                        return;
+                    }
+                }
+
+                if (flow.mode !== 'booking') return;
+
+                if (action === 'booking_cancel') {
+                    setFlow(null);
+                    setSchedulePrompt(false);
+                    renderBotCard(
+                        null,
+                        ['Agendamiento cancelado 😊 ¿Te gustaría agendar tu cita?'],
+                        [{ type: 'book', label: 'Agendar cita', href: APPT_URL }]
+                    );
+                    return;
+                }
+
+                if (action === 'booking_type') {
+                    flow.data.type = value;
+                    flow.step = 'when';
+                    setFlow(flow);
+                    renderBotCard(
+                        'Perfecto',
+                        [
+                            `Motivo: ${value}`,
+                            '',
+                            '¿Para cuándo te gustaría?',
+                            'Ejemplos: “lunes 10am”, “esta semana”, “25 de marzo en la tarde”.'
+                        ],
+                        [
+                            { type: 'button', label: 'Esta semana', action: 'booking_when_quick', value: 'Esta semana' },
+                            { type: 'button', label: 'Próxima semana', action: 'booking_when_quick', value: 'Próxima semana' },
+                            { type: 'button', label: 'No estoy segura', action: 'booking_when_quick', value: 'No estoy segura' },
+                            { type: 'button', label: 'Cancelar', action: 'booking_cancel', value: '' }
+                        ]
+                    );
+                    return;
+                }
+
+                if (action === 'booking_when_quick') {
+                    flow.data.when = value;
+                    flow.step = 'insurance';
+                    setFlow(flow);
+                    renderBotCard(
+                        'Gracias',
+                        [`Preferencia: ${value}`, '', '¿Tienes seguro médico?'],
+                        [
+                            { type: 'button', label: 'Sí', action: 'booking_insurance', value: 'Sí' },
+                            { type: 'button', label: 'No', action: 'booking_insurance', value: 'No' },
+                            { type: 'button', label: 'No sé', action: 'booking_insurance', value: 'No sé' },
+                            { type: 'button', label: 'Cancelar', action: 'booking_cancel', value: '' }
+                        ]
+                    );
+                    return;
+                }
+
+                if (action === 'booking_insurance') {
+                    flow.data.insurance = value;
+                    flow.step = 'notes';
+                    setFlow(flow);
+                    renderBotCard(
+                        'Último paso (opcional)',
+                        [
+                            '¿Quieres agregar algún detalle?',
+                            'Ejemplos: “primera vez”, “embarazo”, “control”, “eco”.',
+                            '',
+                            'Si no deseas agregar nada, presiona “Continuar”.'
+                        ],
+                        [
+                            { type: 'button', label: 'Continuar', action: 'booking_finish', value: '' },
+                            { type: 'button', label: 'Cancelar', action: 'booking_cancel', value: '' }
+                        ]
+                    );
+                    return;
+                }
+
+                if (action === 'booking_finish') {
+                    const waText = buildBookingSummary(flow.data);
+                    setFlow(null);
+                    setSchedulePrompt(false);
+                    renderBotCard(
+                        'Listo',
+                        [
+                            'Puedes agendar en línea o, si prefieres, enviarlo por WhatsApp 😊',
+                            '',
+                            `- Motivo: ${flow.data.type || ''}`,
+                            `- Preferencia: ${flow.data.when || ''}`,
+                            `- Seguro: ${flow.data.insurance || ''}`,
+                            flow.data.notes ? `- Detalles: ${flow.data.notes}` : ''
+                        ].filter(Boolean),
+                        [
+                            { type: 'book', label: 'Agendar cita', href: APPT_URL },
+                            { type: 'wa', label: 'WhatsApp', message: waText },
+                            { type: 'button', label: 'Volver a empezar', action: 'booking_restart', value: '' }
+                        ]
+                    );
+                    return;
+                }
+
+                if (action === 'booking_restart') {
+                    startBooking();
+                }
+            });
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const value = input.value;
+                input.value = '';
+                const flow = getFlow();
+                if (flow && flow.mode === 'onboarding' && flow.step === 'name') {
+                    const rawName = (value || '').trim();
+                    if (!rawName) return;
+                    addMessage('user', rawName);
+                    saveHistory();
+                    setLastActivity();
+
+                    const ctx = getContext();
+                    const name = isLikelyName(rawName) ? formatName(rawName) : '';
+                    if (name) {
+                        setContext({ ...ctx, name });
+                        setFlow(null);
+                        addMessage('bot', [
+                            `Encantada, ${name} 💗`,
+                            `¿Deseas agendar una cita o tienes alguna duda? 😊`
+                        ].join('\n'));
+                        saveHistory();
+                        setLastActivity();
+                        return;
+                    }
+
+                    // Si no parece nombre, ayudamos igual pero lo pedimos de nuevo con tacto.
+                    setFlow({ mode: 'onboarding', step: 'name', data: {} });
+                    addMessage('bot', [
+                        `Gracias 💗`,
+                        `Para dirigirme a ti de forma más cordial, ¿me dices tu nombre? 😊`
+                    ].join('\n'));
+                    saveHistory();
+                    setLastActivity();
+                    return;
+                }
+                if (flow && flow.mode === 'medical' && flow.step === 'describe') {
+                    const v = (value || '').trim();
+                    if (!v) return;
+                    setFlow(null);
+                    send(v);
+                    return;
+                }
+                if (flow && flow.mode === 'other' && flow.step === 'describe') {
+                    const v = (value || '').trim();
+                    if (!v) return;
+                    setFlow(null);
+                    send(v);
+                    return;
+                }
+                if (flow && flow.mode === 'booking') {
+                    const v = (value || '').trim();
+                    if (!v) return;
+                    addMessage('user', v);
+                    saveHistory();
+
+                    if (flow.step === 'when') {
+                        flow.data.when = v;
+                        flow.step = 'insurance';
+                        setFlow(flow);
+                        renderBotCard(
+                            'Gracias',
+                            [`Preferencia: ${v}`, '', '¿Tienes seguro médico?'],
+                            [
+                                { type: 'button', label: 'Sí', action: 'booking_insurance', value: 'Sí' },
+                                { type: 'button', label: 'No', action: 'booking_insurance', value: 'No' },
+                                { type: 'button', label: 'No sé', action: 'booking_insurance', value: 'No sé' },
+                                { type: 'button', label: 'Cancelar', action: 'booking_cancel', value: '' }
+                            ]
+                        );
+                        return;
+                    }
+
+                    if (flow.step === 'notes') {
+                        flow.data.notes = v;
+                        const waText = buildBookingSummary(flow.data);
+                        setFlow(null);
+                        setSchedulePrompt(false);
+                        renderBotCard(
+                            'Listo',
+                            [
+                                'Puedes agendar en línea o, si prefieres, enviarlo por WhatsApp 😊',
+                                '',
+                                `- Motivo: ${flow.data.type || ''}`,
+                                `- Preferencia: ${flow.data.when || ''}`,
+                                `- Seguro: ${flow.data.insurance || ''}`,
+                                flow.data.notes ? `- Detalles: ${flow.data.notes}` : ''
+                            ].filter(Boolean),
+                            [
+                                { type: 'book', label: 'Agendar cita', href: APPT_URL },
+                                { type: 'wa', label: 'WhatsApp', message: waText },
+                                { type: 'button', label: 'Volver a empezar', action: 'booking_restart', value: '' }
+                            ]
+                        );
+                        return;
+                    }
+                }
+
+                send(value);
+            });
+        })();
+    </script>
     
     <!-- Script para ocultar loader cuando la página está lista - Prevenir FOUC -->
     <script>
-        // Ocultar loader cuando todo esté cargado
-        window.addEventListener('load', function() {
+        // Mostrar contenido ASAP (no esperar a imágenes) para mejorar LCP
+        window.addEventListener('DOMContentLoaded', function() {
             // Asegurar que el body tenga la clase loaded
             document.body.classList.add('loaded');
             
@@ -1109,7 +3518,7 @@
                     }, 300);
                 }
             }, 100);
-        });
+        }, { once: true });
         
         // Fallback: Si por alguna razón no se dispara load, forzar después de 3 segundos
         setTimeout(function() {

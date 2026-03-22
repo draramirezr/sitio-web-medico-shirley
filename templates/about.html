@@ -8,321 +8,358 @@
 {% block og_description %}Conoce a la Dra. Shirley Ramírez: Ginecóloga y Obstetra en Santo Domingo con formación internacional. Especialista en salud femenina integral, medicina reproductiva y ginecología estética.{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/admin-responsive.css') }}">
 <style>
-    /* Iconos de marca decorativos - Sobre Mí */
-    .container.py-5 {
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap');
+
+    :root {
+        --about-pink-50: #FDF8F9;
+        --about-pink-100: #f5e6ea;
+        --about-rose: #8B5A6B;
+        --about-rose-dark: #6B3A4B;
+        --about-text: #2D2D2D;
+        --about-muted: #6B6B6B;
+        --about-border: #e0d0d4;
+    }
+
+    .about-hero {
+        background: linear-gradient(135deg, var(--about-pink-50) 0%, var(--about-pink-100) 100%);
+        padding: 80px 0;
+    }
+
+    .about-kicker {
+        color: var(--about-rose) !important;
+        font-size: 0.875rem !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+    }
+
+    .about-title {
+        font-family: "Playfair Display", serif !important;
+        font-weight: 700 !important;
+        color: var(--about-text) !important;
+        font-size: clamp(2.25rem, 3vw, 3rem) !important;
+        line-height: 1.15;
+        margin: 0 0 14px;
+    }
+
+    .about-lead {
+        color: var(--about-muted) !important;
+        font-size: 1.05rem !important;
+        line-height: 1.75;
+    }
+
+    .about-image {
+        border-radius: 18px;
+        overflow: visible;
+        box-shadow: 0 18px 45px rgba(45, 45, 45, 0.12);
+        border: 1px solid rgba(224, 208, 212, 0.7);
+        background: #fff;
         position: relative;
     }
-    
-    .container.py-5::before {
-        content: '';
+
+    .about-image-media{
+        border-radius: 18px;
+        overflow: hidden;
+        background: #fff;
+    }
+
+    .about-image-media img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .about-image-badge {
         position: absolute;
-        width: 320px;
-        height: 320px;
-        background-image: url("{{ url_for('static', filename='images/icono-marca.png') }}");
-        background-size: contain;
-        background-repeat: no-repeat;
-        opacity: 0.04;
-        top: 10%;
-        right: 3%;
-        transform: rotate(-25deg);
-        z-index: 0;
-        pointer-events: none;
-        animation: float-brand-1 12s ease-in-out infinite;
-    }
-    
-    .container.py-5::after {
-        content: '';
-        position: absolute;
-        width: 280px;
-        height: 280px;
-        background-image: url("{{ url_for('static', filename='images/icono-marca.png') }}");
-        background-size: contain;
-        background-repeat: no-repeat;
-        opacity: 0.03;
-        bottom: 15%;
-        left: 5%;
-        transform: rotate(20deg);
-        z-index: 0;
-        pointer-events: none;
-    }
-    
-    @keyframes float-brand-1 {
-        0%, 100% { transform: rotate(-25deg) translateY(0); }
-        50% { transform: rotate(-28deg) translateY(-12px); }
-    }
-    
-    /* Marco parcial animado para la imagen */
-    .image-frame-container {
-        position: relative;
-        display: inline-block;
-        padding: 20px;
-        z-index: 1;
-    }
-    
-    /* Marco superior izquierdo */
-    .image-frame-container::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 60%;
-        height: 60%;
-        border-top: 4px solid var(--primary-color);
-        border-left: 4px solid var(--primary-color);
-        border-radius: 15px 0 0 0;
-    }
-    
-    /* Marco inferior derecho */
-    .image-frame-container::after {
-        content: '';
-        position: absolute;
+        right: 16px;
         bottom: 0;
-        right: 0;
-        width: 60%;
-        height: 60%;
-        border-bottom: 4px solid #ACACAD;
-        border-right: 4px solid #ACACAD;
-        border-radius: 0 0 15px 0;
+        left: auto;
+        transform: translateY(55%);
+        background: linear-gradient(135deg, var(--about-rose) 0%, var(--about-rose-dark) 100%);
+        color: #fff;
+        border-radius: 999px;
+        padding: 10px 18px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        box-shadow: 0 16px 32px rgba(139, 90, 107, 0.22);
+        text-transform: none !important;
+        letter-spacing: 0 !important;
+        font-family: var(--font-body, inherit) !important;
+        white-space: nowrap;
     }
-    
-    .image-frame-container img {
-        position: relative;
-        z-index: 1;
-        border-radius: 10px;
-    }
-    
-    /* ============ RESPONSIVE - OPTIMIZADO ============ */
-    @media (max-width: 992px) {
-        .container.py-5::before {
-            width: 250px;
-            height: 250px;
-        }
-        
-        .container.py-5::after {
-            width: 220px;
-            height: 220px;
-        }
-    }
-    
-    @media (max-width: 768px) {
-        .display-4 {
-            font-size: 2rem !important;
-        }
-        
-        h5 {
-            font-size: 1.1rem;
-        }
-        
-        p {
-            font-size: 0.95rem;
-        }
-        
-        .container.py-5::before {
-            width: 200px;
-            height: 200px;
-            top: 5%;
-            right: 2%;
-        }
-        
-        .container.py-5::after {
-            width: 180px;
-            height: 180px;
-            bottom: 10%;
-            left: 2%;
-        }
-        
-        .image-frame-container {
-            padding: 15px;
-            max-width: 400px;
-            margin: 0 auto;
-        }
-        
-        ul.list-unstyled li {
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .service-icon {
-            width: 60px !important;
-            height: 60px !important;
-            font-size: 1.5rem !important;
-        }
-    }
-    
+
     @media (max-width: 576px) {
-        .display-4 {
-            font-size: 1.75rem !important;
-        }
-        
-        h5 {
-            font-size: 1rem;
-        }
-        
-        h3 {
-            font-size: 1.5rem;
-        }
-        
-        h6 {
-            font-size: 0.9rem;
-        }
-        
-        p, ul.list-unstyled li {
-            font-size: 0.9rem;
-        }
-        
-        .container.py-5::before,
-        .container.py-5::after {
-            width: 150px;
-            height: 150px;
-        }
-        
-        .image-frame-container {
-            padding: 10px;
-            max-width: 100%;
-        }
-        
-        .image-frame-container::before,
-        .image-frame-container::after {
-            border-width: 3px;
-        }
-        
-        .text-primary.mb-4 {
-            font-size: 0.95rem;
-        }
-        
-        .service-icon {
-            width: 50px !important;
-            height: 50px !important;
-            font-size: 1.3rem !important;
-        }
-        
-        .col-lg-3.col-md-6 {
-            margin-bottom: 1rem;
+        .about-image-badge {
+            right: 12px;
+            bottom: 0;
+            transform: translateY(52%);
+            padding: 9px 14px;
+            font-size: 0.82rem;
         }
     }
-    
-    @media (max-width: 375px) {
-        .display-4 {
-            font-size: 1.5rem !important;
+
+    .about-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: linear-gradient(135deg, var(--about-rose) 0%, var(--about-rose-dark) 100%);
+        color: #fff;
+        padding: 12px 18px;
+        border-radius: 999px;
+        text-decoration: none;
+        font-weight: 700;
+        box-shadow: 0 16px 32px rgba(139, 90, 107, 0.22);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+        text-transform: none !important;
+        letter-spacing: 0 !important;
+        font-family: var(--font-body, inherit) !important;
+    }
+
+    .about-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 20px 40px rgba(139, 90, 107, 0.26);
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .about-section {
+        padding: 80px 0;
+        background: #fff;
+    }
+
+    .about-section.alt {
+        background: var(--about-pink-50);
+    }
+
+    .about-section-title {
+        font-family: "Playfair Display", serif !important;
+        font-weight: 700 !important;
+        color: var(--about-text) !important;
+        text-align: center;
+        font-size: 2rem !important;
+        margin-bottom: 10px;
+    }
+
+    .about-section-subtitle {
+        color: var(--about-muted) !important;
+        text-align: center;
+        max-width: 760px;
+        margin: 0 auto 34px;
+    }
+
+    .about-card {
+        background: var(--about-pink-50);
+        border: 1px solid rgba(224, 208, 212, 0.7);
+        border-radius: 18px;
+        padding: 22px;
+        height: 100%;
+        box-shadow: 0 14px 30px rgba(45, 45, 45, 0.05);
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+
+    .about-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 22px 55px rgba(45, 45, 45, 0.10);
+        border-color: rgba(139, 90, 107, 0.35);
+    }
+
+    .about-icon-box {
+        width: 56px;
+        height: 56px;
+        background: #fff;
+        border: 1px solid rgba(224, 208, 212, 0.8);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 24px rgba(45, 45, 45, 0.06);
+        margin-bottom: 14px;
+    }
+
+    .about-icon-box svg {
+        width: 24px;
+        height: 24px;
+        color: var(--about-rose);
+        display: block;
+        transition: transform 0.25s ease, filter 0.25s ease;
+        transform-origin: 50% 50%;
+    }
+
+    /* Animación de iconos (solo "Formación y Experiencia") */
+    #about-formation .about-icon-box {
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+
+    #about-formation .about-card:hover .about-icon-box {
+        transform: translateY(-2px);
+        border-color: rgba(139, 90, 107, 0.35);
+        box-shadow: 0 14px 30px rgba(45, 45, 45, 0.10);
+    }
+
+    #about-formation .about-card:hover .about-icon-box svg {
+        transform: scale(1.08) rotate(6deg);
+        filter: drop-shadow(0 8px 14px rgba(139, 90, 107, 0.25));
+    }
+
+    @keyframes aboutIconFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-3px); }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        #about-formation .about-icon-box svg {
+            animation: aboutIconFloat 6.5s ease-in-out infinite;
         }
-        
-        .container.py-5 {
-            padding: 2rem 0 !important;
+
+        #about-formation .row > div:nth-child(1) .about-icon-box svg { animation-delay: 0s; }
+        #about-formation .row > div:nth-child(2) .about-icon-box svg { animation-delay: 0.35s; }
+        #about-formation .row > div:nth-child(3) .about-icon-box svg { animation-delay: 0.7s; }
+        #about-formation .row > div:nth-child(4) .about-icon-box svg { animation-delay: 1.05s; }
+
+        #about-formation .about-card:hover .about-icon-box svg {
+            animation-play-state: paused;
         }
-        
-        .image-frame-container img {
-            max-width: 90%;
-        }
+    }
+
+    .about-card h3 {
+        font-family: "Playfair Display", serif !important;
+        font-weight: 700 !important;
+        color: var(--about-text) !important;
+        font-size: 1.15rem !important;
+        margin-bottom: 10px;
+    }
+
+    .about-card p {
+        color: var(--about-muted) !important;
+        margin: 0;
+        line-height: 1.7;
+        font-size: 0.95rem !important;
+    }
+
+    @media (max-width: 576px) {
+        .about-hero { padding: 64px 0; }
+        .about-section { padding: 64px 0; }
     }
 </style>
 
-<div class="container py-5">
-    <div class="row align-items-center">
-        <div class="col-lg-5 mb-4 mb-lg-0 text-center">
-            <div class="image-frame-container">
-                <picture>
-                    <source srcset="{{ url_for('static', filename='images/dra-shirley-profesional.webp') }}" type="image/webp">
-                    <img src="{{ url_for('static', filename='images/dra-shirley-profesional.jpg') }}" 
-                         alt="Dra. Shirley Ramírez" 
-                         class="img-fluid shadow"
-                         loading="eager"
-                         decoding="async"
-                         style="max-width: 100%; height: auto;">
-                </picture>
-            </div>
+<section class="about-hero">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-5 text-center">
+                <div class="about-image">
+                <div class="about-image-media">
+                    <picture>
+                        <source srcset="{{ url_for('static', filename='images/Sobremi1.png') }}" type="image/png">
+                        <img src="{{ url_for('static', filename='images/Sobremi1.png') }}" 
+                             alt="Dra. Shirley Ramírez" 
+                             loading="eager"
+                                 decoding="async">
+                    </picture>
+                </div>
+                    <div class="about-image-badge">Ginecóloga-Obstetra</div>
+                </div>
         </div>
         <div class="col-lg-7">
-            <h1 class="display-4 fw-bold mb-2" style="color: var(--title-color);">Dra. Shirley Ramírez</h1>
-            <h5 class="text-primary mb-4">Ginecóloga y Obstetra</h5>
-            
-            <p class="mb-4">
-                <strong>Doctor en Medicina</strong> - Egresada de la Universidad Autónoma de Santo Domingo (UASD), 
-                una de las universidades más reconocidas del país, donde obtuve una formación exhaustiva y práctica 
-                en medicina, preparándome de manera óptima para mi carrera profesional.
-            </p>
-            
-            <p class="mb-4">
-                <strong>Ginecólogo-Obstetra</strong> - Post Grado en el Hospital Docente Universitario Maternidad 
-                Nuestra Señora de la Altagracia. Trabajar en un entorno de alta complejidad, ofreciendo atención 
-                especializada en salud materna y fetal, me ha permitido perfeccionar mis habilidades en el diagnóstico 
-                y tratamiento de condiciones ginecológicas y obstétricas.
-            </p>
-            
-            <p class="mb-4">
-                <strong>Ginecología Estética Funcional y Regenerativa</strong> en la Universidad Nororiental Privada 
-                Gran Mariscal de Ayacucho (Venezuela). Esta capacitación avanzada me ha permitido proporcionar tratamientos 
-                innovadores y personalizados que mejoran la calidad de vida de mis pacientes.
-            </p>
-            
-            <p class="mb-4">
-                <strong>Máster en Reproducción Humana</strong> – Universidad Europea del Atlántico. 
-                Formación enfocada en el estudio integral de la fertilidad y las técnicas de reproducción asistida, 
-                con bases científicas, clínicas y éticas.
-            </p>
-            
-            <h5 class="mb-3">Formación Académica</h5>
-            <ul class="list-unstyled mb-4">
-                <li><i class="fas fa-graduation-cap text-primary me-2"></i>Doctor en Medicina - Universidad Autónoma de Santo Domingo (UASD)</li>
-                <li><i class="fas fa-graduation-cap text-primary me-2"></i>Ginecólogo-Obstetra - Hospital Docente Universitario Maternidad Nuestra Señora de la Altagracia</li>
-                <li><i class="fas fa-graduation-cap text-primary me-2"></i>Ginecología Estética Funcional y Regenerativa - Universidad Nororiental Privada Gran Mariscal de Ayacucho (Venezuela)</li>
-                <li><i class="fas fa-graduation-cap text-primary me-2"></i>Máster en Reproducción Humana - Universidad Europea del Atlántico</li>
-            </ul>
-            
-            <h5 class="mb-3">Experiencia Profesional</h5>
-            <ul class="list-unstyled mb-4">
-                <li><i class="fas fa-hospital text-primary me-2"></i>Más de 10 años de experiencia</li>
-                <li><i class="fas fa-baby text-primary me-2"></i>Especialista en embarazos de alto riesgo</li>
-                <li><i class="fas fa-heart text-primary me-2"></i>Experta en medicina preventiva femenina</li>
-                <li><i class="fas fa-users text-primary me-2"></i>Más de 2000 pacientes atendidas</li>
-            </ul>
+                <div class="about-kicker">Conóceme</div>
+                <h1 class="about-title">Dra. Shirley Ramírez</h1>
+                <p class="about-lead mb-3">
+                    Soy la Dra. Shirley Ramírez, ginecóloga-obstetra comprometida con el bienestar y la tranquilidad de cada una de mis pacientes.
+                    Creo firmemente que la salud femenina no solo se trata de diagnósticos, sino de escuchar, acompañar y brindar un espacio donde te sientas segura y comprendida.
+                </p>
+                <p class="about-lead mb-3">
+                    A lo largo de mi experiencia, he tenido el privilegio de acompañar a muchas mujeres en distintas etapas de sus vidas, desde consultas preventivas hasta el embarazo.
+                    Mi enfoque se basa en ofrecer una atención cercana, clara y personalizada, adaptada a tus necesidades.
+                </p>
+                <p class="about-lead mb-4">
+                    Estoy aquí para ayudarte a cuidar tu salud con confianza, respeto y profesionalismo.
+                </p>
+                {# botón removido por solicitud #}
+            </div>
         </div>
     </div>
-    
-    <!-- Certificaciones -->
-    <div class="row mt-5">
-        <div class="col-12">
-            <h3 class="text-center mb-5">Certificaciones y Membresías</h3>
+</section>
+
+<section class="about-section" id="about-formation">
+    <div class="container">
+        <h2 class="about-section-title">Formación y Experiencia</h2>
+        <p class="about-section-subtitle">Una trayectoria profesional dedicada a la excelencia en el cuidado de la salud femenina.</p>
+
             <div class="row g-4">
-                <div class="col-lg-3 col-md-6">
-                    <div class="text-center">
-                        <div class="service-icon mx-auto mb-3">
-                            <i class="fas fa-certificate"></i>
-                        </div>
-                        <h6>Sociedad Dominicana de Obstetricia y Ginecología</h6>
-                        <p class="text-muted small">Miembro activo</p>
+            <div class="col-md-6 col-lg-3">
+                <div class="about-card text-center">
+                    <div class="about-icon-box mx-auto">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3 1 9l11 6 9-4.91V17h2V9L12 3zm0 9L5.2 9 12 5.4 18.8 9 12 12z"/><path fill="currentColor" d="M5 12.5V17c0 2.21 3.13 4 7 4s7-1.79 7-4v-4.5l-7 3.82-7-3.82z"/></svg>
                     </div>
+                    <h3>Formación Académica</h3>
+                    <p>Doctor en Medicina (UASD) y formación de postgrado en ginecología y obstetricia.</p>
                 </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="text-center">
-                        <div class="service-icon mx-auto mb-3">
-                            <i class="fas fa-award"></i>
                         </div>
-                        <h6>Colegio Médico Dominicano</h6>
-                        <p class="text-muted small">Miembro activo</p>
+            <div class="col-md-6 col-lg-3">
+                <div class="about-card text-center">
+                    <div class="about-icon-box mx-auto">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2 3 6v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V6l-9-4zm0 18c-3.5-1.2-6-4.9-6-8.6V7.3l6-2.7 6 2.7v4.1c0 3.7-2.5 7.4-6 8.6z"/><path fill="currentColor" d="m10.3 12.9-1.6-1.6-1.4 1.4 3 3 6-6-1.4-1.4-4.6 4.6z"/></svg>
                     </div>
+                    <h3>Certificaciones</h3>
+                    <p>Certificacion en Ginecología Estética funcional y Especialización en Medicina Regenerativa.</p>
                 </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="text-center">
-                        <div class="service-icon mx-auto mb-3">
-                            <i class="fas fa-microscope"></i>
                         </div>
-                        <h6>Medicina Reproductiva</h6>
-                        <p class="text-muted small">Especialización</p>
+            <div class="col-md-6 col-lg-3">
+                <div class="about-card text-center">
+                    <div class="about-icon-box mx-auto">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16 11c1.66 0 3-1.57 3-3.5S17.66 4 16 4s-3 1.57-3 3.5S14.34 11 16 11zM8 11c1.66 0 3-1.57 3-3.5S9.66 4 8 4 5 5.57 5 7.5 6.34 11 8 11z"/><path fill="currentColor" d="M8 13c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.93 1.97 3.45V19h7v-2.5C24 14.17 18.33 13 16 13z"/></svg>
                     </div>
+                    <h3>Experiencia Clínica</h3>
+                    <p>Más de 10 años de experiencia atendiendo pacientes en ginecología, obstetricia y estética ginecológica.</p>
                 </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="text-center">
-                        <div class="service-icon mx-auto mb-3">
-                            <i class="fas fa-spa"></i>
                         </div>
-                        <h6>Ginecología Estética Funcional</h6>
-                        <p class="text-muted small">Certificación</p>
+            <div class="col-md-6 col-lg-3">
+                <div class="about-card text-center">
+                    <div class="about-icon-box mx-auto">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27z"/></svg>
                     </div>
+                    <h3>Compromiso Profesional</h3>
+                    <p>Actualización continua en las últimas técnicas y avances para ofrecer la mejor atención.</p>
                 </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# Sección "Certificaciones y Membresías" removida por solicitud #}
+
+<section class="about-section alt" style="background: #FBF5F6;">
+    <div class="container">
+        <h2 class="about-section-title">Mi Filosofía de Atención</h2>
+        <p class="about-section-subtitle">Mi compromiso es brindarte atención con respeto, empatía y calidad.</p>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="about-card">
+                    <h3>Atención Personalizada</h3>
+                    <p>Cada paciente es única. Diseño planes de tratamiento adaptados a tus necesidades específicas.</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="about-card">
+                    <h3>Empatía y Confianza</h3>
+                    <p>Creo un ambiente seguro y de confianza donde puedas expresar tus inquietudes libremente.</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="about-card">
+                    <h3>Tecnología Avanzada</h3>
+                    <p>Utilizo equipos de última generación para ofrecerte los mejores resultados con la mayor seguridad.</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="about-card">
+                    <h3>Educación al Paciente</h3>
+                    <p>Te explico cada procedimiento y opción de tratamiento para que tomes decisiones informadas.</p>
             </div>
         </div>
     </div>
 </div>
+</section>
 {% endblock %}

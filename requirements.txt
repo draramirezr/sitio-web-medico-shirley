@@ -1,58 +1,37 @@
 # ============================================
-# REQUIREMENTS.TXT MÍNIMO PARA RAILWAY
+# requirements.txt (clean ASCII for Windows)
 # ============================================
 
-# Core Flask
+# Core
 Flask==3.0.0
 Werkzeug==3.0.1
 
-# Autenticación
+# Auth
 Flask-Login==0.6.3
 
-# PDF Generation
+# PDF
 reportlab==4.0.7
 
-# Variables de entorno
+# Env
 python-dotenv==1.0.0
 
-# Seguridad
+# Security
 MarkupSafe==2.1.3
 
-# Compresión (opcional)
+# Compression (optional)
 Flask-Compress==1.14
 
-# Producción
+# Production
 gunicorn==21.2.0
 
-# Base de datos MySQL para Railway
+# MySQL (Railway)
 PyMySQL==1.1.0
 
-# SendGrid para envío de emails (usa API en lugar de SMTP bloqueado)
+# Email (SendGrid)
 sendgrid==6.11.0
 
-# Requests para validación de reCAPTCHA
+# reCAPTCHA
 requests==2.31.0
 
-# Excel/Pandas para exportación de datos
+# Excel export
 openpyxl==3.1.2
-
-# ============================================
-# NOTAS IMPORTANTES
-# ============================================
-# 
-# sqlite3 - Incluido con Python por defecto
-# smtplib - Incluido con Python por defecto
-# secrets - Incluido con Python por defecto
-# re - Incluido con Python por defecto
-# os - Incluido con Python por defecto
-# json - Incluido con Python por defecto
-# datetime - Incluido con Python por defecto
-# time - Incluido con Python por defecto
-# threading - Incluido con Python por defecto
-# collections - Incluido con Python por defecto
-# io - Incluido con Python por defecto
-# 
-# Pillow removido temporalmente por problemas de compatibilidad
-# Se puede agregar después si es necesario
-# 
-# Railway instalará automáticamente estas dependencias

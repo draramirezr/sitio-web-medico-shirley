@@ -1,14 +1,631 @@
 {% extends "base.html" %}
 
-{% block title %}Dra. Shirley Ramírez - Ginecóloga y Obstetra en Santo Domingo Este | Ginecología Estética Láser{% endblock %}
+{% block title %}Ginecóloga en Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
 
-{% block description %}Ginecóloga y Obstetra en Santo Domingo Este. Experta en Ginecología Estética Láser: Rejuvenecimiento vaginal, tensado vaginal y labioplastia. Control prenatal, embarazo y salud femenina integral. Agenda tu cita: 829-740-5073{% endblock %}
+{% block description %}Ginecóloga-obstetra en Santo Domingo Este (Zona Oriental). Chequeo ginecológico, control de embarazo y anticonceptivos. Agenda tu cita.{% endblock %}
 
-{% block og_title %}Dra. Shirley Ramírez - Ginecóloga y Obstetra en Santo Domingo Este{% endblock %}
-{% block og_description %}Experta en Ginecología Estética Láser: Rejuvenecimiento vaginal, tensado vaginal y labioplastia. Control prenatal, embarazo y salud femenina. ¡Agenda tu cita: 829-740-5073!{% endblock %}
+{% block og_title %}Ginecóloga en Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
+{% block og_description %}Chequeo ginecológico, control de embarazo y anticonceptivos en Santo Domingo Este (Zona Oriental). Agenda tu cita.{% endblock %}
+{% block twitter_title %}Ginecóloga en Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
+{% block twitter_description %}Atención ginecológica y obstétrica en Santo Domingo Este (Zona Oriental). Agenda tu cita.{% endblock %}
+
+{% block extra_meta %}
+  {# Preload de la imagen principal (mejora LCP en Inicio) #}
+  <link rel="preload" as="image" href="{{ url_for('static', filename='images/dra-shirley-profesional.webp') }}" fetchpriority="high" type="image/webp">
+  <link rel="preload" as="image" href="{{ url_for('static', filename='images/dra-shirley-profesional.jpg') }}" fetchpriority="high" type="image/jpeg">
+{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/home.min.css') }}">
+
+{# Imágenes (se usan en secciones de inicio) #}
+{% set GYNECOLOGY_IMAGE = "https://mgx-backend-cdn.metadl.com/generate/images/1040625/2026-03-18/bf00a439-7bd4-425c-a77f-39303e2b3395.png" %}
+{% set OBSTETRICS_IMAGE = "https://mgx-backend-cdn.metadl.com/generate/images/1040625/2026-03-18/bc414ab5-dc13-4085-9d96-2e0e7842bf30.png" %}
+{% set AESTHETIC_IMAGE = "https://mgx-backend-cdn.metadl.com/generate/images/1040625/2026-03-18/3472b72c-6479-4947-b622-60178c365205.png" %}
+
+<style>
+    /* ===== Home (Inicio) redesign: look like provided screenshots ===== */
+    .home-hero {
+        position: relative;
+        min-height: 78vh;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        background:
+            linear-gradient(90deg, rgba(107, 58, 75, 0.38) 0%, rgba(107, 58, 75, 0.14) 52%, rgba(107, 58, 75, 0.0) 100%),
+            linear-gradient(135deg, #FDF8F9 0%, #f5e6ea 100%);
+    }
+
+    .home-hero::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        /* Fallback JPG + WebP cuando sea posible (más rápido) */
+        background-image: url('{{ url_for('static', filename='images/dra-shirley-profesional.jpg') }}');
+        background-image: -webkit-image-set(
+            url('{{ url_for('static', filename='images/dra-shirley-profesional.webp') }}') 1x,
+            url('{{ url_for('static', filename='images/dra-shirley-profesional.jpg') }}') 1x
+        );
+        background-image: image-set(
+            url('{{ url_for('static', filename='images/dra-shirley-profesional.webp') }}') type('image/webp') 1x,
+            url('{{ url_for('static', filename='images/dra-shirley-profesional.jpg') }}') type('image/jpeg') 1x
+        );
+        background-size: cover;
+        background-position: var(--home-hero-bg-pos, 50% 18%);
+        opacity: var(--home-hero-bg-opacity, 0.32);
+        filter: saturate(1.02) contrast(1.02);
+        transform: scale(1.02);
+        pointer-events: none;
+    }
+
+    .home-hero .container {
+        position: relative;
+        z-index: 2;
+        padding-top: 92px;
+        padding-bottom: 68px;
+    }
+
+    .home-hero-grid {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 40px;
+        align-items: center;
+    }
+
+    .home-hero-kicker {
+        color: rgba(255, 255, 255, 0.80) !important;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        font-weight: 700;
+        font-size: 0.75rem;
+        margin-bottom: 14px;
+    }
+
+    .home-hero-title {
+        font-family: "Playfair Display", serif !important;
+        font-weight: 700 !important;
+        font-size: clamp(2.4rem, 3.2vw, 3.4rem) !important;
+        line-height: 1.05;
+        color: #fff !important;
+        margin: 0 0 14px;
+    }
+    .home-hero-title-sub{
+        display: block;
+        margin-top: 10px;
+        font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif !important;
+        font-weight: 600;
+        font-size: clamp(1.05rem, 1.35vw, 1.25rem);
+        line-height: 1.25;
+        letter-spacing: 0.01em;
+        color: rgba(255, 255, 255, 0.88) !important;
+    }
+
+    .home-hero-subtitle {
+        color: rgba(255, 255, 255, 0.84) !important;
+        font-size: 1.02rem !important;
+        line-height: 1.65;
+        max-width: 42rem;
+        margin: 0 0 22px;
+    }
+
+    .home-hero-actions {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .home-hero-btn {
+        border-radius: 999px;
+        padding: 12px 18px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        box-shadow: none;
+        transition: transform 0.2s ease;
+        text-transform: none !important;
+        letter-spacing: 0 !important;
+        font-family: var(--font-body, inherit) !important;
+        user-select: none;
+    }
+
+    .home-hero-btn:hover {
+        transform: scale(1.08) translateY(-2px);
+        text-decoration: none;
+    }
+
+    .home-hero-btn:active {
+        transform: scale(0.98);
+    }
+
+    .home-hero-btn--primary {
+        background: linear-gradient(135deg, #8B5A6B 0%, #6B3A4B 100%);
+        color: #fff !important;
+    }
+
+    .home-hero-btn--ghost {
+        background: rgba(255, 255, 255, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        color: #fff !important;
+        backdrop-filter: blur(8px);
+    }
+
+
+    .home-services {
+        padding: 80px 0;
+        background: #fff;
+    }
+
+    /* ===== Experiencia y Dedicación (nuevo estilo) ===== */
+    .home-about {
+        padding: 80px 0;
+        background:
+            radial-gradient(circle at 20% 30%, rgba(139, 90, 107, 0.08) 0%, transparent 55%),
+            radial-gradient(circle at 80% 70%, rgba(206, 176, 183, 0.14) 0%, transparent 55%),
+            linear-gradient(180deg, #FDF8F9 0%, #ffffff 100%);
+    }
+
+    .home-about-card {
+        background: rgba(255, 255, 255, 0.78);
+        border: 1px solid rgba(224, 208, 212, 0.65);
+        border-radius: 26px;
+        padding: 40px 34px;
+        box-shadow: 0 22px 60px rgba(45, 45, 45, 0.10);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        max-width: 1040px;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .home-about-title {
+        font-family: "Playfair Display", serif !important;
+        font-weight: 700 !important;
+        color: #8B8B8B !important;
+        font-size: clamp(1.6rem, 2.2vw, 2.05rem) !important;
+        margin: 0 0 14px;
+    }
+
+    .home-about-text {
+        color: rgba(45, 45, 45, 0.68) !important;
+        line-height: 1.75;
+        margin: 0 auto 16px;
+        max-width: 760px;
+        font-size: 0.98rem !important;
+    }
+
+    .home-about-text strong {
+        color: rgba(45, 45, 45, 0.84);
+    }
+
+    .home-about-btn {
+        margin-top: 16px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.82);
+        color: rgba(139, 90, 107, 0.95) !important;
+        border: 1px solid rgba(139, 90, 107, 0.20);
+        border-radius: 999px;
+        padding: 11px 18px;
+        font-weight: 800;
+        text-decoration: none;
+        box-shadow: none;
+        transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+        text-transform: none !important;
+        letter-spacing: 0.08em !important;
+        font-family: var(--font-body, inherit) !important;
+        user-select: none;
+        text-transform: uppercase !important;
+        font-size: 0.8rem;
+    }
+
+    .home-about-btn:hover {
+        transform: translateY(-1px);
+        text-decoration: none;
+        color: rgba(139, 90, 107, 0.95) !important;
+        background: rgba(255, 255, 255, 0.92);
+        border-color: rgba(139, 90, 107, 0.26);
+    }
+
+    .home-about-btn:active {
+        transform: translateY(0);
+    }
+
+    .home-services-kicker {
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        font-weight: 700;
+        font-size: 0.72rem;
+        color: rgba(139, 90, 107, 0.9) !important;
+        margin-bottom: 12px;
+        text-align: center;
+    }
+
+    .home-services-title {
+        font-family: "Playfair Display", serif !important;
+        font-weight: 700 !important;
+        color: #2D2D2D !important;
+        text-align: center;
+        font-size: clamp(2rem, 2.6vw, 2.4rem) !important;
+        margin: 0 0 10px;
+    }
+
+    .home-services-subtitle {
+        color: #6B6B6B !important;
+        text-align: center;
+        max-width: 740px;
+        margin: 0 auto 34px;
+        line-height: 1.7;
+    }
+
+    .home-service-card {
+        background: #fff;
+        border: 1px solid rgba(224, 208, 212, 0.85);
+        border-radius: 18px;
+        /* Evita que el ícono/sombra se vea “cortado” */
+        overflow: visible;
+        box-shadow: 0 14px 30px rgba(45, 45, 45, 0.06);
+        height: 100%;
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+
+    .home-service-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 22px 55px rgba(45, 45, 45, 0.10);
+        border-color: rgba(139, 90, 107, 0.35);
+    }
+
+    .home-service-card img {
+        width: 100%;
+        height: 190px;
+        object-fit: cover;
+        display: block;
+        border-top-left-radius: 18px;
+        border-top-right-radius: 18px;
+    }
+
+    .home-service-body {
+        padding: 18px 18px 16px;
+    }
+
+    .home-service-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(224, 208, 212, 0.75);
+        background: rgba(253, 248, 249, 1);
+        color: #8B5A6B;
+        margin-bottom: 10px;
+    }
+
+    .home-service-icon i,
+    .home-service-icon svg {
+        animation: homeIconFloat 3.2s ease-in-out infinite;
+        will-change: transform, filter;
+    }
+
+    .home-service-icon i {
+        font-size: 18px;
+    }
+
+    .home-service-icon svg {
+        width: 18px;
+        height: 18px;
+        display: block;
+        overflow: visible;
+        transform-box: fill-box;
+        transform-origin: center;
+    }
+
+    .home-service-card:hover .home-service-icon i,
+    .home-service-card:hover .home-service-icon svg {
+        animation: homeIconPop 0.65s ease-in-out infinite;
+        filter: drop-shadow(0 10px 16px rgba(139, 90, 107, 0.25));
+    }
+
+    @keyframes homeIconFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-3px); }
+    }
+
+    @keyframes homeIconPop {
+        0%, 100% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(-2px) scale(1.08); }
+    }
+
+    .home-service-name {
+        font-family: "Playfair Display", serif !important;
+        font-weight: 700 !important;
+        color: #2D2D2D !important;
+        font-size: 1.15rem !important;
+        margin-bottom: 10px;
+    }
+
+    .home-service-desc {
+        color: #6B6B6B !important;
+        line-height: 1.65;
+        font-size: 0.95rem !important;
+        margin: 0 0 12px;
+    }
+
+    .home-service-link {
+        color: #8B5A6B !important;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .home-why {
+        padding: 80px 0;
+        background: var(--accent-light, #FDF8F9);
+    }
+
+    .home-why-kicker {
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        font-weight: 700;
+        font-size: 0.72rem;
+        color: rgba(139, 90, 107, 0.9) !important;
+        margin-bottom: 10px;
+    }
+
+    .home-why-title {
+        font-family: "Playfair Display", serif !important;
+        font-weight: 700 !important;
+        color: #2D2D2D !important;
+        font-size: clamp(1.9rem, 2.6vw, 2.3rem) !important;
+        margin: 0 0 14px;
+        line-height: 1.12;
+    }
+
+    .home-why-text {
+        color: #6B6B6B !important;
+        line-height: 1.7;
+        margin-bottom: 18px;
+        max-width: 40rem;
+    }
+
+    .home-why-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 10px;
+    }
+
+    .home-why-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        color: #2D2D2D;
+        font-size: 0.95rem;
+    }
+
+    .home-why-list svg {
+        width: 18px;
+        height: 18px;
+        margin-top: 2px;
+        color: #8B5A6B;
+        flex: 0 0 auto;
+    }
+
+    .home-why-media {
+        position: relative;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 22px 55px rgba(45, 45, 45, 0.12);
+        border: 1px solid rgba(224, 208, 212, 0.75);
+        background: #fff;
+    }
+
+    .home-why-media img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+        min-height: 320px;
+    }
+
+    .home-why-badge {
+        position: absolute;
+        left: 16px;
+        bottom: 16px;
+        background: linear-gradient(135deg, #8B5A6B 0%, #6B3A4B 100%);
+        color: #fff;
+        border-radius: 16px;
+        padding: 12px 14px;
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.18);
+        display: grid;
+        gap: 4px;
+        min-width: 110px;
+    }
+
+    .home-why-badge strong {
+        font-size: 1.25rem;
+        line-height: 1;
+    }
+
+    .home-why-badge span {
+        font-size: 0.78rem;
+        opacity: 0.92;
+        line-height: 1.15;
+    }
+
+    /* ===== Testimonios (nuevo estilo) ===== */
+    .home-testimonials {
+        padding: 80px 0;
+        background: #fff;
+    }
+
+    .home-testimonials-kicker {
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        font-weight: 700;
+        font-size: 0.72rem;
+        color: rgba(139, 90, 107, 0.9) !important;
+        margin-bottom: 12px;
+        text-align: center;
+    }
+
+    .home-testimonials-title {
+        font-family: "Playfair Display", serif !important;
+        font-weight: 700 !important;
+        color: #2D2D2D !important;
+        text-align: center;
+        font-size: clamp(2rem, 2.6vw, 2.4rem) !important;
+        margin: 0 0 10px;
+    }
+
+    .home-testimonials-subtitle {
+        color: #6B6B6B !important;
+        text-align: center;
+        max-width: 740px;
+        margin: 0 auto 34px;
+        line-height: 1.7;
+    }
+
+    .home-t-card {
+        background: #fff;
+        border: 1px solid rgba(224, 208, 212, 0.85);
+        border-radius: 18px;
+        padding: 18px;
+        height: 100%;
+        box-shadow: 0 14px 30px rgba(45, 45, 45, 0.06);
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+
+    .home-t-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 22px 55px rgba(45, 45, 45, 0.10);
+        border-color: rgba(139, 90, 107, 0.35);
+    }
+
+    .home-t-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .home-t-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        color: #fff;
+        background: linear-gradient(135deg, #8B5A6B 0%, #6B3A4B 100%);
+        flex: 0 0 auto;
+    }
+
+    .home-t-name-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .home-t-name {
+        font-weight: 800;
+        color: #2D2D2D !important;
+        font-size: 1rem !important;
+        line-height: 1.2;
+        margin: 0;
+    }
+
+    .home-t-meta {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 4px;
+    }
+
+    .home-t-stars i {
+        color: #F5C451 !important;
+        font-size: 0.9rem;
+    }
+
+    .home-t-time {
+        color: #8B8B8B !important;
+        font-size: 0.85rem !important;
+        white-space: nowrap;
+    }
+
+    .home-t-text {
+        color: #6B6B6B !important;
+        line-height: 1.75;
+        font-size: 0.95rem !important;
+        margin: 0;
+    }
+
+    .home-t-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: #fff;
+        color: #8B5A6B !important;
+        border: 1px solid rgba(139, 90, 107, 0.22);
+        border-radius: 999px;
+        padding: 12px 18px;
+        font-weight: 800;
+        text-decoration: none;
+        box-shadow: none;
+        transition: transform 0.2s ease;
+        text-transform: none !important;
+        letter-spacing: 0 !important;
+        font-family: var(--font-body, inherit) !important;
+    }
+
+    .home-t-btn:hover {
+        transform: scale(1.08) translateY(-2px);
+        text-decoration: none;
+        color: #8B5A6B !important;
+    }
+
+    .home-t-btn:active {
+        transform: scale(0.98);
+    }
+
+    @media (max-width: 992px) {
+        .home-hero-grid { grid-template-columns: 1fr; }
+        .home-hero { min-height: auto; }
+    }
+
+    @media (max-width: 576px) {
+        .home-hero .container { padding-top: 72px; padding-bottom: 56px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .home-service-icon i,
+        .home-service-card:hover .home-service-icon i {
+            animation: none !important;
+            filter: none !important;
+        }
+        .home-service-card,
+        .home-service-card:hover {
+            transition: none !important;
+            transform: none !important;
+        }
+
+        .home-t-card,
+        .home-t-card:hover,
+        .home-t-btn,
+        .home-t-btn:hover {
+            transition: none !important;
+            transform: none !important;
+        }
+    }
+</style>
 
 {% if tema == 'mes_patria' %}
 <!-- Banner Superior Dinámico con Textos Rotativos -->
@@ -655,9 +1272,9 @@
 <!-- Banner Superior Dinámico Mes de la Mujer -->
 <div class="mujer-banner-dinamico">
     <div class="textos-rotativos-mujer">
-        <div class="texto-mujer-item active"><i class="fas fa-venus" style="color: #ce93d8;"></i> MES DE LA MUJER - MARZO {{ ano_actual }} <i class="fas fa-venus" style="color: #ce93d8;"></i></div>
-        <div class="texto-mujer-item"><i class="fas fa-heart" style="color: #ce93d8;"></i> "Empoderando la salud femenina cada día" <i class="fas fa-heart" style="color: #ce93d8;"></i></div>
-        <div class="texto-mujer-item">8 de Marzo {{ ano_actual }} - Día Internacional de la Mujer</div>
+        <div class="texto-mujer-item active">MARZO {{ ano_actual }} · Mes de la Mujer</div>
+        <div class="texto-mujer-item">Empoderando la salud femenina cada día 💗</div>
+        <div class="texto-mujer-item">8 de Marzo {{ ano_actual }} · Día Internacional de la Mujer</div>
     </div>
 </div>
 
@@ -884,292 +1501,235 @@
         }
     }
 </style>
+
+<!-- Override: adaptar banner al nuevo diseño (minimal premium) -->
+<style>
+    .mujer-banner-dinamico{
+        background: linear-gradient(90deg, rgba(232,160,191,.42) 0%, rgba(245,245,245,.95) 45%, rgba(232,160,191,.34) 100%) !important;
+        color: #333333 !important;
+        box-shadow: 0 10px 24px rgba(17,24,39,.08) !important;
+        border-bottom: 1px solid rgba(232,160,191,.35) !important;
+        padding: 10px 14px !important;
+        min-height: 40px !important;
+        font-weight: 700 !important;
+        letter-spacing: .02em;
+    }
+    .textos-rotativos-mujer{
+        height: 22px !important;
+    }
+    .texto-mujer-item{
+        color: #333333 !important;
+        font-size: 0.92rem !important;
+        font-weight: 700 !important;
+    }
+    @media (max-width: 480px){
+        .mujer-banner-dinamico{ padding: 9px 12px !important; }
+        .texto-mujer-item{ font-size: 0.82rem !important; }
+    }
+    /* Desactivar adornos antiguos si existen */
+    .borde-mujer-rotante,
+    .simbolo-mujer-flotante{ display:none !important; }
+</style>
 {% endif %}
 
-<!-- ========== HERO FULLSCREEN ========== -->
-<section class="hero-fullscreen">
-    <!-- Elementos decorativos flotantes -->
-    {% if tema == 'san_valentin' %}
-    <!-- Corazones flotantes para San Valentín -->
-    <div class="corazon-flotante"><i class="fas fa-heart"></i></div>
-    <div class="corazon-flotante"><i class="fas fa-heart"></i></div>
-    <div class="corazon-flotante"><i class="fas fa-heart"></i></div>
-    <div class="corazon-flotante"><i class="fas fa-heart"></i></div>
-    {% elif tema == 'mes_mujer' %}
-    <!-- Símbolos de mujer flotantes para Mes de la Mujer -->
-    <div class="simbolo-mujer-flotante"><i class="fas fa-venus"></i></div>
-    <div class="simbolo-mujer-flotante"><i class="fas fa-venus"></i></div>
-    <div class="simbolo-mujer-flotante"><i class="fas fa-venus"></i></div>
-    <div class="simbolo-mujer-flotante"><i class="fas fa-venus"></i></div>
-    {% elif tema == 'cancer_mama' %}
-    <!-- Lazos rosas flotantes para Cáncer de Mama -->
-    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
-    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
-    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
-    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
-    {% else %}
-    <!-- Burbujas decorativas (diseño original y otros temas) -->
-    <div class="bubble"></div>
-    <div class="bubble"></div>
-    <div class="bubble"></div>
-    <div class="bubble"></div>
-    {% endif %}
-    
-    <!-- Imagen de la Dra. Shirley - WebP con fallback -->
-    <div class="hero-image-container">
-        {% if tema == 'mes_patria' %}
-        <!-- Borde animado tricolor para Mes de la Patria -->
-        <div class="borde-tricolor-rotante"></div>
-        {% elif tema == 'san_valentin' %}
-        <!-- Borde de corazones pulsantes para San Valentín -->
-        <div class="borde-corazones-pulsante"></div>
-        {% elif tema == 'mes_mujer' %}
-        <!-- Borde morado degradado para Mes de la Mujer -->
-        <div class="borde-mujer-rotante"></div>
-        {% elif tema == 'cancer_mama' %}
-        <!-- Lazo rosa animado para Cáncer de Mama -->
-        <div class="lazo-rosa-rotante"></div>
-        {% endif %}
-        
-        <picture>
-            <source srcset="{{ url_for('static', filename='images/97472.webp') }}" type="image/webp">
-            <img src="{{ url_for('static', filename='images/97472.jpg') }}" 
-                 alt="Dra. Shirley Ramírez - Ginecóloga y Obstetra en Santo Domingo"
-                 width="450" 
-                 height="450"
-                 loading="eager"
-                 decoding="async"
-                 fetchpriority="high">
-        </picture>
+<!-- ========== HERO (similar a capturas) ========== -->
+<section class="home-hero"
+         style="--home-hero-bg-pos: 50% 18%;
+                --home-hero-bg-opacity: 0.38;">
+    <div class="container">
+        <div class="home-hero-grid">
+            <div>
+                <div class="home-hero-kicker">GINECÓLOGA-OBSTETRA EN SANTO DOMINGO ESTE</div>
+                <h1 class="home-hero-title">
+                    Dra. Shirley Ramírez
+                    <span class="home-hero-title-sub">Ginecóloga en Zona Oriental (Santo Domingo Este)</span>
+                </h1>
+                <p class="home-hero-subtitle">
+                    Cuidado ginecológico y obstétrico de excelencia. Tu salud y bienestar íntimo en manos expertas con la más avanzada tecnología.
+                </p>
+                <div class="home-hero-actions">
+                    <a class="home-hero-btn home-hero-btn--primary" href="{{ url_for('request_appointment') }}">
+                        <i class="fas fa-calendar-plus"></i>
+                        Solicitar Cita
+                    </a>
+                    <a class="home-hero-btn home-hero-btn--ghost" href="tel:+18297405073">
+                        <i class="fas fa-phone"></i>
+                        (829) 740-5073
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
-    
-    <div class="hero-content-center">
-        <h1 class="hero-main-title">
-            Dra. Shirley Ramírez<br>
-            <span class="hero-gradient-text">Cuidado Integral de la Salud Femenina</span>
-        </h1>
-        
-        <p class="hero-tagline">
-            Ginecóloga y Obstetra | Gineco-Estética
+</section>
+
+{# Sección "Experiencia y Dedicación" removida por solicitud #}
+
+<!-- ========== SERVICIOS (similar a capturas) ========== -->
+<section id="servicios" class="home-services">
+    <div class="container">
+        <div class="home-services-kicker">NUESTROS SERVICIOS</div>
+        <h2 class="home-services-title">Atención Integral para la Mujer</h2>
+        <p class="home-services-subtitle">
+            Ofrecemos una amplia gama de servicios ginecológicos y obstétricos con tecnología de vanguardia y un enfoque humano y personalizado.
         </p>
-    </div>
-    
-    <div class="scroll-indicator" onclick="document.querySelector('#servicios').scrollIntoView({behavior: 'smooth'})">
-        <i class="fas fa-chevron-down fa-2x" style="color: var(--primary-color);"></i>
-    </div>
-</section>
 
-<!-- ========== SOBRE MÍ ========== -->
-<section class="section-modern section-alt">
-    <div class="container">
-        <div class="banner-featured fade-in-up">
-            <div class="banner-content text-center">
-                <h2 class="banner-title mb-4">
-                    Experiencia y Dedicación
-                </h2>
-                <p class="banner-text mb-3">
-                    <strong>Dra. Shirley Ramírez Montero</strong>, especialista en Ginecología y Obstetricia 
-                    con formación avanzada en medicina reproductiva y ginecología estética funcional.
-                </p>
-                <p class="banner-text mb-4" style="font-size: 1rem;">
-                    Atención personalizada con empatía y profesionalismo, acompañándote en cada etapa de tu vida.
-                </p>
-                
-                <div class="text-center mt-4">
-                    <a href="{{ url_for('about') }}" class="btn btn-outline-primary px-5">
-                        Conocer Mi Trayectoria
-                        <i class="fas fa-arrow-right ms-2"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- ========== SERVICIOS ========== -->
-<section id="servicios" class="section-specialties">
-    <div class="container">
-        <div class="section-header fade-in-up">
-            <h2 class="section-title">Especialidades Médicas</h2>
-            <p class="section-subtitle">
-                Atención integral en todas las áreas de la salud femenina
-            </p>
-        </div>
-        
-        <div class="row g-4 justify-content-center">
-            {% for service in services %}
-            {% if service['name'] in ['Consulta Ginecológica', 'Consulta Obstétrica', 'Planificación Familiar'] %}
-            <div class="col-lg-4 col-md-6 fade-in-up" style="animation-delay: {{ loop.index * 0.15 }}s;">
-                <div class="card-premium">
-                    <div class="card-icon-large">
-                        <i class="{{ service['icon'] or 'fas fa-stethoscope' }}"></i>
-                    </div>
-                    <h3 class="mb-3" style="color: var(--title-color); font-weight: 700; font-size: 1.3rem;">
-                        {{ service['name'] }}
-                    </h3>
-                    <p class="text-muted" style="line-height: 1.7;">
-                        {{ service['description'][:100] }}{% if service['description']|length > 100 %}...{% endif %}
-                    </p>
-                </div>
-            </div>
-            {% endif %}
-            {% endfor %}
-        </div>
-        
-        <div class="text-center mt-5 fade-in-up">
-            <a href="{{ url_for('services') }}" class="btn btn-outline-primary px-5">
-                Ver Todos los Servicios
-                <i class="fas fa-arrow-right ms-2"></i>
-            </a>
-        </div>
-    </div>
-</section>
-
-<!-- ========== TRATAMIENTOS ESTÉTICOS BANNER ========== -->
-<section class="section-aesthetics">
-    <div class="container">
-        <div class="banner-featured fade-in-up">
-            <div class="banner-content">
-                <div class="row align-items-center">
-                    <div class="col-lg-7 mb-4 mb-lg-0">
-                        <h2 class="banner-title">
-                            Tratamientos Estéticos Ginecológicos
-                        </h2>
-                        <p class="banner-text">
-                            Tecnología láser de vanguardia para tu bienestar íntimo. 
-                            13 tratamientos especializados con resultados comprobados.
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="home-service-card">
+                    <img src="{{ GYNECOLOGY_IMAGE }}" alt="Ginecología General" loading="lazy">
+                    <div class="home-service-body">
+                        <div class="home-service-icon" aria-hidden="true">
+                            <i class="fas fa-stethoscope"></i>
+                        </div>
+                        <div class="home-service-name">Ginecología General</div>
+                        <p class="home-service-desc">
+                            Consultas ginecológicas completas, Papanicolau, colposcopía, ultrasonidos y más. Cuidado integral de la salud femenina.
                         </p>
-                        <ul class="banner-list">
-                            <li>
-                                <i class="fas fa-check-circle"></i> 
-                                <span>Procedimientos mínimamente invasivos</span>
-                            </li>
-                            <li>
-                                <i class="fas fa-check-circle"></i> 
-                                <span>Resultados naturales y duraderos</span>
-                            </li>
-                            <li>
-                                <i class="fas fa-check-circle"></i> 
-                                <span>Recuperación rápida</span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="col-lg-5 banner-icon-container">
-                        <i class="fas fa-spa banner-icon-large"></i>
+                        <a class="home-service-link" href="{{ url_for('services') }}">
+                            Ver más <span aria-hidden="true">→</span>
+                        </a>
                     </div>
                 </div>
-                <div class="text-center mt-4 fade-in-up">
-                    <a href="{{ url_for('aesthetic_treatments') }}" class="btn btn-outline-primary px-5">
-                        Explorar Tratamientos
-                        <i class="fas fa-arrow-right ms-2"></i>
-                    </a>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="home-service-card">
+                    <img src="{{ OBSTETRICS_IMAGE }}" alt="Obstetricia y Embarazo" loading="lazy">
+                    <div class="home-service-body">
+                        <div class="home-service-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" focusable="false">
+                                <path fill="currentColor" d="M12 2 3 6v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V6l-9-4zm0 18c-3.5-1.2-6-4.9-6-8.6V7.3l6-2.7 6 2.7v4.1c0 3.7-2.5 7.4-6 8.6z"/>
+                                <path fill="currentColor" d="m10.3 12.9-1.6-1.6-1.4 1.4 3 3 6-6-1.4-1.4-4.6 4.6z"/>
+                            </svg>
+                        </div>
+                        <div class="home-service-name">Obstetricia y Embarazo</div>
+                        <p class="home-service-desc">
+                            Acompañamiento durante todo tu embarazo con control prenatal, ultrasonidos obstétricos y atención de parto.
+                        </p>
+                        <a class="home-service-link" href="{{ url_for('services') }}">
+                            Ver más <span aria-hidden="true">→</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="home-service-card">
+                    <img src="{{ AESTHETIC_IMAGE }}" alt="Tratamientos Estéticos" loading="lazy">
+                    <div class="home-service-body">
+                        <div class="home-service-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" focusable="false">
+                                <path fill="currentColor" d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27z"/>
+                            </svg>
+                        </div>
+                        <div class="home-service-name">Tratamientos Estéticos</div>
+                        <p class="home-service-desc">
+                            Tecnología láser de última generación para rejuvenecimiento vaginal, blanqueamiento genital y más.
+                        </p>
+                        <a class="home-service-link" href="{{ url_for('aesthetic_treatments') }}">
+                            Ver más <span aria-hidden="true">→</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<!-- ========== ¿POR QUÉ ELEGIRNOS? (similar a capturas) ========== -->
+<section class="home-why">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <div class="home-why-kicker">¿POR QUÉ ELEGIRNOS?</div>
+                <h2 class="home-why-title">Tu Salud Femenina en las Mejores Manos</h2>
+                <p class="home-why-text">
+                    En nuestro consultorio, cada paciente recibe un trato personalizado y profesional. Combinamos experiencia médica con la más avanzada tecnología para ofrecerte el mejor cuidado.
+                </p>
+                <ul class="home-why-list">
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+                        Más de 10 años de experiencia en ginecología y obstetricia
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+                        Tecnología láser de última generación
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+                        Atención personalizada y cercana
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+                        Ubicación accesible en la Zona Oriental
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+                        Horarios flexibles para tu comodidad
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+                        Aceptamos todo tipo de tarjeta de creditos
+                    </li>
+                </ul>
+            </div>
+            <div class="col-lg-6">
+                <div class="home-why-media">
+                    <img src="{{ GYNECOLOGY_IMAGE }}" alt="Consulta ginecológica" loading="lazy">
+                    <div class="home-why-badge" aria-label="Más de 10 años de experiencia">
+                        <strong>10+</strong>
+                        <span>Años de experiencia</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# Sección "Tratamientos Estéticos Ginecológicos" removida por solicitud #}
 
 <!-- ========== TESTIMONIOS ========== -->
 {% if testimonials %}
-<section class="section-modern section-alt">
+<section class="home-testimonials">
     <div class="container">
-        <div class="section-header fade-in-up">
-            <h2 class="section-title">Lo Que Dicen Mis Pacientes</h2>
-            <p class="section-subtitle">
-                Tu confianza es mi mayor motivación
-            </p>
+        <div class="fade-in-up">
+            <div class="home-testimonials-kicker">TESTIMONIOS</div>
+            <h2 class="home-testimonials-title">Lo Que Dicen Mis Pacientes</h2>
+            <p class="home-testimonials-subtitle">Tu confianza es mi mayor motivación</p>
         </div>
         
         <div class="row g-4">
             {% for testimonial in testimonials %}
             <div class="col-lg-4 fade-in-up" style="animation-delay: {{ loop.index * 0.15 }}s;">
-                <div class="testimonial-card">
-                    <!-- Header con avatar y nombre estilo Google -->
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="testimonial-avatar" style="background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.3rem; margin-right: 1rem; flex-shrink: 0;">
-                            {{ testimonial.patient_name[0] }}
-                        </div>
-                        <div class="flex-grow-1">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <strong style="color: #2c3e50; font-size: 1.1rem;">{{ testimonial.patient_name }}</strong>
-                                <i class="fab fa-google" style="color: #4285F4; font-size: 1.3rem; margin-left: 0.5rem;" title="Reseña de Google"></i>
+                <div class="home-t-card">
+                    <div class="home-t-head">
+                        <div class="home-t-avatar">{{ testimonial.patient_name[0] }}</div>
+                        <div style="flex: 1 1 auto;">
+                            <div class="home-t-name-row">
+                                <div class="home-t-name">{{ testimonial.patient_name }}</div>
+                                <i class="fab fa-google" style="color: #4285F4; font-size: 1.15rem;" title="Reseña de Google"></i>
                             </div>
-                            <div class="d-flex align-items-center gap-2 mt-1">
-                                <div class="testimonial-rating" style="font-size: 0.9rem;">
+                            <div class="home-t-meta">
+                                <div class="home-t-stars" aria-label="Calificación">
                                     {% for i in range(testimonial.rating or 5) %}
-                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star"></i>
                                     {% endfor %}
                                 </div>
-                                <small class="text-muted" style="font-size: 0.85rem;">
-                                    {{ testimonial.time_ago }}
-                                </small>
+                                <div class="home-t-time">{{ testimonial.time_ago }}</div>
                             </div>
                         </div>
                     </div>
-                    <p class="testimonial-text">{{ testimonial.testimonial_text }}</p>
+                    <p class="home-t-text">{{ testimonial.testimonial_text }}</p>
                 </div>
             </div>
             {% endfor %}
         </div>
         
-        <div class="text-center mt-5 fade-in-up">
-            <a href="{{ url_for('testimonials') }}" class="btn btn-outline-primary px-5">
-                Ver Más Testimonios
-                <i class="fas fa-arrow-right ms-2"></i>
-            </a>
-        </div>
+        {# Botón "Ver Más Testimonios" removido por solicitud #}
     </div>
 </section>
 {% endif %}
-
-<!-- ========== CTA FINAL ========== -->
-<section class="section-modern" style="position: relative; overflow: hidden;">
-    <!-- Elementos decorativos flotantes -->
-    {% if tema == 'san_valentin' %}
-    <!-- Corazones flotantes -->
-    <div class="corazon-flotante"><i class="fas fa-heart"></i></div>
-    <div class="corazon-flotante"><i class="fas fa-heart"></i></div>
-    <div class="corazon-flotante"><i class="fas fa-heart"></i></div>
-    <div class="corazon-flotante"><i class="fas fa-heart"></i></div>
-    {% elif tema == 'mes_mujer' %}
-    <!-- Símbolos de mujer flotantes -->
-    <div class="simbolo-mujer-flotante"><i class="fas fa-venus"></i></div>
-    <div class="simbolo-mujer-flotante"><i class="fas fa-venus"></i></div>
-    <div class="simbolo-mujer-flotante"><i class="fas fa-venus"></i></div>
-    <div class="simbolo-mujer-flotante"><i class="fas fa-venus"></i></div>
-    {% elif tema == 'cancer_mama' %}
-    <!-- Lazos rosas flotantes -->
-    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
-    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
-    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
-    <div class="lazo-rosa-flotante"><i class="fas fa-ribbon"></i></div>
-    {% else %}
-    <!-- Burbujas decorativas -->
-    <div class="bubble"></div>
-    <div class="bubble"></div>
-    <div class="bubble"></div>
-    <div class="bubble"></div>
-    {% endif %}
-    
-    <div class="container" style="position: relative; z-index: 10;">
-        <div class="banner-featured fade-in-up text-center">
-            <div class="banner-content">
-                <h2 class="banner-title mb-4">
-                    ¿Lista para cuidar tu salud?
-                </h2>
-                <p class="banner-text mb-5">
-                    Agenda tu cita hoy y comienza a recibir la atención profesional que mereces
-                </p>
-                <div class="text-center">
-                    <a href="{{ url_for('request_appointment') }}" class="btn-banner">
-                        <i class="fas fa-calendar-plus"></i>
-                        Solicitar Cita
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+{# CTA final removida por solicitud (se usa el pie global) #}
 
 <!-- JavaScript para animaciones -->
 <script>

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Ginecólogo Zona Oriental | Dra. Shirley Ramírez (SDE){% endblock %}
+{% block description %}Ginecóloga-obstetra en Zona Oriental (Santo Domingo Este). Chequeo ginecológico, control de embarazo y anticonceptivos. Agenda tu cita.{% endblock %}
+{% block og_title %}Ginecólogo en Zona Oriental | Dra. Shirley Ramírez{% endblock %}
+{% block og_description %}Atención ginecológica y obstétrica en Zona Oriental (Santo Domingo Este). Agenda tu cita.{% endblock %}
+{% block twitter_title %}Ginecólogo Zona Oriental | Dra. Shirley Ramírez{% endblock %}
+{% block twitter_description %}Consulta ginecológica y control prenatal en Santo Domingo Este (Zona Oriental). Agenda tu cita.{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <h1 class="display-5 fw-bold mb-3" style="color: var(--title-color);">Ginecólogo en Zona Oriental</h1>
+      <p class="lead text-muted mb-4">
+        Si buscas <strong>ginecólogo zona oriental</strong> o <strong>ginecóloga en zona oriental</strong>, soy la
+        <strong>Dra. Shirley Ramírez</strong>, <strong>Ginecóloga y Obstetra</strong> en <strong>Santo Domingo Este</strong>.
+      </p>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <div class="p-3 h-100" style="background: rgba(206, 176, 183, 0.10); border-radius: 12px; border-left: 4px solid var(--primary-color);">
+            <h2 class="h5 fw-bold mb-2" style="color: var(--title-color);">Agendar cita</h2>
+            <p class="text-muted mb-3">
+              Puedes agendar en línea o escribir por WhatsApp. Te ayudamos a elegir el tipo de consulta.
+            </p>
+            <a class="btn btn-primary" href="{{ url_for('request_appointment') }}">
+              <i class="fas fa-calendar-plus me-2"></i>Solicitar cita
+            </a>
+            <a class="btn btn-outline-primary ms-2" href="https://wa.me/18297405073?text=Hola,%20quiero%20agendar%20una%20cita%20de%20ginecolog%C3%ADa%20en%20Zona%20Oriental" target="_blank" rel="noopener noreferrer">
+              <i class="fab fa-whatsapp me-2"></i>WhatsApp
+            </a>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="p-3 h-100" style="background: rgba(206, 176, 183, 0.10); border-radius: 12px; border-left: 4px solid var(--primary-color);">
+            <h2 class="h5 fw-bold mb-2" style="color: var(--title-color);">Ubicación</h2>
+            <p class="text-muted mb-2">
+              <strong>Av. Sabana Larga 123, Santo Domingo Este 11901</strong>.
+            </p>
+            <a class="text-decoration-none" href="https://www.google.com/maps/search/?api=1&query=Av.%20Sabana%20Larga%20123%2C%20Santo%20Domingo%20Este%2011901" target="_blank" rel="noopener noreferrer">
+              <i class="fas fa-map-marker-alt me-2"></i>Ver en Google Maps
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="h4 fw-bold mt-4" style="color: var(--title-color);">Servicios más solicitados</h2>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="p-3 h-100" style="border: 1px solid rgba(206, 176, 183, 0.35); border-radius: 12px;">
+            <h3 class="h5 fw-bold mb-2" style="color: var(--title-color);">Chequeo ginecológico</h3>
+            <p class="text-muted mb-0">
+              Orientación y evaluación en consulta para cuidado preventivo y salud femenina.
+            </p>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="p-3 h-100" style="border: 1px solid rgba(206, 176, 183, 0.35); border-radius: 12px;">
+            <h3 class="h5 fw-bold mb-2" style="color: var(--title-color);">Control de embarazo</h3>
+            <p class="text-muted mb-0">
+              Control prenatal y seguimiento de embarazo con un enfoque humano y claro.
+            </p>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="p-3 h-100" style="border: 1px solid rgba(206, 176, 183, 0.35); border-radius: 12px;">
+            <h3 class="h5 fw-bold mb-2" style="color: var(--title-color);">Anticonceptivos</h3>
+            <p class="text-muted mb-0">
+              Consejería para elegir el método más adecuado según tu caso.
+            </p>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="p-3 h-100" style="border: 1px solid rgba(206, 176, 183, 0.35); border-radius: 12px;">
+            <h3 class="h5 fw-bold mb-2" style="color: var(--title-color);">Salud femenina</h3>
+            <p class="text-muted mb-0">
+              Atención integral para distintas etapas de la vida.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="h4 fw-bold mt-5" style="color: var(--title-color);">“Cerca de mí” (búsquedas locales)</h2>
+      <p class="text-muted" style="line-height: 1.85;">
+        Si estás buscando <strong>ginecólogo cerca de mi</strong> o <strong>ginecóloga cerca de mí</strong> en <strong>Santo Domingo Este</strong>,
+        la Zona Oriental es una ubicación accesible para pacientes de sectores cercanos. La mejor forma de orientarte correctamente es con una consulta.
+      </p>
+
+      <div class="text-center mt-5">
+        <a class="btn btn-primary btn-lg" href="{{ url_for('request_appointment') }}">
+          <i class="fas fa-calendar-plus me-2"></i>Agendar mi cita
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

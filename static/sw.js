@@ -1,8 +1,8 @@
 // Service Worker para PWA y cache offline
-const CACHE_NAME = 'drashirley-v3.3'; // Bump: limpiar cache viejo (imágenes)
+const CACHE_NAME = 'drashirley-v3.4'; // Bump: limpiar cache viejo (CSP/assets)
 const urlsToCache = [
   '/static/css/critical.min.css',
-  '/static/logos/logo-dra-shirley.png',
+  '/static/logos/logo.png',
   // Favicons (Google a veces pide /favicon.ico)
   '/favicon.ico',
   '/static/favicon.ico',
@@ -12,9 +12,7 @@ const urlsToCache = [
   '/static/images/dra-shirley-profesional.webp',
   '/static/images/dra-shirley-profesional.jpg',
   '/static/images/97472.webp',
-  '/static/images/97472.jpg',
-  'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+  '/static/images/97472.jpg'
 ];
 
 // Instalar Service Worker

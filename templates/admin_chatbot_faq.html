@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Chatbot FAQ Dataset | Admin{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+    <div>
+      <h1 class="h3 fw-bold mb-1" style="color: var(--title-color);">Dataset de FAQ del Chatbot</h1>
+      <div class="text-muted">Total: <strong>{{ total }}</strong></div>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+      <input id="faqSearch" type="search" class="form-control" placeholder="Buscar (tema, pregunta o respuesta)..." style="min-width: 280px;">
+      <a class="btn btn-outline-primary" href="{{ url_for('admin') }}">Volver</a>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <div class="d-flex flex-wrap gap-2">
+      {% for c in cats %}
+        <a class="btn btn-sm btn-outline-secondary" href="#cat-{{ c|e }}">{{ c|capitalize }}</a>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% for c in cats %}
+    {% set items = grouped.get(c, []) %}
+    <div class="mb-4" id="cat-{{ c|e }}">
+      <div class="d-flex flex-wrap align-items-end justify-content-between gap-2 mb-2">
+        <h2 class="h5 fw-bold mb-0" style="color: var(--title-color);">{{ c|capitalize }}</h2>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <div class="text-muted small">{{ items|length }} preguntas</div>
+          <a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin_chatbot_faq_download_json') }}?cat={{ c|urlencode }}">
+            Descargar JSON
+          </a>
+        </div>
+      </div>
+
+      <div class="accordion" id="acc-{{ c|e }}">
+        {% for it in items %}
+          {% set idx = loop.index0 %}
+          {% set key = c ~ '-' ~ idx %}
+          <div class="accordion-item faq-item"
+               data-search="{{ (c ~ ' ' ~ (it.intencion or '') ~ ' ' ~ (it.pregunta or '') ~ ' ' ~ (it.respuesta or ''))|lower|e }}">
+            <h3 class="accordion-header" id="h-{{ key|e }}">
+              <button class="accordion-button collapsed" type="button"
+                      data-bs-toggle="collapse" data-bs-target="#b-{{ key|e }}"
+                      aria-expanded="false" aria-controls="b-{{ key|e }}">
+                {{ it.pregunta or '(sin pregunta)' }}
+                {% if it.urgencia %}
+                  <span class="badge bg-danger ms-2">Urgencia{% if it.urgencia_nivel %}: {{ it.urgencia_nivel }}{% endif %}</span>
+                {% elif it.urgencia_nivel %}
+                  <span class="badge bg-light text-dark border ms-2">Urgencia: {{ it.urgencia_nivel }}</span>
+                {% endif %}
+                {% if it.conversion %}
+                  <span class="badge bg-secondary ms-2">{{ it.conversion }}</span>
+                {% endif %}
+              </button>
+            </h3>
+            <div id="b-{{ key|e }}" class="accordion-collapse collapse" aria-labelledby="h-{{ key|e }}" data-bs-parent="#acc-{{ c|e }}">
+              <div class="accordion-body">
+                <div class="mb-2">
+                  <span class="badge bg-light text-dark border">intención: {{ it.intencion or '—' }}</span>
+                </div>
+                <div class="fw-bold mb-1">Respuesta</div>
+                <div class="text-muted" style="white-space: pre-wrap;">{{ it.respuesta or '(sin respuesta)' }}</div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<script>
+  (function(){
+    const input = document.getElementById('faqSearch');
+    if (!input) return;
+    const items = Array.from(document.querySelectorAll('.faq-item'));
+    const norm = (s) => (s || '').toString().toLowerCase().trim();
+    input.addEventListener('input', () => {
+      const q = norm(input.value);
+      items.forEach(el => {
+        const hay = norm(el.getAttribute('data-search'));
+        const ok = !q || hay.includes(q);
+        el.style.display = ok ? '' : 'none';
+      });
+    });
+  })();
+</script>
+{% endblock %}
+

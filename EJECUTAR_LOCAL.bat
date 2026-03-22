@@ -10,7 +10,7 @@ echo.
 echo Ejecutando servidor Flask en puerto 5000...
 echo.
 
-python app_simple.py
+py app_simple.py
 
 echo.
 echo ================================================

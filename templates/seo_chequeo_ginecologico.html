@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Chequeo Ginecológico en Santo Domingo Este | Dra. Shirley{% endblock %}
+{% block description %}Chequeo ginecológico (chequeo ginecologico) en Santo Domingo Este (Zona Oriental). Orientación en salud femenina y prevención. Agenda tu cita.{% endblock %}
+{% block og_title %}Chequeo Ginecológico | Dra. Shirley Ramírez{% endblock %}
+{% block og_description %}Chequeo ginecológico en Santo Domingo Este (Zona Oriental). Agenda tu cita.{% endblock %}
+{% block twitter_title %}Chequeo Ginecológico | Dra. Shirley Ramírez{% endblock %}
+{% block twitter_description %}Chequeo ginecológico en Santo Domingo Este. Agenda tu cita.{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <h1 class="display-5 fw-bold mb-3" style="color: var(--title-color);">Chequeo Ginecológico</h1>
+      <p class="lead text-muted mb-4">
+        Si buscas <strong>chequeo ginecológico</strong> (o <strong>chequeo ginecologico</strong>) en <strong>Santo Domingo Este</strong>,
+        soy la <strong>Dra. Shirley Ramírez</strong>, <strong>Ginecóloga y Obstetra</strong> en Zona Oriental.
+      </p>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <div class="p-3 h-100" style="background: rgba(206, 176, 183, 0.10); border-radius: 12px; border-left: 4px solid var(--primary-color);">
+            <h2 class="h5 fw-bold mb-2" style="color: var(--title-color);">Agenda tu chequeo</h2>
+            <p class="text-muted mb-3">
+              Un chequeo es una excelente decisión para tu <strong>salud femenina</strong>. Agenda tu consulta y te orientamos.
+            </p>
+            <a class="btn btn-primary" href="{{ url_for('request_appointment') }}">
+              <i class="fas fa-calendar-plus me-2"></i>Solicitar cita
+            </a>
+            <a class="btn btn-outline-primary ms-2" href="https://wa.me/18297405073?text=Hola,%20quiero%20agendar%20un%20chequeo%20ginecol%C3%B3gico" target="_blank" rel="noopener noreferrer">
+              <i class="fab fa-whatsapp me-2"></i>WhatsApp
+            </a>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="p-3 h-100" style="background: rgba(206, 176, 183, 0.10); border-radius: 12px; border-left: 4px solid var(--primary-color);">
+            <h2 class="h5 fw-bold mb-2" style="color: var(--title-color);">Ubicación</h2>
+            <p class="text-muted mb-2">
+              <strong>Av. Sabana Larga 123, Santo Domingo Este 11901</strong>.
+            </p>
+            <a class="text-decoration-none" href="https://www.google.com/maps/search/?api=1&query=Av.%20Sabana%20Larga%20123%2C%20Santo%20Domingo%20Este%2011901" target="_blank" rel="noopener noreferrer">
+              <i class="fas fa-map-marker-alt me-2"></i>Ver en Google Maps
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="h4 fw-bold mt-4" style="color: var(--title-color);">Prevención y orientación</h2>
+      <p class="text-muted" style="line-height: 1.9;">
+        En un chequeo se revisan antecedentes, se conversa sobre síntomas o cambios y se orienta sobre prevención.
+        La evaluación exacta depende de cada paciente y se define en consulta.
+      </p>
+
+      <h2 class="h4 fw-bold mt-4" style="color: var(--title-color);">¿Ginecóloga en Santo Domingo o “cerca de mí”?</h2>
+      <p class="text-muted" style="line-height: 1.9;">
+        Atiendo en <strong>Santo Domingo Este (Zona Oriental)</strong> y recibo pacientes de <strong>Santo Domingo</strong>.
+        Si llegaste por “<strong>ginecólogo cerca de mi</strong> / <strong>ginecóloga cerca de mí</strong>”, podemos ayudarte a ubicarte y agendar.
+      </p>
+
+      <div class="accordion mt-4" id="faqSeoChequeo">
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="c1">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#ca1" aria-expanded="true" aria-controls="ca1">
+              ¿Cómo agendo un chequeo ginecológico?
+            </button>
+          </h3>
+          <div id="ca1" class="accordion-collapse collapse show" aria-labelledby="c1" data-bs-parent="#faqSeoChequeo">
+            <div class="accordion-body text-muted">
+              Puedes agendar desde “Solicitar cita” o por WhatsApp. Te confirmamos disponibilidad y tipo de consulta.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="c2">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#ca2" aria-expanded="false" aria-controls="ca2">
+              ¿Qué debo llevar a la consulta?
+            </button>
+          </h3>
+          <div id="ca2" class="accordion-collapse collapse" aria-labelledby="c2" data-bs-parent="#faqSeoChequeo">
+            <div class="accordion-body text-muted">
+              Si tienes resultados previos o historial médico, tráelos. En caso contrario, igual puedes asistir y te orientamos.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center mt-5">
+        <a class="btn btn-primary btn-lg" href="{{ url_for('request_appointment') }}">
+          <i class="fas fa-calendar-plus me-2"></i>Agendar mi chequeo
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

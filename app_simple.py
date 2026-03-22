@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+import sys
 from datetime import datetime, timedelta
 import hashlib
 import json
@@ -20,6 +21,15 @@ from markupsafe import escape
 from io import BytesIO
 import threading
 import mimetypes
+
+# For Windows consoles (cp1252) avoid UnicodeEncodeError on emoji logs
+try:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    if hasattr(sys.stderr, "reconfigure"):
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
 
 # SendGrid para envío de emails (API en lugar de SMTP bloqueado por Railway)
 try:
@@ -216,12 +226,13 @@ RECAPTCHA_SECRET_KEY = os.getenv('RECAPTCHA_SECRET_KEY', '')
 app.config['SESSION_COOKIE_SECURE'] = PRODUCTION  # True en producción
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-app.config['SESSION_COOKIE_DOMAIN'] = '.draramirez.com'  # Permite cookies en www y sin www
+# En local/localhost, el navegador rechaza cookies con Domain=.draramirez.com
+app.config['SESSION_COOKIE_DOMAIN'] = '.draramirez.com' if PRODUCTION else None
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=8)
 app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=7)
 app.config['REMEMBER_COOKIE_SECURE'] = PRODUCTION
 app.config['REMEMBER_COOKIE_HTTPONLY'] = True
-app.config['REMEMBER_COOKIE_DOMAIN'] = '.draramirez.com'  # Permite cookies en www y sin www
+app.config['REMEMBER_COOKIE_DOMAIN'] = '.draramirez.com' if PRODUCTION else None
 
 # Si está detrás de un proxy/reverse proxy (Railway/Nginx/Cloudflare),
 # esto hace que Flask vea correctamente IP/proto/host.
@@ -301,49 +312,28 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 # Headers de seguridad
 @app.after_request
 def security_and_performance_headers(response):
-    """Agregar headers de seguridad y optimización"""
-    # Headers de seguridad
-    response.headers['X-Content-Type-Options'] = 'nosniff'
-    response.headers['X-Frame-Options'] = 'DENY'
-    response.headers['X-XSS-Protection'] = '1; mode=block'
-    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
-    # CSP: permitir GTM/Analytics + Google Ads (DoubleClick) sin abrir de más.
-    # Nota: Google Ads puede cargar scripts desde googleads.g.doubleclick.net y googleadservices.com
-    response.headers['Content-Security-Policy'] = (
-        "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' "
-        "https://cdn.jsdelivr.net https://cdnjs.cloudflare.com "
-        "https://www.googletagmanager.com https://www.google.com https://www.gstatic.com "
-        "https://www.googleadservices.com https://googleads.g.doubleclick.net; "
-        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; "
-        "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; "
-        "img-src 'self' data: https:; "
-        "connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com "
-        "https://www.google-analytics.com https://www.googletagmanager.com https://www.google.com "
-        "https://googleads.g.doubleclick.net https://www.googleadservices.com; "
-        "frame-src https://www.googletagmanager.com https://www.google.com;"
-    )
-    
-    # Headers de caché
-    if response.content_type:
-        if 'text/html' in response.content_type:
-            # NO cachear HTML en desarrollo para ver cambios inmediatamente
-            response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
-            response.headers['Pragma'] = 'no-cache'
-            response.headers['Expires'] = '0'
-        elif any(ext in response.content_type for ext in ['css', 'js', 'png', 'jpg', 'jpeg', 'gif', 'svg']):
-            response.headers['Cache-Control'] = 'public, max-age=2592000'  # 30 días
-        else:
-            response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-    
-    # Compresión de respuesta
-    if OPTIMIZATION_AVAILABLE:
-        response = compress_response(response)
-    
-    # Headers adicionales de rendimiento
-    response.headers['X-Powered-By'] = 'Flask-Optimized'
-    response.headers['Server'] = 'Nginx/1.18.0'  # Ocultar información del servidor
-    
+    """CSP (evitar duplicar headers/cache en otros after_request)."""
+    # CSP: El sitio usa estilos y scripts inline (templates), por eso se requiere 'unsafe-inline'.
+    # Endurecemos lo posible sin romper Bootstrap/FA/CDNs/Google Tag Manager/Maps.
+    if not response.headers.get('Content-Security-Policy'):
+        response.headers['Content-Security-Policy'] = (
+            "default-src 'self'; "
+            "base-uri 'self'; "
+            "object-src 'none'; "
+            "frame-ancestors 'self'; "
+            "form-action 'self' https://wa.me https://www.draramirez.com; "
+            "script-src 'self' 'unsafe-inline' "
+            "https://cdn.jsdelivr.net https://cdnjs.cloudflare.com "
+            "https://www.googletagmanager.com https://www.google.com https://www.gstatic.com "
+            "https://www.googleadservices.com https://googleads.g.doubleclick.net; "
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; "
+            "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; "
+            "img-src 'self' data: https:; "
+            "connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com "
+            "https://www.google-analytics.com https://www.googletagmanager.com https://www.google.com "
+            "https://googleads.g.doubleclick.net https://www.googleadservices.com; "
+            "frame-src https://www.googletagmanager.com https://www.google.com https://www.google.com/maps https://www.google.com/maps/embed;"
+        )
     return response
 
 # Configuración adicional de sesiones
@@ -447,18 +437,31 @@ else:
 @app.after_request
 def add_security_and_cache_headers(response):
     """Agregar headers de seguridad HTTP y cache optimizado"""
+    # En desarrollo/local: evitar cachear HTML para ver cambios al instante
+    try:
+        if not PRODUCTION and response.content_type and 'text/html' in response.content_type:
+            response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+            response.headers['Pragma'] = 'no-cache'
+            response.headers['Expires'] = '0'
+            return response
+    except Exception:
+        pass
+
     # Seguridad
     response.headers['X-Content-Type-Options'] = 'nosniff'
     response.headers['X-Frame-Options'] = 'SAMEORIGIN'
     response.headers['X-XSS-Protection'] = '1; mode=block'
-    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    if PRODUCTION:
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
     response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
+    response.headers['X-Permitted-Cross-Domain-Policies'] = 'none'
+    response.headers['X-Download-Options'] = 'noopen'
     
     # Cache agresivo para recursos estáticos (máxima velocidad)
     if request.path.startswith('/static/'):
         # Cache de 1 año para CSS, JS, imágenes
-        if any(request.path.endswith(ext) for ext in ['.css', '.js', '.jpg', '.jpeg', '.png', '.gif', '.ico', '.svg', '.woff', '.woff2', '.ttf']):
+        if any(request.path.endswith(ext) for ext in ['.css', '.js', '.jpg', '.jpeg', '.png', '.gif', '.ico', '.svg', '.webp', '.avif', '.woff', '.woff2', '.ttf', '.json']):
             response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
             # Usar datetime.now(timezone.utc) en lugar de utcnow() (deprecated)
             from datetime import timezone
@@ -1923,6 +1926,21 @@ def seo_ginecologa_santo_domingo():
     """Landing SEO para búsqueda amplia en Santo Domingo"""
     return render_template('seo_ginecologa_santo_domingo.html')
 
+@app.route('/ginecologo-zona-oriental')
+def seo_ginecologo_zona_oriental():
+    """Landing SEO para Zona Oriental (Santo Domingo Este)"""
+    return render_template('seo_ginecologo_zona_oriental.html')
+
+@app.route('/control-embarazo')
+def seo_control_embarazo():
+    """Landing SEO para control de embarazo / control prenatal"""
+    return render_template('seo_control_embarazo.html')
+
+@app.route('/chequeo-ginecologico')
+def seo_chequeo_ginecologico():
+    """Landing SEO para chequeo ginecológico"""
+    return render_template('seo_chequeo_ginecologico.html')
+
 @app.route('/testimonios')
 def testimonials():
     """Página de testimonios con rotación diaria y fechas dinámicas"""
@@ -2545,6 +2563,7 @@ def request_appointment():
                 request_counts[f'{client_ip}_appointment'].append(current_time)
             
             # Validar y sanitizar entrada
+            full_name = sanitize_input(request.form.get('full_name', ''))
             first_name = sanitize_input(request.form.get('first_name', ''))
             last_name = sanitize_input(request.form.get('last_name', ''))
             email = sanitize_input(request.form.get('email', ''))
@@ -2553,6 +2572,15 @@ def request_appointment():
             appointment_time = sanitize_input(request.form.get('appointment_time', ''))
             appointment_type = sanitize_input(request.form.get('appointment_type', ''))
             medical_insurance = sanitize_input(request.form.get('medical_insurance', ''))
+
+            # Compatibilidad: si el frontend envía "Nombre Completo", dividirlo en nombre y apellido
+            if full_name and (not first_name or not last_name):
+                parts = [p for p in full_name.split(' ') if p.strip()]
+                if len(parts) < 2:
+                    flash('Por favor, ingresa tu nombre y apellido.', 'danger')
+                    return redirect(url_for('request_appointment'))
+                first_name = parts[0]
+                last_name = ' '.join(parts[1:])
             
             # Validar Google reCAPTCHA
             recaptcha_response = request.form.get('g-recaptcha-response')
@@ -2583,6 +2611,12 @@ def request_appointment():
             
             emergency_datetime = sanitize_input(request.form.get('emergency_datetime', ''))
             reason = sanitize_input(request.form.get('reason', ''))
+
+            # Requerir fecha y hora para servicios normales (no emergencia)
+            if appointment_type in ["consulta", "estetico"]:
+                if not appointment_date or not appointment_time:
+                    flash('Por favor, selecciona una fecha y hora para tu cita.', 'danger')
+                    return redirect(url_for('request_appointment'))
             
             # Verificar disponibilidad de horario (solo para citas normales con fecha y hora)
             if appointment_type in ["consulta", "estetico"] and appointment_date and appointment_time:
@@ -2955,6 +2989,114 @@ def admin_messages():
     conn.close()
     
     return render_template('admin_messages.html', messages=messages)
+
+@app.route('/admin/chatbot-faq')
+@login_required
+def admin_chatbot_faq():
+    """Visor del dataset de FAQs del chatbot (temas/preguntas/respuestas)."""
+    import json
+    dataset_path = os.path.join(app.root_path, 'static', 'data', 'chatbot_faq_dataset.json')
+    items = []
+    try:
+        with open(dataset_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            raw = data.get('faq_dataset') or []
+            if isinstance(raw, list):
+                items = raw
+    except Exception:
+        items = []
+
+    def s(v):
+        if v is None:
+            return ''
+        return str(v)
+
+    normalized = []
+    for it in items:
+        if not isinstance(it, dict):
+            continue
+        urg_raw = it.get('urgencia')
+        urg_norm = s(urg_raw).strip().lower()
+        urg_bool = (urg_raw is True) or (urg_norm in ('alta', 'urgencia', 'urgente', 'emergencia', 'true', '1', 'si', 'sí'))
+        normalized.append({
+            'categoria': s(it.get('categoria')).strip().lower(),
+            'intencion': s(it.get('intencion')).strip().lower(),
+            'pregunta': s(it.get('pregunta')).strip(),
+            'respuesta': s(it.get('respuesta')).strip(),
+            'urgencia': urg_bool,
+            'urgencia_nivel': urg_norm,
+            'conversion': s(it.get('conversion')).strip().lower(),
+        })
+
+    # Orden preferido de temas para UI
+    preferred = ['embarazo', 'ginecologia', 'infecciones', 'anticonceptivos', 'postparto', 'fertilidad', 'urgencias']
+    cats = sorted({x['categoria'] for x in normalized if x.get('categoria')})
+    cats = [c for c in preferred if c in cats] + [c for c in cats if c not in preferred]
+
+    grouped = {c: [] for c in cats}
+    for it in normalized:
+        c = it.get('categoria') or ''
+        if not c:
+            continue
+        grouped.setdefault(c, []).append(it)
+
+    return render_template('admin_chatbot_faq.html', grouped=grouped, cats=cats, total=len(normalized))
+
+@app.route('/admin/chatbot-faq.json')
+@login_required
+def admin_chatbot_faq_download_json():
+    """Descargar dataset FAQ del chatbot (opcional por categoría) en JSON."""
+    import json
+    from flask import Response
+
+    cat = (request.args.get('cat') or '').strip().lower()
+    dataset_path = os.path.join(app.root_path, 'static', 'data', 'chatbot_faq_dataset.json')
+    items = []
+    try:
+        with open(dataset_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            raw = data.get('faq_dataset') or []
+            if isinstance(raw, list):
+                items = raw
+    except Exception:
+        items = []
+
+    def s(v):
+        if v is None:
+            return ''
+        return str(v)
+
+    normalized = []
+    for it in items:
+        if not isinstance(it, dict):
+            continue
+        urg_raw = it.get('urgencia')
+        urg_norm = s(urg_raw).strip().lower()
+        urg_bool = (urg_raw is True) or (urg_norm in ('alta', 'urgencia', 'urgente', 'emergencia', 'true', '1', 'si', 'sí'))
+        normalized.append({
+            'categoria': s(it.get('categoria')).strip().lower(),
+            'intencion': s(it.get('intencion')).strip().lower(),
+            'pregunta': s(it.get('pregunta')).strip(),
+            'variaciones': it.get('variaciones') if isinstance(it.get('variaciones'), list) else [],
+            'respuesta': s(it.get('respuesta')).strip(),
+            'urgencia': urg_bool,
+            'urgencia_nivel': urg_norm,
+            'conversion': s(it.get('conversion')).strip().lower(),
+        })
+
+    if cat:
+        filtered = [x for x in normalized if x.get('categoria') == cat]
+        payload = {'faq_dataset': filtered, 'categoria': cat, 'total': len(filtered)}
+        filename = f'chatbot_faq_{cat}.json'
+    else:
+        payload = {'faq_dataset': normalized, 'total': len(normalized)}
+        filename = 'chatbot_faq_dataset.json'
+
+    body = json.dumps(payload, ensure_ascii=False, indent=2)
+    resp = Response(body, mimetype='application/json; charset=utf-8')
+    resp.headers['Content-Disposition'] = f'attachment; filename=\"{filename}\"'
+    resp.headers['Cache-Control'] = 'no-store'
+    return resp
 
 @app.route('/admin/visor-pagina')
 @login_required
@@ -8330,6 +8472,9 @@ def sitemap():
         {'path': url_for('contact'), 'priority': '0.9', 'changefreq': 'monthly'},
         {'path': url_for('request_appointment'), 'priority': '1.0', 'changefreq': 'daily'},
         {'path': url_for('seo_ginecologa_santo_domingo'), 'priority': '0.85', 'changefreq': 'weekly'},
+        {'path': url_for('seo_ginecologo_zona_oriental'), 'priority': '0.9', 'changefreq': 'weekly'},
+        {'path': url_for('seo_control_embarazo'), 'priority': '0.9', 'changefreq': 'weekly'},
+        {'path': url_for('seo_chequeo_ginecologico'), 'priority': '0.9', 'changefreq': 'weekly'},
     ]
     
     today = datetime.now().strftime('%Y-%m-%d')
@@ -8409,9 +8554,9 @@ Crawl-delay: 1
 def favicon_ico():
     """
     Algunos bots y navegadores piden /favicon.ico.
-    Este repo solo incluye favicon.svg, así que redirigimos para evitar 404.
+    Servimos el favicon real del sitio para evitar 404.
     """
-    return redirect(url_for('static', filename='favicon.svg'), code=301)
+    return redirect(url_for('static', filename='logos/favicon.ico'), code=301)
 
 @app.route('/static/logos/logo-dra-shirley.png')
 def logo_dra_shirley_png():
@@ -8714,7 +8859,7 @@ if __name__ == '__main__':
     print("="*60)
     print(f"🌐 Entorno: {'PRODUCCIÓN' if not debug else 'DESARROLLO'}")
     print(f"🌐 Host: {host}:{port}")
-    print(f"📧 Email configurado: {'✅ SÍ' if EMAIL_PASSWORD and EMAIL_PASSWORD != 'tu_password_aqui' else '❌ NO'}")
+    print(f"📧 Email configurado (SendGrid): {'✅ SÍ' if EMAIL_CONFIGURED else '❌ NO'}")
     print(f"📄 PDF disponible: {'✅ SÍ' if REPORTLAB_AVAILABLE else '❌ NO'}")
     print(f"🔒 Seguridad: {'✅ ACTIVADA' if not debug else '⚠️ DESARROLLO'}")
     print("="*60 + "\n")
