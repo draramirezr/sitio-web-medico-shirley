@@ -258,7 +258,8 @@ def _env_bool(name: str, default: bool = False) -> bool:
 # Activar solo en producción (por defecto) para evitar loops en local.
 # Si necesitas forzarlo en staging/dev, define explícitamente estas variables.
 SECURE_SSL_REDIRECT = _env_bool('SECURE_SSL_REDIRECT', default=PRODUCTION)
-PREPEND_WWW = _env_bool('PREPEND_WWW', default=PRODUCTION)
+# En este proyecto el canónico es SIN www (draramirez.com)
+PREPEND_WWW = _env_bool('PREPEND_WWW', default=False)
 
 # Lista de hosts permitidos (equivalente a Django ALLOWED_HOSTS)
 _allowed_hosts_env = (os.getenv('ALLOWED_HOSTS') or '').strip()
@@ -273,19 +274,19 @@ else:
         '127.0.0.1',
     ]
 
-PREFERRED_WWW_HOST = os.getenv('PREFERRED_WWW_HOST', 'www.draramirez.com').strip().lower()
+PREFERRED_WWW_HOST = os.getenv('PREFERRED_WWW_HOST', 'draramirez.com').strip().lower()
 
 def _canonical_base_url() -> str:
     """
     URL base canónica para SEO (sitemap/robots/canonical).
-    - En producción: por defecto https://www.draramirez.com
+    - En producción: por defecto https://draramirez.com
     - En dev: permite sobreescribir con SITE_URL/CANONICAL_BASE_URL
     """
     env = (os.getenv('CANONICAL_BASE_URL') or os.getenv('SITE_URL') or '').strip()
     if env:
         return env.rstrip('/')
     if PRODUCTION:
-        host = (PREFERRED_WWW_HOST or 'www.draramirez.com').strip().lower()
+        host = (PREFERRED_WWW_HOST or 'draramirez.com').strip().lower()
         return f"https://{host}".rstrip('/')
     # Local/dev fallback
     return "http://localhost:5000"
@@ -863,18 +864,24 @@ def check_password_temporal():
     """
     Verificar si el usuario tiene contraseña temporal y forzar cambio
     """
-    # Seguridad/SEO: ALLOWED_HOSTS + redirección HTTPS/WWW (equivalentes tipo Django)
+    # Seguridad/SEO: redirección canónica (HTTPS + sin www) + ALLOWED_HOSTS
     req_host = _request_host_no_port()
-    if req_host and (req_host not in ALLOWED_HOSTS):
-        return ("Host no permitido", 400)
-
     if PRODUCTION:
         proto = _request_proto()
         path = request.path or '/'
         qs = request.query_string.decode('utf-8', errors='ignore') if request.query_string else ''
         path_qs = f"{path}?{qs}" if qs else path
 
-        # Forzar www primero (si aplica)
+        # CANÓNICO: https://draramirez.com (sin www) + 301 manteniendo ruta + querystring
+        canonical_host = (os.getenv('CANONICAL_HOST') or 'draramirez.com').strip().lower()
+        # Evitar contenido duplicado por dominio público de Railway
+        if req_host and req_host.endswith('.up.railway.app') and canonical_host:
+            code = 301 if request.method in ('GET', 'HEAD') else 308
+            return redirect(f"https://{canonical_host}{path_qs}", code=code)
+        if req_host == 'www.draramirez.com' and canonical_host:
+            code = 301 if request.method in ('GET', 'HEAD') else 308
+            return redirect(f"https://{canonical_host}{path_qs}", code=code)
+        # Si se mantiene PREPEND_WWW por env (por alguna razón), respetarlo.
         if PREPEND_WWW and req_host == 'draramirez.com' and PREFERRED_WWW_HOST:
             code = 301 if request.method in ('GET', 'HEAD') else 308
             scheme = 'https' if (SECURE_SSL_REDIRECT or proto == 'https') else (proto or 'http')
@@ -883,7 +890,12 @@ def check_password_temporal():
         # Forzar HTTPS (si aplica)
         if SECURE_SSL_REDIRECT and proto and proto != 'https':
             code = 301 if request.method in ('GET', 'HEAD') else 308
-            return redirect(f"https://{req_host}{path_qs}", code=code)
+            target_host = canonical_host if canonical_host else req_host
+            return redirect(f"https://{target_host}{path_qs}", code=code)
+
+    # Validar host permitido (después de posibles redirects canónicos)
+    if req_host and (req_host not in ALLOWED_HOSTS):
+        return ("Host no permitido", 400)
     
     # Verificar contraseña temporal (solo para usuarios autenticados)
     if current_user.is_authenticated:
