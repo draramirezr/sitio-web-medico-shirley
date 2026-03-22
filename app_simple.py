@@ -322,7 +322,7 @@ def security_and_performance_headers(response):
             "base-uri 'self'; "
             "object-src 'none'; "
             "frame-ancestors 'self'; "
-            "form-action 'self' https://wa.me https://www.draramirez.com; "
+            "form-action 'self' https://wa.me https://draramirez.com; "
             "script-src 'self' 'unsafe-inline' "
             "https://cdn.jsdelivr.net https://cdnjs.cloudflare.com "
             "https://www.googletagmanager.com https://www.google.com https://www.gstatic.com "
