@@ -258,8 +258,8 @@ def _env_bool(name: str, default: bool = False) -> bool:
 # Activar solo en producción (por defecto) para evitar loops en local.
 # Si necesitas forzarlo en staging/dev, define explícitamente estas variables.
 SECURE_SSL_REDIRECT = _env_bool('SECURE_SSL_REDIRECT', default=PRODUCTION)
-# En este proyecto el canónico es SIN www (draramirez.com)
-PREPEND_WWW = _env_bool('PREPEND_WWW', default=False)
+# Canónico: con www (www.draramirez.com)
+PREPEND_WWW = _env_bool('PREPEND_WWW', default=PRODUCTION)
 
 # Lista de hosts permitidos (equivalente a Django ALLOWED_HOSTS)
 _allowed_hosts_env = (os.getenv('ALLOWED_HOSTS') or '').strip()
@@ -274,19 +274,19 @@ else:
         '127.0.0.1',
     ]
 
-PREFERRED_WWW_HOST = os.getenv('PREFERRED_WWW_HOST', 'draramirez.com').strip().lower()
+PREFERRED_WWW_HOST = os.getenv('PREFERRED_WWW_HOST', 'www.draramirez.com').strip().lower()
 
 def _canonical_base_url() -> str:
     """
     URL base canónica para SEO (sitemap/robots/canonical).
-    - En producción: por defecto https://draramirez.com
+    - En producción: por defecto https://www.draramirez.com
     - En dev: permite sobreescribir con SITE_URL/CANONICAL_BASE_URL
     """
     env = (os.getenv('CANONICAL_BASE_URL') or os.getenv('SITE_URL') or '').strip()
     if env:
         return env.rstrip('/')
     if PRODUCTION:
-        host = (PREFERRED_WWW_HOST or 'draramirez.com').strip().lower()
+        host = (PREFERRED_WWW_HOST or 'www.draramirez.com').strip().lower()
         return f"https://{host}".rstrip('/')
     # Local/dev fallback
     return "http://localhost:5000"
@@ -322,7 +322,7 @@ def security_and_performance_headers(response):
             "base-uri 'self'; "
             "object-src 'none'; "
             "frame-ancestors 'self'; "
-            "form-action 'self' https://wa.me https://draramirez.com; "
+            "form-action 'self' https://wa.me https://www.draramirez.com; "
             "script-src 'self' 'unsafe-inline' "
             "https://cdn.jsdelivr.net https://cdnjs.cloudflare.com "
             "https://www.googletagmanager.com https://www.google.com https://www.gstatic.com "
@@ -872,13 +872,14 @@ def check_password_temporal():
         qs = request.query_string.decode('utf-8', errors='ignore') if request.query_string else ''
         path_qs = f"{path}?{qs}" if qs else path
 
-        # CANÓNICO: https://draramirez.com (sin www) + 301 manteniendo ruta + querystring
-        canonical_host = (os.getenv('CANONICAL_HOST') or 'draramirez.com').strip().lower()
+        # CANÓNICO: https://www.draramirez.com + 301 manteniendo ruta + querystring
+        canonical_host = (os.getenv('CANONICAL_HOST') or 'www.draramirez.com').strip().lower()
         # Evitar contenido duplicado por dominio público de Railway
         if req_host and req_host.endswith('.up.railway.app') and canonical_host:
             code = 301 if request.method in ('GET', 'HEAD') else 308
             return redirect(f"https://{canonical_host}{path_qs}", code=code)
-        if req_host == 'www.draramirez.com' and canonical_host:
+        # Quitar no-www -> www (cuando el root llegue al app, p.ej. en staging)
+        if req_host == 'draramirez.com' and canonical_host:
             code = 301 if request.method in ('GET', 'HEAD') else 308
             return redirect(f"https://{canonical_host}{path_qs}", code=code)
         # Si se mantiene PREPEND_WWW por env (por alguna razón), respetarlo.
