@@ -235,7 +235,6 @@ function registerServiceWorker() {
 // INICIALIZACIÓN
 document.addEventListener('DOMContentLoaded', function() {
   // Ejecutar optimizaciones
-  preconnectResources();
   optimizeImages();
   optimizeForms();
   detectSlowConnection();

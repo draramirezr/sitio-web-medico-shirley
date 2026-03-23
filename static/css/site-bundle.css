@@ -1,0 +1,3364 @@
+/* ====================================================
+   CSS BUNDLE (generated)
+   Consolidates multiple local stylesheets into one request
+   to reduce render-blocking CSS on first paint.
+
+   Source order preserved from `templates/base.html`:
+   1) typography.css
+   2) custom-colors.css
+   3) piggy-pink-background.css
+   4) silver-pink-elements.css
+   5) silver-chalice-titles.css
+   6) responsive-enhanced.min.css
+   ==================================================== */
+
+/* ===== typography.css ===== */
+/* Tipografías personalizadas según la línea gráfica de Dra. Shirley Ramírez */
+
+/* Si tienes los archivos de la fuente BLANKERS, descomenta y configura esto: */
+/*
+@font-face {
+    font-family: 'Blankers Regular';
+    src: url('../fonts/Blankers-Regular.woff2') format('woff2'),
+         url('../fonts/Blankers-Regular.woff') format('woff'),
+         url('../fonts/Blankers-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Blankers Light';
+    src: url('../fonts/Blankers-Light.woff2') format('woff2'),
+         url('../fonts/Blankers-Light.woff') format('woff'),
+         url('../fonts/Blankers-Light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+*/
+
+/* Variables de tipografía */
+:root {
+    /* Tipografía para títulos - BLANKERS (alternativa: Montserrat) */
+    --font-titles: 'Montserrat', 'Blankers Regular', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-titles-light: 'Montserrat', 'Blankers Light', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    
+    /* Tipografía para cuerpo de texto - BE VIETNAM */
+    --font-body: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    
+    /* Pesos de fuente */
+    --font-weight-light: 300;
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --font-weight-extrabold: 800;
+    
+    /* Tamaños de fuente */
+    --font-size-xs: 0.75rem;      /* 12px */
+    --font-size-sm: 0.875rem;     /* 14px */
+    --font-size-base: 1rem;       /* 16px */
+    --font-size-lg: 1.125rem;     /* 18px */
+    --font-size-xl: 1.25rem;      /* 20px */
+    --font-size-2xl: 1.5rem;      /* 24px */
+    --font-size-3xl: 1.875rem;    /* 30px */
+    --font-size-4xl: 2.25rem;     /* 36px */
+    --font-size-5xl: 3rem;        /* 48px */
+    --font-size-6xl: 3.75rem;     /* 60px */
+    
+    /* Alturas de línea */
+    --line-height-tight: 1.25;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.75;
+    
+    /* Espaciado de letras */
+    --letter-spacing-tight: -0.025em;
+    --letter-spacing-normal: 0;
+    --letter-spacing-wide: 0.025em;
+    --letter-spacing-wider: 0.05em;
+    --letter-spacing-widest: 0.1em;
+}
+
+/* Aplicar tipografía base al body - BE VIETNAM para texto */
+body {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-regular) !important;
+    font-size: var(--font-size-base) !important;
+    line-height: var(--line-height-normal) !important;
+    letter-spacing: var(--letter-spacing-normal) !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Aplicar BLANKERS a todos los títulos */
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+    font-family: var(--font-titles) !important;
+    font-weight: var(--font-weight-bold) !important;
+    line-height: var(--line-height-tight) !important;
+    letter-spacing: var(--letter-spacing-tight) !important;
+    color: var(--title-color, #ACACAD) !important;
+}
+
+/* Tamaños de títulos con BLANKERS */
+h1, .h1 {
+    font-size: var(--font-size-5xl) !important;
+    font-weight: var(--font-weight-extrabold) !important;
+    margin-bottom: 1.5rem !important;
+}
+
+h2, .h2 {
+    font-size: var(--font-size-4xl) !important;
+    font-weight: var(--font-weight-bold) !important;
+    margin-bottom: 1.25rem !important;
+}
+
+h3, .h3 {
+    font-size: var(--font-size-3xl) !important;
+    font-weight: var(--font-weight-bold) !important;
+    margin-bottom: 1rem !important;
+}
+
+h4, .h4 {
+    font-size: var(--font-size-2xl) !important;
+    font-weight: var(--font-weight-semibold) !important;
+    margin-bottom: 0.875rem !important;
+}
+
+h5, .h5 {
+    font-size: var(--font-size-xl) !important;
+    font-weight: var(--font-weight-semibold) !important;
+    margin-bottom: 0.75rem !important;
+}
+
+h6, .h6 {
+    font-size: var(--font-size-lg) !important;
+    font-weight: var(--font-weight-semibold) !important;
+    margin-bottom: 0.625rem !important;
+}
+
+/* Aplicar BLANKERS al navbar brand */
+.navbar-brand {
+    font-family: var(--font-titles) !important;
+    font-weight: var(--font-weight-bold) !important;
+    font-size: var(--font-size-2xl) !important;
+    letter-spacing: var(--letter-spacing-tight) !important;
+}
+
+/* Aplicar BLANKERS a los enlaces del menú */
+.navbar-nav .nav-link {
+    font-family: var(--font-titles) !important;
+    font-weight: var(--font-weight-semibold) !important;
+    font-size: var(--font-size-base) !important;
+    letter-spacing: var(--letter-spacing-wide) !important;
+    text-transform: uppercase !important;
+}
+
+/* Aplicar BLANKERS a los botones */
+.btn {
+    font-family: var(--font-titles) !important;
+    font-weight: var(--font-weight-semibold) !important;
+    letter-spacing: var(--letter-spacing-wider) !important;
+    text-transform: uppercase !important;
+}
+
+.btn-primary,
+.btn-outline-primary {
+    font-weight: var(--font-weight-bold) !important;
+}
+
+/* Aplicar BE VIETNAM al cuerpo de texto */
+p, .text, .description {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-regular) !important;
+    font-size: var(--font-size-base) !important;
+    line-height: var(--line-height-relaxed) !important;
+}
+
+/* Aplicar BE VIETNAM a textos pequeños */
+small, .small, .text-sm {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-regular) !important;
+    font-size: var(--font-size-sm) !important;
+}
+
+/* Aplicar BE VIETNAM a los labels */
+label, .form-label {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-medium) !important;
+    font-size: var(--font-size-base) !important;
+}
+
+/* Aplicar BE VIETNAM a los inputs */
+.form-control,
+.form-select,
+textarea {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-regular) !important;
+    font-size: var(--font-size-base) !important;
+}
+
+/* Aplicar BLANKERS a títulos de tarjetas */
+.card-title,
+.service-card h5,
+.testimonial-card h5 {
+    font-family: var(--font-titles) !important;
+    font-weight: var(--font-weight-bold) !important;
+}
+
+/* Aplicar BE VIETNAM al texto de tarjetas */
+.card-text,
+.card-body p,
+.service-card p,
+.testimonial-card p {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-regular) !important;
+}
+
+/* Aplicar BLANKERS a los títulos del hero */
+.hero h1,
+.hero h2 {
+    font-family: var(--font-titles) !important;
+    font-weight: var(--font-weight-extrabold) !important;
+    letter-spacing: var(--letter-spacing-tight) !important;
+}
+
+/* Aplicar BE VIETNAM al texto del hero */
+.hero p {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-regular) !important;
+    line-height: var(--line-height-relaxed) !important;
+}
+
+/* Aplicar BLANKERS a los títulos del footer */
+.footer h5,
+.footer h6 {
+    font-family: var(--font-titles) !important;
+    font-weight: var(--font-weight-bold) !important;
+}
+
+/* Aplicar BE VIETNAM al texto del footer */
+.footer p,
+.footer a,
+.footer li {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-regular) !important;
+}
+
+/* Aplicar BLANKERS a títulos de sección */
+.section-title {
+    font-family: var(--font-titles) !important;
+    font-weight: var(--font-weight-extrabold) !important;
+    font-size: var(--font-size-4xl) !important;
+    letter-spacing: var(--letter-spacing-tight) !important;
+}
+
+/* Aplicar tipografía a elementos de Bootstrap */
+.alert {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-regular) !important;
+}
+
+.badge {
+    font-family: var(--font-titles) !important;
+    font-weight: var(--font-weight-semibold) !important;
+    letter-spacing: var(--letter-spacing-wider) !important;
+}
+
+.breadcrumb {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-regular) !important;
+}
+
+.dropdown-item {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-regular) !important;
+}
+
+.modal-title {
+    font-family: var(--font-titles) !important;
+    font-weight: var(--font-weight-bold) !important;
+}
+
+.modal-body {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-regular) !important;
+}
+
+.table th {
+    font-family: var(--font-titles) !important;
+    font-weight: var(--font-weight-semibold) !important;
+}
+
+.table td {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-regular) !important;
+}
+
+/* Clases de utilidad para tipografía */
+.font-titles {
+    font-family: var(--font-titles) !important;
+}
+
+.font-body {
+    font-family: var(--font-body) !important;
+}
+
+.font-light {
+    font-weight: var(--font-weight-light) !important;
+}
+
+.font-regular {
+    font-weight: var(--font-weight-regular) !important;
+}
+
+.font-medium {
+    font-weight: var(--font-weight-medium) !important;
+}
+
+.font-semibold {
+    font-weight: var(--font-weight-semibold) !important;
+}
+
+.font-bold {
+    font-weight: var(--font-weight-bold) !important;
+}
+
+.font-extrabold {
+    font-weight: var(--font-weight-extrabold) !important;
+}
+
+/* Responsive - ajustes de tamaño para móviles */
+@media (max-width: 768px) {
+    :root {
+        --font-size-5xl: 2.5rem;      /* 40px */
+        --font-size-4xl: 2rem;        /* 32px */
+        --font-size-3xl: 1.625rem;    /* 26px */
+        --font-size-2xl: 1.375rem;    /* 22px */
+    }
+    
+    h1, .h1 {
+        font-size: var(--font-size-4xl) !important;
+    }
+    
+    h2, .h2 {
+        font-size: var(--font-size-3xl) !important;
+    }
+    
+    h3, .h3 {
+        font-size: var(--font-size-2xl) !important;
+    }
+    
+    .navbar-brand {
+        font-size: var(--font-size-xl) !important;
+    }
+    
+    .navbar-nav .nav-link {
+        font-size: var(--font-size-sm) !important;
+    }
+}
+
+@media (max-width: 576px) {
+    :root {
+        --font-size-5xl: 2rem;        /* 32px */
+        --font-size-4xl: 1.75rem;     /* 28px */
+        --font-size-3xl: 1.5rem;      /* 24px */
+        --font-size-2xl: 1.25rem;     /* 20px */
+    }
+    
+    body {
+        font-size: var(--font-size-sm) !important;
+    }
+    
+    h1, .h1 {
+        font-size: var(--font-size-3xl) !important;
+    }
+    
+    h2, .h2 {
+        font-size: var(--font-size-2xl) !important;
+    }
+    
+    h3, .h3 {
+        font-size: var(--font-size-xl) !important;
+    }
+}
+
+/* Mejoras de legibilidad */
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Selección de texto personalizada */
+::selection {
+    background-color: rgba(206, 176, 183, 0.3);
+    color: var(--text-dark);
+}
+
+::-moz-selection {
+    background-color: rgba(206, 176, 183, 0.3);
+    color: var(--text-dark);
+}
+
+/* ===== custom-colors.css ===== */
+/* Estilos personalizados con la paleta de colores de Dra. Shirley Ramírez */
+
+/* Variables de color adicionales optimizadas */
+:root {
+    --success-color: #4CAF50;
+    --warning-color: #FF9800;
+    --info-color: #2196F3;
+    --light-bg: var(--accent-light);
+    --card-shadow: var(--shadow-light);
+    --card-shadow-hover: var(--shadow-medium);
+}
+
+/* Mejoras en las tarjetas de servicios */
+.service-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-light);
+    position: relative;
+    overflow: hidden;
+}
+
+.service-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.service-card:hover::before {
+    transform: scaleX(1);
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--card-shadow-hover);
+    border-color: var(--primary-color);
+}
+
+.service-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background: var(--gradient-hero);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-medium);
+}
+
+.service-card:hover .service-icon {
+    transform: scale(1.1);
+    background: var(--gradient-accent);
+    box-shadow: var(--shadow-strong);
+}
+
+/* Mejoras en las tarjetas de testimonios */
+.testimonial-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+    border-left: 4px solid var(--primary-color);
+    position: relative;
+}
+
+.testimonial-card::before {
+    content: '"';
+    position: absolute;
+    top: -10px;
+    left: 20px;
+    font-size: 4rem;
+    color: var(--primary-color);
+    font-family: serif;
+    line-height: 1;
+}
+
+.testimonial-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--card-shadow-hover);
+    border-left-color: var(--secondary-color);
+}
+
+/* Mejoras en los botones */
+.btn-primary {
+    background: var(--gradient-primary);
+    border: none;
+    border-radius: 25px;
+    padding: 12px 30px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-primary:hover::before {
+    left: 100%;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-strong);
+}
+
+.btn-outline-primary {
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    border-radius: 25px;
+    padding: 10px 28px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background: var(--gradient-hero);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+/* Mejoras en el hero */
+.hero {
+    background: var(--gradient-hero);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(to top, rgba(255,255,255,0.1), transparent);
+}
+
+/* Mejoras en la navegación */
+.navbar {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-light);
+    transition: all 0.3s ease;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    color: var(--primary-color) !important;
+}
+
+.navbar-nav .nav-link {
+    color: var(--text-dark) !important;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.navbar-nav .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--primary-color);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.navbar-nav .nav-link:hover::after {
+    width: 100%;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--primary-color) !important;
+}
+
+/* Mejoras en las alertas */
+.alert-success {
+    background: linear-gradient(135deg, #E8F5E8 0%, #F0F8F0 100%);
+    border-left: 4px solid var(--success-color);
+    color: #2E7D32;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #FFF8E1 0%, #FFFBF0 100%);
+    border-left: 4px solid var(--warning-color);
+    color: #E65100;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #FFEBEE 0%, #FFF0F2 100%);
+    border-left: 4px solid var(--primary-color);
+    color: #C62828;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #E3F2FD 0%, #F0F8FF 100%);
+    border-left: 4px solid var(--info-color);
+    color: #1565C0;
+}
+
+/* Mejoras en los formularios */
+.form-control {
+    border: 2px solid #E0E0E0;
+    border-radius: 10px;
+    padding: 12px 15px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(171, 155, 159, 0.25);
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+}
+
+/* Mejoras en las secciones */
+.section-title {
+    position: relative;
+    margin-bottom: 3rem;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: var(--gradient-primary);
+    border-radius: 2px;
+}
+
+/* Animaciones suaves */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Responsive mejoras */
+@media (max-width: 768px) {
+    .service-card {
+        padding: 1.5rem;
+    }
+    
+    .testimonial-card {
+        padding: 1.5rem;
+    }
+    
+    .btn-primary,
+    .btn-outline-primary {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Mejoras en el scroll */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--gradient-primary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+/* ============================================
+   ELIMINAR CHECKMARKS VERDES DE VALIDACIÓN
+   ============================================ */
+
+/* Ocultar los iconos de validación de Bootstrap en todos los formularios */
+.form-control.is-valid,
+.was-validated .form-control:valid,
+.form-control:valid {
+    border-color: #E0E0E0 !important;
+    padding-right: calc(1.5em + 0.75rem) !important;
+    background-image: none !important;
+    background-repeat: no-repeat !important;
+    background-position: right calc(0.375em + 0.1875rem) center !important;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem) !important;
+}
+
+.form-control.is-valid:focus,
+.was-validated .form-control:valid:focus,
+.form-control:valid:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 0.2rem rgba(171, 155, 159, 0.25) !important;
+    background-image: none !important;
+}
+
+/* Ocultar feedback de validación visual */
+.valid-feedback,
+.valid-tooltip {
+    display: none !important;
+}
+
+/* Mantener solo los mensajes de error (is-invalid) */
+.form-control.is-invalid,
+.was-validated .form-control:invalid {
+    border-color: #dc3545 !important;
+}
+
+.invalid-feedback,
+.invalid-tooltip {
+    display: block !important;
+}
+
+/* Aplicar a select, textarea y otros inputs */
+.form-select.is-valid,
+.was-validated .form-select:valid,
+.form-select:valid,
+textarea.form-control.is-valid,
+.was-validated textarea.form-control:valid,
+textarea.form-control:valid,
+textarea:valid,
+input[type="checkbox"].form-check-input.is-valid,
+.was-validated input[type="checkbox"].form-check-input:valid,
+input[type="checkbox"]:valid,
+input[type="radio"].form-check-input.is-valid,
+.was-validated input[type="radio"].form-check-input:valid,
+input[type="radio"]:valid,
+input[type="text"]:valid,
+input[type="email"]:valid,
+input[type="tel"]:valid,
+input[type="date"]:valid,
+input[type="password"]:valid,
+input[type="number"]:valid,
+input[type="url"]:valid {
+    background-image: none !important;
+    border-color: #E0E0E0 !important;
+}
+
+/* Asegurar que no haya checkmarks en ningún estado - Regla SUPER agresiva */
+input:valid,
+select:valid,
+textarea:valid,
+.form-control:valid,
+.form-select:valid,
+input.form-control:valid,
+textarea.form-control:valid,
+select.form-control:valid,
+input[required]:valid,
+select[required]:valid,
+textarea[required]:valid {
+    background-image: none !important;
+    border-color: #ced4da !important;
+}
+
+/* Sobrescribir estilos de Bootstrap 5 para :valid */
+input:not(:placeholder-shown):valid,
+textarea:not(:placeholder-shown):valid {
+    background-image: none !important;
+}
+
+/* Forzar en focus también */
+input:valid:focus,
+select:valid:focus,
+textarea:valid:focus {
+    background-image: none !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 0.2rem rgba(171, 155, 159, 0.25) !important;
+}
+
+/* ============================================
+   OCULTAR TODOS LOS CHECKMARKS VERDES GLOBALES
+   ============================================ */
+
+/* Ocultar iconos fa-check de color verde en toda la aplicación */
+.text-success .fa-check,
+.text-success .fa-check-circle,
+.text-success .fa-check-double,
+i.fa-check.text-success,
+i.fa-check-circle.text-success,
+i.fa-check-double.text-success,
+span.text-success i.fa-check,
+span.text-success i.fa-check-circle {
+    display: none !important;
+}
+
+/* Prevenir que los checkmarks se muestren con clases success de Bootstrap */
+.alert-success .fa-check,
+.alert-success .fa-check-circle,
+.bg-success .fa-check,
+.bg-success .fa-check-circle,
+.badge-success .fa-check,
+.badge-success .fa-check-circle {
+    display: none !important;
+}
+
+/* Ocultar cualquier ícono de check que tenga color verde directo */
+i[class*="fa-check"][style*="color: green"],
+i[class*="fa-check"][style*="color: #28a745"],
+i[class*="fa-check"][style*="color: #4CAF50"],
+i[class*="fa-check"][style*="color:#28a745"],
+i[class*="fa-check"][style*="color:#4CAF50"] {
+    display: none !important;
+}
+
+/* Ocultar símbolos de checkmark Unicode */
+.text-success::before {
+    content: "" !important;
+}
+
+/* Si hay elementos con clase 'checkmark' o 'check-icon' en verde */
+.checkmark.text-success,
+.check-icon.text-success,
+.success-icon i[class*="check"],
+.validated-icon.success {
+    display: none !important;
+}
+
+/* ===== piggy-pink-background.css ===== */
+/* Archivo CSS para aplicar el color de fondo PIGGY PINK (#F2E2E6) en toda la página */
+
+/* Aplicar el color de fondo PIGGY PINK a toda la página */
+body {
+    background-color: #F2E2E6 !important;
+    background-image: none !important;
+}
+
+/* Aplicar el fondo también al html para asegurar cobertura completa */
+html {
+    background-color: #F2E2E6 !important;
+}
+
+/* Mantener el fondo en todas las secciones principales */
+.main-content,
+.container,
+.container-fluid {
+    background-color: transparent !important;
+}
+
+/* Ajustar las tarjetas para que se vean bien sobre el fondo PIGGY PINK */
+.card,
+.service-card,
+.testimonial-card {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Ajustar el navbar para que se vea bien sobre el fondo PIGGY PINK */
+.navbar,
+.header {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Ajustar el footer para que se vea bien sobre el fondo PIGGY PINK */
+.footer {
+    background-color: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Ajustar las secciones de servicios para que mantengan el fondo PIGGY PINK */
+.services,
+.about,
+.testimonials,
+.contact {
+    background-color: transparent !important;
+}
+
+/* Ajustar el hero section para que mantenga su gradiente pero se vea bien con el fondo */
+.hero {
+    background: linear-gradient(135deg, rgba(44, 90, 160, 0.9) 0%, rgba(74, 144, 226, 0.9) 100%) !important;
+    backdrop-filter: blur(10px);
+}
+
+/* Ajustar los formularios para que se vean bien sobre el fondo PIGGY PINK */
+.form-control {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+.form-control:focus {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 0.2rem rgba(44, 90, 160, 0.25) !important;
+}
+
+/* Ajustar las alertas para que se vean bien sobre el fondo PIGGY PINK */
+.alert {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Ajustar el botón de WhatsApp para que se vea bien */
+.whatsapp-float {
+    background: #25d366 !important;
+    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.3) !important;
+}
+
+.whatsapp-float:hover {
+    box-shadow: 0 6px 25px rgba(37, 211, 102, 0.5) !important;
+}
+
+/* Asegurar que todas las páginas mantengan el fondo PIGGY PINK */
+.page-wrapper {
+    background-color: #F2E2E6 !important;
+    min-height: 100vh;
+}
+
+/* Ajustar el scrollbar para que se vea bien con el fondo PIGGY PINK */
+::-webkit-scrollbar-track {
+    background: #F2E2E6 !important;
+}
+
+/* Mejorar la legibilidad del texto sobre el fondo PIGGY PINK */
+.text-muted {
+    color: #6c757d !important;
+}
+
+/* Ajustar los enlaces para que se vean bien sobre el fondo PIGGY PINK */
+a {
+    color: var(--primary-color) !important;
+}
+
+a:hover {
+    color: #1a3d6b !important;
+}
+
+/* Asegurar que las imágenes mantengan su aspecto sobre el fondo PIGGY PINK */
+img {
+    background-color: transparent !important;
+}
+
+/* Ajustar las tablas para que se vean bien sobre el fondo PIGGY PINK */
+.table {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(10px);
+}
+
+/* Ajustar los modales para que se vean bien sobre el fondo PIGGY PINK */
+.modal-content {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Ajustar los dropdowns para que se vean bien sobre el fondo PIGGY PINK */
+.dropdown-menu {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Asegurar que el fondo PIGGY PINK se mantenga en todas las resoluciones */
+@media (max-width: 768px) {
+    body,
+    html {
+        background-color: #F2E2E6 !important;
+    }
+    
+    .card,
+    .service-card,
+    .testimonial-card {
+        background-color: rgba(255, 255, 255, 0.95) !important;
+    }
+}
+
+@media (max-width: 576px) {
+    body,
+    html {
+        background-color: #F2E2E6 !important;
+    }
+}
+
+/* ===== silver-pink-elements.css ===== */
+/* Archivo CSS para aplicar el color SILVER PINK (#CEB0B7) en sombras, menús y botones */
+
+/* Variables CSS actualizadas con SILVER PINK */
+:root {
+    --silver-pink: #CEB0B7;           /* SILVER PINK - Color principal para sombras y elementos */
+    --silver-pink-light: #DBC4CA;     /* SILVER PINK más claro */
+    --silver-pink-dark: #B89CA3;      /* SILVER PINK más oscuro */
+    --silver-pink-shadow: rgba(206, 176, 183, 0.3);  /* SILVER PINK para sombras */
+    --silver-pink-shadow-light: rgba(206, 176, 183, 0.15);  /* SILVER PINK sombra suave */
+    --silver-pink-shadow-medium: rgba(206, 176, 183, 0.25); /* SILVER PINK sombra media */
+    --silver-pink-shadow-strong: rgba(206, 176, 183, 0.4);  /* SILVER PINK sombra fuerte */
+}
+
+/* Aplicar SILVER PINK a los botones principales */
+.btn-primary {
+    background: linear-gradient(135deg, var(--silver-pink) 0%, var(--silver-pink-dark) 100%) !important;
+    border: none !important;
+    color: white !important;
+    box-shadow: 0 4px 15px var(--silver-pink-shadow) !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--silver-pink-dark) 0%, var(--silver-pink) 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px var(--silver-pink-shadow-medium) !important;
+    color: white !important;
+}
+
+.btn-primary:focus {
+    box-shadow: 0 0 0 0.2rem var(--silver-pink-shadow-light) !important;
+}
+
+/* Aplicar SILVER PINK a los botones outline */
+.btn-outline-primary {
+    border: 2px solid var(--silver-pink) !important;
+    color: var(--silver-pink) !important;
+    background-color: transparent !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--silver-pink) !important;
+    border-color: var(--silver-pink) !important;
+    color: white !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 15px var(--silver-pink-shadow) !important;
+}
+
+/* Aplicar SILVER PINK a las sombras de las tarjetas */
+.card,
+.service-card,
+.testimonial-card {
+    box-shadow: 0 4px 20px var(--silver-pink-shadow-light) !important;
+    border: 1px solid rgba(206, 176, 183, 0.2) !important;
+    transition: all 0.3s ease !important;
+}
+
+.card:hover,
+.service-card:hover,
+.testimonial-card:hover {
+    box-shadow: 0 8px 30px var(--silver-pink-shadow-medium) !important;
+    transform: translateY(-5px) !important;
+    border-color: var(--silver-pink-shadow) !important;
+}
+
+/* Aplicar SILVER PINK al navbar */
+.navbar {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(15px) !important;
+    border-bottom: 2px solid var(--silver-pink-shadow-light) !important;
+    box-shadow: 0 2px 10px var(--silver-pink-shadow-light) !important;
+}
+
+.navbar-brand {
+    color: var(--silver-pink) !important;
+    font-weight: 700 !important;
+}
+
+.navbar-nav .nav-link {
+    color: var(--text-dark) !important;
+    font-weight: 500 !important;
+    transition: all 0.3s ease !important;
+    position: relative !important;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--silver-pink) !important;
+}
+
+.navbar-nav .nav-link::after {
+    content: '' !important;
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 50% !important;
+    width: 0 !important;
+    height: 2px !important;
+    background-color: var(--silver-pink) !important;
+    transition: all 0.3s ease !important;
+    transform: translateX(-50%) !important;
+}
+
+.navbar-nav .nav-link:hover::after {
+    width: 80% !important;
+}
+
+/* Aplicar SILVER PINK a los iconos de servicios */
+.service-icon {
+    background: linear-gradient(135deg, var(--silver-pink) 0%, var(--silver-pink-dark) 100%) !important;
+    box-shadow: 0 4px 15px var(--silver-pink-shadow) !important;
+    transition: all 0.3s ease !important;
+}
+
+.service-card:hover .service-icon {
+    background: linear-gradient(135deg, var(--silver-pink-dark) 0%, var(--silver-pink) 100%) !important;
+    transform: scale(1.1) !important;
+    box-shadow: 0 6px 20px var(--silver-pink-shadow-medium) !important;
+}
+
+/* Aplicar SILVER PINK a los formularios */
+.form-control {
+    border: 2px solid rgba(206, 176, 183, 0.3) !important;
+    transition: all 0.3s ease !important;
+}
+
+.form-control:focus {
+    border-color: var(--silver-pink) !important;
+    box-shadow: 0 0 0 0.2rem var(--silver-pink-shadow-light) !important;
+}
+
+/* Aplicar SILVER PINK a las alertas */
+.alert-success {
+    background: linear-gradient(135deg, rgba(206, 176, 183, 0.1) 0%, rgba(206, 176, 183, 0.05) 100%) !important;
+    border-left: 4px solid var(--silver-pink) !important;
+    color: var(--text-dark) !important;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, rgba(206, 176, 183, 0.1) 0%, rgba(206, 176, 183, 0.05) 100%) !important;
+    border-left: 4px solid var(--silver-pink) !important;
+    color: var(--text-dark) !important;
+}
+
+/* Aplicar SILVER PINK al botón de WhatsApp */
+.whatsapp-float {
+    background: linear-gradient(135deg, #25d366 0%, #20ba5a 100%) !important;
+    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.3) !important;
+    transition: all 0.3s ease !important;
+}
+
+.whatsapp-float:hover {
+    transform: scale(1.1) !important;
+    box-shadow: 0 6px 25px rgba(37, 211, 102, 0.5) !important;
+}
+
+/* Aplicar SILVER PINK al footer */
+.footer {
+    background: linear-gradient(135deg, rgba(206, 176, 183, 0.1) 0%, rgba(206, 176, 183, 0.05) 100%) !important;
+    border-top: 2px solid var(--silver-pink-shadow-light) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+.footer h5,
+.footer h6 {
+    color: var(--silver-pink) !important;
+    font-weight: 600 !important;
+}
+
+/* Aplicar SILVER PINK a los enlaces */
+a {
+    color: var(--silver-pink) !important;
+    transition: all 0.3s ease !important;
+}
+
+a:hover {
+    color: var(--silver-pink-dark) !important;
+}
+
+/* Aplicar SILVER PINK a los títulos de sección */
+.section-title::after {
+    background: linear-gradient(135deg, var(--silver-pink) 0%, var(--silver-pink-dark) 100%) !important;
+}
+
+/* Aplicar SILVER PINK a los testimonios */
+.testimonial-card::before {
+    color: var(--silver-pink) !important;
+}
+
+/* Aplicar SILVER PINK a las clases de utilidad */
+.text-primary {
+    color: var(--silver-pink) !important;
+}
+
+.bg-primary {
+    background: linear-gradient(135deg, var(--silver-pink) 0%, var(--silver-pink-dark) 100%) !important;
+}
+
+.border-primary {
+    border-color: var(--silver-pink) !important;
+}
+
+/* Aplicar SILVER PINK al scrollbar */
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--silver-pink) 0%, var(--silver-pink-dark) 100%) !important;
+    border-radius: 4px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--silver-pink-dark) !important;
+}
+
+/* Aplicar SILVER PINK a los dropdowns */
+.dropdown-menu {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(15px) !important;
+    border: 1px solid var(--silver-pink-shadow-light) !important;
+    box-shadow: 0 4px 20px var(--silver-pink-shadow-light) !important;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(206, 176, 183, 0.1) !important;
+    color: var(--silver-pink-dark) !important;
+}
+
+/* Aplicar SILVER PINK a los modales */
+.modal-content {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(15px) !important;
+    border: 1px solid var(--silver-pink-shadow-light) !important;
+    box-shadow: 0 8px 30px var(--silver-pink-shadow-medium) !important;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--silver-pink-shadow-light) !important;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--silver-pink-shadow-light) !important;
+}
+
+/* Aplicar SILVER PINK a las tablas */
+.table {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+/* DESHABILITADO - Los encabezados usan color específico #AB9B9F sin opacidad */
+/* .table thead th {
+    background-color: rgba(206, 176, 183, 0.1) !important;
+    color: var(--silver-pink-dark) !important;
+    border-bottom: 2px solid var(--silver-pink-shadow-light) !important;
+} */
+
+/* Responsive - mantener SILVER PINK en todas las resoluciones */
+@media (max-width: 768px) {
+    .btn-primary,
+    .btn-outline-primary {
+        padding: 10px 20px !important;
+        font-size: 0.9rem !important;
+    }
+    
+    .card,
+    .service-card,
+    .testimonial-card {
+        box-shadow: 0 2px 15px var(--silver-pink-shadow-light) !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .navbar {
+        box-shadow: 0 1px 5px var(--silver-pink-shadow-light) !important;
+    }
+    
+    .whatsapp-float {
+        box-shadow: 0 2px 15px rgba(37, 211, 102, 0.3) !important;
+    }
+}
+
+/* ===== silver-chalice-titles.css ===== */
+/* Archivo CSS para aplicar el color SILVER CHALICE (#ACACAD) en títulos de menús y botones */
+
+/* Variables CSS para SILVER CHALICE */
+:root {
+    --silver-chalice: #ACACAD;           /* SILVER CHALICE - Color principal para títulos y botones */
+    --silver-chalice-light: #C4C4C5;    /* SILVER CHALICE más claro */
+    --silver-chalice-dark: #949495;      /* SILVER CHALICE más oscuro */
+    --silver-chalice-shadow: rgba(172, 172, 173, 0.3);  /* SILVER CHALICE para sombras */
+    --silver-chalice-shadow-light: rgba(172, 172, 173, 0.15);  /* SILVER CHALICE sombra suave */
+    --silver-chalice-shadow-medium: rgba(172, 172, 173, 0.25); /* SILVER CHALICE sombra media */
+    --silver-chalice-shadow-strong: rgba(172, 172, 173, 0.4);  /* SILVER CHALICE sombra fuerte */
+}
+
+/* Aplicar SILVER CHALICE a los títulos de menús */
+.navbar-brand {
+    color: var(--silver-chalice) !important;
+    font-weight: 700 !important;
+    font-size: 1.5rem !important;
+    transition: all 0.3s ease !important;
+}
+
+.navbar-brand:hover {
+    color: var(--silver-chalice-dark) !important;
+    transform: scale(1.05) !important;
+}
+
+/* Aplicar SILVER CHALICE a los enlaces del menú */
+.navbar-nav .nav-link {
+    color: var(--silver-chalice) !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    transition: all 0.3s ease !important;
+    position: relative !important;
+    padding: 0.75rem 1rem !important;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--silver-chalice-dark) !important;
+    transform: translateY(-1px) !important;
+}
+
+.navbar-nav .nav-link::after {
+    content: '' !important;
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 50% !important;
+    width: 0 !important;
+    height: 2px !important;
+    background-color: var(--silver-chalice) !important;
+    transition: all 0.3s ease !important;
+    transform: translateX(-50%) !important;
+}
+
+.navbar-nav .nav-link:hover::after {
+    width: 80% !important;
+}
+
+/* Aplicar SILVER CHALICE a los botones principales */
+.btn-primary {
+    background: linear-gradient(135deg, var(--silver-chalice) 0%, var(--silver-chalice-dark) 100%) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 15px var(--silver-chalice-shadow) !important;
+    transition: all 0.3s ease !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--silver-chalice-dark) 0%, var(--silver-chalice) 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px var(--silver-chalice-shadow-medium) !important;
+    color: white !important;
+}
+
+.btn-primary:focus {
+    box-shadow: 0 0 0 0.2rem var(--silver-chalice-shadow-light) !important;
+}
+
+.btn-primary:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 2px 10px var(--silver-chalice-shadow) !important;
+}
+
+/* Aplicar SILVER CHALICE a los botones outline */
+.btn-outline-primary {
+    border: 2px solid var(--silver-chalice) !important;
+    color: var(--silver-chalice) !important;
+    background-color: transparent !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--silver-chalice) !important;
+    border-color: var(--silver-chalice) !important;
+    color: white !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 15px var(--silver-chalice-shadow) !important;
+}
+
+.btn-outline-primary:focus {
+    box-shadow: 0 0 0 0.2rem var(--silver-chalice-shadow-light) !important;
+}
+
+/* Aplicar SILVER CHALICE a los botones pequeños */
+.btn-sm {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.875rem !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos de sección */
+.section-title,
+h1, h2, h3, h4, h5, h6 {
+    color: var(--silver-chalice) !important;
+    font-weight: 700 !important;
+}
+
+h1 {
+    font-size: 2.5rem !important;
+    margin-bottom: 1.5rem !important;
+}
+
+h2 {
+    font-size: 2rem !important;
+    margin-bottom: 1.25rem !important;
+}
+
+h3 {
+    font-size: 1.75rem !important;
+    margin-bottom: 1rem !important;
+}
+
+h4 {
+    font-size: 1.5rem !important;
+    margin-bottom: 0.875rem !important;
+}
+
+h5 {
+    font-size: 1.25rem !important;
+    margin-bottom: 0.75rem !important;
+}
+
+h6 {
+    font-size: 1rem !important;
+    margin-bottom: 0.625rem !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos de tarjetas */
+.card-title,
+.service-card h5,
+.testimonial-card h5 {
+    color: var(--silver-chalice) !important;
+    font-weight: 600 !important;
+    margin-bottom: 1rem !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos del footer */
+.footer h5,
+.footer h6 {
+    color: var(--silver-chalice) !important;
+    font-weight: 600 !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos de formularios */
+.form-label {
+    color: var(--silver-chalice) !important;
+    font-weight: 600 !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos de alertas */
+.alert-title {
+    color: var(--silver-chalice) !important;
+    font-weight: 600 !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos de modales */
+.modal-title {
+    color: var(--silver-chalice) !important;
+    font-weight: 700 !important;
+}
+
+/* DESHABILITADO - Los encabezados usan color específico #AB9B9F sin opacidad */
+/* .table th {
+    color: var(--silver-chalice) !important;
+    font-weight: 600 !important;
+    background-color: rgba(172, 172, 173, 0.1) !important;
+} */
+
+/* Aplicar SILVER CHALICE a los títulos de dropdowns */
+.dropdown-header {
+    color: var(--silver-chalice) !important;
+    font-weight: 600 !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos de navegación breadcrumb */
+.breadcrumb-item.active {
+    color: var(--silver-chalice) !important;
+    font-weight: 600 !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos de paginación */
+.page-link {
+    color: var(--silver-chalice) !important;
+    font-weight: 500 !important;
+}
+
+.page-link:hover {
+    color: var(--silver-chalice-dark) !important;
+    background-color: rgba(172, 172, 173, 0.1) !important;
+}
+
+.page-item.active .page-link {
+    background-color: var(--silver-chalice) !important;
+    border-color: var(--silver-chalice) !important;
+    color: white !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos de badges */
+.badge {
+    background-color: var(--silver-chalice) !important;
+    color: white !important;
+    font-weight: 600 !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos de listas */
+.list-group-item.active {
+    background-color: var(--silver-chalice) !important;
+    border-color: var(--silver-chalice) !important;
+    color: white !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos de tabs */
+.nav-tabs .nav-link.active {
+    color: var(--silver-chalice) !important;
+    border-color: var(--silver-chalice) !important;
+    font-weight: 600 !important;
+}
+
+.nav-tabs .nav-link {
+    color: var(--silver-chalice) !important;
+    font-weight: 500 !important;
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--silver-chalice-dark) !important;
+    border-color: var(--silver-chalice-shadow-light) !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos de accordion */
+.accordion-button {
+    color: var(--silver-chalice) !important;
+    font-weight: 600 !important;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: rgba(172, 172, 173, 0.1) !important;
+    color: var(--silver-chalice-dark) !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos de carousel */
+.carousel-caption h5 {
+    color: var(--silver-chalice) !important;
+    font-weight: 700 !important;
+}
+
+/* Responsive - mantener SILVER CHALICE en todas las resoluciones */
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1.25rem !important;
+    }
+    
+    .navbar-nav .nav-link {
+        font-size: 0.9rem !important;
+        padding: 0.5rem 0.75rem !important;
+    }
+    
+    h1 {
+        font-size: 2rem !important;
+    }
+    
+    h2 {
+        font-size: 1.75rem !important;
+    }
+    
+    h3 {
+        font-size: 1.5rem !important;
+    }
+    
+    .btn-primary,
+    .btn-outline-primary {
+        padding: 0.625rem 1.25rem !important;
+        font-size: 0.9rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .navbar-brand {
+        font-size: 1.1rem !important;
+    }
+    
+    h1 {
+        font-size: 1.75rem !important;
+    }
+    
+    h2 {
+        font-size: 1.5rem !important;
+    }
+    
+    h3 {
+        font-size: 1.25rem !important;
+    }
+    
+    .btn-primary,
+    .btn-outline-primary {
+        padding: 0.5rem 1rem !important;
+        font-size: 0.875rem !important;
+    }
+}
+
+/* Animaciones suaves para los elementos con SILVER CHALICE */
+@keyframes fadeInSilver {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-silver {
+    animation: fadeInSilver 0.6s ease-out;
+}
+
+/* Efectos de hover mejorados */
+.navbar-nav .nav-link,
+.btn-primary,
+.btn-outline-primary {
+    position: relative;
+    overflow: hidden;
+}
+
+.navbar-nav .nav-link::before,
+.btn-primary::before,
+.btn-outline-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.navbar-nav .nav-link:hover::before,
+.btn-primary:hover::before,
+.btn-outline-primary:hover::before {
+    left: 100%;
+}
+
+/* ===== responsive-enhanced.min.css ===== */
+:root{--mobile-padding:1rem;--tablet-padding:1.5rem;--desktop-padding:2rem;--mobile-font:14px;--tablet-font:15px;--desktop-font:16px}@media (max-width:576px){body{font-size:var(--mobile-font);padding:0;margin:0}.container{padding-left:var(--mobile-padding);padding-right:var(--mobile-padding)}h1{font-size:1.75rem;line-height:1.2}h2{font-size:1.5rem;line-height:1.3}h3{font-size:1.25rem;line-height:1.4}h4{font-size:1.1rem;line-height:1.4}h5{font-size:1rem;line-height:1.4}.btn{min-height:44px;padding:12px 20px;font-size:1rem;width:100%;margin-bottom:.5rem}.btn-sm{min-height:38px;padding:8px 16px}input,select,textarea,.form-control{min-height:44px;font-size:16px!important;padding:12px}.navbar{padding:.5rem 1rem}.navbar-brand img{max-height:40px}.navbar-toggler{padding:8px 12px;border:none;background:var(--primary-color);color:#fff}.navbar-collapse{margin-top:1rem;padding:1rem;background:#fff;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.1)}.nav-link{padding:12px 16px!important;font-size:1.1rem;border-bottom:1px solid #eee}.hero{min-height:300px;padding:2rem 0}.hero h1{font-size:1.75rem;margin-bottom:1rem}.hero p{font-size:1rem;margin-bottom:1.5rem}.service-card,.testimonial-card,.card{margin-bottom:1rem;padding:1.25rem}.service-icon{width:60px;height:60px;font-size:1.5rem;margin-bottom:1rem}.table-responsive{overflow-x:auto;-webkit-overflow-scrolling:touch}table{font-size:.875rem}table td,table th{padding:8px;white-space:nowrap}.form-group{margin-bottom:1rem}label{font-size:.95rem;font-weight:600;margin-bottom:.5rem}.modal-dialog{margin:.5rem}.modal-content{border-radius:15px}footer{padding:2rem 1rem;text-align:center}footer .col-md-4,footer .col-md-3{margin-bottom:1.5rem}.mb-5,.my-5{margin-bottom:2rem!important}.mt-5,.my-5{margin-top:2rem!important}.py-5{padding-top:2rem!important;padding-bottom:2rem!important}.hide-mobile{display:none!important}}@media (min-width:577px) and (max-width:991px){body{font-size:var(--tablet-font)}.container{padding-left:var(--tablet-padding);padding-right:var(--tablet-padding)}h1{font-size:2.25rem}h2{font-size:2rem}h3{font-size:1.75rem}.btn{min-height:40px}.hero{min-height:400px}.hide-tablet{display:none!important}}@media (min-width:992px){body{font-size:var(--desktop-font)}.container{padding-left:var(--desktop-padding);padding-right:var(--desktop-padding)}.service-card:hover{transform:translateY(-10px)}.btn:hover{transform:translateY(-2px)}.hide-desktop{display:none!important}}@media (orientation:landscape) and (max-height:500px){.hero{min-height:250px;padding:1rem 0}.navbar{padding:.25rem 1rem}h1{font-size:1.5rem}h2{font-size:1.25rem}}@media (hover:none) and (pointer:coarse){a,button,.btn,.nav-link{-webkit-tap-highlight-color:rgba(206,176,183,.3)}.service-card:hover,.btn:hover{transform:none}}@media (-webkit-min-device-pixel-ratio:2),(min-resolution:192dpi){body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}}@media (prefers-color-scheme:dark){body{background:#1a1a1a;color:#e0e0e0}.card,.service-card{background:#2a2a2a;color:#e0e0e0}}@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}@media print{.navbar,.footer,.btn,.no-print{display:none!important}body{background:#fff;color:#000}a{text-decoration:underline}.container{max-width:100%}}@media (max-width:768px){.tabla-lineas{font-size:.8rem}.tabla-lineas th,.tabla-lineas td{padding:.5rem .25rem}.form-control-sm{font-size:.85rem;padding:.4rem}.btn-agregar-linea,.btn-guardar-factura{width:100%;margin-top:.5rem}.total-factura{padding:1rem;font-size:1.25rem}}@media (max-width:992px){.tabla-pendientes{font-size:.85rem}.tabla-pendientes .btn-accion{padding:.25rem .5rem;font-size:.75rem}.badge{font-size:.7rem;padding:.25em .5em}}@media (max-width:768px){.stat-card{margin-bottom:1rem}.quick-action-btn{width:100%;margin-bottom:.5rem}.admin-section-card .card-body{max-height:300px;overflow-y:auto}}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.skeleton{animation:skeleton-loading 1s linear infinite alternate;background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%}@keyframes skeleton-loading{0%{background-position:200% 0}100%{background-position:-200% 0}}*{will-change:auto}img{content-visibility:auto;loading:lazy}.d-mobile,.d-tablet,.d-desktop{display:none!important}@media (max-width:576px){.d-mobile{display:block!important}}@media (min-width:577px) and (max-width:991px){.d-tablet{display:block!important}}@media (min-width:992px){.d-desktop{display:block!important}}
+/* ====================================================
+   CSS BUNDLE (public + admin shared)
+   - Consolidates previously separate local CSS files to reduce
+     render-blocking requests.
+   Source order preserved from `templates/base.html`:
+   1) typography.css
+   2) custom-colors.css
+   3) piggy-pink-background.css
+   4) silver-pink-elements.css
+   5) silver-chalice-titles.css
+   6) responsive-enhanced.min.css
+   ==================================================== */
+
+/* ===== typography.css ===== */
+/* Tipografías personalizadas según la línea gráfica de Dra. Shirley Ramírez */
+
+/* Si tienes los archivos de la fuente BLANKERS, descomenta y configura esto: */
+/*
+@font-face {
+    font-family: 'Blankers Regular';
+    src: url('../fonts/Blankers-Regular.woff2') format('woff2'),
+         url('../fonts/Blankers-Regular.woff') format('woff'),
+         url('../fonts/Blankers-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Blankers Light';
+    src: url('../fonts/Blankers-Light.woff2') format('woff2'),
+         url('../fonts/Blankers-Light.woff') format('woff'),
+         url('../fonts/Blankers-Light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+*/
+
+/* Variables de tipografía */
+:root {
+    /* Tipografía para títulos - BLANKERS (alternativa: Montserrat) */
+    --font-titles: 'Montserrat', 'Blankers Regular', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-titles-light: 'Montserrat', 'Blankers Light', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    
+    /* Tipografía para cuerpo de texto - BE VIETNAM */
+    --font-body: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    
+    /* Pesos de fuente */
+    --font-weight-light: 300;
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --font-weight-extrabold: 800;
+    
+    /* Tamaños de fuente */
+    --font-size-xs: 0.75rem;      /* 12px */
+    --font-size-sm: 0.875rem;     /* 14px */
+    --font-size-base: 1rem;       /* 16px */
+    --font-size-lg: 1.125rem;     /* 18px */
+    --font-size-xl: 1.25rem;      /* 20px */
+    --font-size-2xl: 1.5rem;      /* 24px */
+    --font-size-3xl: 1.875rem;    /* 30px */
+    --font-size-4xl: 2.25rem;     /* 36px */
+    --font-size-5xl: 3rem;        /* 48px */
+    --font-size-6xl: 3.75rem;     /* 60px */
+    
+    /* Alturas de línea */
+    --line-height-tight: 1.25;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.75;
+    
+    /* Espaciado de letras */
+    --letter-spacing-tight: -0.025em;
+    --letter-spacing-normal: 0;
+    --letter-spacing-wide: 0.025em;
+    --letter-spacing-wider: 0.05em;
+    --letter-spacing-widest: 0.1em;
+}
+
+/* Aplicar tipografía base al body - BE VIETNAM para texto */
+body {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-regular) !important;
+    font-size: var(--font-size-base) !important;
+    line-height: var(--line-height-normal) !important;
+    letter-spacing: var(--letter-spacing-normal) !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Aplicar BLANKERS a todos los títulos */
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+    font-family: var(--font-titles) !important;
+    font-weight: var(--font-weight-bold) !important;
+    line-height: var(--line-height-tight) !important;
+    letter-spacing: var(--letter-spacing-tight) !important;
+    color: var(--title-color, #ACACAD) !important;
+}
+
+/* Tamaños de títulos con BLANKERS */
+h1, .h1 {
+    font-size: var(--font-size-5xl) !important;
+    font-weight: var(--font-weight-extrabold) !important;
+    margin-bottom: 1.5rem !important;
+}
+
+h2, .h2 {
+    font-size: var(--font-size-4xl) !important;
+    font-weight: var(--font-weight-bold) !important;
+    margin-bottom: 1.25rem !important;
+}
+
+h3, .h3 {
+    font-size: var(--font-size-3xl) !important;
+    font-weight: var(--font-weight-bold) !important;
+    margin-bottom: 1rem !important;
+}
+
+h4, .h4 {
+    font-size: var(--font-size-2xl) !important;
+    font-weight: var(--font-weight-semibold) !important;
+    margin-bottom: 0.875rem !important;
+}
+
+h5, .h5 {
+    font-size: var(--font-size-xl) !important;
+    font-weight: var(--font-weight-semibold) !important;
+    margin-bottom: 0.75rem !important;
+}
+
+h6, .h6 {
+    font-size: var(--font-size-lg) !important;
+    font-weight: var(--font-weight-semibold) !important;
+    margin-bottom: 0.625rem !important;
+}
+
+/* Aplicar BLANKERS al navbar brand */
+.navbar-brand {
+    font-family: var(--font-titles) !important;
+    font-weight: var(--font-weight-bold) !important;
+    font-size: var(--font-size-2xl) !important;
+    letter-spacing: var(--letter-spacing-tight) !important;
+}
+
+/* Aplicar BLANKERS a los enlaces del menú */
+.navbar-nav .nav-link {
+    font-family: var(--font-titles) !important;
+    font-weight: var(--font-weight-semibold) !important;
+    font-size: var(--font-size-base) !important;
+    letter-spacing: var(--letter-spacing-wide) !important;
+    text-transform: uppercase !important;
+}
+
+/* Aplicar BLANKERS a los botones */
+.btn {
+    font-family: var(--font-titles) !important;
+    font-weight: var(--font-weight-semibold) !important;
+    letter-spacing: var(--letter-spacing-wider) !important;
+    text-transform: uppercase !important;
+}
+
+.btn-primary,
+.btn-outline-primary {
+    font-weight: var(--font-weight-bold) !important;
+}
+
+/* Aplicar BE VIETNAM al cuerpo de texto */
+p, .text, .description {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-regular) !important;
+    font-size: var(--font-size-base) !important;
+    line-height: var(--line-height-relaxed) !important;
+}
+
+/* Aplicar BE VIETNAM a textos pequeños */
+small, .small, .text-sm {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-regular) !important;
+    font-size: var(--font-size-sm) !important;
+}
+
+/* Aplicar BE VIETNAM a los labels */
+label, .form-label {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-medium) !important;
+    font-size: var(--font-size-base) !important;
+}
+
+/* Aplicar BE VIETNAM a los inputs */
+.form-control,
+.form-select,
+textarea {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-regular) !important;
+    font-size: var(--font-size-base) !important;
+}
+
+/* Aplicar BLANKERS a títulos de tarjetas */
+.card-title,
+.service-card h5,
+.testimonial-card h5 {
+    font-family: var(--font-titles) !important;
+    font-weight: var(--font-weight-bold) !important;
+}
+
+/* Aplicar BE VIETNAM al texto de tarjetas */
+.card-text,
+.card-body p,
+.service-card p,
+.testimonial-card p {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-regular) !important;
+}
+
+/* Aplicar BLANKERS a los títulos del hero */
+.hero h1,
+.hero h2 {
+    font-family: var(--font-titles) !important;
+    font-weight: var(--font-weight-extrabold) !important;
+    letter-spacing: var(--letter-spacing-tight) !important;
+}
+
+/* Aplicar BE VIETNAM al texto del hero */
+.hero p {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-regular) !important;
+    line-height: var(--line-height-relaxed) !important;
+}
+
+/* Aplicar BLANKERS a los títulos del footer */
+.footer h5,
+.footer h6 {
+    font-family: var(--font-titles) !important;
+    font-weight: var(--font-weight-bold) !important;
+}
+
+/* Aplicar BE VIETNAM al texto del footer */
+.footer p,
+.footer a,
+.footer li {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-regular) !important;
+}
+
+/* Aplicar BLANKERS a títulos de sección */
+.section-title {
+    font-family: var(--font-titles) !important;
+    font-weight: var(--font-weight-extrabold) !important;
+    font-size: var(--font-size-4xl) !important;
+    letter-spacing: var(--letter-spacing-tight) !important;
+}
+
+/* Aplicar tipografía a elementos de Bootstrap */
+.alert {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-regular) !important;
+}
+
+.badge {
+    font-family: var(--font-titles) !important;
+    font-weight: var(--font-weight-semibold) !important;
+    letter-spacing: var(--letter-spacing-wider) !important;
+}
+
+.breadcrumb {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-regular) !important;
+}
+
+.dropdown-item {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-regular) !important;
+}
+
+.modal-title {
+    font-family: var(--font-titles) !important;
+    font-weight: var(--font-weight-bold) !important;
+}
+
+.modal-body {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-regular) !important;
+}
+
+.table th {
+    font-family: var(--font-titles) !important;
+    font-weight: var(--font-weight-semibold) !important;
+}
+
+.table td {
+    font-family: var(--font-body) !important;
+    font-weight: var(--font-weight-regular) !important;
+}
+
+/* Clases de utilidad para tipografía */
+.font-titles {
+    font-family: var(--font-titles) !important;
+}
+
+.font-body {
+    font-family: var(--font-body) !important;
+}
+
+.font-light {
+    font-weight: var(--font-weight-light) !important;
+}
+
+.font-regular {
+    font-weight: var(--font-weight-regular) !important;
+}
+
+.font-medium {
+    font-weight: var(--font-weight-medium) !important;
+}
+
+.font-semibold {
+    font-weight: var(--font-weight-semibold) !important;
+}
+
+.font-bold {
+    font-weight: var(--font-weight-bold) !important;
+}
+
+.font-extrabold {
+    font-weight: var(--font-weight-extrabold) !important;
+}
+
+/* Responsive - ajustes de tamaño para móviles */
+@media (max-width: 768px) {
+    :root {
+        --font-size-5xl: 2.5rem;      /* 40px */
+        --font-size-4xl: 2rem;        /* 32px */
+        --font-size-3xl: 1.625rem;    /* 26px */
+        --font-size-2xl: 1.375rem;    /* 22px */
+    }
+    
+    h1, .h1 {
+        font-size: var(--font-size-4xl) !important;
+    }
+    
+    h2, .h2 {
+        font-size: var(--font-size-3xl) !important;
+    }
+    
+    h3, .h3 {
+        font-size: var(--font-size-2xl) !important;
+    }
+    
+    .navbar-brand {
+        font-size: var(--font-size-xl) !important;
+    }
+    
+    .navbar-nav .nav-link {
+        font-size: var(--font-size-sm) !important;
+    }
+}
+
+@media (max-width: 576px) {
+    :root {
+        --font-size-5xl: 2rem;        /* 32px */
+        --font-size-4xl: 1.75rem;     /* 28px */
+        --font-size-3xl: 1.5rem;      /* 24px */
+        --font-size-2xl: 1.25rem;     /* 20px */
+    }
+    
+    body {
+        font-size: var(--font-size-sm) !important;
+    }
+    
+    h1, .h1 {
+        font-size: var(--font-size-3xl) !important;
+    }
+    
+    h2, .h2 {
+        font-size: var(--font-size-2xl) !important;
+    }
+    
+    h3, .h3 {
+        font-size: var(--font-size-xl) !important;
+    }
+}
+
+/* Mejoras de legibilidad */
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Selección de texto personalizada */
+::selection {
+    background-color: rgba(206, 176, 183, 0.3);
+    color: var(--text-dark);
+}
+
+::-moz-selection {
+    background-color: rgba(206, 176, 183, 0.3);
+    color: var(--text-dark);
+}
+
+/* ===== custom-colors.css ===== */
+/* Estilos personalizados con la paleta de colores de Dra. Shirley Ramírez */
+
+/* Variables de color adicionales optimizadas */
+:root {
+    --success-color: #4CAF50;
+    --warning-color: #FF9800;
+    --info-color: #2196F3;
+    --light-bg: var(--accent-light);
+    --card-shadow: var(--shadow-light);
+    --card-shadow-hover: var(--shadow-medium);
+}
+
+/* Mejoras en las tarjetas de servicios */
+.service-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-light);
+    position: relative;
+    overflow: hidden;
+}
+
+.service-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.service-card:hover::before {
+    transform: scaleX(1);
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--card-shadow-hover);
+    border-color: var(--primary-color);
+}
+
+.service-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background: var(--gradient-hero);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-medium);
+}
+
+.service-card:hover .service-icon {
+    transform: scale(1.1);
+    background: var(--gradient-accent);
+    box-shadow: var(--shadow-strong);
+}
+
+/* Mejoras en las tarjetas de testimonios */
+.testimonial-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+    border-left: 4px solid var(--primary-color);
+    position: relative;
+}
+
+.testimonial-card::before {
+    content: '"';
+    position: absolute;
+    top: -10px;
+    left: 20px;
+    font-size: 4rem;
+    color: var(--primary-color);
+    font-family: serif;
+    line-height: 1;
+}
+
+.testimonial-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--card-shadow-hover);
+    border-left-color: var(--secondary-color);
+}
+
+/* Mejoras en los botones */
+.btn-primary {
+    background: var(--gradient-primary);
+    border: none;
+    border-radius: 25px;
+    padding: 12px 30px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-primary:hover::before {
+    left: 100%;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-strong);
+}
+
+.btn-outline-primary {
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    border-radius: 25px;
+    padding: 10px 28px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background: var(--gradient-hero);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+/* Mejoras en el hero */
+.hero {
+    background: var(--gradient-hero);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(to top, rgba(255,255,255,0.1), transparent);
+}
+
+/* Mejoras en la navegación */
+.navbar {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-light);
+    transition: all 0.3s ease;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    color: var(--primary-color) !important;
+}
+
+.navbar-nav .nav-link {
+    color: var(--text-dark) !important;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.navbar-nav .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--primary-color);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.navbar-nav .nav-link:hover::after {
+    width: 100%;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--primary-color) !important;
+}
+
+/* Mejoras en las alertas */
+.alert-success {
+    background: linear-gradient(135deg, #E8F5E8 0%, #F0F8F0 100%);
+    border-left: 4px solid var(--success-color);
+    color: #2E7D32;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #FFF8E1 0%, #FFFBF0 100%);
+    border-left: 4px solid var(--warning-color);
+    color: #E65100;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #FFEBEE 0%, #FFF0F2 100%);
+    border-left: 4px solid var(--primary-color);
+    color: #C62828;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #E3F2FD 0%, #F0F8FF 100%);
+    border-left: 4px solid var(--info-color);
+    color: #1565C0;
+}
+
+/* Mejoras en los formularios */
+.form-control {
+    border: 2px solid #E0E0E0;
+    border-radius: 10px;
+    padding: 12px 15px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(171, 155, 159, 0.25);
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+}
+
+/* Mejoras en las secciones */
+.section-title {
+    position: relative;
+    margin-bottom: 3rem;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: var(--gradient-primary);
+    border-radius: 2px;
+}
+
+/* Animaciones suaves */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Responsive mejoras */
+@media (max-width: 768px) {
+    .service-card {
+        padding: 1.5rem;
+    }
+    
+    .testimonial-card {
+        padding: 1.5rem;
+    }
+    
+    .btn-primary,
+    .btn-outline-primary {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Mejoras en el scroll */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--gradient-primary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+/* ============================================
+   ELIMINAR CHECKMARKS VERDES DE VALIDACIÓN
+   ============================================ */
+
+/* Ocultar los iconos de validación de Bootstrap en todos los formularios */
+.form-control.is-valid,
+.was-validated .form-control:valid,
+.form-control:valid {
+    border-color: #E0E0E0 !important;
+    padding-right: calc(1.5em + 0.75rem) !important;
+    background-image: none !important;
+    background-repeat: no-repeat !important;
+    background-position: right calc(0.375em + 0.1875rem) center !important;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem) !important;
+}
+
+.form-control.is-valid:focus,
+.was-validated .form-control:valid:focus,
+.form-control:valid:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 0.2rem rgba(171, 155, 159, 0.25) !important;
+    background-image: none !important;
+}
+
+/* Ocultar feedback de validación visual */
+.valid-feedback,
+.valid-tooltip {
+    display: none !important;
+}
+
+/* Mantener solo los mensajes de error (is-invalid) */
+.form-control.is-invalid,
+.was-validated .form-control:invalid {
+    border-color: #dc3545 !important;
+}
+
+.invalid-feedback,
+.invalid-tooltip {
+    display: block !important;
+}
+
+/* Aplicar a select, textarea y otros inputs */
+.form-select.is-valid,
+.was-validated .form-select:valid,
+.form-select:valid,
+textarea.form-control.is-valid,
+.was-validated textarea.form-control:valid,
+textarea.form-control:valid,
+textarea:valid,
+input[type="checkbox"].form-check-input.is-valid,
+.was-validated input[type="checkbox"].form-check-input:valid,
+input[type="checkbox"]:valid,
+input[type="radio"].form-check-input.is-valid,
+.was-validated input[type="radio"].form-check-input:valid,
+input[type="radio"]:valid,
+input[type="text"]:valid,
+input[type="email"]:valid,
+input[type="tel"]:valid,
+input[type="date"]:valid,
+input[type="password"]:valid,
+input[type="number"]:valid,
+input[type="url"]:valid {
+    background-image: none !important;
+    border-color: #E0E0E0 !important;
+}
+
+/* Asegurar que no haya checkmarks en ningún estado - Regla SUPER agresiva */
+input:valid,
+select:valid,
+textarea:valid,
+.form-control:valid,
+.form-select:valid,
+input.form-control:valid,
+textarea.form-control:valid,
+select.form-control:valid,
+input[required]:valid,
+select[required]:valid,
+textarea[required]:valid {
+    background-image: none !important;
+    border-color: #ced4da !important;
+}
+
+/* Sobrescribir estilos de Bootstrap 5 para :valid */
+input:not(:placeholder-shown):valid,
+textarea:not(:placeholder-shown):valid {
+    background-image: none !important;
+}
+
+/* Forzar en focus también */
+input:valid:focus,
+select:valid:focus,
+textarea:valid:focus {
+    background-image: none !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 0.2rem rgba(171, 155, 159, 0.25) !important;
+}
+
+/* ============================================
+   OCULTAR TODOS LOS CHECKMARKS VERDES GLOBALES
+   ============================================ */
+
+/* Ocultar iconos fa-check de color verde en toda la aplicación */
+.text-success .fa-check,
+.text-success .fa-check-circle,
+.text-success .fa-check-double,
+i.fa-check.text-success,
+i.fa-check-circle.text-success,
+i.fa-check-double.text-success,
+span.text-success i.fa-check,
+span.text-success i.fa-check-circle {
+    display: none !important;
+}
+
+/* Prevenir que los checkmarks se muestren con clases success de Bootstrap */
+.alert-success .fa-check,
+.alert-success .fa-check-circle,
+.bg-success .fa-check,
+.bg-success .fa-check-circle,
+.badge-success .fa-check,
+.badge-success .fa-check-circle {
+    display: none !important;
+}
+
+/* Ocultar cualquier ícono de check que tenga color verde directo */
+i[class*="fa-check"][style*="color: green"],
+i[class*="fa-check"][style*="color: #28a745"],
+i[class*="fa-check"][style*="color: #4CAF50"],
+i[class*="fa-check"][style*="color:#28a745"],
+i[class*="fa-check"][style*="color:#4CAF50"] {
+    display: none !important;
+}
+
+/* Ocultar símbolos de checkmark Unicode */
+.text-success::before {
+    content: "" !important;
+}
+
+/* Si hay elementos con clase 'checkmark' o 'check-icon' en verde */
+.checkmark.text-success,
+.check-icon.text-success,
+.success-icon i[class*="check"],
+.validated-icon.success {
+    display: none !important;
+}
+
+/* ===== piggy-pink-background.css ===== */
+/* Archivo CSS para aplicar el color de fondo PIGGY PINK (#F2E2E6) en toda la página */
+
+/* Aplicar el color de fondo PIGGY PINK a toda la página */
+body {
+    background-color: #F2E2E6 !important;
+    background-image: none !important;
+}
+
+/* Aplicar el fondo también al html para asegurar cobertura completa */
+html {
+    background-color: #F2E2E6 !important;
+}
+
+/* Mantener el fondo en todas las secciones principales */
+.main-content,
+.container,
+.container-fluid {
+    background-color: transparent !important;
+}
+
+/* Ajustar las tarjetas para que se vean bien sobre el fondo PIGGY PINK */
+.card,
+.service-card,
+.testimonial-card {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Ajustar el navbar para que se vea bien sobre el fondo PIGGY PINK */
+.navbar,
+.header {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Ajustar el footer para que se vea bien sobre el fondo PIGGY PINK */
+.footer {
+    background-color: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Ajustar las secciones de servicios para que mantengan el fondo PIGGY PINK */
+.services,
+.about,
+.testimonials,
+.contact {
+    background-color: transparent !important;
+}
+
+/* Ajustar el hero section para que mantenga su gradiente pero se vea bien con el fondo */
+.hero {
+    background: linear-gradient(135deg, rgba(44, 90, 160, 0.9) 0%, rgba(74, 144, 226, 0.9) 100%) !important;
+    backdrop-filter: blur(10px);
+}
+
+/* Ajustar los formularios para que se vean bien sobre el fondo PIGGY PINK */
+.form-control {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+.form-control:focus {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 0.2rem rgba(44, 90, 160, 0.25) !important;
+}
+
+/* Ajustar las alertas para que se vean bien sobre el fondo PIGGY PINK */
+.alert {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Ajustar el botón de WhatsApp para que se vea bien */
+.whatsapp-float {
+    background: #25d366 !important;
+    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.3) !important;
+}
+
+.whatsapp-float:hover {
+    box-shadow: 0 6px 25px rgba(37, 211, 102, 0.5) !important;
+}
+
+/* Asegurar que todas las páginas mantengan el fondo PIGGY PINK */
+.page-wrapper {
+    background-color: #F2E2E6 !important;
+    min-height: 100vh;
+}
+
+/* Ajustar el scrollbar para que se vea bien con el fondo PIGGY PINK */
+::-webkit-scrollbar-track {
+    background: #F2E2E6 !important;
+}
+
+/* Mejorar la legibilidad del texto sobre el fondo PIGGY PINK */
+.text-muted {
+    color: #6c757d !important;
+}
+
+/* Ajustar los enlaces para que se vean bien sobre el fondo PIGGY PINK */
+a {
+    color: var(--primary-color) !important;
+}
+
+a:hover {
+    color: #1a3d6b !important;
+}
+
+/* Asegurar que las imágenes mantengan su aspecto sobre el fondo PIGGY PINK */
+img {
+    background-color: transparent !important;
+}
+
+/* Ajustar las tablas para que se vean bien sobre el fondo PIGGY PINK */
+.table {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(10px);
+}
+
+/* Ajustar los modales para que se vean bien sobre el fondo PIGGY PINK */
+.modal-content {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Ajustar los dropdowns para que se vean bien sobre el fondo PIGGY PINK */
+.dropdown-menu {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Asegurar que el fondo PIGGY PINK se mantenga en todas las resoluciones */
+@media (max-width: 768px) {
+    body,
+    html {
+        background-color: #F2E2E6 !important;
+    }
+    
+    .card,
+    .service-card,
+    .testimonial-card {
+        background-color: rgba(255, 255, 255, 0.95) !important;
+    }
+}
+
+@media (max-width: 576px) {
+    body,
+    html {
+        background-color: #F2E2E6 !important;
+    }
+}
+
+/* ===== silver-pink-elements.css ===== */
+/* Archivo CSS para aplicar el color SILVER PINK (#CEB0B7) en sombras, menús y botones */
+
+/* Variables CSS actualizadas con SILVER PINK */
+:root {
+    --silver-pink: #CEB0B7;           /* SILVER PINK - Color principal para sombras y elementos */
+    --silver-pink-light: #DBC4CA;     /* SILVER PINK más claro */
+    --silver-pink-dark: #B89CA3;      /* SILVER PINK más oscuro */
+    --silver-pink-shadow: rgba(206, 176, 183, 0.3);  /* SILVER PINK para sombras */
+    --silver-pink-shadow-light: rgba(206, 176, 183, 0.15);  /* SILVER PINK sombra suave */
+    --silver-pink-shadow-medium: rgba(206, 176, 183, 0.25); /* SILVER PINK sombra media */
+    --silver-pink-shadow-strong: rgba(206, 176, 183, 0.4);  /* SILVER PINK sombra fuerte */
+}
+
+/* Aplicar SILVER PINK a los botones principales */
+.btn-primary {
+    background: linear-gradient(135deg, var(--silver-pink) 0%, var(--silver-pink-dark) 100%) !important;
+    border: none !important;
+    color: white !important;
+    box-shadow: 0 4px 15px var(--silver-pink-shadow) !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--silver-pink-dark) 0%, var(--silver-pink) 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px var(--silver-pink-shadow-medium) !important;
+    color: white !important;
+}
+
+.btn-primary:focus {
+    box-shadow: 0 0 0 0.2rem var(--silver-pink-shadow-light) !important;
+}
+
+/* Aplicar SILVER PINK a los botones outline */
+.btn-outline-primary {
+    border: 2px solid var(--silver-pink) !important;
+    color: var(--silver-pink) !important;
+    background-color: transparent !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--silver-pink) !important;
+    border-color: var(--silver-pink) !important;
+    color: white !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 15px var(--silver-pink-shadow) !important;
+}
+
+/* Aplicar SILVER PINK a las sombras de las tarjetas */
+.card,
+.service-card,
+.testimonial-card {
+    box-shadow: 0 4px 20px var(--silver-pink-shadow-light) !important;
+    border: 1px solid rgba(206, 176, 183, 0.2) !important;
+    transition: all 0.3s ease !important;
+}
+
+.card:hover,
+.service-card:hover,
+.testimonial-card:hover {
+    box-shadow: 0 8px 30px var(--silver-pink-shadow-medium) !important;
+    transform: translateY(-5px) !important;
+    border-color: var(--silver-pink-shadow) !important;
+}
+
+/* Aplicar SILVER PINK al navbar */
+.navbar {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(15px) !important;
+    border-bottom: 2px solid var(--silver-pink-shadow-light) !important;
+    box-shadow: 0 2px 10px var(--silver-pink-shadow-light) !important;
+}
+
+.navbar-brand {
+    color: var(--silver-pink) !important;
+    font-weight: 700 !important;
+}
+
+.navbar-nav .nav-link {
+    color: var(--text-dark) !important;
+    font-weight: 500 !important;
+    transition: all 0.3s ease !important;
+    position: relative !important;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--silver-pink) !important;
+}
+
+.navbar-nav .nav-link::after {
+    content: '' !important;
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 50% !important;
+    width: 0 !important;
+    height: 2px !important;
+    background-color: var(--silver-pink) !important;
+    transition: all 0.3s ease !important;
+    transform: translateX(-50%) !important;
+}
+
+.navbar-nav .nav-link:hover::after {
+    width: 80% !important;
+}
+
+/* Aplicar SILVER PINK a los iconos de servicios */
+.service-icon {
+    background: linear-gradient(135deg, var(--silver-pink) 0%, var(--silver-pink-dark) 100%) !important;
+    box-shadow: 0 4px 15px var(--silver-pink-shadow) !important;
+    transition: all 0.3s ease !important;
+}
+
+.service-card:hover .service-icon {
+    background: linear-gradient(135deg, var(--silver-pink-dark) 0%, var(--silver-pink) 100%) !important;
+    transform: scale(1.1) !important;
+    box-shadow: 0 6px 20px var(--silver-pink-shadow-medium) !important;
+}
+
+/* Aplicar SILVER PINK a los formularios */
+.form-control {
+    border: 2px solid rgba(206, 176, 183, 0.3) !important;
+    transition: all 0.3s ease !important;
+}
+
+.form-control:focus {
+    border-color: var(--silver-pink) !important;
+    box-shadow: 0 0 0 0.2rem var(--silver-pink-shadow-light) !important;
+}
+
+/* Aplicar SILVER PINK a las alertas */
+.alert-success {
+    background: linear-gradient(135deg, rgba(206, 176, 183, 0.1) 0%, rgba(206, 176, 183, 0.05) 100%) !important;
+    border-left: 4px solid var(--silver-pink) !important;
+    color: var(--text-dark) !important;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, rgba(206, 176, 183, 0.1) 0%, rgba(206, 176, 183, 0.05) 100%) !important;
+    border-left: 4px solid var(--silver-pink) !important;
+    color: var(--text-dark) !important;
+}
+
+/* Aplicar SILVER PINK al botón de WhatsApp */
+.whatsapp-float {
+    background: linear-gradient(135deg, #25d366 0%, #20ba5a 100%) !important;
+    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.3) !important;
+    transition: all 0.3s ease !important;
+}
+
+.whatsapp-float:hover {
+    transform: scale(1.1) !important;
+    box-shadow: 0 6px 25px rgba(37, 211, 102, 0.5) !important;
+}
+
+/* Aplicar SILVER PINK al footer */
+.footer {
+    background: linear-gradient(135deg, rgba(206, 176, 183, 0.1) 0%, rgba(206, 176, 183, 0.05) 100%) !important;
+    border-top: 2px solid var(--silver-pink-shadow-light) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+.footer h5,
+.footer h6 {
+    color: var(--silver-pink) !important;
+    font-weight: 600 !important;
+}
+
+/* Aplicar SILVER PINK a los enlaces */
+a {
+    color: var(--silver-pink) !important;
+    transition: all 0.3s ease !important;
+}
+
+a:hover {
+    color: var(--silver-pink-dark) !important;
+}
+
+/* Aplicar SILVER PINK a los títulos de sección */
+.section-title::after {
+    background: linear-gradient(135deg, var(--silver-pink) 0%, var(--silver-pink-dark) 100%) !important;
+}
+
+/* Aplicar SILVER PINK a los testimonios */
+.testimonial-card::before {
+    color: var(--silver-pink) !important;
+}
+
+/* Aplicar SILVER PINK a las clases de utilidad */
+.text-primary {
+    color: var(--silver-pink) !important;
+}
+
+.bg-primary {
+    background: linear-gradient(135deg, var(--silver-pink) 0%, var(--silver-pink-dark) 100%) !important;
+}
+
+.border-primary {
+    border-color: var(--silver-pink) !important;
+}
+
+/* Aplicar SILVER PINK al scrollbar */
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--silver-pink) 0%, var(--silver-pink-dark) 100%) !important;
+    border-radius: 4px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--silver-pink-dark) !important;
+}
+
+/* Aplicar SILVER PINK a los dropdowns */
+.dropdown-menu {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(15px) !important;
+    border: 1px solid var(--silver-pink-shadow-light) !important;
+    box-shadow: 0 4px 20px var(--silver-pink-shadow-light) !important;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(206, 176, 183, 0.1) !important;
+    color: var(--silver-pink-dark) !important;
+}
+
+/* Aplicar SILVER PINK a los modales */
+.modal-content {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(15px) !important;
+    border: 1px solid var(--silver-pink-shadow-light) !important;
+    box-shadow: 0 8px 30px var(--silver-pink-shadow-medium) !important;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--silver-pink-shadow-light) !important;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--silver-pink-shadow-light) !important;
+}
+
+/* Aplicar SILVER PINK a las tablas */
+.table {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+/* DESHABILITADO - Los encabezados usan color específico #AB9B9F sin opacidad */
+/* .table thead th {
+    background-color: rgba(206, 176, 183, 0.1) !important;
+    color: var(--silver-pink-dark) !important;
+    border-bottom: 2px solid var(--silver-pink-shadow-light) !important;
+} */
+
+/* Responsive - mantener SILVER PINK en todas las resoluciones */
+@media (max-width: 768px) {
+    .btn-primary,
+    .btn-outline-primary {
+        padding: 10px 20px !important;
+        font-size: 0.9rem !important;
+    }
+    
+    .card,
+    .service-card,
+    .testimonial-card {
+        box-shadow: 0 2px 15px var(--silver-pink-shadow-light) !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .navbar {
+        box-shadow: 0 1px 5px var(--silver-pink-shadow-light) !important;
+    }
+    
+    .whatsapp-float {
+        box-shadow: 0 2px 15px rgba(37, 211, 102, 0.3) !important;
+    }
+}
+
+/* ===== silver-chalice-titles.css ===== */
+/* Archivo CSS para aplicar el color SILVER CHALICE (#ACACAD) en títulos de menús y botones */
+
+/* Variables CSS para SILVER CHALICE */
+:root {
+    --silver-chalice: #ACACAD;           /* SILVER CHALICE - Color principal para títulos y botones */
+    --silver-chalice-light: #C4C4C5;    /* SILVER CHALICE más claro */
+    --silver-chalice-dark: #949495;      /* SILVER CHALICE más oscuro */
+    --silver-chalice-shadow: rgba(172, 172, 173, 0.3);  /* SILVER CHALICE para sombras */
+    --silver-chalice-shadow-light: rgba(172, 172, 173, 0.15);  /* SILVER CHALICE sombra suave */
+    --silver-chalice-shadow-medium: rgba(172, 172, 173, 0.25); /* SILVER CHALICE sombra media */
+    --silver-chalice-shadow-strong: rgba(172, 172, 173, 0.4);  /* SILVER CHALICE sombra fuerte */
+}
+
+/* Aplicar SILVER CHALICE a los títulos de menús */
+.navbar-brand {
+    color: var(--silver-chalice) !important;
+    font-weight: 700 !important;
+    font-size: 1.5rem !important;
+    transition: all 0.3s ease !important;
+}
+
+.navbar-brand:hover {
+    color: var(--silver-chalice-dark) !important;
+    transform: scale(1.05) !important;
+}
+
+/* Aplicar SILVER CHALICE a los enlaces del menú */
+.navbar-nav .nav-link {
+    color: var(--silver-chalice) !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    transition: all 0.3s ease !important;
+    position: relative !important;
+    padding: 0.75rem 1rem !important;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--silver-chalice-dark) !important;
+    transform: translateY(-1px) !important;
+}
+
+.navbar-nav .nav-link::after {
+    content: '' !important;
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 50% !important;
+    width: 0 !important;
+    height: 2px !important;
+    background-color: var(--silver-chalice) !important;
+    transition: all 0.3s ease !important;
+    transform: translateX(-50%) !important;
+}
+
+.navbar-nav .nav-link:hover::after {
+    width: 80% !important;
+}
+
+/* Aplicar SILVER CHALICE a los botones principales */
+.btn-primary {
+    background: linear-gradient(135deg, var(--silver-chalice) 0%, var(--silver-chalice-dark) 100%) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 15px var(--silver-chalice-shadow) !important;
+    transition: all 0.3s ease !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--silver-chalice-dark) 0%, var(--silver-chalice) 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px var(--silver-chalice-shadow-medium) !important;
+    color: white !important;
+}
+
+.btn-primary:focus {
+    box-shadow: 0 0 0 0.2rem var(--silver-chalice-shadow-light) !important;
+}
+
+.btn-primary:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 2px 10px var(--silver-chalice-shadow) !important;
+}
+
+/* Aplicar SILVER CHALICE a los botones outline */
+.btn-outline-primary {
+    border: 2px solid var(--silver-chalice) !important;
+    color: var(--silver-chalice) !important;
+    background-color: transparent !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--silver-chalice) !important;
+    border-color: var(--silver-chalice) !important;
+    color: white !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 15px var(--silver-chalice-shadow) !important;
+}
+
+.btn-outline-primary:focus {
+    box-shadow: 0 0 0 0.2rem var(--silver-chalice-shadow-light) !important;
+}
+
+/* Aplicar SILVER CHALICE a los botones pequeños */
+.btn-sm {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.875rem !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos de sección */
+.section-title,
+h1, h2, h3, h4, h5, h6 {
+    color: var(--silver-chalice) !important;
+    font-weight: 700 !important;
+}
+
+h1 {
+    font-size: 2.5rem !important;
+    margin-bottom: 1.5rem !important;
+}
+
+h2 {
+    font-size: 2rem !important;
+    margin-bottom: 1.25rem !important;
+}
+
+h3 {
+    font-size: 1.75rem !important;
+    margin-bottom: 1rem !important;
+}
+
+h4 {
+    font-size: 1.5rem !important;
+    margin-bottom: 0.875rem !important;
+}
+
+h5 {
+    font-size: 1.25rem !important;
+    margin-bottom: 0.75rem !important;
+}
+
+h6 {
+    font-size: 1rem !important;
+    margin-bottom: 0.625rem !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos de tarjetas */
+.card-title,
+.service-card h5,
+.testimonial-card h5 {
+    color: var(--silver-chalice) !important;
+    font-weight: 600 !important;
+    margin-bottom: 1rem !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos del footer */
+.footer h5,
+.footer h6 {
+    color: var(--silver-chalice) !important;
+    font-weight: 600 !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos de formularios */
+.form-label {
+    color: var(--silver-chalice) !important;
+    font-weight: 600 !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos de alertas */
+.alert-title {
+    color: var(--silver-chalice) !important;
+    font-weight: 600 !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos de modales */
+.modal-title {
+    color: var(--silver-chalice) !important;
+    font-weight: 700 !important;
+}
+
+/* DESHABILITADO - Los encabezados usan color específico #AB9B9F sin opacidad */
+/* .table th {
+    color: var(--silver-chalice) !important;
+    font-weight: 600 !important;
+    background-color: rgba(172, 172, 173, 0.1) !important;
+} */
+
+/* Aplicar SILVER CHALICE a los títulos de dropdowns */
+.dropdown-header {
+    color: var(--silver-chalice) !important;
+    font-weight: 600 !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos de navegación breadcrumb */
+.breadcrumb-item.active {
+    color: var(--silver-chalice) !important;
+    font-weight: 600 !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos de paginación */
+.page-link {
+    color: var(--silver-chalice) !important;
+    font-weight: 500 !important;
+}
+
+.page-link:hover {
+    color: var(--silver-chalice-dark) !important;
+    background-color: rgba(172, 172, 173, 0.1) !important;
+}
+
+.page-item.active .page-link {
+    background-color: var(--silver-chalice) !important;
+    border-color: var(--silver-chalice) !important;
+    color: white !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos de badges */
+.badge {
+    background-color: var(--silver-chalice) !important;
+    color: white !important;
+    font-weight: 600 !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos de listas */
+.list-group-item.active {
+    background-color: var(--silver-chalice) !important;
+    border-color: var(--silver-chalice) !important;
+    color: white !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos de tabs */
+.nav-tabs .nav-link.active {
+    color: var(--silver-chalice) !important;
+    border-color: var(--silver-chalice) !important;
+    font-weight: 600 !important;
+}
+
+.nav-tabs .nav-link {
+    color: var(--silver-chalice) !important;
+    font-weight: 500 !important;
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--silver-chalice-dark) !important;
+    border-color: var(--silver-chalice-shadow-light) !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos de accordion */
+.accordion-button {
+    color: var(--silver-chalice) !important;
+    font-weight: 600 !important;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: rgba(172, 172, 173, 0.1) !important;
+    color: var(--silver-chalice-dark) !important;
+}
+
+/* Aplicar SILVER CHALICE a los títulos de carousel */
+.carousel-caption h5 {
+    color: var(--silver-chalice) !important;
+    font-weight: 700 !important;
+}
+
+/* Responsive - mantener SILVER CHALICE en todas las resoluciones */
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1.25rem !important;
+    }
+    
+    .navbar-nav .nav-link {
+        font-size: 0.9rem !important;
+        padding: 0.5rem 0.75rem !important;
+    }
+    
+    h1 {
+        font-size: 2rem !important;
+    }
+    
+    h2 {
+        font-size: 1.75rem !important;
+    }
+    
+    h3 {
+        font-size: 1.5rem !important;
+    }
+    
+    .btn-primary,
+    .btn-outline-primary {
+        padding: 0.625rem 1.25rem !important;
+        font-size: 0.9rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .navbar-brand {
+        font-size: 1.1rem !important;
+    }
+    
+    h1 {
+        font-size: 1.75rem !important;
+    }
+    
+    h2 {
+        font-size: 1.5rem !important;
+    }
+    
+    h3 {
+        font-size: 1.25rem !important;
+    }
+    
+    .btn-primary,
+    .btn-outline-primary {
+        padding: 0.5rem 1rem !important;
+        font-size: 0.875rem !important;
+    }
+}
+
+/* Animaciones suaves para los elementos con SILVER CHALICE */
+@keyframes fadeInSilver {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-silver {
+    animation: fadeInSilver 0.6s ease-out;
+}
+
+/* Efectos de hover mejorados */
+.navbar-nav .nav-link,
+.btn-primary,
+.btn-outline-primary {
+    position: relative;
+    overflow: hidden;
+}
+
+.navbar-nav .nav-link::before,
+.btn-primary::before,
+.btn-outline-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.navbar-nav .nav-link:hover::before,
+.btn-primary:hover::before,
+.btn-outline-primary:hover::before {
+    left: 100%;
+}
+
+/* ===== responsive-enhanced.min.css ===== */
+:root{--mobile-padding:1rem;--tablet-padding:1.5rem;--desktop-padding:2rem;--mobile-font:14px;--tablet-font:15px;--desktop-font:16px}@media (max-width:576px){body{font-size:var(--mobile-font);padding:0;margin:0}.container{padding-left:var(--mobile-padding);padding-right:var(--mobile-padding)}h1{font-size:1.75rem;line-height:1.2}h2{font-size:1.5rem;line-height:1.3}h3{font-size:1.25rem;line-height:1.4}h4{font-size:1.1rem;line-height:1.4}h5{font-size:1rem;line-height:1.4}.btn{min-height:44px;padding:12px 20px;font-size:1rem;width:100%;margin-bottom:.5rem}.btn-sm{min-height:38px;padding:8px 16px}input,select,textarea,.form-control{min-height:44px;font-size:16px!important;padding:12px}.navbar{padding:.5rem 1rem}.navbar-brand img{max-height:40px}.navbar-toggler{padding:8px 12px;border:none;background:var(--primary-color);color:#fff}.navbar-collapse{margin-top:1rem;padding:1rem;background:#fff;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.1)}.nav-link{padding:12px 16px!important;font-size:1.1rem;border-bottom:1px solid #eee}.hero{min-height:300px;padding:2rem 0}.hero h1{font-size:1.75rem;margin-bottom:1rem}.hero p{font-size:1rem;margin-bottom:1.5rem}.service-card,.testimonial-card,.card{margin-bottom:1rem;padding:1.25rem}.service-icon{width:60px;height:60px;font-size:1.5rem;margin-bottom:1rem}.table-responsive{overflow-x:auto;-webkit-overflow-scrolling:touch}table{font-size:.875rem}table td,table th{padding:8px;white-space:nowrap}.form-group{margin-bottom:1rem}label{font-size:.95rem;font-weight:600;margin-bottom:.5rem}.modal-dialog{margin:.5rem}.modal-content{border-radius:15px}footer{padding:2rem 1rem;text-align:center}footer .col-md-4,footer .col-md-3{margin-bottom:1.5rem}.mb-5,.my-5{margin-bottom:2rem!important}.mt-5,.my-5{margin-top:2rem!important}.py-5{padding-top:2rem!important;padding-bottom:2rem!important}.hide-mobile{display:none!important}}@media (min-width:577px) and (max-width:991px){body{font-size:var(--tablet-font)}.container{padding-left:var(--tablet-padding);padding-right:var(--tablet-padding)}h1{font-size:2.25rem}h2{font-size:2rem}h3{font-size:1.75rem}.btn{min-height:40px}.hero{min-height:400px}.hide-tablet{display:none!important}}@media (min-width:992px){body{font-size:var(--desktop-font)}.container{padding-left:var(--desktop-padding);padding-right:var(--desktop-padding)}.service-card:hover{transform:translateY(-10px)}.btn:hover{transform:translateY(-2px)}.hide-desktop{display:none!important}}@media (orientation:landscape) and (max-height:500px){.hero{min-height:250px;padding:1rem 0}.navbar{padding:.25rem 1rem}h1{font-size:1.5rem}h2{font-size:1.25rem}}@media (hover:none) and (pointer:coarse){a,button,.btn,.nav-link{-webkit-tap-highlight-color:rgba(206,176,183,.3)}.service-card:hover,.btn:hover{transform:none}}@media (-webkit-min-device-pixel-ratio:2),(min-resolution:192dpi){body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}}@media (prefers-color-scheme:dark){body{background:#1a1a1a;color:#e0e0e0}.card,.service-card{background:#2a2a2a;color:#e0e0e0}}@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}@media print{.navbar,.footer,.btn,.no-print{display:none!important}body{background:#fff;color:#000}a{text-decoration:underline}.container{max-width:100%}}@media (max-width:768px){.tabla-lineas{font-size:.8rem}.tabla-lineas th,.tabla-lineas td{padding:.5rem .25rem}.form-control-sm{font-size:.85rem;padding:.4rem}.btn-agregar-linea,.btn-guardar-factura{width:100%;margin-top:.5rem}.total-factura{padding:1rem;font-size:1.25rem}}@media (max-width:992px){.tabla-pendientes{font-size:.85rem}.tabla-pendientes .btn-accion{padding:.25rem .5rem;font-size:.75rem}.badge{font-size:.7rem;padding:.25em .5em}}@media (max-width:768px){.stat-card{margin-bottom:1rem}.quick-action-btn{width:100%;margin-bottom:.5rem}.admin-section-card .card-body{max-height:300px;overflow-y:auto}}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.skeleton{animation:skeleton-loading 1s linear infinite alternate;background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%}@keyframes skeleton-loading{0%{background-position:200% 0}100%{background-position:-200% 0}}*{will-change:auto}img{content-visibility:auto;loading:lazy}.d-mobile,.d-tablet,.d-desktop{display:none!important}@media (max-width:576px){.d-mobile{display:block!important}}@media (min-width:577px) and (max-width:991px){.d-tablet{display:block!important}}@media (min-width:992px){.d-desktop{display:block!important}}
+

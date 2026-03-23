@@ -1,12 +1,5 @@
 /* Tipografías personalizadas según la línea gráfica de Dra. Shirley Ramírez */
 
-/* Importar fuentes de Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap');
-
-/* BLANKERS no está disponible en Google Fonts, así que usaremos una alternativa elegante y similar */
-/* Como alternativa profesional a BLANKERS, usaremos Montserrat que tiene características similares */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap');
-
 /* Si tienes los archivos de la fuente BLANKERS, descomenta y configura esto: */
 /*
 @font-face {

@@ -11,17 +11,16 @@
 
 {% block extra_meta %}
   {# Preload de la imagen principal (mejora LCP en Inicio) #}
-  <link rel="preload" as="image" href="{{ url_for('static', filename='images/dra-shirley-profesional.webp') }}" fetchpriority="high" type="image/webp">
-  <link rel="preload" as="image" href="{{ url_for('static', filename='images/dra-shirley-profesional.jpg') }}" fetchpriority="high" type="image/jpeg">
+  <link rel="preload" as="image" href="{{ url_for('static', filename='images/dra-shirley-profesional.webp') }}?v=1" fetchpriority="high" type="image/webp">
 {% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/home.min.css') }}">
 
 {# Imágenes (se usan en secciones de inicio) #}
-{% set GYNECOLOGY_IMAGE = "https://mgx-backend-cdn.metadl.com/generate/images/1040625/2026-03-18/bf00a439-7bd4-425c-a77f-39303e2b3395.png" %}
-{% set OBSTETRICS_IMAGE = "https://mgx-backend-cdn.metadl.com/generate/images/1040625/2026-03-18/bc414ab5-dc13-4085-9d96-2e0e7842bf30.png" %}
-{% set AESTHETIC_IMAGE = "https://mgx-backend-cdn.metadl.com/generate/images/1040625/2026-03-18/3472b72c-6479-4947-b622-60178c365205.png" %}
+{% set GYNECOLOGY_IMAGE = url_for('static', filename='images/servicios-ginecologia-general.webp') ~ '?v=1' %}
+{% set OBSTETRICS_IMAGE = url_for('static', filename='images/servicios-obstetricia-embarazo.webp') ~ '?v=1' %}
+{% set AESTHETIC_IMAGE = url_for('static', filename='images/servicios-tratamientos-esteticos.webp') ~ '?v=2' %}
 
 <style>
     /* ===== Home (Inicio) redesign: look like provided screenshots ===== */
@@ -41,14 +40,14 @@
         position: absolute;
         inset: 0;
         /* Fallback JPG + WebP cuando sea posible (más rápido) */
-        background-image: url('{{ url_for('static', filename='images/dra-shirley-profesional.jpg') }}');
+        background-image: url('{{ url_for('static', filename='images/dra-shirley-profesional.jpg') }}?v=1');
         background-image: -webkit-image-set(
-            url('{{ url_for('static', filename='images/dra-shirley-profesional.webp') }}') 1x,
-            url('{{ url_for('static', filename='images/dra-shirley-profesional.jpg') }}') 1x
+            url('{{ url_for('static', filename='images/dra-shirley-profesional.webp') }}?v=1') 1x,
+            url('{{ url_for('static', filename='images/dra-shirley-profesional.jpg') }}?v=1') 1x
         );
         background-image: image-set(
-            url('{{ url_for('static', filename='images/dra-shirley-profesional.webp') }}') type('image/webp') 1x,
-            url('{{ url_for('static', filename='images/dra-shirley-profesional.jpg') }}') type('image/jpeg') 1x
+            url('{{ url_for('static', filename='images/dra-shirley-profesional.webp') }}?v=1') type('image/webp') 1x,
+            url('{{ url_for('static', filename='images/dra-shirley-profesional.jpg') }}?v=1') type('image/jpeg') 1x
         );
         background-size: cover;
         background-position: var(--home-hero-bg-pos, 50% 18%);

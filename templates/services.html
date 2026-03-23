@@ -9,8 +9,6 @@
 
 {% block content %}
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap');
-
     :root {
         --svc-pink-50: #FDF8F9;
         --svc-pink-100: #f5e6ea;
@@ -550,9 +548,9 @@
     }
 </style>
 
-{% set GYNECOLOGY_IMAGE = url_for('static', filename='images/servicios-ginecologia-general.png') %}
-{% set OBSTETRICS_IMAGE = url_for('static', filename='images/servicios-obstetricia-embarazo.png') %}
-{% set AESTHETIC_IMAGE = "https://mgx-backend-cdn.metadl.com/generate/images/1040625/2026-03-18/3472b72c-6479-4947-b622-60178c365205.png" %}
+{% set GYNECOLOGY_IMAGE = url_for('static', filename='images/servicios-ginecologia-general.webp') ~ '?v=1' %}
+{% set OBSTETRICS_IMAGE = url_for('static', filename='images/servicios-obstetricia-embarazo.webp') ~ '?v=1' %}
+{% set AESTHETIC_IMAGE = url_for('static', filename='images/servicios-tratamientos-esteticos.webp') ~ '?v=2' %}
 
 {% set GYNECOLOGY_SERVICES = [
   "Consulta ginecológica integral",
