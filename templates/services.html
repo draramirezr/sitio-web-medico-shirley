@@ -550,8 +550,8 @@
     }
 </style>
 
-{% set GYNECOLOGY_IMAGE = "https://mgx-backend-cdn.metadl.com/generate/images/1040625/2026-03-18/bf00a439-7bd4-425c-a77f-39303e2b3395.png" %}
-{% set OBSTETRICS_IMAGE = "https://mgx-backend-cdn.metadl.com/generate/images/1040625/2026-03-18/bc414ab5-dc13-4085-9d96-2e0e7842bf30.png" %}
+{% set GYNECOLOGY_IMAGE = url_for('static', filename='images/servicios-ginecologia-general.png') %}
+{% set OBSTETRICS_IMAGE = url_for('static', filename='images/servicios-obstetricia-embarazo.png') %}
 {% set AESTHETIC_IMAGE = "https://mgx-backend-cdn.metadl.com/generate/images/1040625/2026-03-18/3472b72c-6479-4947-b622-60178c365205.png" %}
 
 {% set GYNECOLOGY_SERVICES = [
