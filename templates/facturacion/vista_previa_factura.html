@@ -274,7 +274,16 @@
             <img src="{{ url_for('static', filename='logos/logo-dra-shirley.png') }}" alt="Logo" class="factura-logo">
             <div class="factura-title-center">
                 <h1 class="factura-title">FACTURA</h1>
-                <div class="factura-title-small">CRÉDITO FISCAL</div>
+                {% set _tipo_ncf_raw = (ncf['tipo'] if ncf and ncf['tipo'] else '') %}
+                {% set _tipo_ncf_up = _tipo_ncf_raw|upper %}
+                {% if 'GUBERNAMENTAL' in _tipo_ncf_up %}
+                    {% set _tipo_ncf_header = 'GUBERNAMENTAL' %}
+                {% elif 'FISCAL' in _tipo_ncf_up %}
+                    {% set _tipo_ncf_header = 'CRÉDITO FISCAL' %}
+                {% else %}
+                    {% set _tipo_ncf_header = (_tipo_ncf_raw if _tipo_ncf_raw else 'NCF') %}
+                {% endif %}
+                <div class="factura-title-small">{{ _tipo_ncf_header|upper }}</div>
             </div>
             <div style="width: 120px;"></div>
         </div>
