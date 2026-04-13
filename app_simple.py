@@ -910,6 +910,46 @@ def check_password_temporal():
                 session['cambio_password_email'] = current_user.email
                 return redirect(url_for('cambiar_password_obligatorio'))
 
+
+# ==================== MIGRACIONES LIGERAS (PRODUCCIÓN / GUNICORN) ====================
+# Nota: En producción el servidor puede iniciarse sin ejecutar el bloque __main__,
+# por lo que estas migraciones aseguran columnas críticas al primer request.
+_FACTURACION_SCHEMA_READY = False
+
+
+def _ensure_facturacion_schema() -> None:
+    global _FACTURACION_SCHEMA_READY
+    if _FACTURACION_SCHEMA_READY:
+        return
+
+    try:
+        conn = get_db_connection()
+        try:
+            # Verificar columna ncf_id_default en ars
+            conn.execute("SELECT ncf_id_default FROM ars LIMIT 1")
+        except Exception:
+            # Agregar columna si no existe
+            conn.execute("ALTER TABLE ars ADD COLUMN ncf_id_default INT NULL")
+            try:
+                conn.commit()
+            except Exception:
+                pass
+            print("✅ Migración aplicada: ars.ncf_id_default")
+        finally:
+            conn.close()
+    except Exception as e:
+        # No bloquear requests del sitio completo por una migración
+        print(f"⚠️ No se pudo verificar/aplicar migración facturación: {e}")
+    finally:
+        _FACTURACION_SCHEMA_READY = True
+
+
+@app.before_request
+def ensure_facturacion_schema_before_request():
+    # Solo ejecutar cuando estemos en rutas de facturación
+    if request.path and request.path.startswith('/facturacion'):
+        _ensure_facturacion_schema()
+
 def init_db():
     """Inicializar la base de datos"""
     conn = get_db_connection()

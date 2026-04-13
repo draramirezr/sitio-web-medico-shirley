@@ -1027,6 +1027,42 @@
     });
     
     function initCharts() {
+    // ==================== PALETA CONSISTENTE PARA MÉDICOS ====================
+    // Mantener el mismo color por médico en TODOS los gráficos del dashboard.
+    const MEDICO_PALETTE = [
+        '#CEB0B7', // Rosa principal
+        '#3498db', // Azul
+        '#e74c3c', // Rojo
+        '#2ecc71', // Verde
+        '#f39c12', // Naranja
+        '#9b59b6', // Morado
+        '#1abc9c', // Turquesa
+        '#e67e22', // Naranja oscuro
+        '#34495e', // Gris azulado
+        '#16a085', // Verde azulado
+        '#d35400', // Naranja quemado
+        '#8e44ad', // Púrpura
+        '#27ae60', // Verde oscuro
+        '#2980b9', // Azul oscuro
+        '#c0392b'  // Rojo oscuro
+    ];
+
+    const hashString = (s) => {
+        // djb2
+        let h = 5381;
+        const str = (s || '').toString();
+        for (let i = 0; i < str.length; i++) {
+            h = ((h << 5) + h) + str.charCodeAt(i);
+            h |= 0; // 32-bit
+        }
+        return Math.abs(h);
+    };
+
+    const colorForMedico = (nombre) => {
+        const idx = hashString(nombre) % MEDICO_PALETTE.length;
+        return MEDICO_PALETTE[idx];
+    };
+
     // ==================== GRÁFICO: FACTURACIÓN POR MES ====================
     const ctxMes = document.getElementById('chartPorMes').getContext('2d');
     const facturacionPorMes = {{ facturacion_por_mes | tojson }};
@@ -1276,11 +1312,6 @@
     const medicosTop = usarTop ? medicosOrdenados.slice(0, MAX_SERIES) : medicosUnicos;
     const incluirOtros = usarTop;
 
-    const coloresMed = [
-        '#CEB0B7', '#3498db', '#e74c3c', '#2ecc71', '#f39c12',
-        '#9b59b6', '#1abc9c', '#e67e22', '#34495e', '#16a085'
-    ];
-
     if (!usarTop) {
         // Línea por médico (cuando hay pocos)
         const datasetsMed = medicosTop.map((med, index) => {
@@ -1288,15 +1319,16 @@
                 const r = facturacionMedicoMes.find(x => x.medico_nombre === med && x.mes === mes);
                 return r ? r.total_monto : 0;
             });
+            const c = colorForMedico(med);
             return {
                 label: med,
                 data,
-                borderColor: coloresMed[index % coloresMed.length],
-                backgroundColor: coloresMed[index % coloresMed.length] + '20',
+                borderColor: c,
+                backgroundColor: c + '20',
                 borderWidth: 3,
                 fill: false,
                 tension: 0.35,
-                pointBackgroundColor: coloresMed[index % coloresMed.length],
+                pointBackgroundColor: c,
                 pointBorderColor: '#fff',
                 pointBorderWidth: 2,
                 pointRadius: 4,
@@ -1380,8 +1412,8 @@
             };
         };
 
-        const datasetsStack = medicosTop.map((med, idx) =>
-            buildSeries(med, (n) => n === med, coloresMed[idx % coloresMed.length] + 'CC')
+        const datasetsStack = medicosTop.map((med) =>
+            buildSeries(med, (n) => n === med, colorForMedico(med) + 'CC')
         );
 
         if (incluirOtros) {
@@ -1453,6 +1485,7 @@
 
     const mesesUni2 = [...new Set(rowsMesARSMedico.map(r => r.mes))].sort();
     const arsUni2 = [...new Set(rowsMesARSMedico.map(r => r.nombre_ars))].sort();
+    const arsCount2 = arsUni2.length || 1;
 
     // Labels: cada mes contiene todas las ARS (dos líneas: Mes y ARS)
     const mesesFmt2 = (mes) => {
@@ -1462,9 +1495,8 @@
     };
     const labels2 = [];
     mesesUni2.forEach(mes => {
-        const mesLabel = mesesFmt2(mes);
         arsUni2.forEach(ars => {
-            labels2.push(`${mesLabel}\n${ars}`);
+            labels2.push(ars);
         });
     });
 
@@ -1483,11 +1515,6 @@
     const medTop2 = usarOtros2 ? medOrden2.slice(0, MAX_SERIES2) : medOrden2;
     const setTop2 = new Set(medTop2);
 
-    const colores2 = [
-        '#CEB0B7', '#3498db', '#e74c3c', '#2ecc71', '#f39c12',
-        '#9b59b6', '#1abc9c', '#e67e22', '#34495e', '#16a085'
-    ];
-
     const buildDataForMed = (medName) => {
         // data alineada con labels2 (mes->ARS)
         const data = [];
@@ -1500,11 +1527,11 @@
         return data;
     };
 
-    const datasets2 = medTop2.map((med, idx) => ({
+    const datasets2 = medTop2.map((med) => ({
         label: med,
         data: buildDataForMed(med),
-        backgroundColor: colores2[idx % colores2.length] + 'CC',
-        borderColor: colores2[idx % colores2.length],
+        backgroundColor: colorForMedico(med) + 'CC',
+        borderColor: colorForMedico(med),
         borderWidth: 1,
         borderRadius: 6,
         stack: 'stackMesArs'
@@ -1534,6 +1561,63 @@
             stack: 'stackMesArs'
         });
     }
+
+    // Plugin: dibuja los meses en vertical centrados por grupo, arriba de las ARS
+    const monthGroupLabelsPlugin = {
+        id: 'monthGroupLabelsPlugin',
+        afterDraw(chart) {
+            const xScale = chart.scales.x;
+            if (!xScale) return;
+
+            const ctx = chart.ctx;
+            const months = mesesUni2;
+            if (!months || months.length === 0) return;
+
+            ctx.save();
+            ctx.fillStyle = '#666';
+            ctx.font = '600 11px Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            const y = xScale.top + 10; // "primero": más arriba que las ARS
+            const totalTicks = xScale.ticks.length;
+
+            for (let mi = 0; mi < months.length; mi++) {
+                const startIndex = mi * arsCount2;
+                const endIndex = Math.min(startIndex + arsCount2 - 1, totalTicks - 1);
+                if (startIndex > endIndex) continue;
+
+                const xStart = xScale.getPixelForTick(startIndex);
+                const xEnd = xScale.getPixelForTick(endIndex);
+                const xCenter = (xStart + xEnd) / 2;
+
+                // Texto vertical
+                ctx.save();
+                ctx.translate(xCenter, y);
+                ctx.rotate(-Math.PI / 2);
+                ctx.fillText(mesesFmt2(months[mi]), 0, 0);
+                ctx.restore();
+
+                // Separador entre meses (línea suave)
+                if (mi < months.length - 1) {
+                    const boundaryIndex = endIndex + 0.5;
+                    const xBoundary = xScale.getPixelForTick(Math.min(endIndex, totalTicks - 1));
+                    const xNext = xScale.getPixelForTick(Math.min(endIndex + 1, totalTicks - 1));
+                    const xSep = (xBoundary + xNext) / 2;
+                    ctx.save();
+                    ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(xSep, chart.chartArea.top);
+                    ctx.lineTo(xSep, chart.chartArea.bottom);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            }
+
+            ctx.restore();
+        }
+    };
 
     new Chart(ctxMesARSMedico, {
         type: 'bar',
@@ -1565,6 +1649,15 @@
                     padding: 12,
                     bodyFont: { size: 14 },
                     callbacks: {
+                        title: function(items) {
+                            if (!items || !items.length) return '';
+                            const i = items[0].dataIndex;
+                            const mesIdx = Math.floor(i / arsCount2);
+                            const arsIdx = i % arsCount2;
+                            const mes = mesesUni2[mesIdx] ? mesesFmt2(mesesUni2[mesIdx]) : '';
+                            const ars = arsUni2[arsIdx] || '';
+                            return [mes, ars].filter(Boolean).join(' - ');
+                        },
                         label: function(context) {
                             return context.dataset.label + ': $' + context.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
                         }
@@ -1581,10 +1674,11 @@
                         autoSkip: true,
                         maxRotation: 0,
                         minRotation: 0,
+                        padding: 22,
                         callback: function(value) {
-                            // Mostrar etiquetas de 2 líneas (Mes arriba, ARS abajo)
+                            // Mostrar solo ARS en horizontal (mes se dibuja en vertical por plugin)
                             const label = this.getLabelForValue(value);
-                            return (label || '').split('\n');
+                            return label || '';
                         }
                     }
                 },
@@ -1602,6 +1696,8 @@
                 }
             }
         }
+        ,
+        plugins: [monthGroupLabelsPlugin]
     });
     } // Fin de initCharts()
 </script>
