@@ -1676,9 +1676,8 @@
                         minRotation: 0,
                         padding: 22,
                         callback: function(value) {
-                            // Mostrar solo ARS en horizontal (mes se dibuja en vertical por plugin)
-                            const label = this.getLabelForValue(value);
-                            return label || '';
+                            // Ocultar nombres de ARS en el eje X (mes se dibuja en vertical por plugin)
+                            return '';
                         }
                     }
                 },
