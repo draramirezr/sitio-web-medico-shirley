@@ -8078,6 +8078,118 @@ def facturacion_dashboard():
                          es_administrador=es_administrador,
                          medico_usuario_id=medico_usuario_id)
 
+
+@app.route('/facturacion/dashboard/detalle-mes')
+@login_required
+def facturacion_dashboard_detalle_mes():
+    """Detalle de facturas que componen una barra del gráfico (por mes)."""
+    # Perfiles permitidos (igual al dashboard)
+    if current_user.perfil not in ['Administrador', 'Registro de Facturas', 'Nivel 2']:
+        flash('No tienes permisos para acceder a esta sección', 'error')
+        return redirect(url_for('facturacion_menu'))
+
+    from datetime import datetime, date
+
+    mes = (request.args.get('mes') or '').strip()  # formato esperado: YYYY-MM
+    fecha_desde = (request.args.get('fecha_desde') or '').strip()
+    fecha_hasta = (request.args.get('fecha_hasta') or '').strip()
+
+    # Si viene "mes", calcular rango del mes (YYYY-MM-01 a YYYY-MM-último)
+    if mes and (not fecha_desde or not fecha_hasta):
+        try:
+            y, m = mes.split('-')
+            y_i = int(y)
+            m_i = int(m)
+            start = date(y_i, m_i, 1)
+            # last day: first day next month minus 1 day
+            if m_i == 12:
+                end = date(y_i + 1, 1, 1)
+            else:
+                end = date(y_i, m_i + 1, 1)
+            end = end.fromordinal(end.toordinal() - 1)
+            fecha_desde = start.strftime('%Y-%m-%d')
+            fecha_hasta = end.strftime('%Y-%m-%d')
+        except Exception:
+            pass
+
+    # Filtros (mismos nombres que el dashboard)
+    ars_ids = request.args.getlist('ars_id', type=int)
+    medico_factura_ids = request.args.getlist('medico_factura_id', type=int)
+    medico_consulta_ids = request.args.getlist('medico_consulta_id', type=int)
+    ars_ids = [i for i in ars_ids if i]
+    medico_factura_ids = [i for i in medico_factura_ids if i]
+    medico_consulta_ids = [i for i in medico_consulta_ids if i]
+
+    # Si medico_consulta_ids está presente, no es excluyente aquí; se aplica por EXISTS
+
+    if not fecha_desde or not fecha_hasta:
+        flash('Faltan parámetros de fecha para ver el detalle.', 'error')
+        return redirect(url_for('facturacion_dashboard'))
+
+    conn = get_db_connection()
+
+    # placeholders para IN
+    placeholders_ars = ','.join(['%s'] * len(ars_ids)) if ars_ids else ''
+    placeholders_med_f = ','.join(['%s'] * len(medico_factura_ids)) if medico_factura_ids else ''
+    placeholders_med_c = ','.join(['%s'] * len(medico_consulta_ids)) if medico_consulta_ids else ''
+
+    query = '''
+        SELECT DISTINCT
+            f.id,
+            f.fecha_factura,
+            a.nombre_ars,
+            COALESCE(f.ncf_numero, f.ncf) as ncf_numero,
+            f.total
+        FROM facturas f
+        JOIN ars a ON f.ars_id = a.id
+        WHERE f.activo = 1
+          AND f.fecha_factura BETWEEN %s AND %s
+    '''
+    params = [fecha_desde, fecha_hasta]
+
+    if ars_ids:
+        query += ' AND f.ars_id IN (' + placeholders_ars + ')'
+        params.extend(ars_ids)
+
+    if medico_factura_ids:
+        query += ' AND f.medico_id IN (' + placeholders_med_f + ')'
+        params.extend(medico_factura_ids)
+
+    if medico_consulta_ids:
+        query += '''
+          AND EXISTS (
+              SELECT 1
+              FROM facturas_detalle fd
+              WHERE fd.factura_id = f.id
+                AND fd.activo = 1
+                AND fd.medico_consulta IN (''' + placeholders_med_c + ''')
+          )
+        '''
+        params.extend(medico_consulta_ids)
+
+    query += ' ORDER BY f.fecha_factura DESC, f.id DESC'
+
+    facturas = conn.execute(query, params).fetchall()
+    conn.close()
+
+    # Formato para header
+    mes_label = None
+    try:
+        if mes and len(mes) == 7 and '-' in mes:
+            dt = datetime.strptime(mes + '-01', '%Y-%m-%d')
+            mes_label = dt.strftime('%B %Y')  # locale puede variar; template lo muestra simple
+    except Exception:
+        mes_label = None
+
+    return render_template(
+        'facturacion/dashboard_detalle_mes.html',
+        facturas=facturas,
+        mes=mes,
+        mes_label=mes_label,
+        fecha_desde=fecha_desde,
+        fecha_hasta=fecha_hasta
+    )
+
 @app.route('/facturacion/ver-factura/<int:factura_id>')
 @login_required
 def facturacion_ver_factura(factura_id):

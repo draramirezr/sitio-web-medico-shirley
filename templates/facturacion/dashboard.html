@@ -1074,7 +1074,7 @@
     });
     const montos = facturacionPorMes.map(item => item.total_monto);
     
-    new Chart(ctxMes, {
+    const chartPorMes = new Chart(ctxMes, {
         type: 'bar',
         data: {
             labels: meses,
@@ -1149,6 +1149,47 @@
                     }
                 }
             }
+        },
+        onClick: function(evt, elements) {
+            if (!elements || elements.length === 0) return;
+            const idx = elements[0].index;
+            const mesIso = (facturacionPorMes[idx] && facturacionPorMes[idx].mes) ? facturacionPorMes[idx].mes : null;
+            if (!mesIso) return;
+
+            const buildParamsFromDashboardFilters = () => {
+                const params = new URLSearchParams();
+
+                // Mes + rango
+                params.set('mes', mesIso);
+
+                const [y, m] = mesIso.split('-');
+                const mm = String(m).padStart(2, '0');
+                const start = `${y}-${mm}-01`;
+                const lastDay = new Date(parseInt(y, 10), parseInt(mm, 10), 0).getDate();
+                const end = `${y}-${mm}-${String(lastDay).padStart(2, '0')}`;
+                params.set('fecha_desde', start);
+                params.set('fecha_hasta', end);
+
+                const collect = (dropdownId, name) => {
+                    const dropdown = document.getElementById(dropdownId);
+                    if (!dropdown) return;
+                    const cbs = dropdown.querySelectorAll('input[type=\"checkbox\"][name=\"' + name + '\"]');
+                    if (!cbs || cbs.length === 0) return;
+                    const checked = Array.from(cbs).filter(cb => cb.checked).map(cb => cb.value);
+                    // Si todos o ninguno, no enviar (sin filtro)
+                    if (checked.length === 0 || checked.length === cbs.length) return;
+                    checked.forEach(v => params.append(name, v));
+                };
+
+                collect('ars-dropdown', 'ars_id');
+                collect('medico_factura-dropdown', 'medico_factura_id');
+                collect('medico_consulta-dropdown', 'medico_consulta_id');
+
+                return params;
+            };
+
+            const params = buildParamsFromDashboardFilters();
+            window.location.href = `/facturacion/dashboard/detalle-mes?${params.toString()}`;
         }
     });
     

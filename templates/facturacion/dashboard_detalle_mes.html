@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle de Facturas por Mes - Facturación{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+<style>
+  .detalle-hero {
+    background: linear-gradient(135deg, rgba(206, 176, 183, 0.10) 0%, rgba(242, 226, 230, 0.25) 100%);
+    border: 2px solid rgba(206, 176, 183, 0.35);
+    border-radius: 20px;
+    padding: 1.75rem;
+    margin: 1.5rem 0;
+  }
+
+  .card-panel {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+
+  .table thead th {
+    background: #AB9B9F !important;
+    background-color: #AB9B9F !important;
+    color: #fff !important;
+    border: none;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+
+  .table-wrap {
+    max-height: 70vh;
+    overflow: auto;
+  }
+
+  .badge-ncf {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(206,176,183,0.18);
+    color: #6b4d55;
+    font-weight: 700;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.85rem;
+  }
+
+  .btn-back {
+    background: #ACACAD;
+    color: #fff;
+    border: none;
+    padding: 0.8rem 1.25rem;
+    border-radius: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .btn-back:hover { color: #fff; opacity: 0.95; }
+  .btn-view {
+    background: white;
+    border: 2px solid #CEB0B7;
+    color: #CEB0B7;
+    border-radius: 12px;
+    padding: 0.35rem 0.7rem;
+    font-weight: 800;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .btn-view:hover { background: #CEB0B7; color: #fff; }
+</style>
+
+<div class="container">
+  <div class="detalle-hero d-flex justify-content-between align-items-start flex-wrap gap-3">
+    <div>
+      <h1 style="margin:0; font-weight:900; color:#B89BA3;">
+        <i class="fas fa-table me-2"></i>Detalle de Facturas
+      </h1>
+      <div class="text-muted" style="margin-top:0.35rem; font-weight:600;">
+        {% if mes_label %}
+          {{ mes_label }} —
+        {% endif %}
+        Rango: {{ fecha_desde }} a {{ fecha_hasta }}
+      </div>
+    </div>
+    <a class="btn-back" href="{{ url_for('facturacion_dashboard', fecha_desde=fecha_desde, fecha_hasta=fecha_hasta) }}">
+      <i class="fas fa-arrow-left"></i>
+      Volver al Dashboard
+    </a>
+  </div>
+
+  <div class="card-panel">
+    <div class="p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div class="text-muted" style="font-weight:700;">
+        Facturas: <span style="color:#282828;">{{ facturas|length }}</span>
+      </div>
+      <div style="font-weight:900; color:#B89BA3;">
+        Total: {{ (facturas|sum(attribute='total'))|formato_moneda }}
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th style="width:10%;">ID</th>
+            <th style="width:18%;">Fecha</th>
+            <th style="width:22%;">ARS</th>
+            <th style="width:25%;">NCF</th>
+            <th style="width:15%;" class="text-end">Monto</th>
+            <th style="width:10%;" class="text-center">Ver</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for f in facturas %}
+          <tr>
+            <td><strong>{{ f['id'] }}</strong></td>
+            <td>{{ f['fecha_factura']|fecha_es }}</td>
+            <td>{{ f['nombre_ars'] }}</td>
+            <td>
+              <span class="badge-ncf">{{ f['ncf_numero'] }}</span>
+            </td>
+            <td class="text-end"><strong style="color:#B89BA3;">{{ f['total']|formato_moneda }}</strong></td>
+            <td class="text-center">
+              <a class="btn-view" href="{{ url_for('facturacion_ver_factura', factura_id=f['id']) }}">
+                <i class="fas fa-eye"></i> Ver
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+          {% if not facturas %}
+          <tr>
+            <td colspan="6" class="text-center text-muted p-4" style="font-weight:700;">
+              No hay facturas para este período / filtros.
+            </td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
