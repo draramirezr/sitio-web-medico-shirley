@@ -1579,7 +1579,7 @@
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
-            const y = xScale.top + 10; // "primero": más arriba que las ARS
+            const y = xScale.top + 10; // "primero": arriba del eje X
             const totalTicks = xScale.ticks.length;
 
             for (let mi = 0; mi < months.length; mi++) {
@@ -1591,12 +1591,8 @@
                 const xEnd = xScale.getPixelForTick(endIndex);
                 const xCenter = (xStart + xEnd) / 2;
 
-                // Texto vertical
-                ctx.save();
-                ctx.translate(xCenter, y);
-                ctx.rotate(-Math.PI / 2);
-                ctx.fillText(mesesFmt2(months[mi]), 0, 0);
-                ctx.restore();
+                // Texto horizontal (mes)
+                ctx.fillText(mesesFmt2(months[mi]), xCenter, y);
 
                 // Separador entre meses (línea suave)
                 if (mi < months.length - 1) {
