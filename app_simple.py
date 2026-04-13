@@ -1076,10 +1076,18 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nombre_ars VARCHAR(255) NOT NULL,
             rnc TEXT NOT NULL,
+            ncf_id_default INTEGER,
             activo BOOLEAN DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     '''))
+
+    # Agregar columna ncf_id_default a ars si no existe
+    try:
+        cursor.execute("SELECT ncf_id_default FROM ars LIMIT 1")
+    except:
+        cursor.execute("ALTER TABLE ars ADD COLUMN ncf_id_default INTEGER")
+        print("✅ Columna 'ncf_id_default' agregada a la tabla ars")
     
     # Tabla de Médicos
     cursor.execute(adapt_sql_for_database('''
@@ -3591,6 +3599,7 @@ def facturacion_ars_nuevo():
     if request.method == 'POST':
         nombre_ars = sanitize_input(request.form['nombre_ars'], 200)
         rnc = sanitize_input(request.form['rnc'], 50)
+        ncf_id_default = request.form.get('ncf_id_default', type=int)
 
         # Validación de caracteres (integridad)
         try:
@@ -3600,19 +3609,36 @@ def facturacion_ars_nuevo():
             flash(f'❌ {str(ve)}', 'error')
             return redirect(url_for('facturacion_ars_nuevo'))
         
-        if not nombre_ars or not rnc:
-            flash('Todos los campos son obligatorios', 'error')
+        if not nombre_ars or not rnc or not ncf_id_default:
+            flash('Todos los campos son obligatorios (incluyendo el Tipo de NCF)', 'error')
+            return redirect(url_for('facturacion_ars_nuevo'))
+
+        conn = get_db_connection()
+
+        # Validar que el NCF exista y esté activo
+        ncf_exists = conn.execute(
+            'SELECT id FROM ncf WHERE id = %s AND activo = 1',
+            (ncf_id_default,)
+        ).fetchone()
+        if not ncf_exists:
+            conn.close()
+            flash('El NCF seleccionado no es válido', 'error')
             return redirect(url_for('facturacion_ars_nuevo'))
         
-        conn = get_db_connection()
-        conn.execute('INSERT INTO ars (nombre_ars, rnc) VALUES (%s, %s)', (nombre_ars, rnc))
+        conn.execute(
+            'INSERT INTO ars (nombre_ars, rnc, ncf_id_default) VALUES (%s, %s, %s)',
+            (nombre_ars, rnc, ncf_id_default)
+        )
         conn.commit()
         conn.close()
         
         flash('ARS creado exitosamente', 'success')
         return redirect(url_for('facturacion_ars'))
     
-    return render_template('facturacion/ars_form.html', ars=None)
+    conn = get_db_connection()
+    ncf_list = conn.execute('SELECT * FROM ncf WHERE activo = 1 ORDER BY tipo, prefijo').fetchall()
+    conn.close()
+    return render_template('facturacion/ars_form.html', ars=None, ncf_list=ncf_list)
 
 @app.route('/facturacion/ars/<int:ars_id>/editar', methods=['GET', 'POST'])
 @login_required
@@ -3623,6 +3649,7 @@ def facturacion_ars_editar(ars_id):
     if request.method == 'POST':
         nombre_ars = sanitize_input(request.form['nombre_ars'], 200)
         rnc = sanitize_input(request.form['rnc'], 50)
+        ncf_id_default = request.form.get('ncf_id_default', type=int)
 
         # Validación de caracteres (integridad)
         try:
@@ -3632,11 +3659,24 @@ def facturacion_ars_editar(ars_id):
             flash(f'❌ {str(ve)}', 'error')
             return redirect(url_for('facturacion_ars_editar', ars_id=ars_id))
         
-        if not nombre_ars or not rnc:
-            flash('Todos los campos son obligatorios', 'error')
+        if not nombre_ars or not rnc or not ncf_id_default:
+            flash('Todos los campos son obligatorios (incluyendo el Tipo de NCF)', 'error')
+            return redirect(url_for('facturacion_ars_editar', ars_id=ars_id))
+
+        # Validar que el NCF exista y esté activo
+        ncf_exists = conn.execute(
+            'SELECT id FROM ncf WHERE id = %s AND activo = 1',
+            (ncf_id_default,)
+        ).fetchone()
+        if not ncf_exists:
+            conn.close()
+            flash('El NCF seleccionado no es válido', 'error')
             return redirect(url_for('facturacion_ars_editar', ars_id=ars_id))
         
-        conn.execute('UPDATE ars SET nombre_ars = %s, rnc = %s WHERE id = %s', (nombre_ars, rnc, ars_id))
+        conn.execute(
+            'UPDATE ars SET nombre_ars = %s, rnc = %s, ncf_id_default = %s WHERE id = %s',
+            (nombre_ars, rnc, ncf_id_default, ars_id)
+        )
         conn.commit()
         conn.close()
         
@@ -3644,9 +3684,10 @@ def facturacion_ars_editar(ars_id):
         return redirect(url_for('facturacion_ars'))
     
     ars = conn.execute('SELECT * FROM ars WHERE id = %s', (ars_id,)).fetchone()
+    ncf_list = conn.execute('SELECT * FROM ncf WHERE activo = 1 ORDER BY tipo, prefijo').fetchall()
     conn.close()
     
-    return render_template('facturacion/ars_form.html', ars=ars)
+    return render_template('facturacion/ars_form.html', ars=ars, ncf_list=ncf_list)
 
 @app.route('/facturacion/ars/<int:ars_id>/eliminar', methods=['POST'])
 @login_required
@@ -6399,23 +6440,30 @@ def facturacion_generar():
                 medico_id_prefill = primer_medico['id']
         
         # 2. Detectar tipo de NCF según ARS
-        ars_info = conn.execute('SELECT nombre_ars FROM ars WHERE id = %s', (ars_id_prefill,)).fetchone()
+        ars_info = conn.execute(
+            'SELECT nombre_ars, ncf_id_default FROM ars WHERE id = %s',
+            (ars_id_prefill,)
+        ).fetchone()
         
         if ars_info:
-            # Si es SENASA → Crédito Gubernamental
-            if 'SENASA' in ars_info['nombre_ars'].upper():
-                ncf_gubernamental = conn.execute(
-                    "SELECT id FROM ncf WHERE tipo LIKE '%Gubernamental%' AND activo = 1 ORDER BY id LIMIT 1"
-                ).fetchone()
-                if ncf_gubernamental:
-                    ncf_id_prefill = ncf_gubernamental['id']
+            # Prioridad: usar NCF por defecto configurado en la ARS
+            if ars_info.get('ncf_id_default'):
+                ncf_id_prefill = ars_info['ncf_id_default']
             else:
-                # Otras ARS → Crédito Fiscal
-                ncf_fiscal = conn.execute(
-                    "SELECT id FROM ncf WHERE tipo LIKE '%Fiscal%' AND activo = 1 ORDER BY id LIMIT 1"
-                ).fetchone()
-                if ncf_fiscal:
-                    ncf_id_prefill = ncf_fiscal['id']
+                # Si es SENASA → Crédito Gubernamental
+                if 'SENASA' in ars_info['nombre_ars'].upper():
+                    ncf_gubernamental = conn.execute(
+                        "SELECT id FROM ncf WHERE tipo LIKE '%Gubernamental%' AND activo = 1 ORDER BY id LIMIT 1"
+                    ).fetchone()
+                    if ncf_gubernamental:
+                        ncf_id_prefill = ncf_gubernamental['id']
+                else:
+                    # Otras ARS → Crédito Fiscal
+                    ncf_fiscal = conn.execute(
+                        "SELECT id FROM ncf WHERE tipo LIKE '%Fiscal%' AND activo = 1 ORDER BY id LIMIT 1"
+                    ).fetchone()
+                    if ncf_fiscal:
+                        ncf_id_prefill = ncf_fiscal['id']
             
             mensaje_auto = f"✅ Formulario pre-llenado para facturar: {ars_info['nombre_ars']}"
     
@@ -7876,6 +7924,40 @@ def facturacion_dashboard():
         query_ars_mes += ' GROUP BY a.id, a.nombre_ars, DATE_FORMAT(f.fecha_factura, \'%%Y-%%m\') ORDER BY a.nombre_ars, mes ASC'
     
     facturacion_ars_mes = conn.execute(query_ars_mes, params_ars_mes).fetchall()
+
+    # ==================== FACTURACIÓN POR MÉDICO PACIENTE Y MES (para gráfico) ====================
+    # Siempre se calcula desde facturas_detalle porque el "médico paciente" viene de fd.medico_consulta
+    query_medico_mes = '''
+        SELECT
+            COALESCE(m.nombre, 'Sin médico asignado') as medico_nombre,
+            DATE_FORMAT(f.fecha_factura, '%%Y-%%m') as mes,
+            COALESCE(SUM(fd.monto), 0) as total_monto
+        FROM facturas_detalle fd
+        JOIN facturas f ON fd.factura_id = f.id
+        LEFT JOIN medicos m ON fd.medico_consulta = m.id
+        WHERE fd.activo = 1
+        AND f.activo = 1
+        AND fd.estado = 'facturado'
+        AND f.fecha_factura BETWEEN %s AND %s
+    '''
+    params_medico_mes = [fecha_desde, fecha_hasta]
+
+    if ars_ids:
+        query_medico_mes += ' AND f.ars_id IN (' + placeholders_ars + ')'
+        params_medico_mes.extend(ars_ids)
+
+    # Si viene filtro por médico consulta, aplicarlo
+    if medico_consulta_ids:
+        query_medico_mes += ' AND fd.medico_consulta IN (' + placeholders_medicos_c + ')'
+        params_medico_mes.extend(medico_consulta_ids)
+
+    # Si viene filtro por médico que factura, aplicarlo también
+    if medico_factura_ids:
+        query_medico_mes += ' AND f.medico_id IN (' + placeholders_medicos_f + ')'
+        params_medico_mes.extend(medico_factura_ids)
+
+    query_medico_mes += " GROUP BY medico_nombre, DATE_FORMAT(f.fecha_factura, '%%Y-%%m') ORDER BY medico_nombre, mes ASC"
+    facturacion_medico_paciente_mes = conn.execute(query_medico_mes, params_medico_mes).fetchall()
     
     conn.close()
     
@@ -7888,6 +7970,7 @@ def facturacion_dashboard():
                          facturacion_por_mes=facturacion_por_mes,
                          facturacion_por_ars=facturacion_por_ars,
                          facturacion_ars_mes=facturacion_ars_mes,
+                         facturacion_medico_paciente_mes=facturacion_medico_paciente_mes,
                          fecha_desde=fecha_desde,
                          fecha_hasta=fecha_hasta,
                          ars_list=ars_list,

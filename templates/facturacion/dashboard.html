@@ -6,8 +6,8 @@
 {% block description %}Dashboard administrativo con estadísticas e indicadores de facturación en tiempo real. Sistema de gestión médica profesional.{% endblock %}
 
 {% block content %}
-<!-- Script para filtros de fecha dd/mm/yyyy - Cargar primero -->
-<script src="{{ url_for('static', filename='js/filtros-fecha.js') }}"></script>
+<!-- Flatpickr (calendario con formato dd/mm/yyyy) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
 <style>
     :root {
@@ -104,8 +104,27 @@
         background: white;
         font-weight: 500;
     }
+
+    /* Flatpickr altInput (input visible) */
+    .date-flat-input {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        border: 2px solid rgba(206, 176, 183, 0.2);
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: white;
+        font-weight: 500;
+    }
     
     .form-group input[type="date"]:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(206, 176, 183, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .date-flat-input:focus {
         outline: none;
         border-color: var(--primary-color);
         box-shadow: 0 0 0 4px rgba(206, 176, 183, 0.1);
@@ -595,23 +614,25 @@
                 <label for="fecha_desde">
                     <i class="fas fa-calendar-alt"></i> Fecha Desde:
                 </label>
-                <input type="date" 
+                <input type="text" 
                        id="fecha_desde" 
                        name="fecha_desde" 
                        value="{{ fecha_desde }}" 
                        required
-                       data-formato="dd/mm/yyyy">
+                       autocomplete="off"
+                       placeholder="dd/mm/yyyy">
             </div>
             <div class="form-group">
                 <label for="fecha_hasta">
                     <i class="fas fa-calendar-alt"></i> Fecha Hasta:
                 </label>
-                <input type="date" 
+                <input type="text" 
                        id="fecha_hasta" 
                        name="fecha_hasta" 
                        value="{{ fecha_hasta }}" 
                        required
-                       data-formato="dd/mm/yyyy">
+                       autocomplete="off"
+                       placeholder="dd/mm/yyyy">
             </div>
             
             <!-- Filtro ARS -->
@@ -787,13 +808,77 @@
             </div>
         </div>
     </div>
+
+    <div class="row g-4 mb-4">
+        <!-- Facturación por Médico Paciente y Mes -->
+        <div class="col-lg-12 animate-card" style="animation-delay: 0.7s">
+            <div class="chart-card">
+                <h3><i class="fas fa-user-md"></i>Facturación por Médico Paciente y Mes</h3>
+                <canvas id="chartMedicoPacientePorMes" height="110"></canvas>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Flatpickr JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
 
 <!-- Chart.js (carga diferida para mejor performance) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js" defer></script>
 
 <script>
     // ==================== FUNCIONES PARA DROPDOWNS MULTISELECT ====================
+
+    // ==================== CALENDARIOS (DESDE/HASTA) ====================
+    function initDashboardDatePickers() {
+        if (typeof flatpickr === 'undefined') return;
+
+        const baseOptions = {
+            locale: "es",
+            dateFormat: "Y-m-d",   // valor enviado al backend
+            altInput: true,
+            altFormat: "d/m/Y",    // valor visible
+            altInputClass: "date-flat-input",
+            allowInput: true,
+            disableMobile: true
+        };
+
+        const attachRequiredToAlt = (instance) => {
+            if (!instance) return;
+            // El input real se envía (hidden por flatpickr). Required debe estar en el visible.
+            if (instance.input) instance.input.required = false;
+            if (instance.altInput) instance.altInput.required = true;
+        };
+
+        const fpDesde = flatpickr(document.getElementById('fecha_desde'), {
+            ...baseOptions,
+            onReady: function(selectedDates, dateStr, instance) { attachRequiredToAlt(instance); }
+        });
+
+        const fpHasta = flatpickr(document.getElementById('fecha_hasta'), {
+            ...baseOptions,
+            onReady: function(selectedDates, dateStr, instance) { attachRequiredToAlt(instance); }
+        });
+
+        // Mantener consistencia de rango
+        if (fpDesde && fpHasta) {
+            fpDesde.set('onChange', function(selectedDates) {
+                if (selectedDates && selectedDates[0]) {
+                    fpHasta.set('minDate', selectedDates[0]);
+                } else {
+                    fpHasta.set('minDate', null);
+                }
+            });
+            fpHasta.set('onChange', function(selectedDates) {
+                if (selectedDates && selectedDates[0]) {
+                    fpDesde.set('maxDate', selectedDates[0]);
+                } else {
+                    fpDesde.set('maxDate', null);
+                }
+            });
+        }
+    }
     
     // Cerrar dropdown al hacer clic fuera
     document.addEventListener('click', function(event) {
@@ -879,6 +964,7 @@
     
     // Inicializar textos al cargar la página
     document.addEventListener('DOMContentLoaded', function() {
+        initDashboardDatePickers();
         updateSelectedText('ars');
         {% if es_administrador %}
         updateSelectedText('medico_factura');
@@ -1151,6 +1237,205 @@
             }
         }
     });
+
+    // ==================== GRÁFICO: FACTURACIÓN POR MÉDICO PACIENTE Y MES ====================
+    const ctxMedicoMes = document.getElementById('chartMedicoPacientePorMes').getContext('2d');
+    const facturacionMedicoMes = {{ facturacion_medico_paciente_mes | tojson }};
+
+    const mesesUnicosMed = [...new Set(facturacionMedicoMes.map(item => item.mes))].sort();
+    const mesesFormateadosMed = mesesUnicosMed.map(mes => {
+        const [year, month] = mes.split('-');
+        const fecha = new Date(year, month - 1);
+        return fecha.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
+    });
+
+    const medicosUnicos = [...new Set(facturacionMedicoMes.map(item => item.medico_nombre))];
+
+    // Calcular totales por médico para elegir top N si hay muchos
+    const totalPorMedico = new Map();
+    facturacionMedicoMes.forEach(row => {
+        const k = row.medico_nombre;
+        totalPorMedico.set(k, (totalPorMedico.get(k) || 0) + (row.total_monto || 0));
+    });
+    const medicosOrdenados = [...totalPorMedico.entries()]
+        .sort((a, b) => (b[1] || 0) - (a[1] || 0))
+        .map(([nombre]) => nombre);
+
+    const MAX_SERIES = 8;
+    const usarTop = medicosUnicos.length > MAX_SERIES;
+    const medicosTop = usarTop ? medicosOrdenados.slice(0, MAX_SERIES) : medicosUnicos;
+    const incluirOtros = usarTop;
+
+    const coloresMed = [
+        '#CEB0B7', '#3498db', '#e74c3c', '#2ecc71', '#f39c12',
+        '#9b59b6', '#1abc9c', '#e67e22', '#34495e', '#16a085'
+    ];
+
+    if (!usarTop) {
+        // Línea por médico (cuando hay pocos)
+        const datasetsMed = medicosTop.map((med, index) => {
+            const data = mesesUnicosMed.map(mes => {
+                const r = facturacionMedicoMes.find(x => x.medico_nombre === med && x.mes === mes);
+                return r ? r.total_monto : 0;
+            });
+            return {
+                label: med,
+                data,
+                borderColor: coloresMed[index % coloresMed.length],
+                backgroundColor: coloresMed[index % coloresMed.length] + '20',
+                borderWidth: 3,
+                fill: false,
+                tension: 0.35,
+                pointBackgroundColor: coloresMed[index % coloresMed.length],
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            };
+        });
+
+        new Chart(ctxMedicoMes, {
+            type: 'line',
+            data: { labels: mesesFormateadosMed, datasets: datasetsMed },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            color: '#282828',
+                            font: { size: 13, weight: '600' },
+                            padding: 15,
+                            boxWidth: 15,
+                            boxHeight: 15,
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#fff',
+                        titleColor: '#282828',
+                        bodyColor: '#666',
+                        borderColor: '#CEB0B7',
+                        borderWidth: 2,
+                        padding: 12,
+                        bodyFont: { size: 14 },
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': $' + context.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: {
+                            color: '#666',
+                            font: { size: 12 },
+                            callback: function(value) {
+                                return '$' + value.toLocaleString('en-US', {minimumFractionDigits: 0});
+                            }
+                        }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#666', font: { size: 12 } }
+                    }
+                }
+            }
+        });
+    } else {
+        // Barras apiladas (Top N + Otros) para que sea legible
+        const buildSeries = (label, filterFn, color) => {
+            const data = mesesUnicosMed.map(mes => {
+                let total = 0;
+                facturacionMedicoMes.forEach(r => {
+                    if (r.mes !== mes) return;
+                    if (!filterFn(r.medico_nombre)) return;
+                    total += (r.total_monto || 0);
+                });
+                return total;
+            });
+            return {
+                label,
+                data,
+                backgroundColor: color,
+                borderColor: color,
+                borderWidth: 1,
+                borderRadius: 6,
+                stack: 'stack1'
+            };
+        };
+
+        const datasetsStack = medicosTop.map((med, idx) =>
+            buildSeries(med, (n) => n === med, coloresMed[idx % coloresMed.length] + 'CC')
+        );
+
+        if (incluirOtros) {
+            const setTop = new Set(medicosTop);
+            datasetsStack.push(
+                buildSeries('Otros', (n) => !setTop.has(n), '#ACACADCC')
+            );
+        }
+
+        new Chart(ctxMedicoMes, {
+            type: 'bar',
+            data: { labels: mesesFormateadosMed, datasets: datasetsStack },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            color: '#282828',
+                            font: { size: 13, weight: '600' },
+                            padding: 12,
+                            boxWidth: 14,
+                            boxHeight: 14
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#fff',
+                        titleColor: '#282828',
+                        bodyColor: '#666',
+                        borderColor: '#CEB0B7',
+                        borderWidth: 2,
+                        padding: 12,
+                        bodyFont: { size: 14 },
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': $' + context.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: { display: false },
+                        ticks: { color: '#666', font: { size: 12 } }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: {
+                            color: '#666',
+                            font: { size: 12 },
+                            callback: function(value) {
+                                return '$' + value.toLocaleString('en-US', {minimumFractionDigits: 0});
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
     } // Fin de initCharts()
 </script>
 

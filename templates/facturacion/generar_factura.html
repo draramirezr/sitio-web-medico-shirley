@@ -216,7 +216,11 @@
                 <select class="form-select with-icon" id="ars_id" name="ars_id" required onchange="checkForm(); seleccionarNCFporARS()">
                     <option value="">-- Seleccione una ARS --</option>
                     {% for ars in ars_list %}
-                    <option value="{{ ars['id'] }}" data-nombre="{{ ars['nombre_ars'] }}">{{ ars['nombre_ars'] }} {% if ars['rnc'] %}(RNC: {{ ars['rnc'] }}){% endif %}</option>
+                    <option value="{{ ars['id'] }}"
+                            data-nombre="{{ ars['nombre_ars'] }}"
+                            data-ncf-default-id="{{ ars['ncf_id_default'] if ars['ncf_id_default'] else '' }}">
+                        {{ ars['nombre_ars'] }} {% if ars['rnc'] %}(RNC: {{ ars['rnc'] }}){% endif %}
+                    </option>
                     {% endfor %}
                 </select>
             </div>
@@ -285,17 +289,13 @@
                 Fecha de Facturación
                 <span class="required">*</span>
             </label>
-            <input type="text" 
-                   class="form-control" 
-                   id="fecha_factura" 
-                   name="fecha_factura_visual" 
-                   value="{{ fecha_actual_visual }}" 
-                   required 
-                   onchange="checkForm()" 
-                   placeholder="dd/mm/yyyy"
-                   pattern="\d{2}/\d{2}/\d{4}"
-                   title="Formato: dd/mm/yyyy">
-            <input type="hidden" id="fecha_factura_sql" name="fecha_factura" value="{{ fecha_actual }}">
+            <input type="date"
+                   class="form-control"
+                   id="fecha_factura"
+                   name="fecha_factura"
+                   value="{{ fecha_actual }}"
+                   required
+                   onchange="checkForm()">
             <small class="text-muted">
                 <i class="fas fa-info-circle"></i>
                 Fecha actual pre-llenada (puede modificarla si es necesario)
@@ -319,46 +319,11 @@
 </div>
 
 <script>
-// Sincronizar fecha visual con fecha SQL
-document.addEventListener('DOMContentLoaded', function() {
-    const fechaVisual = document.getElementById('fecha_factura_visual');
-    const fechaSQL = document.getElementById('fecha_factura_sql');
-    
-    if (fechaVisual && fechaSQL) {
-        fechaVisual.addEventListener('input', function() {
-            let value = this.value.replace(/[^0-9/]/g, '');
-            
-            // Auto-agregar barras
-            if (value.length === 2 && !value.includes('/')) {
-                value += '/';
-            } else if (value.length === 5 && value.split('/').length === 2) {
-                value += '/';
-            }
-            
-            if (value.length > 10) {
-                value = value.substring(0, 10);
-            }
-            
-            this.value = value;
-            
-            // Si está completo, convertir a yyyy-mm-dd
-            if (value.length === 10) {
-                const match = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-                if (match) {
-                    const [, dia, mes, ano] = match;
-                    fechaSQL.value = `${ano}-${mes}-${dia}`;
-                    checkForm();
-                }
-            }
-        });
-    }
-});
-
 function checkForm() {
     const ars = document.getElementById('ars_id').value;
     const ncf = document.getElementById('ncf_id').value;
     const medico = document.getElementById('medico_factura_id').value;
-    const fecha = document.getElementById('fecha_factura_sql') ? document.getElementById('fecha_factura_sql').value : document.getElementById('fecha_factura').value;
+    const fecha = document.getElementById('fecha_factura').value;
     
     const btnContinuar = document.getElementById('btnContinuar');
     if (ars && ncf && medico && fecha) {
@@ -380,6 +345,19 @@ function seleccionarNCFporARS() {
         ncfSelect.selectedIndex = 0;
         checkForm();
         return;
+    }
+
+    // 1) Si la ARS tiene un NCF por defecto configurado, usarlo
+    const ncfDefaultId = (arsOption.dataset.ncfDefaultId || '').trim();
+    if (ncfDefaultId) {
+        // Si existe esa opción en el select, seleccionar y salir
+        for (let i = 0; i < ncfSelect.options.length; i++) {
+            if (String(ncfSelect.options[i].value) === String(ncfDefaultId)) {
+                ncfSelect.selectedIndex = i;
+                checkForm();
+                return;
+            }
+        }
     }
     
     const arsNombre = arsOption.dataset.nombre.toUpperCase();

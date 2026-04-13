@@ -31,7 +31,19 @@
         transition: all 0.3s ease;
     }
     
+    .form-select {
+        border-radius: 10px;
+        border: 2px solid rgba(206, 176, 183, 0.3);
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    
     .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(206, 176, 183, 0.25);
+    }
+
+    .form-select:focus {
         border-color: var(--primary-color);
         box-shadow: 0 0 0 0.2rem rgba(206, 176, 183, 0.25);
     }
@@ -112,6 +124,31 @@
                            pattern="[0-9\-]+"
                            inputmode="numeric"
                            title="Solo números y guiones permitidos">
+                </div>
+
+                <div class="mb-4">
+                    <label for="ncf_id_default" class="form-label">
+                        <i class="fas fa-file-invoice me-2 text-primary"></i>Tipo de NCF *
+                    </label>
+                    <select class="form-select" id="ncf_id_default" name="ncf_id_default" required>
+                        <option value="">-- Seleccione un NCF --</option>
+                        {% for ncf in ncf_list %}
+                        <option value="{{ ncf['id'] }}" {% if ars and ars['ncf_id_default'] == ncf['id'] %}selected{% endif %}>
+                            {{ ncf['tipo'] }} - {{ ncf['prefijo'] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    {% if not ncf_list %}
+                    <small class="text-danger">
+                        <i class="fas fa-exclamation-circle me-1"></i>
+                        No hay NCF disponibles. <a href="{{ url_for('facturacion_ncf_nuevo') }}">Crear uno aquí</a>
+                    </small>
+                    {% else %}
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Este NCF se usará por defecto al generar facturas para esta ARS
+                    </small>
+                    {% endif %}
                 </div>
 
                 <div class="d-flex justify-content-between gap-3 mt-5">

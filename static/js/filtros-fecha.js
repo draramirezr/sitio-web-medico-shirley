@@ -5,81 +5,35 @@
  */
 
 /**
- * Convertir input type="date" a formato dd/mm/yyyy visible
+ * Habilitar selector de calendario (input type="date")
+ *
+ * Nota:
+ * - Antes este script convertía los inputs a type="text" para forzar dd/mm/yyyy,
+ *   lo cual deshabilitaba el calendario nativo del navegador.
+ * - Ahora mantenemos type="date" para que el usuario pueda elegir desde el calendario.
  */
-function inicializarFechasDDMMYYYY() {
-    // Buscar todos los inputs de fecha con clase especial
-    document.querySelectorAll('input[data-formato="dd/mm/yyyy"]').forEach(input => {
-        const valorActual = input.value; // yyyy-mm-dd o vacío
-        
-        console.log('🔍 Procesando campo fecha:', input.id, 'Valor:', valorActual);
-        
-        // Convertir a dd/mm/yyyy para mostrar
-        if (valorActual && valorActual.includes('-')) {
-            try {
-                const [ano, mes, dia] = valorActual.split('-');
-                if (ano && mes && dia) {
-                    const fechaFormateada = `${dia}/${mes}/${ano}`;
-                    input.setAttribute('data-valor-sql', valorActual); // Guardar original
-                    input.value = fechaFormateada; // Mostrar dd/mm/yyyy
-                    console.log('✅ Fecha convertida:', valorActual, '→', fechaFormateada);
-                }
-            } catch (e) {
-                console.error('❌ Error al convertir fecha:', e);
-            }
+function inicializarCalendariosFecha() {
+    document.querySelectorAll('input[data-formato="dd/mm/yyyy"]').forEach((input) => {
+        // Garantizar input type="date"
+        if (input.type !== 'date') input.type = 'date';
+
+        const raw = (input.value || '').toString().trim();
+        if (!raw) return;
+
+        // Si viene como dd/mm/yyyy, convertir a yyyy-mm-dd
+        const m = raw.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        if (m) {
+            const dd = m[1];
+            const mm = m[2];
+            const yyyy = m[3];
+            input.value = `${yyyy}-${mm}-${dd}`;
+            return;
         }
-        
-        // Cambiar type a text
-        input.type = 'text';
-        input.placeholder = 'dd/mm/yyyy';
-        input.title = 'Formato: dd/mm/yyyy (ejemplo: 04/02/2026)';
-        
-        // Validación en tiempo real
-        input.addEventListener('input', function(e) {
-            let value = this.value.replace(/[^0-9/]/g, '');
-            
-            // Auto-agregar barras
-            if (value.length === 2 && !value.includes('/')) {
-                value += '/';
-            } else if (value.length === 5 && value.split('/').length === 2) {
-                value += '/';
-            }
-            
-            if (value.length > 10) {
-                value = value.substring(0, 10);
-            }
-            
-            this.value = value;
-        });
-        
-        // Validar antes de enviar formulario
-        input.form.addEventListener('submit', function(e) {
-            const fecha = input.value.trim();
-            if (!fecha && input.required) {
-                alert('La fecha es obligatoria');
-                e.preventDefault();
-                input.focus();
-                return;
-            }
-            
-            if (fecha) {
-                const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
-                const match = fecha.match(regex);
-                
-                if (!match) {
-                    alert('Formato de fecha incorrecto. Use: dd/mm/yyyy');
-                    e.preventDefault();
-                    input.focus();
-                    return;
-                }
-                
-                const [, dia, mes, ano] = match;
-                
-                // Convertir a yyyy-mm-dd para enviar al servidor
-                const fechaSQL = `${ano}-${mes}-${dia}`;
-                input.value = fechaSQL;
-            }
-        });
+
+        // Si viene como datetime string, usar solo la parte ISO de fecha
+        if (raw.length > 10 && raw.includes('-') && raw.slice(0, 10).match(/^\d{4}-\d{2}-\d{2}$/)) {
+            input.value = raw.slice(0, 10);
+        }
     });
 }
 
@@ -94,13 +48,13 @@ function mantenerFiltros() {
 
 // Inicializar al cargar la página
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Inicializando sistema de fechas dd/mm/yyyy...');
-    inicializarFechasDDMMYYYY();
+    console.log('🚀 Inicializando calendarios de fecha...');
+    inicializarCalendariosFecha();
     mantenerFiltros();
     
     // Forzar conversión después de un pequeño delay (por si hay pre-llenado dinámico)
     setTimeout(function() {
-        console.log('🔄 Re-inicializando fechas (verificación)...');
-        inicializarFechasDDMMYYYY();
+        console.log('🔄 Re-inicializando calendarios (verificación)...');
+        inicializarCalendariosFecha();
     }, 500);
 });
