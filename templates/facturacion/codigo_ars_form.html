@@ -121,11 +121,29 @@
                     <select class="form-select" id="ars_id" name="ars_id" required>
                         <option value="">-- Seleccione un ARS --</option>
                         {% for ars in ars_list %}
-                        <option value="{{ ars['id'] }}" {% if codigo and codigo['ars_id'] == ars['id'] %}selected{% endif %}>
+                        <option value="{{ ars['id'] }}"
+                                data-ncf-id="{{ ars['ncf_id_default'] if ars['ncf_id_default'] else '' }}"
+                                data-ncf-label="{{ (ars['ncf_tipo'] ~ ' - ' ~ ars['ncf_prefijo']) if ars['ncf_tipo'] and ars['ncf_prefijo'] else '' }}"
+                                {% if codigo and codigo['ars_id'] == ars['id'] %}selected{% endif %}>
                             {{ ars['nombre_ars'] }}
                         </option>
                         {% endfor %}
                     </select>
+                    <div class="mt-2" id="ars-ncf-info" style="display:none;">
+                        <small class="text-muted">
+                            <i class="fas fa-file-invoice me-1"></i>
+                            <span id="ars-ncf-text"></span>
+                            <span class="ms-2">
+                                <a id="ars-ncf-edit-link" href="{{ url_for('facturacion_ars') }}" target="_blank" rel="noopener">Editar ARS</a>
+                            </span>
+                        </small>
+                    </div>
+                    <div class="mt-2" id="ars-ncf-warning" style="display:none;">
+                        <small class="text-danger">
+                            <i class="fas fa-exclamation-circle me-1"></i>
+                            Esta ARS no tiene Tipo de NCF asignado. Debes configurarlo en <a href="{{ url_for('facturacion_ars') }}" target="_blank" rel="noopener">Maestra de ARS</a>.
+                        </small>
+                    </div>
                     {% if not ars_list %}
                     <small class="text-danger">
                         <i class="fas fa-exclamation-circle me-1"></i>
@@ -165,5 +183,41 @@
         </div>
     </div>
 </div>
+
+<script>
+(function () {
+    const arsSelect = document.getElementById('ars_id');
+    const infoWrap = document.getElementById('ars-ncf-info');
+    const warningWrap = document.getElementById('ars-ncf-warning');
+    const text = document.getElementById('ars-ncf-text');
+    const editLink = document.getElementById('ars-ncf-edit-link');
+    if (!arsSelect || !infoWrap || !warningWrap || !text || !editLink) return;
+
+    const update = () => {
+        const opt = arsSelect.options[arsSelect.selectedIndex];
+        if (!opt || !arsSelect.value) {
+            infoWrap.style.display = 'none';
+            warningWrap.style.display = 'none';
+            return;
+        }
+
+        const ncfId = (opt.dataset.ncfId || '').trim();
+        const ncfLabel = (opt.dataset.ncfLabel || '').trim();
+
+        if (ncfId && ncfLabel) {
+            text.textContent = `NCF por defecto: ${ncfLabel}`;
+            infoWrap.style.display = '';
+            warningWrap.style.display = 'none';
+        } else {
+            infoWrap.style.display = 'none';
+            warningWrap.style.display = '';
+        }
+    };
+
+    arsSelect.addEventListener('change', update);
+    document.addEventListener('DOMContentLoaded', update);
+    update();
+})();
+</script>
 {% endblock %}
 

@@ -3938,7 +3938,18 @@ def facturacion_codigo_ars_nuevo():
     
     # Obtener listas para los select
     medicos = conn.execute('SELECT id, nombre, especialidad FROM medicos WHERE activo = 1 ORDER BY nombre').fetchall()
-    ars_list = conn.execute('SELECT id, nombre_ars FROM ars WHERE activo = 1 ORDER BY nombre_ars').fetchall()
+    ars_list = conn.execute('''
+        SELECT 
+            a.id,
+            a.nombre_ars,
+            a.ncf_id_default,
+            n.tipo as ncf_tipo,
+            n.prefijo as ncf_prefijo
+        FROM ars a
+        LEFT JOIN ncf n ON a.ncf_id_default = n.id AND n.activo = 1
+        WHERE a.activo = 1
+        ORDER BY a.nombre_ars
+    ''').fetchall()
     conn.close()
     
     return render_template('facturacion/codigo_ars_form.html', codigo=None, medicos=medicos, ars_list=ars_list)
@@ -3984,7 +3995,18 @@ def facturacion_codigo_ars_editar(codigo_id):
     
     codigo = conn.execute('SELECT * FROM codigo_ars WHERE id = %s', (codigo_id,)).fetchone()
     medicos = conn.execute('SELECT id, nombre, especialidad FROM medicos WHERE activo = 1 ORDER BY nombre').fetchall()
-    ars_list = conn.execute('SELECT id, nombre_ars FROM ars WHERE activo = 1 ORDER BY nombre_ars').fetchall()
+    ars_list = conn.execute('''
+        SELECT 
+            a.id,
+            a.nombre_ars,
+            a.ncf_id_default,
+            n.tipo as ncf_tipo,
+            n.prefijo as ncf_prefijo
+        FROM ars a
+        LEFT JOIN ncf n ON a.ncf_id_default = n.id AND n.activo = 1
+        WHERE a.activo = 1
+        ORDER BY a.nombre_ars
+    ''').fetchall()
     conn.close()
     
     return render_template('facturacion/codigo_ars_form.html', codigo=codigo, medicos=medicos, ars_list=ars_list)
@@ -7958,6 +7980,39 @@ def facturacion_dashboard():
 
     query_medico_mes += " GROUP BY medico_nombre, DATE_FORMAT(f.fecha_factura, '%%Y-%%m') ORDER BY medico_nombre, mes ASC"
     facturacion_medico_paciente_mes = conn.execute(query_medico_mes, params_medico_mes).fetchall()
+
+    # ==================== FACTURACIÓN POR ARS + MÉDICO PACIENTE + MES (para gráfico de barras apiladas) ====================
+    query_ars_medico_mes = '''
+        SELECT
+            a.nombre_ars,
+            COALESCE(m.nombre, 'Sin médico asignado') as medico_nombre,
+            DATE_FORMAT(f.fecha_factura, '%%Y-%%m') as mes,
+            COALESCE(SUM(fd.monto), 0) as total_monto
+        FROM facturas_detalle fd
+        JOIN facturas f ON fd.factura_id = f.id
+        JOIN ars a ON f.ars_id = a.id
+        LEFT JOIN medicos m ON fd.medico_consulta = m.id
+        WHERE fd.activo = 1
+        AND f.activo = 1
+        AND fd.estado = 'facturado'
+        AND f.fecha_factura BETWEEN %s AND %s
+    '''
+    params_ars_medico_mes = [fecha_desde, fecha_hasta]
+
+    if ars_ids:
+        query_ars_medico_mes += ' AND f.ars_id IN (' + placeholders_ars + ')'
+        params_ars_medico_mes.extend(ars_ids)
+
+    if medico_consulta_ids:
+        query_ars_medico_mes += ' AND fd.medico_consulta IN (' + placeholders_medicos_c + ')'
+        params_ars_medico_mes.extend(medico_consulta_ids)
+
+    if medico_factura_ids:
+        query_ars_medico_mes += ' AND f.medico_id IN (' + placeholders_medicos_f + ')'
+        params_ars_medico_mes.extend(medico_factura_ids)
+
+    query_ars_medico_mes += " GROUP BY a.id, a.nombre_ars, medico_nombre, DATE_FORMAT(f.fecha_factura, '%%Y-%%m') ORDER BY mes ASC, a.nombre_ars ASC, medico_nombre ASC"
+    facturacion_ars_medico_paciente_mes = conn.execute(query_ars_medico_mes, params_ars_medico_mes).fetchall()
     
     conn.close()
     
@@ -7971,6 +8026,7 @@ def facturacion_dashboard():
                          facturacion_por_ars=facturacion_por_ars,
                          facturacion_ars_mes=facturacion_ars_mes,
                          facturacion_medico_paciente_mes=facturacion_medico_paciente_mes,
+                         facturacion_ars_medico_paciente_mes=facturacion_ars_medico_paciente_mes,
                          fecha_desde=fecha_desde,
                          fecha_hasta=fecha_hasta,
                          ars_list=ars_list,

@@ -818,6 +818,16 @@
             </div>
         </div>
     </div>
+
+    <div class="row g-4 mb-4">
+        <!-- Barras: Mes (grupo) > ARS (eje X) con Médico Paciente apilado -->
+        <div class="col-lg-12 animate-card" style="animation-delay: 0.75s">
+            <div class="chart-card">
+                <h3><i class="fas fa-layer-group"></i>Facturación por Mes: ARS (X) + Médico Paciente (apilado)</h3>
+                <canvas id="chartMesARSMedico" height="130"></canvas>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Flatpickr JavaScript -->
@@ -1436,6 +1446,163 @@
             }
         });
     }
+
+    // ==================== GRÁFICO (BARRAS APILADAS): MES > ARS (X) + MÉDICO PACIENTE ====================
+    const ctxMesARSMedico = document.getElementById('chartMesARSMedico').getContext('2d');
+    const rowsMesARSMedico = {{ facturacion_ars_medico_paciente_mes | tojson }};
+
+    const mesesUni2 = [...new Set(rowsMesARSMedico.map(r => r.mes))].sort();
+    const arsUni2 = [...new Set(rowsMesARSMedico.map(r => r.nombre_ars))].sort();
+
+    // Labels: cada mes contiene todas las ARS (dos líneas: Mes y ARS)
+    const mesesFmt2 = (mes) => {
+        const [year, month] = mes.split('-');
+        const fecha = new Date(year, month - 1);
+        return fecha.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
+    };
+    const labels2 = [];
+    mesesUni2.forEach(mes => {
+        const mesLabel = mesesFmt2(mes);
+        arsUni2.forEach(ars => {
+            labels2.push(`${mesLabel}\n${ars}`);
+        });
+    });
+
+    // Médicos: Top N para legibilidad, el resto como "Otros"
+    const totalMed2 = new Map();
+    rowsMesARSMedico.forEach(r => {
+        const k = r.medico_nombre;
+        totalMed2.set(k, (totalMed2.get(k) || 0) + (r.total_monto || 0));
+    });
+    const medOrden2 = [...totalMed2.entries()]
+        .sort((a, b) => (b[1] || 0) - (a[1] || 0))
+        .map(([n]) => n);
+
+    const MAX_SERIES2 = 8;
+    const usarOtros2 = medOrden2.length > MAX_SERIES2;
+    const medTop2 = usarOtros2 ? medOrden2.slice(0, MAX_SERIES2) : medOrden2;
+    const setTop2 = new Set(medTop2);
+
+    const colores2 = [
+        '#CEB0B7', '#3498db', '#e74c3c', '#2ecc71', '#f39c12',
+        '#9b59b6', '#1abc9c', '#e67e22', '#34495e', '#16a085'
+    ];
+
+    const buildDataForMed = (medName) => {
+        // data alineada con labels2 (mes->ARS)
+        const data = [];
+        mesesUni2.forEach(mes => {
+            arsUni2.forEach(ars => {
+                const row = rowsMesARSMedico.find(x => x.mes === mes && x.nombre_ars === ars && x.medico_nombre === medName);
+                data.push(row ? (row.total_monto || 0) : 0);
+            });
+        });
+        return data;
+    };
+
+    const datasets2 = medTop2.map((med, idx) => ({
+        label: med,
+        data: buildDataForMed(med),
+        backgroundColor: colores2[idx % colores2.length] + 'CC',
+        borderColor: colores2[idx % colores2.length],
+        borderWidth: 1,
+        borderRadius: 6,
+        stack: 'stackMesArs'
+    }));
+
+    if (usarOtros2) {
+        // "Otros" = suma de médicos fuera del top
+        const dataOtros = [];
+        mesesUni2.forEach(mes => {
+            arsUni2.forEach(ars => {
+                let total = 0;
+                rowsMesARSMedico.forEach(r => {
+                    if (r.mes !== mes || r.nombre_ars !== ars) return;
+                    if (setTop2.has(r.medico_nombre)) return;
+                    total += (r.total_monto || 0);
+                });
+                dataOtros.push(total);
+            });
+        });
+        datasets2.push({
+            label: 'Otros',
+            data: dataOtros,
+            backgroundColor: '#ACACADCC',
+            borderColor: '#ACACAD',
+            borderWidth: 1,
+            borderRadius: 6,
+            stack: 'stackMesArs'
+        });
+    }
+
+    new Chart(ctxMesARSMedico, {
+        type: 'bar',
+        data: {
+            labels: labels2,
+            datasets: datasets2
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        color: '#282828',
+                        font: { size: 13, weight: '600' },
+                        padding: 12,
+                        boxWidth: 14,
+                        boxHeight: 14
+                    }
+                },
+                tooltip: {
+                    backgroundColor: '#fff',
+                    titleColor: '#282828',
+                    bodyColor: '#666',
+                    borderColor: '#CEB0B7',
+                    borderWidth: 2,
+                    padding: 12,
+                    bodyFont: { size: 14 },
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': $' + context.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    stacked: true,
+                    grid: { display: false },
+                    ticks: {
+                        color: '#666',
+                        font: { size: 11 },
+                        autoSkip: true,
+                        maxRotation: 0,
+                        minRotation: 0,
+                        callback: function(value) {
+                            // Mostrar etiquetas de 2 líneas (Mes arriba, ARS abajo)
+                            const label = this.getLabelForValue(value);
+                            return (label || '').split('\n');
+                        }
+                    }
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                    ticks: {
+                        color: '#666',
+                        font: { size: 12 },
+                        callback: function(v) {
+                            return '$' + v.toLocaleString('en-US', {minimumFractionDigits: 0});
+                        }
+                    }
+                }
+            }
+        }
+    });
     } // Fin de initCharts()
 </script>
 

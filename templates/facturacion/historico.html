@@ -4,8 +4,8 @@
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
-<!-- Script para filtros de fecha dd/mm/yyyy - Cargar primero -->
-<script src="{{ url_for('static', filename='js/filtros-fecha.js') }}"></script>
+<!-- Flatpickr (calendario con formato dd/mm/yyyy) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
 <style>
     .historico-hero {
@@ -245,23 +245,25 @@
                     <label style="color: #666; font-weight: 600; margin-bottom: 0.5rem;">
                         <i class="fas fa-calendar"></i> Desde
                     </label>
-                    <input type="date" 
-                           class="form-control" 
-                           name="fecha_desde" 
+                    <input type="text"
+                           class="form-control"
+                           id="fecha_desde"
+                           name="fecha_desde"
                            value="{{ fecha_desde or '' }}"
-                           data-formato="dd/mm/yyyy"
-                           placeholder="dd/mm/yyyy">
+                           placeholder="dd/mm/yyyy"
+                           autocomplete="off">
                 </div>
                 <div class="col-md-2 mb-3">
                     <label style="color: #666; font-weight: 600; margin-bottom: 0.5rem;">
                         <i class="fas fa-calendar"></i> Hasta
                     </label>
-                    <input type="date" 
-                           class="form-control" 
-                           name="fecha_hasta" 
+                    <input type="text"
+                           class="form-control"
+                           id="fecha_hasta"
+                           name="fecha_hasta"
                            value="{{ fecha_hasta or '' }}"
-                           data-formato="dd/mm/yyyy"
-                           placeholder="dd/mm/yyyy">
+                           placeholder="dd/mm/yyyy"
+                           autocomplete="off">
                 </div>
             </div>
             <div class="text-end">
@@ -362,7 +364,38 @@
     {% endif %}
 </div>
 
+<!-- Flatpickr JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+
 <script>
+// Calendarios para filtros (envía YYYY-MM-DD, muestra dd/mm/yyyy)
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof flatpickr === 'undefined') return;
+
+    const baseOptions = {
+        locale: "es",
+        dateFormat: "Y-m-d",   // valor enviado al backend
+        altInput: true,
+        altFormat: "d/m/Y",    // valor visible
+        altInputClass: "form-control",
+        allowInput: true,
+        disableMobile: true
+    };
+
+    const fpDesde = flatpickr(document.getElementById('fecha_desde'), baseOptions);
+    const fpHasta = flatpickr(document.getElementById('fecha_hasta'), baseOptions);
+
+    if (fpDesde && fpHasta) {
+        fpDesde.set('onChange', function(selectedDates) {
+            fpHasta.set('minDate', (selectedDates && selectedDates[0]) ? selectedDates[0] : null);
+        });
+        fpHasta.set('onChange', function(selectedDates) {
+            fpDesde.set('maxDate', (selectedDates && selectedDates[0]) ? selectedDates[0] : null);
+        });
+    }
+});
+
 // Validar si cada factura es editable (menos de 30 días)
 document.addEventListener('DOMContentLoaded', function() {
     const botonesEditar = document.querySelectorAll('[id^="btnEditar"]');
