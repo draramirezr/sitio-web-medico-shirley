@@ -11,6 +11,7 @@ import hashlib
 import json
 import functools
 import smtplib
+import ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
@@ -221,6 +222,15 @@ app.secret_key = _secret_key_env
 # Google reCAPTCHA v2 - Configuración
 RECAPTCHA_SITE_KEY = os.getenv('RECAPTCHA_SITE_KEY', '')
 RECAPTCHA_SECRET_KEY = os.getenv('RECAPTCHA_SECRET_KEY', '')
+
+# Google Ads - seguimiento de conversiones (clic WhatsApp)
+GOOGLE_ADS_ID = (os.getenv('GOOGLE_ADS_ID') or 'AW-11017749694').strip()
+GOOGLE_ADS_CONVERSION_LABEL = (os.getenv('GOOGLE_ADS_CONVERSION_LABEL') or '9di3CMv66I0cEL6J1oUp').strip()
+GOOGLE_ADS_CONVERSION_SEND_TO = (
+    f"{GOOGLE_ADS_ID}/{GOOGLE_ADS_CONVERSION_LABEL}"
+    if GOOGLE_ADS_ID and GOOGLE_ADS_CONVERSION_LABEL
+    else ''
+)
 
 # Configuración de seguridad y sesiones
 app.config['SESSION_COOKIE_SECURE'] = PRODUCTION  # True en producción
@@ -502,6 +512,24 @@ EMAIL_FROM = raw_email_from.strip().strip('"').strip("'") if raw_email_from else
 raw_email_dest = os.getenv('EMAIL_DESTINATARIO', 'dra.ramirezr@gmail.com')
 EMAIL_DESTINATARIO = raw_email_dest.strip().strip('"').strip("'") if raw_email_dest else 'dra.ramirezr@gmail.com'
 
+# SMTP (Zoho u otros) — alternativa a SendGrid
+# Zoho: smtp.zoho.com | TLS 587 | SSL 465 | Autenticación: sí
+# Dominio organización: smtppro.zoho.com
+def _env_bool_email(name, default=False):
+    raw = os.getenv(name, str(default)).strip().lower()
+    return raw in ('1', 'true', 'yes', 'on')
+
+raw_email_host = os.getenv('EMAIL_HOST', 'smtp.zoho.com')
+EMAIL_HOST = raw_email_host.strip().strip('"').strip("'") if raw_email_host else 'smtp.zoho.com'
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = _env_bool_email('EMAIL_USE_TLS', EMAIL_PORT == 587)
+EMAIL_USE_SSL = _env_bool_email('EMAIL_USE_SSL', EMAIL_PORT == 465)
+raw_email_user = os.getenv('EMAIL_USERNAME', '') or os.getenv('EMAIL_FROM', '')
+EMAIL_USERNAME = raw_email_user.strip().strip('"').strip("'") if raw_email_user else EMAIL_FROM
+raw_email_pass = os.getenv('EMAIL_PASSWORD', '')
+EMAIL_PASSWORD = raw_email_pass.strip().strip('"').strip("'") if raw_email_pass else ''
+SMTP_CONFIGURED = bool(EMAIL_HOST and EMAIL_USERNAME and EMAIL_PASSWORD)
+
 # Verificar configuración
 EMAIL_CONFIGURED = bool(SENDGRID_API_KEY and SENDGRID_AVAILABLE)
 
@@ -512,6 +540,12 @@ if EMAIL_CONFIGURED:
     print(f"   🔑 API Key: {SENDGRID_API_KEY[:10]}...{SENDGRID_API_KEY[-4:] if SENDGRID_API_KEY else ''}")
 else:
     print("⚠️ Email NO configurado - revisa SENDGRID_API_KEY")
+if SMTP_CONFIGURED:
+    modo = "SSL" if EMAIL_USE_SSL else ("TLS/STARTTLS" if EMAIL_USE_TLS else "sin cifrado extra")
+    print(f"✅ SMTP configurado ({EMAIL_HOST}:{EMAIL_PORT}, {modo})")
+    print(f"   📧 Usuario SMTP: {EMAIL_USERNAME}")
+else:
+    print(f"ℹ️ SMTP no configurado (opcional) — {EMAIL_HOST}:{EMAIL_PORT}")
 
 # Función para limpiar comillas de variables de entorno
 def clean_env_var(var_name, default=''):
@@ -791,9 +825,11 @@ def verificar_recaptcha(response_token):
 
 @app.context_processor
 def inject_recaptcha():
-    """Inyectar la Site Key de reCAPTCHA en todos los templates"""
+    """Variables globales para templates (reCAPTCHA, Google Ads)."""
     return {
-        'RECAPTCHA_SITE_KEY': RECAPTCHA_SITE_KEY
+        'RECAPTCHA_SITE_KEY': RECAPTCHA_SITE_KEY,
+        'google_ads_id': GOOGLE_ADS_ID,
+        'google_ads_conversion_send_to': GOOGLE_ADS_CONVERSION_SEND_TO,
     }
 
 # Filtro personalizado para formatear fechas a dd/mm/yyyy
@@ -2350,10 +2386,9 @@ def enviar_email_cita(first_name, last_name, email, phone, appointment_date, app
 def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora, tipo, estatus, motivo=None):
     """Enviar email de confirmación de cambio de estatus de cita al paciente"""
     try:
-        # Verificar si hay contraseña configurada
-        if not EMAIL_PASSWORD or EMAIL_PASSWORD == "tu_password_aqui":
-            print("\n⚠️ CONFIGURACIÓN DE EMAIL PENDIENTE")
-            print("Por favor, configura EMAIL_PASSWORD en el archivo .env")
+        if not SMTP_CONFIGURED:
+            print("\n⚠️ SMTP no configurado")
+            print("Configura EMAIL_HOST, EMAIL_USERNAME y EMAIL_PASSWORD en .env / Railway")
             return False
         
         # Verificar que el paciente tenga email
@@ -2387,10 +2422,17 @@ def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora
         part = MIMEText(html, 'html')
         msg.attach(part)
         
-        # Conectar y enviar con configuración desde variables de entorno
-        server = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=30)
-        if EMAIL_USE_TLS:
-            server.starttls()
+        # Conectar y enviar (Zoho: TLS 587 o SSL 465)
+        ctx = ssl.create_default_context()
+        if EMAIL_USE_SSL:
+            server = smtplib.SMTP_SSL(EMAIL_HOST, EMAIL_PORT, timeout=30, context=ctx)
+            server.ehlo()
+        else:
+            server = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=30)
+            server.ehlo()
+            if EMAIL_USE_TLS:
+                server.starttls(context=ctx)
+                server.ehlo()
         server.login(EMAIL_USERNAME, EMAIL_PASSWORD)
         server.send_message(msg)
         server.quit()

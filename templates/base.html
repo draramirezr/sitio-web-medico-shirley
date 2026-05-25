@@ -1,23 +1,27 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <!-- Google Tag Manager - Optimizado para Performance -->
+    <!-- Google Tag Manager -->
     <script>
     (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
     j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-WHS5RKP2');
-    
-    {% if not current_user.is_authenticated %}
-    // Google Ads configurado mediante GTM (elimina carga duplicada)
+    </script>
+    <!-- End Google Tag Manager -->
+
+    {% if not current_user.is_authenticated and google_ads_id %}
+    <!-- Google tag (gtag.js) - Google Ads -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ google_ads_id }}"></script>
+    <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'AW-11017749694');
-    {% endif %}
+    gtag('config', '{{ google_ads_id }}');
+    window.GOOGLE_ADS_CONVERSION_SEND_TO = '{{ google_ads_conversion_send_to }}';
     </script>
-    <!-- End Google Tag Manager -->
+    {% endif %}
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1688,12 +1692,43 @@
     <!-- Script de optimización de rendimiento -->
     <script src="{{ url_for('static', filename='js/performance.js') }}?v=2" defer></script>
 
-    <!-- GTM helper: emitir evento al hacer click en WhatsApp -->
+    {% if not current_user.is_authenticated and google_ads_id %}
+    <!-- Google Ads: conversión WhatsApp + evento GTM -->
     <script>
+        window.GOOGLE_ADS_CONVERSION_SEND_TO = window.GOOGLE_ADS_CONVERSION_SEND_TO || '{{ google_ads_conversion_send_to }}';
+
+        function gtag_report_conversion(url, opts) {
+            opts = opts || {};
+            var navigated = false;
+
+            function navigate() {
+                if (navigated || !url) return;
+                navigated = true;
+                if (opts.newTab) {
+                    window.open(url, '_blank', 'noopener,noreferrer');
+                } else {
+                    window.location.href = url;
+                }
+            }
+
+            if (typeof gtag !== 'function') {
+                navigate();
+                return false;
+            }
+
+            gtag('event', 'conversion', {
+                send_to: window.GOOGLE_ADS_CONVERSION_SEND_TO,
+                event_callback: navigate
+            });
+
+            setTimeout(navigate, 1000);
+            return false;
+        }
+
         (function () {
             function isWhatsAppLink(a) {
                 try {
-                    const href = (a && a.getAttribute && a.getAttribute('href')) || '';
+                    var href = (a && a.getAttribute && a.getAttribute('href')) || '';
                     if (!href) return false;
                     return href.indexOf('wa.me/') !== -1 || href.indexOf('api.whatsapp.com') !== -1;
                 } catch (e) {
@@ -1702,20 +1737,30 @@
             }
 
             document.addEventListener('click', function (e) {
-                const a = e.target && e.target.closest ? e.target.closest('a') : null;
+                var a = e.target && e.target.closest ? e.target.closest('a') : null;
                 if (!a || !isWhatsAppLink(a)) return;
+
+                var url = a.href || a.getAttribute('href') || '';
+                var newTab = (a.getAttribute('target') || '').toLowerCase() === '_blank';
 
                 window.dataLayer = window.dataLayer || [];
                 window.dataLayer.push({
                     event: 'whatsapp_click',
-                    link_url: a.href || a.getAttribute('href') || '',
+                    link_url: url,
                     link_text: (a.innerText || '').trim().slice(0, 80),
                     page_path: (window.location && window.location.pathname) || '',
                     location: a.getAttribute('data-gtm-location') || 'unknown'
                 });
+
+                if (typeof gtag_report_conversion === 'function') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    gtag_report_conversion(url, { newTab: newTab });
+                }
             }, { capture: true });
         })();
     </script>
+    {% endif %}
 
     <script>
         (function () {
