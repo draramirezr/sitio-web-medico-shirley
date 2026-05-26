@@ -8887,9 +8887,6 @@ Disallow: /Procfile
 
 # Sitemap
 Sitemap: {base_url}/sitemap.xml
-
-# Crawl-delay para ser respetuosos (algunos bots lo ignoran)
-Crawl-delay: 1
 """
     response = make_response(content)
     response.headers["Content-Type"] = "text/plain"

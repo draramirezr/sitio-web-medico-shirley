@@ -21,8 +21,5 @@ Disallow: /database.db
 Disallow: /requirements.txt
 Disallow: /Procfile
 
-# Sitemap
+# Sitemap (version oficial generada por Flask en /sitemap.xml)
 Sitemap: https://www.draramirez.com/sitemap.xml
-
-# Crawl-delay para ser respetuosos
-Crawl-delay: 1
