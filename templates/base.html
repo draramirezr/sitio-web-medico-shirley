@@ -11,14 +11,15 @@
     </script>
     <!-- End Google Tag Manager -->
 
-    {% if not current_user.is_authenticated and google_ads_id %}
-    <!-- Google tag (gtag.js) - Google Ads -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ google_ads_id }}"></script>
+    {% if not current_user.is_authenticated and google_gtag_loader_id %}
+    <!-- Google tag (gtag.js) + Google Ads -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ google_gtag_loader_id }}"></script>
     <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', '{{ google_ads_id }}');
+    {% if google_tag_id %}gtag('config', '{{ google_tag_id }}');{% endif %}
+    {% if google_ads_id %}gtag('config', '{{ google_ads_id }}');{% endif %}
     window.GOOGLE_ADS_CONVERSION_SEND_TO = '{{ google_ads_conversion_send_to }}';
     </script>
     {% endif %}
@@ -1692,7 +1693,7 @@
     <!-- Script de optimización de rendimiento -->
     <script src="{{ url_for('static', filename='js/performance.js') }}?v=2" defer></script>
 
-    {% if not current_user.is_authenticated and google_ads_id %}
+    {% if not current_user.is_authenticated and google_gtag_loader_id %}
     <!-- Google Ads: conversión WhatsApp + evento GTM -->
     <script>
         window.GOOGLE_ADS_CONVERSION_SEND_TO = window.GOOGLE_ADS_CONVERSION_SEND_TO || '{{ google_ads_conversion_send_to }}';
@@ -1718,7 +1719,8 @@
 
             gtag('event', 'conversion', {
                 send_to: window.GOOGLE_ADS_CONVERSION_SEND_TO,
-                event_callback: navigate
+                event_callback: navigate,
+                transport_type: 'beacon'
             });
 
             setTimeout(navigate, 1000);

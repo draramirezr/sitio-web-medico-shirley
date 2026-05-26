@@ -223,7 +223,8 @@ app.secret_key = _secret_key_env
 RECAPTCHA_SITE_KEY = os.getenv('RECAPTCHA_SITE_KEY', '')
 RECAPTCHA_SECRET_KEY = os.getenv('RECAPTCHA_SECRET_KEY', '')
 
-# Google Ads - seguimiento de conversiones (clic WhatsApp)
+# Google Ads / Google tag - conversiones (clic WhatsApp)
+GOOGLE_TAG_ID = (os.getenv('GOOGLE_TAG_ID') or 'GT-TWM7D7Q').strip()
 GOOGLE_ADS_ID = (os.getenv('GOOGLE_ADS_ID') or 'AW-11017749694').strip()
 GOOGLE_ADS_CONVERSION_LABEL = (os.getenv('GOOGLE_ADS_CONVERSION_LABEL') or 'JjDCCIXU140cEL6J1oUp').strip()
 GOOGLE_ADS_CONVERSION_SEND_TO = (
@@ -231,6 +232,8 @@ GOOGLE_ADS_CONVERSION_SEND_TO = (
     if GOOGLE_ADS_ID and GOOGLE_ADS_CONVERSION_LABEL
     else ''
 )
+# ID principal para cargar gtag.js (Google tag unificada; si no hay, usa Ads)
+GOOGLE_GTAG_LOADER_ID = GOOGLE_TAG_ID or GOOGLE_ADS_ID
 
 # Configuración de seguridad y sesiones
 app.config['SESSION_COOKIE_SECURE'] = PRODUCTION  # True en producción
@@ -828,7 +831,9 @@ def inject_recaptcha():
     """Variables globales para templates (reCAPTCHA, Google Ads)."""
     return {
         'RECAPTCHA_SITE_KEY': RECAPTCHA_SITE_KEY,
+        'google_tag_id': GOOGLE_TAG_ID,
         'google_ads_id': GOOGLE_ADS_ID,
+        'google_gtag_loader_id': GOOGLE_GTAG_LOADER_ID,
         'google_ads_conversion_send_to': GOOGLE_ADS_CONVERSION_SEND_TO,
     }
 
