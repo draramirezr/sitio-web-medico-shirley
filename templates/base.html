@@ -1283,6 +1283,45 @@
             box-shadow: none;
         }
 
+        .site-footer-seo {
+            margin-top: 26px;
+            padding-top: 22px;
+            border-top: 1px solid rgba(255, 255, 255, 0.22);
+            text-align: center;
+        }
+
+        .site-footer-seo-title {
+            color: rgba(255, 255, 255, 0.92) !important;
+            font-weight: 700 !important;
+            font-size: 0.95rem !important;
+            margin: 0 0 12px;
+            letter-spacing: 0.02em;
+        }
+
+        .site-footer-seo-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px 18px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .site-footer-seo-links a {
+            color: rgba(255, 255, 255, 0.88) !important;
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .site-footer-seo-links a:hover,
+        .site-footer-seo-links a:focus-visible {
+            color: #fff !important;
+            text-decoration: underline;
+        }
+
         .site-footer-insurance {
             margin-top: 28px;
             text-align: center;
@@ -1617,7 +1656,10 @@
     </main>
 
     {# Pie de página estilo /servicios (solo en páginas públicas) #}
-    {% set SHOW_SITE_FOOTER = request.endpoint in ['index', 'services', 'about', 'contact', 'request_appointment', 'aesthetic_treatments'] %}
+    {% set SHOW_SITE_FOOTER = request.endpoint in [
+        'index', 'services', 'about', 'contact', 'request_appointment', 'aesthetic_treatments',
+        'seo_ginecologa_santo_domingo', 'seo_ginecologo_zona_oriental', 'seo_control_embarazo', 'seo_chequeo_ginecologico'
+    ] %}
     {% if SHOW_SITE_FOOTER %}
     <footer class="site-footer-cta" role="contentinfo">
         <div class="container">
@@ -1645,6 +1687,16 @@
                         WhatsApp
                     </a>
                 </div>
+
+                <nav class="site-footer-seo" aria-label="Atención ginecológica por zona y servicio">
+                    <p class="site-footer-seo-title">Atención ginecológica en tu zona</p>
+                    <ul class="site-footer-seo-links">
+                        <li><a href="{{ url_for('seo_ginecologa_santo_domingo') }}">Ginecóloga en Santo Domingo</a></li>
+                        <li><a href="{{ url_for('seo_ginecologo_zona_oriental') }}">Ginecólogo en Zona Oriental</a></li>
+                        <li><a href="{{ url_for('seo_control_embarazo') }}">Control de embarazo</a></li>
+                        <li><a href="{{ url_for('seo_chequeo_ginecologico') }}">Chequeo ginecológico</a></li>
+                    </ul>
+                </nav>
 
                 <div class="site-footer-insurance" aria-label="Seguros médicos disponibles">
                     <div class="site-footer-insurance-title">Trabajamos con los principales seguros médicos</div>
