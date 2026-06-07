@@ -327,7 +327,7 @@
             <h5 style="color: var(--primary-color); font-weight: 700; margin-bottom: 1rem;">
                 <i class="fas fa-filter me-2"></i>Filtros
             </h5>
-            <form method="GET" action="{{ url_for('facturacion_pacientes_pendientes') }}" class="row g-3">
+            <form method="GET" action="{{ url_for('facturacion_pacientes_pendientes') }}" id="filtros-pacientes-form" class="row g-3">
                 <div class="col-md-3">
                     <label for="estado" class="form-label" style="font-weight: 600; color: #666;">
                         <i class="fas fa-clipboard-check me-1" style="color: var(--primary-color);"></i>Estado
@@ -373,14 +373,16 @@
                 </div>
             </form>
             
-            {% if estado_filtro or medico_seleccionado or ars_seleccionada %}
+            {% if hay_filtros_aplicados %}
             <div class="mt-3 p-3" style="background: rgba(242, 226, 230, 0.2); border-radius: 10px; border-left: 4px solid var(--primary-color);">
                 <strong style="color: var(--primary-color);">
                     <i class="fas fa-info-circle me-2"></i>Filtros activos:
                 </strong>
+                {% if request.args.get('estado') %}
                 <span class="badge" style="background: {{ '#CEB0B7' if estado_filtro == 'pendiente' else '#B89BA3' }}; color: white; padding: 0.4rem 0.8rem; border-radius: 8px; margin-left: 0.5rem;">
                     Estado: {{ 'Pendientes' if estado_filtro == 'pendiente' else 'Facturados' }}
                 </span>
+                {% endif %}
                 {% if medico_seleccionado %}
                 <span class="badge" style="background: var(--primary-color); color: white; padding: 0.4rem 0.8rem; border-radius: 8px; margin-left: 0.5rem;">
                     Médico: {{ medico_seleccionado }}
@@ -459,8 +461,12 @@
                 <tr>
                     <td colspan="10" class="text-center" style="padding: 3rem;">
                         <i class="fas fa-inbox" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
+                        {% if estado_filtro == 'facturado' %}
+                        <p style="color: #999; margin: 0;">No hay pacientes facturados con estos filtros</p>
+                        {% else %}
                         <p style="color: #999; margin: 0;">No hay pacientes pendientes</p>
                         <p style="color: #999; font-size: 0.9rem;">Click en "Agregar Pacientes" para empezar</p>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
@@ -481,5 +487,21 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 {% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('filtros-pacientes-form');
+    if (!form) return;
+
+    ['estado', 'medico_id', 'ars_id'].forEach(function (id) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('change', function () {
+                form.submit();
+            });
+        }
+    });
+});
+</script>
 {% endblock %}
 

@@ -743,6 +743,56 @@ def fecha_maxima_cita_rd(hoy_rd=None):
         hoy_rd = obtener_fecha_rd()
     return hoy_rd + timedelta(days=CITA_FECHA_MAX_DIAS)
 
+def normalizar_estado_facturacion(estado_raw):
+    """Normaliza el filtro de estado a 'pendiente' o 'facturado'."""
+    estado = (estado_raw or 'pendiente').strip().lower()
+    if estado in ('facturado', 'facturadas', 'facturada'):
+        return 'facturado'
+    return 'pendiente'
+
+def consultar_pacientes_facturacion(conn, estado, medico_id=None, ars_id=None, user_email=None, filtrar_por_usuario=False):
+    """Consulta pacientes pendientes o facturados con filtros opcionales."""
+    estado = normalizar_estado_facturacion(estado)
+    if estado == 'pendiente':
+        query = '''
+            SELECT fd.*, m.nombre as medico_nombre, a.nombre_ars,
+                   COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
+            FROM facturas_detalle fd
+            LEFT JOIN medicos m ON fd.medico_consulta = m.id
+            JOIN ars a ON fd.ars_id = a.id
+            LEFT JOIN pacientes p ON fd.paciente_id = p.id
+            WHERE fd.estado = %s AND fd.activo = 1
+        '''
+    else:
+        query = '''
+            SELECT fd.*, m.nombre as medico_nombre, a.nombre_ars,
+                   COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
+            FROM facturas_detalle fd
+            LEFT JOIN medicos m ON fd.medico_id = m.id
+            JOIN ars a ON fd.ars_id = a.id
+            LEFT JOIN pacientes p ON fd.paciente_id = p.id
+            WHERE fd.estado = %s AND fd.activo = 1
+        '''
+    params = [estado]
+
+    if filtrar_por_usuario and user_email:
+        query += ' AND m.email = %s'
+        params.append(user_email)
+
+    if medico_id:
+        if estado == 'pendiente':
+            query += ' AND fd.medico_consulta = %s'
+        else:
+            query += ' AND fd.medico_id = %s'
+        params.append(medico_id)
+
+    if ars_id:
+        query += ' AND fd.ars_id = %s'
+        params.append(ars_id)
+
+    query += ' ORDER BY fd.created_at DESC'
+    return conn.execute(query, params).fetchall(), estado
+
 def formato_fecha_pdf(fecha):
     """Formatear fecha a dd/mm/yyyy para PDFs
     
@@ -4932,8 +4982,13 @@ def facturacion_pacientes_pendientes():
     # Obtener filtros opcionales
     medico_id = request.args.get('medico_id', type=int)
     ars_id = request.args.get('ars_id', type=int)
-    estado = request.args.get('estado', default='pendiente')  # Por defecto: pendiente
-    
+    estado = normalizar_estado_facturacion(request.args.get('estado', default='pendiente'))
+    hay_filtros_aplicados = any([
+        request.args.get('estado'),
+        request.args.get('medico_id'),
+        request.args.get('ars_id'),
+    ])
+
     # IDs recién agregados (para resaltar 1 sola vez)
     highlight_ids = session.pop('highlight_pendientes_ids', [])
     if highlight_ids is None:
@@ -4943,52 +4998,16 @@ def facturacion_pacientes_pendientes():
     resumen_carga = session.pop('resumen_carga_pendientes', None)
 
     conn = get_db_connection()
-    
-    # Construir query con filtros opcionales
-    # NOTA: Para pendientes usamos medico_consulta, para facturados usamos medico_id
-    if estado == 'pendiente':
-        query = '''
-            SELECT fd.*, m.nombre as medico_nombre, a.nombre_ars, 
-                   COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
-            FROM facturas_detalle fd
-            LEFT JOIN medicos m ON fd.medico_consulta = m.id
-            JOIN ars a ON fd.ars_id = a.id
-            LEFT JOIN pacientes p ON fd.paciente_id = p.id
-            WHERE fd.estado = %s
-        '''
-    else:
-        query = '''
-            SELECT fd.*, m.nombre as medico_nombre, a.nombre_ars, 
-                   COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
-            FROM facturas_detalle fd
-            LEFT JOIN medicos m ON fd.medico_id = m.id
-            JOIN ars a ON fd.ars_id = a.id
-            LEFT JOIN pacientes p ON fd.paciente_id = p.id
-            WHERE fd.estado = %s
-        '''
-    params = [estado]
-    
-    # Si el usuario tiene rol "Registro de Facturas", filtrar solo sus pacientes
-    if current_user.perfil == 'Registro de Facturas':
-        query += ' AND m.email = %s'
-        params.append(current_user.email)
-    
-    if medico_id:
-        # Filtrar por el campo correspondiente según el estado
-        if estado == 'pendiente':
-            query += ' AND fd.medico_consulta = %s'
-        else:
-            query += ' AND fd.medico_id = %s'
-        params.append(medico_id)
-    
-    if ars_id:
-        query += ' AND fd.ars_id = %s'
-        params.append(ars_id)
-    
-    query += ' ORDER BY fd.created_at DESC'
-    
-    pendientes = conn.execute(query, params).fetchall()
-    
+
+    pendientes, estado = consultar_pacientes_facturacion(
+        conn,
+        estado,
+        medico_id=medico_id,
+        ars_id=ars_id,
+        user_email=current_user.email,
+        filtrar_por_usuario=(current_user.perfil == 'Registro de Facturas'),
+    )
+
     # Obtener listas para los filtros
     # Filtrar médicos según el perfil del usuario
     if current_user.perfil == 'Registro de Facturas':
@@ -5023,6 +5042,7 @@ def facturacion_pacientes_pendientes():
                          medico_id_filtro=medico_id,
                          ars_id_filtro=ars_id,
                          estado_filtro=estado,
+                         hay_filtros_aplicados=hay_filtros_aplicados,
                          medico_seleccionado=medico_seleccionado,
                          ars_seleccionada=ars_seleccionada,
                          highlight_ids=highlight_ids,
@@ -5040,55 +5060,19 @@ def facturacion_pacientes_pendientes_pdf():
     # Obtener filtros opcionales
     medico_id = request.args.get('medico_id', type=int)
     ars_id = request.args.get('ars_id', type=int)
-    estado = request.args.get('estado', default='pendiente')
-    
+    estado = normalizar_estado_facturacion(request.args.get('estado', default='pendiente'))
+
     conn = get_db_connection()
-    
-    # Construir query con filtros opcionales (mismo que la vista)
-    # NOTA: Para pendientes usamos medico_consulta, para facturados usamos medico_id
-    if estado == 'pendiente':
-        query = '''
-            SELECT fd.*, m.nombre as medico_nombre, a.nombre_ars, 
-                   COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
-            FROM facturas_detalle fd
-            LEFT JOIN medicos m ON fd.medico_consulta = m.id
-            JOIN ars a ON fd.ars_id = a.id
-            LEFT JOIN pacientes p ON fd.paciente_id = p.id
-            WHERE fd.estado = %s
-        '''
-    else:
-        query = '''
-            SELECT fd.*, m.nombre as medico_nombre, a.nombre_ars, 
-                   COALESCE(p.nombre, fd.nombre_paciente) as paciente_nombre_completo
-            FROM facturas_detalle fd
-            LEFT JOIN medicos m ON fd.medico_id = m.id
-            JOIN ars a ON fd.ars_id = a.id
-            LEFT JOIN pacientes p ON fd.paciente_id = p.id
-            WHERE fd.estado = %s
-        '''
-    params = [estado]
-    
-    # Si el usuario tiene rol "Registro de Facturas", filtrar solo sus pacientes
-    if current_user.perfil == 'Registro de Facturas':
-        query += ' AND m.email = %s'
-        params.append(current_user.email)
-    
-    if medico_id:
-        # Filtrar por el campo correspondiente según el estado
-        if estado == 'pendiente':
-            query += ' AND fd.medico_consulta = %s'
-        else:
-            query += ' AND fd.medico_id = %s'
-        params.append(medico_id)
-    
-    if ars_id:
-        query += ' AND fd.ars_id = %s'
-        params.append(ars_id)
-    
-    query += ' ORDER BY fd.created_at DESC'
-    
-    pendientes = conn.execute(query, params).fetchall()
-    
+
+    pendientes, estado = consultar_pacientes_facturacion(
+        conn,
+        estado,
+        medico_id=medico_id,
+        ars_id=ars_id,
+        user_email=current_user.email,
+        filtrar_por_usuario=(current_user.perfil == 'Registro de Facturas'),
+    )
+
     # Obtener nombres para el encabezado si hay filtros
     medico_nombre = None
     ars_nombre = None
