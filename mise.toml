@@ -1,0 +1,7 @@
+# Railway/Nixpacks usa mise para instalar Python (.python-version).
+# Evita fallo: "No GitHub artifact attestations found for python@3.11.7"
+[settings]
+python.github_attestations = false
+
+[tools]
+python = "3.11.7"
