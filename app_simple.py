@@ -2843,10 +2843,12 @@ def request_appointment():
             return redirect(url_for('request_appointment'))
     
     hoy_rd = obtener_fecha_rd()
+    max_cita = fecha_maxima_cita_rd(hoy_rd)
     return render_template(
         'request_appointment.html',
         fecha_hoy_rd=hoy_rd.strftime('%Y-%m-%d'),
-        fecha_max_cita=fecha_maxima_cita_rd(hoy_rd).strftime('%Y-%m-%d'),
+        fecha_max_cita=max_cita.strftime('%Y-%m-%d'),
+        fecha_max_cita_es=max_cita.strftime('%d/%m/%Y'),
         cita_fecha_max_dias=CITA_FECHA_MAX_DIAS,
     )
 

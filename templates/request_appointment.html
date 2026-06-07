@@ -306,7 +306,7 @@
                                     <i class="fas fa-calendar-alt icon-right"></i>
                                 </div>
                                 <small class="text-muted d-block mt-1" id="appointment_date_hint">
-                                    Solo martes y jueves, hasta {{ cita_fecha_max_dias }} días desde hoy.
+                                    Solo martes y jueves. Máximo hasta el {{ fecha_max_cita_es }} ({{ cita_fecha_max_dias }} días desde hoy).
                                 </small>
                             </div>
 
@@ -369,8 +369,21 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const FECHA_HOY_RD = "{{ fecha_hoy_rd }}";
     const FECHA_MAX_CITA = "{{ fecha_max_cita }}";
+    const FECHA_MAX_CITA_ES = "{{ fecha_max_cita_es }}";
     const CITA_FECHA_MAX_DIAS = {{ cita_fecha_max_dias|default(30) }};
+
+    function parseLocalIsoDate(iso) {
+        if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return null;
+        const parts = iso.split('-').map(function(n) { return parseInt(n, 10); });
+        return new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0, 0);
+    }
+
+    function dateOnlyLocal(d) {
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0, 0);
+    }
+
     function maxCitaDateIso() {
         if (FECHA_MAX_CITA && /^\d{4}-\d{2}-\d{2}$/.test(FECHA_MAX_CITA)) return FECHA_MAX_CITA;
         const d = new Date();
@@ -378,8 +391,38 @@ document.addEventListener('DOMContentLoaded', function() {
         const y = d.getFullYear();
         const m = String(d.getMonth() + 1).padStart(2, '0');
         const day = String(d.getDate()).padStart(2, '0');
-        return `${y}-${m}-${day}`;
+        return y + '-' + m + '-' + day;
     }
+
+    function minCitaDateIso() {
+        if (FECHA_HOY_RD && /^\d{4}-\d{2}-\d{2}$/.test(FECHA_HOY_RD)) return FECHA_HOY_RD;
+        const d = new Date();
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return y + '-' + m + '-' + day;
+    }
+
+    const minCitaDate = parseLocalIsoDate(minCitaDateIso());
+    const maxCitaDate = parseLocalIsoDate(maxCitaDateIso());
+
+    function isDateSelectable(date) {
+        if (!minCitaDate || !maxCitaDate) return false;
+        const d = dateOnlyLocal(date);
+        if (d.getTime() < minCitaDate.getTime() || d.getTime() > maxCitaDate.getTime()) return false;
+        const dow = d.getDay();
+        return dow === 2 || dow === 4;
+    }
+
+    function validarFechaCitaSeleccionada(iso) {
+        if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return false;
+        const d = parseLocalIsoDate(iso);
+        return d ? isDateSelectable(d) : false;
+    }
+
+    window.validarFechaCitaAppt = validarFechaCitaSeleccionada;
+    window.fechaMaxCitaEsAppt = FECHA_MAX_CITA_ES || maxCitaDateIso();
+    window.citaFechaMaxDiasAppt = CITA_FECHA_MAX_DIAS;
 
     const appointmentType = document.getElementById('appointment_type'); // hidden
     const serviceDetail = document.getElementById('service_detail'); // visible
@@ -394,33 +437,41 @@ document.addEventListener('DOMContentLoaded', function() {
     const firstNameHidden = document.getElementById('first_name');
     const lastNameHidden = document.getElementById('last_name');
     
-    // Inicializar Flatpickr con restricción de solo martes y jueves
+    // Inicializar Flatpickr: martes/jueves, hoy .. hoy+30 días (zona RD)
     const datePicker = flatpickr(appointmentDateInput, {
         locale: "es",
         dateFormat: "Y-m-d",
         altInput: true,
         altFormat: "d/m/Y",
         altInputClass: "form-control",
-        minDate: "today",
-        maxDate: maxCitaDateIso(),
+        minDate: minCitaDate,
+        maxDate: maxCitaDate,
         disableMobile: true,
         disable: [
             function(date) {
-                // Deshabilitar todos los días EXCEPTO martes (2) y jueves (4)
-                return (date.getDay() !== 2 && date.getDay() !== 4);
+                return !isDateSelectable(date);
             }
         ],
         onReady: function(selectedDates, dateStr, instance) {
-            // El input "real" queda oculto; mover required al altInput visible
             if (instance && instance.input) instance.input.required = false;
             if (instance && instance.altInput) instance.altInput.required = true;
+            if (instance && maxCitaDate) {
+                instance.set('maxDate', maxCitaDate);
+                instance.set('minDate', minCitaDate);
+            }
         },
         onChange: function(selectedDates, dateStr, instance) {
             if (selectedDates.length > 0) {
                 const selectedDate = selectedDates[0];
+                if (!isDateSelectable(selectedDate)) {
+                    instance.clear();
+                    alert('La fecha debe ser martes o jueves, entre hoy y ' + (FECHA_MAX_CITA_ES || maxCitaDateIso()) + ' (máximo ' + CITA_FECHA_MAX_DIAS + ' días).');
+                    appointmentTime.disabled = true;
+                    appointmentTime.innerHTML = '<option value="">Seleccionar hora</option>';
+                    scheduleInfo.textContent = '';
+                    return;
+                }
                 const dayOfWeek = selectedDate.getDay();
-                
-                // Habilitar selector de hora y cargar horarios disponibles
                 appointmentTime.disabled = true;
                 appointmentTime.innerHTML = '<option value="">Cargando horarios...</option>';
                 loadAvailableTimeSlots(dateStr, dayOfWeek);
@@ -561,7 +612,16 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             const form = this;
             const submitBtn = document.getElementById('submit-btn');
-            
+            const tipo = (document.getElementById('appointment_type') || {}).value || '';
+            const fechaIso = (document.getElementById('appointment_date') || {}).value || '';
+
+            if (tipo === 'consulta' || tipo === 'estetico') {
+                if (typeof window.validarFechaCitaAppt === 'function' && !window.validarFechaCitaAppt(fechaIso)) {
+                    alert('Seleccione una fecha válida: martes o jueves, entre hoy y ' + (window.fechaMaxCitaEsAppt || '') + ' (máximo ' + (window.citaFechaMaxDiasAppt || 30) + ' días).');
+                    return;
+                }
+            }
+
             // Deshabilitar botón mientras se procesa
             if (submitBtn) {
                 submitBtn.disabled = true;
