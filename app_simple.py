@@ -140,11 +140,19 @@ login_attempts_lock = Lock()
 
 # Importar middleware de seguridad
 try:
-    from security_middleware import add_security_headers, rate_limit, log_security_event
+    from security_middleware import add_security_headers as apply_security_middleware_headers
+    from security_middleware import log_security_event
     SECURITY_MIDDLEWARE_AVAILABLE = True
-except ImportError:
+    print("✅ Security middleware cargado")
+except ImportError as e:
     SECURITY_MIDDLEWARE_AVAILABLE = False
-    print("⚠️  Security middleware no disponible")
+    print(f"⚠️  Security middleware no disponible: {e}")
+
+    def apply_security_middleware_headers(response):
+        return response
+
+    def log_security_event(event_type, details=None):
+        pass
 
 # Importar ReportLab de forma opcional
 try:
@@ -471,6 +479,9 @@ def add_security_and_cache_headers(response):
     response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
     response.headers['X-Permitted-Cross-Domain-Policies'] = 'none'
     response.headers['X-Download-Options'] = 'noopen'
+
+    if SECURITY_MIDDLEWARE_AVAILABLE:
+        response = apply_security_middleware_headers(response)
     
     # Cache agresivo para recursos estáticos (máxima velocidad)
     if request.path.startswith('/static/'):
@@ -714,6 +725,23 @@ def obtener_fecha_rd():
     from datetime import datetime, timezone, timedelta
     tz_rd = timezone(timedelta(hours=-4))
     return datetime.now(tz_rd).date()
+
+FECHA_MIN_CONSULTA_DIAS = 45
+CITA_FECHA_MAX_DIAS = 30
+
+def fecha_minima_consulta_rd(hoy_rd=None):
+    """Fecha mínima permitida para consulta: hoy (RD) menos 45 días."""
+    from datetime import timedelta
+    if hoy_rd is None:
+        hoy_rd = obtener_fecha_rd()
+    return hoy_rd - timedelta(days=FECHA_MIN_CONSULTA_DIAS)
+
+def fecha_maxima_cita_rd(hoy_rd=None):
+    """Fecha máxima para solicitar cita: hoy (RD) más 30 días."""
+    from datetime import timedelta
+    if hoy_rd is None:
+        hoy_rd = obtener_fecha_rd()
+    return hoy_rd + timedelta(days=CITA_FECHA_MAX_DIAS)
 
 def formato_fecha_pdf(fecha):
     """Formatear fecha a dd/mm/yyyy para PDFs
@@ -2725,6 +2753,20 @@ def request_appointment():
                 if not appointment_date or not appointment_time:
                     flash('Por favor, selecciona una fecha y hora para tu cita.', 'danger')
                     return redirect(url_for('request_appointment'))
+                try:
+                    from datetime import date
+                    fecha_cita = date.fromisoformat(str(appointment_date)[:10])
+                    hoy_rd = obtener_fecha_rd()
+                    max_cita = fecha_maxima_cita_rd(hoy_rd)
+                    if fecha_cita < hoy_rd:
+                        flash('La fecha preferida no puede ser anterior a hoy.', 'danger')
+                        return redirect(url_for('request_appointment'))
+                    if fecha_cita > max_cita:
+                        flash(f'La fecha preferida no puede ser más de {CITA_FECHA_MAX_DIAS} días desde hoy.', 'danger')
+                        return redirect(url_for('request_appointment'))
+                except Exception:
+                    flash('Por favor, selecciona una fecha válida para tu cita.', 'danger')
+                    return redirect(url_for('request_appointment'))
             
             # Verificar disponibilidad de horario (solo para citas normales con fecha y hora)
             if appointment_type in ["consulta", "estetico"] and appointment_date and appointment_time:
@@ -2800,7 +2842,13 @@ def request_appointment():
             flash('⚠️ Ocurrió un error al procesar tu solicitud. Por favor intenta nuevamente o contáctanos directamente.', 'danger')
             return redirect(url_for('request_appointment'))
     
-    return render_template('request_appointment.html')
+    hoy_rd = obtener_fecha_rd()
+    return render_template(
+        'request_appointment.html',
+        fecha_hoy_rd=hoy_rd.strftime('%Y-%m-%d'),
+        fecha_max_cita=fecha_maxima_cita_rd(hoy_rd).strftime('%Y-%m-%d'),
+        cita_fecha_max_dias=CITA_FECHA_MAX_DIAS,
+    )
 
 # ============================================================================
 # AUTENTICACIÓN Y GESTIÓN DE USUARIOS
@@ -2826,6 +2874,7 @@ def login():
             
             # Verificar límite
             if len(request_counts.get(f'{client_ip}_login', [])) >= 5:
+                log_security_event('login_rate_limited', {'ip': client_ip})
                 flash('⚠️ Demasiados intentos de inicio de sesión. Por favor espera 5 minutos.', 'error')
                 return redirect(url_for('login'))
             
@@ -2886,8 +2935,10 @@ def login():
                     return redirect(next_page)
                 return redirect(url_for('admin'))
             else:
+                log_security_event('login_failed', {'ip': client_ip, 'email': email, 'reason': 'bad_password'})
                 flash('Contraseña incorrecta', 'error')
         else:
+            log_security_event('login_failed', {'ip': client_ip, 'email': email, 'reason': 'user_not_found'})
             flash('Usuario no encontrado o inactivo', 'error')
         
         return redirect(url_for('login'))
@@ -5534,10 +5585,8 @@ def facturacion_facturas_nueva():
         try:
             conn = get_db_connection()
             fecha_hoy_rd = obtener_fecha_rd()
-            # Regla: no permitir fechas con más de 12 meses hacia atrás.
-            # Interpretación: si hoy es 2026-01-XX, mínimo permitido es 2025-01-01 (inicio del mes).
             from datetime import date
-            fecha_minima_rd = date(fecha_hoy_rd.year - 1, fecha_hoy_rd.month, 1)
+            fecha_minima_rd = fecha_minima_consulta_rd(fecha_hoy_rd)
             
             # Datos del encabezado
             medico_id = request.form.get('medico_id')
@@ -5651,7 +5700,7 @@ def facturacion_facturas_nueva():
                     })
                     continue
                 if fecha_obj < fecha_minima_rd:
-                    errores_validacion.append(f'Línea {idx}: La fecha de consulta no puede ser anterior a 12 meses (mínimo {fecha_minima_rd.strftime("%Y-%m-%d")})')
+                    errores_validacion.append(f'Línea {idx}: La fecha de consulta no puede ser anterior a {FECHA_MIN_CONSULTA_DIAS} días (mínimo {fecha_minima_rd.strftime("%Y-%m-%d")})')
                     resumen_lineas.append({
                         'linea': idx,
                         'nss': nss,
@@ -5853,7 +5902,7 @@ def facturacion_facturas_nueva():
                              centros_medicos=centros_medicos,
                              descargar_pdf=descargar_pdf,
                              fecha_hoy_rd=obtener_fecha_rd().strftime('%Y-%m-%d'),
-                             fecha_min_rd=(lambda h: __import__('datetime').date(h.year - 1, h.month, 1))(obtener_fecha_rd()).strftime('%Y-%m-%d'))
+                             fecha_min_rd=fecha_minima_consulta_rd().strftime('%Y-%m-%d'))
     finally:
         conn.close()
 
@@ -5870,7 +5919,7 @@ def descargar_plantilla_excel():
         from io import BytesIO
         hoy_rd = obtener_fecha_rd()
         from datetime import date
-        min_rd = date(hoy_rd.year - 1, hoy_rd.month, 1)
+        min_rd = fecha_minima_consulta_rd(hoy_rd)
         
         # Crear un nuevo workbook
         wb = Workbook()
@@ -5955,9 +6004,9 @@ def descargar_plantilla_excel():
             formula2=f"DATE({hoy_rd.year},{hoy_rd.month},{hoy_rd.day})",
             allow_blank=False
         )
-        dv_fecha.error = 'La FECHA debe ser válida. No puede ser futura ni mayor a 12 meses hacia atrás.'
+        dv_fecha.error = f'La FECHA debe ser válida. No puede ser futura ni anterior a {FECHA_MIN_CONSULTA_DIAS} días.'
         dv_fecha.errorTitle = 'Fecha inválida'
-        dv_fecha.prompt = 'Seleccione una fecha (DD/MM/AAAA). Rango permitido: últimos 12 meses (desde inicio del mes) hasta hoy.'
+        dv_fecha.prompt = f'Seleccione una fecha (DD/MM/AAAA). Rango permitido: últimos {FECHA_MIN_CONSULTA_DIAS} días hasta hoy.'
         dv_fecha.promptTitle = 'Fecha de consulta'
         ws_pacientes.add_data_validation(dv_fecha)
         dv_fecha.add('C2:C1000')
@@ -5990,7 +6039,7 @@ def descargar_plantilla_excel():
             ['1. Complete la hoja "Pacientes" con los datos de los pacientes'],
             ['2. NSS: Solo números y guiones (ej: 001-234-5678)'],
             ['3. NOMBRE: Nombre completo del paciente'],
-            ['4. FECHA: Formato DD/MM/AAAA (ej: 16/10/2025). Rango permitido: últimos 12 meses (desde inicio del mes) hasta hoy.'],
+            [f'4. FECHA: Formato DD/MM/AAAA (ej: 16/10/2025). Rango permitido: últimos {FECHA_MIN_CONSULTA_DIAS} días hasta hoy.'],
             ['5. AUTORIZACIÓN: Solo números, debe ser única para cada paciente'],
             ['6. SERVICIO: Seleccione de la lista desplegable (se alimenta de la hoja "Servicios Disponibles")'],
             ['7. MONTO: Cantidad en pesos (solo números)'],
@@ -6058,7 +6107,7 @@ def procesar_excel():
         ws = wb['Pacientes']
         hoy_rd = obtener_fecha_rd()
         from datetime import date
-        min_rd = date(hoy_rd.year - 1, hoy_rd.month, 1)
+        min_rd = fecha_minima_consulta_rd(hoy_rd)
         
         pacientes = []
         errores = []
@@ -6141,7 +6190,7 @@ def procesar_excel():
                 errores.append(f'❌ Fila {row_num}: FECHA {fecha_obj_date.strftime("%d/%m/%Y")} no puede ser futura (máximo hoy)')
                 continue
             if fecha_obj_date < min_rd:
-                errores.append(f'❌ Fila {row_num}: FECHA {fecha_obj_date.strftime("%d/%m/%Y")} no puede ser anterior a 12 meses (mínimo {min_rd.strftime("%d/%m/%Y")})')
+                errores.append(f'❌ Fila {row_num}: FECHA {fecha_obj_date.strftime("%d/%m/%Y")} no puede ser anterior a {FECHA_MIN_CONSULTA_DIAS} días (mínimo {min_rd.strftime("%d/%m/%Y")})')
                 continue
             
             # ========== VALIDACIÓN 5: AUTORIZACIÓN (Alfanumérico y única) ==========
@@ -6208,36 +6257,29 @@ def procesar_excel():
                 'fila': row_num
             })
 
-        # Si hay errores en el Excel, no cargar nada (validación previa obligatoria)
-        if errores:
-            return jsonify({
-                'error': 'El archivo tiene errores. Corrija FECHA (DD/MM/AAAA) y vuelva a cargar.',
-                'errores': errores,
-                'total_errores': len(errores),
-                'total_excel': total_filas_con_datos,
-                'total_validos': len(pacientes),
-                'total_omitidos': max(total_filas_con_datos - len(pacientes), 0),
-            }), 400
+        total_omitidos = max(total_filas_con_datos - len(pacientes), 0)
+        payload_base = {
+            'total_excel': total_filas_con_datos,
+            'total_validos': len(pacientes),
+            'total_omitidos': total_omitidos,
+            'errores': errores,
+            'total_errores': len(errores),
+        }
 
         if not pacientes:
-            return jsonify({
-                'error': 'El archivo no contiene datos válidos',
-                'errores': errores,
-                'total_errores': len(errores),
-                'total_excel': total_filas_con_datos
-            }), 400
-        
+            msg = (
+                'El archivo tiene errores. Corrija FECHA (DD/MM/AAAA) y vuelva a cargar.'
+                if errores else
+                'El archivo no contiene datos válidos'
+            )
+            return jsonify({'error': msg, **payload_base}), 400
+
         return jsonify({
             'success': True,
+            'partial': bool(errores),
             'pacientes': pacientes,
-            # Compatibilidad (existente)
             'total': len(pacientes),
-            # Nuevos campos para UX/alertas
-            'total_validos': len(pacientes),
-            'total_excel': total_filas_con_datos,
-            'total_omitidos': max(total_filas_con_datos - len(pacientes), 0),
-            'errores': errores,
-            'total_errores': len(errores)
+            **payload_base
         })
         
     except Exception as e:

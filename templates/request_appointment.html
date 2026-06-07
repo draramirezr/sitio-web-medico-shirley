@@ -305,6 +305,9 @@
                                     <input type="text" class="form-control" name="appointment_date" id="appointment_date" placeholder="dd/mm/yyyy" required>
                                     <i class="fas fa-calendar-alt icon-right"></i>
                                 </div>
+                                <small class="text-muted d-block mt-1" id="appointment_date_hint">
+                                    Solo martes y jueves, hasta {{ cita_fecha_max_dias }} días desde hoy.
+                                </small>
                             </div>
 
                             <div class="col-md-6" id="appointment_time_group">
@@ -366,6 +369,18 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const FECHA_MAX_CITA = "{{ fecha_max_cita }}";
+    const CITA_FECHA_MAX_DIAS = {{ cita_fecha_max_dias|default(30) }};
+    function maxCitaDateIso() {
+        if (FECHA_MAX_CITA && /^\d{4}-\d{2}-\d{2}$/.test(FECHA_MAX_CITA)) return FECHA_MAX_CITA;
+        const d = new Date();
+        d.setDate(d.getDate() + CITA_FECHA_MAX_DIAS);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    }
+
     const appointmentType = document.getElementById('appointment_type'); // hidden
     const serviceDetail = document.getElementById('service_detail'); // visible
     const appointmentDateInput = document.getElementById('appointment_date');
@@ -387,6 +402,7 @@ document.addEventListener('DOMContentLoaded', function() {
         altFormat: "d/m/Y",
         altInputClass: "form-control",
         minDate: "today",
+        maxDate: maxCitaDateIso(),
         disableMobile: true,
         disable: [
             function(date) {

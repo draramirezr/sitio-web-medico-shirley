@@ -484,6 +484,7 @@ let lineas = [];
 // La fecha se establece automáticamente al generar la factura
 const FECHA_HOY_RD = "{{ fecha_hoy_rd if fecha_hoy_rd else '' }}";
 const FECHA_MIN_RD = "{{ fecha_min_rd if fecha_min_rd else '' }}";
+const FECHA_MIN_DIAS = 45;
 
 function agregarLinea() {
     numeroLinea++;
@@ -803,7 +804,14 @@ async function procesarExcel(input) {
         if (!response.ok) {
             document.getElementById('loading-excel').remove();
             const erroresHttp = Array.isArray(data?.errores) ? data.errores : [];
-            mostrarModalErrorExcel(data?.error || 'Error al procesar el Excel', erroresHttp);
+            const totalExcelErr = Number.isFinite(data?.total_excel) ? data.total_excel : null;
+            const totalValidosErr = Number.isFinite(data?.total_validos) ? data.total_validos : 0;
+            mostrarModalErrorExcel(
+                data?.error || 'Error al procesar el Excel',
+                erroresHttp,
+                totalExcelErr,
+                totalValidosErr
+            );
             input.value = '';
             return;
         }
@@ -917,93 +925,23 @@ async function procesarExcel(input) {
             return;
         }
 
-        // Si hay diferencia entre válidos y total en Excel, preguntar si desea detener o continuar
-        if (totalOmitidos > 0 && errores.length > 0) {
-            let erroresHTML = '';
-            errores.slice(0, 50).forEach(err => {
-                erroresHTML += `<p style="margin: 0.4rem 0; color: #721c24; font-weight: 500; font-size: 0.9rem;">${err}</p>`;
+        const hayDiferencia = totalValidos !== totalExcel || totalOmitidos > 0;
+
+        if (hayDiferencia) {
+            const continuar = await mostrarModalConfirmacionCargaExcel({
+                totalValidos,
+                totalExcel,
+                totalOmitidos,
+                errores
             });
-            if (errores.length > 50) {
-                erroresHTML += `<p style="margin: 0.6rem 0 0 0; color: #666; font-size: 0.85rem;">... y ${errores.length - 50} más</p>`;
+            if (!continuar) {
+                input.value = '';
+                return;
             }
-            
-            const modalHTML = `
-                <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                            background: white; padding: 2.5rem; border-radius: 15px; box-shadow: 0 4px 30px rgba(0,0,0,0.3); 
-                            z-index: 9999; max-width: 750px; width: calc(100% - 2rem); max-height: 85vh; overflow-y: auto;">
-                    <div style="text-align: center; margin-bottom: 1.25rem;">
-                        <div style="background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%); 
-                                    width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 1rem; 
-                                    display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: white;"></i>
-                        </div>
-                        <h4 style="color: #B89BA3; font-weight: 800; margin-bottom: 0.4rem;">
-                            ⚠️ Carga Incompleta Detectada
-                        </h4>
-                        <p style="color: #666; font-size: 1rem; margin: 0;">
-                            <strong>${totalValidos}</strong> paciente(s) cargado(s) de <strong>${totalExcel}</strong> paciente(s) que tiene tu Excel.
-                        </p>
-                        <p style="color: #666; font-size: 0.95rem; margin: 0.5rem 0 0 0;">
-                            Se omitieron <strong>${totalOmitidos}</strong> fila(s). ¿Deseas detener para verificar o continuar con los válidos?
-                        </p>
-                    </div>
-                    
-                    <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; border-radius: 10px; margin-bottom: 1.25rem;">
-                        <h6 style="color: #856404; font-weight: 700; margin-bottom: 0.75rem;">
-                            <i class="fas fa-list me-2"></i>Detalle de filas omitidas (${errores.length})
-                        </h6>
-                        <div style="max-height: 260px; overflow-y: auto;">
-                            ${erroresHTML}
-                        </div>
-                    </div>
-                    
-                    <div class="d-flex gap-2 flex-wrap">
-                        <button onclick="detenerCargaExcel()" 
-                                style="background: #ACACAD; 
-                                       color: white; border: none; padding: 0.9rem 1.2rem; border-radius: 10px; 
-                                       font-weight: 700; cursor: pointer; flex: 1; min-width: 220px;">
-                            <i class="fas fa-stop-circle me-2"></i>Detener y Revisar
-                        </button>
-                        <button onclick="continuarCargaExcel()" 
-                                style="background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%); 
-                                       color: white; border: none; padding: 0.9rem 1.2rem; border-radius: 10px; 
-                                       font-weight: 700; cursor: pointer; flex: 1; min-width: 220px;">
-                            <i class="fas fa-play-circle me-2"></i>Continuar (Cargar Válidos)
-                        </button>
-                    </div>
-                </div>
-                <div onclick="detenerCargaExcel()" 
-                     style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-                            background: rgba(0,0,0,0.6); z-index: 9998;"></div>
-            `;
-            
-            const modalDiv = document.createElement('div');
-            modalDiv.id = 'modal-resultado-excel';
-            modalDiv.innerHTML = modalHTML;
-            document.body.appendChild(modalDiv);
-            
-            window.detenerCargaExcel = function() {
-                const modal = document.getElementById('modal-resultado-excel');
-                if (modal) modal.remove();
-                // No tocar la tabla, solo limpiar input
-                input.value = '';
-            };
-            
-            window.continuarCargaExcel = function() {
-                const modal = document.getElementById('modal-resultado-excel');
-                if (modal) modal.remove();
-                const pacientesAgregados = cargarPacientesEnTabla();
-                // Mostrar mini modal de confirmación (con X de Y)
-                mostrarModalExitoExcel(pacientesAgregados, totalExcel, totalOmitidos);
-                input.value = '';
-            };
-            
-            return;
         }
-        
-        // Cargar directamente y mostrar éxito
+
         const pacientesAgregados = cargarPacientesEnTabla();
-        mostrarModalExitoExcel(pacientesAgregados, totalExcel, 0);
+        mostrarModalExitoExcel(pacientesAgregados, totalExcel, totalOmitidos);
         input.value = '';
         return;
 
@@ -1017,9 +955,8 @@ async function procesarExcel(input) {
 }
 
 function mostrarModalExitoExcel(pacientesAgregados, totalExcel, omitidos) {
-    const textoSecundario = omitidos > 0
-        ? `Cargados ${pacientesAgregados} de ${totalExcel}. Se omitieron ${omitidos} fila(s).`
-        : `Cargados ${pacientesAgregados} de ${totalExcel} paciente(s) que tiene tu Excel.`;
+    const coinciden = pacientesAgregados === totalExcel && omitidos === 0;
+    const titulo = coinciden ? '✅ ¡Carga Exitosa!' : '✅ Carga Parcial Completada';
 
     let mensajeHTML = `
             <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
@@ -1031,16 +968,21 @@ function mostrarModalExitoExcel(pacientesAgregados, totalExcel, omitidos) {
                     <i class="fas fa-check-circle" style="font-size: 3rem; color: white;"></i>
                 </div>
                 <h4 style="color: #CEB0B7; margin-bottom: 1rem; font-weight: 800;">
-                    ✅ ¡Carga Exitosa!
+                    ${titulo}
                 </h4>
                 <div style="background: linear-gradient(135deg, rgba(206, 176, 183, 0.1) 0%, rgba(242, 226, 230, 0.2) 100%); 
                             padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem;">
-                    <p style="color: #CEB0B7; font-weight: 700; font-size: 1.3rem; margin: 0;">
-                        <i class="fas fa-users me-2"></i>${pacientesAgregados} paciente(s)
+                    <p style="color: #CEB0B7; font-weight: 700; font-size: 1.15rem; margin: 0; line-height: 1.5;">
+                        <i class="fas fa-users me-2"></i>
+                        <strong>${pacientesAgregados}</strong> paciente(s) cargado(s) de <strong>${totalExcel}</strong> paciente(s) que contiene el Excel.
                     </p>
+                    ${omitidos > 0 ? `
+                    <p style="color: #856404; font-size: 0.9rem; margin: 0.75rem 0 0 0; font-weight: 600;">
+                        Se omitieron ${omitidos} fila(s) por errores de validación.
+                    </p>` : `
                     <p style="color: #666; font-size: 0.9rem; margin: 0.5rem 0 0 0;">
-                        ${textoSecundario}
-                    </p>
+                        Todos los registros del Excel fueron cargados correctamente.
+                    </p>`}
                 </div>
                 <p style="color: #666; font-size: 0.9rem; margin-bottom: 1.5rem;">
                     Los pacientes están listos para ser agregados como pendientes de facturación.
@@ -1067,8 +1009,89 @@ function mostrarModalExitoExcel(pacientesAgregados, totalExcel, omitidos) {
         };
 }
 
-function mostrarModalErrorExcel(mensaje, errores) {
+function mostrarModalConfirmacionCargaExcel({ totalValidos, totalExcel, totalOmitidos, errores }) {
+    return new Promise((resolve) => {
+        const lista = Array.isArray(errores) ? errores : [];
+        let erroresHTML = '';
+        if (lista.length > 0) {
+            lista.slice(0, 50).forEach(err => {
+                erroresHTML += `<p style="margin: 0.4rem 0; color: #721c24; font-weight: 500; font-size: 0.9rem;">${err}</p>`;
+            });
+            if (lista.length > 50) {
+                erroresHTML += `<p style="margin: 0.6rem 0 0 0; color: #666; font-size: 0.85rem;">... y ${lista.length - 50} más</p>`;
+            }
+        }
+
+        const modalHTML = `
+            <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                        background: white; padding: 2.5rem; border-radius: 15px; box-shadow: 0 4px 30px rgba(0,0,0,0.3); 
+                        z-index: 9999; max-width: 750px; width: calc(100% - 2rem); max-height: 85vh; overflow-y: auto;">
+                <div style="text-align: center; margin-bottom: 1.25rem;">
+                    <div style="background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%); 
+                                width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 1rem; 
+                                display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: white;"></i>
+                    </div>
+                    <h4 style="color: #B89BA3; font-weight: 800; margin-bottom: 0.75rem;">
+                        ⚠️ Los números no coinciden
+                    </h4>
+                    <p style="color: #CEB0B7; font-weight: 700; font-size: 1.1rem; margin: 0; line-height: 1.5;">
+                        <strong>${totalValidos}</strong> paciente(s) cargado(s) de <strong>${totalExcel}</strong> paciente(s) que contiene el Excel.
+                    </p>
+                    <p style="color: #666; font-size: 0.95rem; margin: 0.75rem 0 0 0;">
+                        Se omitieron <strong>${totalOmitidos}</strong> fila(s). ¿Desea continuar con los válidos o revisar su Excel?
+                    </p>
+                </div>
+                ${lista.length > 0 ? `
+                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; border-radius: 10px; margin-bottom: 1.25rem;">
+                    <h6 style="color: #856404; font-weight: 700; margin-bottom: 0.75rem;">
+                        <i class="fas fa-list me-2"></i>Detalle de filas omitidas (${lista.length})
+                    </h6>
+                    <div style="max-height: 260px; overflow-y: auto;">
+                        ${erroresHTML}
+                    </div>
+                </div>` : ''}
+                <div class="d-flex gap-2 flex-wrap">
+                    <button onclick="resolverConfirmacionCargaExcel(false)" 
+                            style="background: #ACACAD; 
+                                   color: white; border: none; padding: 0.9rem 1.2rem; border-radius: 10px; 
+                                   font-weight: 700; cursor: pointer; flex: 1; min-width: 220px;">
+                        <i class="fas fa-file-excel me-2"></i>Revisar Excel
+                    </button>
+                    <button onclick="resolverConfirmacionCargaExcel(true)" 
+                            style="background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%); 
+                                   color: white; border: none; padding: 0.9rem 1.2rem; border-radius: 10px; 
+                                   font-weight: 700; cursor: pointer; flex: 1; min-width: 220px;">
+                        <i class="fas fa-play-circle me-2"></i>Continuar
+                    </button>
+                </div>
+            </div>
+            <div onclick="resolverConfirmacionCargaExcel(false)" 
+                 style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                        background: rgba(0,0,0,0.6); z-index: 9998;"></div>
+        `;
+
+        const modalDiv = document.createElement('div');
+        modalDiv.id = 'modal-confirm-carga-excel';
+        modalDiv.innerHTML = modalHTML;
+        document.body.appendChild(modalDiv);
+
+        window.resolverConfirmacionCargaExcel = function(continuar) {
+            const modal = document.getElementById('modal-confirm-carga-excel');
+            if (modal) modal.remove();
+            delete window.resolverConfirmacionCargaExcel;
+            resolve(!!continuar);
+        };
+    });
+}
+
+function mostrarModalErrorExcel(mensaje, errores, totalExcel, totalValidos) {
     const lista = Array.isArray(errores) ? errores : [];
+    const resumenFilas = Number.isFinite(totalExcel)
+        ? `<p style="color: #CEB0B7; font-weight: 700; font-size: 1rem; margin: 0.75rem 0 0 0;">
+               <strong>${totalValidos || 0}</strong> paciente(s) cargado(s) de <strong>${totalExcel}</strong> paciente(s) que contiene el Excel.
+           </p>`
+        : '';
     let erroresHTML = '';
     if (lista.length > 0) {
         lista.slice(0, 60).forEach(err => {
@@ -1095,6 +1118,7 @@ function mostrarModalErrorExcel(mensaje, errores) {
                 <p style="color: #666; font-size: 1rem; margin: 0;">
                     ${mensaje}
                 </p>
+                ${resumenFilas}
             </div>
             ${lista.length > 0 ? `
                 <div style="background: #f8d7da; border-left: 4px solid #dc3545; padding: 1rem; border-radius: 10px; margin-bottom: 1.25rem;">
@@ -1201,10 +1225,13 @@ function hoyIso() {
 function minIso() {
     if (FECHA_MIN_RD && /^\d{4}-\d{2}-\d{2}$/.test(FECHA_MIN_RD)) return FECHA_MIN_RD;
     const h = hoyIso();
-    // fallback: mismo mes del año anterior, día 01
-    const y = parseInt(h.slice(0, 4), 10) - 1;
-    const m = h.slice(5, 7);
-    return `${y}-${m}-01`;
+    const [y, m, d] = h.split('-').map(n => parseInt(n, 10));
+    const dt = new Date(y, m - 1, d);
+    dt.setDate(dt.getDate() - FECHA_MIN_DIAS);
+    const yy = dt.getFullYear();
+    const mm = String(dt.getMonth() + 1).padStart(2, '0');
+    const dd = String(dt.getDate()).padStart(2, '0');
+    return `${yy}-${mm}-${dd}`;
 }
 
 function validarFechaNoFutura(input) {
@@ -1219,7 +1246,7 @@ function validarFechaNoFutura(input) {
         return;
     }
     if (iso < min) {
-        alert(`❌ La fecha de consulta no puede ser anterior a 12 meses.\n\nFecha seleccionada: ${isoAEs(iso)}\nMínimo permitido: ${isoAEs(min)}`);
+        alert(`❌ La fecha de consulta no puede ser anterior a ${FECHA_MIN_DIAS} días.\n\nFecha seleccionada: ${isoAEs(iso)}\nMínimo permitido: ${isoAEs(min)}`);
         input.value = min;
         input.style.borderColor = '#dc3545';
         input.style.backgroundColor = '#ffe6e6';
@@ -1385,7 +1412,7 @@ document.getElementById('formFactura').addEventListener('submit', function(e) {
 
     if (errorFechaFutura) {
         if (errorFechaFutura.tipo === 'min') {
-            alert(`❌ La fecha de consulta no puede ser anterior a 12 meses.\n\nFecha seleccionada: ${isoAEs(errorFechaFutura.fechaIso)}\nMínimo permitido: ${isoAEs(errorFechaFutura.minIso)}`);
+            alert(`❌ La fecha de consulta no puede ser anterior a ${FECHA_MIN_DIAS} días.\n\nFecha seleccionada: ${isoAEs(errorFechaFutura.fechaIso)}\nMínimo permitido: ${isoAEs(errorFechaFutura.minIso)}`);
         } else {
             alert(`❌ La fecha de consulta no puede ser futura.\n\nFecha seleccionada: ${isoAEs(errorFechaFutura.fechaIso)}\nMáximo permitido: ${isoAEs(errorFechaFutura.maxIso)}`);
         }
