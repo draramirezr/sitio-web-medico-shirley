@@ -10,11 +10,6 @@ from datetime import datetime, timedelta
 import hashlib
 import json
 import functools
-import smtplib
-import ssl
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.mime.application import MIMEApplication
 from dotenv import load_dotenv
 import secrets
 import re
@@ -2581,78 +2576,42 @@ def enviar_email_cita(first_name, last_name, email, phone, appointment_date, app
         return False
 
 def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora, tipo, estatus, motivo=None):
-    """Enviar email de confirmación de cambio de estatus de cita al paciente"""
+    """Enviar email de confirmación de cambio de estatus de cita al paciente (Resend/SendGrid)."""
     try:
-        if not SMTP_CONFIGURED:
-            print("\n⚠️ SMTP no configurado")
-            print("Configura EMAIL_HOST, EMAIL_USERNAME y EMAIL_PASSWORD en .env / Railway")
+        if not EMAIL_CONFIGURED:
+            print("\n⚠️ Email no configurado. Configura RESEND_API_KEY o SENDGRID_API_KEY en Railway.")
             return False
-        
-        # Verificar que el paciente tenga email
+
         if not paciente_email:
             print("\n⚠️ El paciente no tiene email registrado")
             return False
-        
-        print("\n" + "=" * 60)
-        print("📧 ENVIANDO EMAIL DE CONFIRMACIÓN DE CITA AL PACIENTE")
-        print("=" * 60)
-        
-        # Crear mensaje
-        msg = MIMEMultipart('alternative')
-        
-        # Asunto según el estatus
+
         asuntos = {
             'pending': '⏳ Tu Cita está Pendiente de Confirmación',
             'confirmed': '✅ ¡Tu Cita ha sido Confirmada!',
             'cancelled': '❌ Tu Cita ha sido Cancelada',
-            'completed': '✔️ Tu Cita ha sido Completada'
+            'completed': '✔️ Tu Cita ha sido Completada',
         }
-        
-        msg['Subject'] = asuntos.get(estatus, '📅 Actualización de tu Cita')
-        msg['From'] = EMAIL_USERNAME
-        msg['To'] = paciente_email
-        
-        # Generar HTML usando el template
+
         html = template_confirmacion_cita(nombre, apellido, fecha, hora, tipo, estatus, motivo)
-        
-        # Adjuntar HTML
-        part = MIMEText(html, 'html')
-        msg.attach(part)
-        
-        # Conectar y enviar (Zoho: TLS 587 o SSL 465)
-        ctx = ssl.create_default_context()
-        if EMAIL_USE_SSL:
-            server = smtplib.SMTP_SSL(EMAIL_HOST, EMAIL_PORT, timeout=30, context=ctx)
-            server.ehlo()
+        success = send_email_api(
+            to_email=paciente_email,
+            subject=asuntos.get(estatus, '📅 Actualización de tu Cita'),
+            html_content=html,
+            reply_to=EMAIL_FROM,
+        )
+
+        if success:
+            print(f"✅ Confirmación de cita enviada a {paciente_email} ({nombre} {apellido}) — {estatus}")
         else:
-            server = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=30)
-            server.ehlo()
-            if EMAIL_USE_TLS:
-                server.starttls(context=ctx)
-                server.ehlo()
-        server.login(EMAIL_USERNAME, EMAIL_PASSWORD)
-        server.send_message(msg)
-        server.quit()
-        
-        print("\n✅ EMAIL DE CONFIRMACIÓN ENVIADO EXITOSAMENTE")
-        print("=" * 60)
-        print(f"📧 Destinatario: {paciente_email}")
-        print(f"👤 Paciente: {nombre} {apellido}")
-        print(f"🏥 Estatus: {estatus}")
-        print(f"📅 Fecha: {fecha if fecha else 'Por confirmar'}")
-        print(f"🕐 Hora: {hora if hora else 'Por confirmar'}")
-        print("=" * 60 + "\n")
-        
-        return True
-        
+            print(f"⚠️ Cita actualizada pero email NO enviado a {paciente_email}")
+
+        return success
+
     except Exception as e:
-        print("\n" + "=" * 60)
-        print("❌ ERROR AL ENVIAR EMAIL DE CONFIRMACIÓN")
-        print("=" * 60)
-        print(f"Error: {e}")
-        print("\nEl cambio de estatus se guardó en la base de datos.")
-        print("Pero el email no pudo ser enviado al paciente.")
-        print("=" * 60 + "\n")
+        print(f"❌ ERROR AL ENVIAR EMAIL DE CONFIRMACIÓN: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 def send_email(destinatario, asunto, cuerpo):
@@ -3500,19 +3459,13 @@ def update_appointment_status(appointment_id):
         tipo = appointment['appointment_type']
         motivo = appointment['reason'] if appointment['reason'] else None
         
-        # Enviar email de manera asíncrona (no bloquea la respuesta)
-        threading.Thread(target=enviar_email_confirmacion_cita, args=(
-            email_paciente,
-            nombre,
-            apellido,
-            fecha,
-            hora,
-            tipo,
-            new_status,
-            motivo
-        )).start()
-        
-        flash(f'Estado de la cita actualizado y notificación enviada a {nombre} {apellido}', 'success')
+        email_ok = enviar_email_confirmacion_cita(
+            email_paciente, nombre, apellido, fecha, hora, tipo, new_status, motivo
+        )
+        if email_ok:
+            flash(f'Estado de la cita actualizado y notificación enviada a {nombre} {apellido}', 'success')
+        else:
+            flash(f'Estado actualizado, pero no se pudo enviar el email a {nombre} {apellido}', 'warning')
     else:
         flash('Estado de la cita actualizado (paciente sin email registrado)', 'warning')
     
@@ -3548,7 +3501,7 @@ def update_appointment_status_ajax(appointment_id):
         conn.commit()
         conn.close()
         
-        # Enviar email de confirmación al paciente si tiene email (asíncrono)
+        # Enviar email de confirmación al paciente si tiene email
         if appointment['email']:
             nombre = appointment['first_name']
             apellido = appointment['last_name']
@@ -3558,21 +3511,15 @@ def update_appointment_status_ajax(appointment_id):
             tipo = appointment['appointment_type']
             motivo = appointment['reason'] if appointment['reason'] else None
             
-            threading.Thread(target=enviar_email_confirmacion_cita, args=(
-                email_paciente,
-                nombre,
-                apellido,
-                fecha,
-                hora,
-                tipo,
-                new_status,
-                motivo
-            )).start()
+            email_ok = enviar_email_confirmacion_cita(
+                email_paciente, nombre, apellido, fecha, hora, tipo, new_status, motivo
+            )
         
         return jsonify({
             'success': True,
             'message': f'Estado actualizado a: {new_status}',
-            'new_status': new_status
+            'new_status': new_status,
+            'email_sent': email_ok if appointment['email'] else False,
         })
         
     except Exception as e:
