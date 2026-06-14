@@ -371,7 +371,7 @@
                 <div class="card-body" style="min-height: 200px; max-height: 450px; overflow-y: auto;">
                     {% if recent_appointments %}
                                 {% for appointment in recent_appointments %}
-                        <div class="appointment-card mb-3" data-bs-toggle="modal" data-bs-target="#appointmentModal{{ appointment['id'] }}" 
+                        <div class="appointment-card mb-3" data-appointment-id="{{ appointment['id'] }}" data-bs-toggle="modal" data-bs-target="#appointmentModal{{ appointment['id'] }}" 
                                     style="background: rgba(242, 226, 230, 0.1); 
                                     border-left: 4px solid #CEB0B7; 
                                     border-radius: 10px; padding: 1rem; transition: all 0.3s ease; cursor: pointer;">
@@ -409,7 +409,7 @@
                                     {% endif %}
                                 </div>
                                 <div class="ms-2">
-                                    <span class="badge" style="background: #CEB0B7; 
+                                    <span class="badge appointment-list-status" style="background: #CEB0B7; 
                                                 color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">
                                         <i class="fas fa-clock me-1"></i>
                                         Pendiente
@@ -518,7 +518,7 @@
                 <div class="card-body" style="min-height: 200px; max-height: 450px; overflow-y: auto;">
                     {% if confirmed_appointments %}
                                 {% for appointment in confirmed_appointments %}
-                        <div class="appointment-card mb-3" data-bs-toggle="modal" data-bs-target="#confirmedAppointmentModal{{ appointment['id'] }}" 
+                        <div class="appointment-card mb-3" data-appointment-id="{{ appointment['id'] }}" data-bs-toggle="modal" data-bs-target="#confirmedAppointmentModal{{ appointment['id'] }}" 
                                     style="background: rgba(184, 155, 163, 0.05); 
                                     border-left: 4px solid #B89BA3; 
                                     border-radius: 10px; padding: 1rem; transition: all 0.3s ease; cursor: pointer;">
@@ -556,7 +556,7 @@
                                     {% endif %}
                                 </div>
                                 <div class="ms-2">
-                                    <span class="badge" style="background: #B89BA3; 
+                                    <span class="badge appointment-list-status" style="background: #B89BA3; 
                                                 color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">
                                         <i class="fas fa-check-circle me-1"></i>
                                         Confirmada
@@ -638,6 +638,48 @@
         </div>
     </div>
 </div>
+
+{% macro cita_estado_controls(appointment) %}
+{% set status_map = {
+    'pending': ('Pendiente', '#FF9800', 'fa-clock'),
+    'confirmed': ('Confirmada', '#B89BA3', 'fa-check-circle'),
+    'completed': ('Completada', '#4CAF50', 'fa-check-double'),
+    'cancelled': ('Cancelada', '#ACACAD', 'fa-times-circle')
+} %}
+{% set cfg = status_map.get(appointment['status'], status_map['pending']) %}
+<div class="p-3 appointment-status-section" style="background: rgba(206, 176, 183, 0.1); border-radius: 10px;" data-appointment-id="{{ appointment['id'] }}">
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+        <strong><i class="fas fa-info-circle me-2"></i>Estado actual:</strong>
+        <span class="badge appointment-status-badge" id="statusBadge{{ appointment['id'] }}"
+              style="background: {{ cfg[1] }}; color: white; padding: 0.5rem 1rem; font-size: 0.9rem;">
+            <i class="fas {{ cfg[2] }} me-1"></i> {{ cfg[0] }}
+        </span>
+    </div>
+    <div class="row g-2 align-items-end">
+        <div class="col-sm-8">
+            <label class="form-label mb-1" for="statusSelect{{ appointment['id'] }}">
+                <i class="fas fa-sync-alt me-1"></i>Cambiar estado
+            </label>
+            <select class="form-select appointment-status-select" id="statusSelect{{ appointment['id'] }}"
+                    data-appointment-id="{{ appointment['id'] }}"
+                    data-current-status="{{ appointment['status'] }}">
+                <option value="pending" {% if appointment['status'] == 'pending' %}selected{% endif %}>Pendiente</option>
+                <option value="confirmed" {% if appointment['status'] == 'confirmed' %}selected{% endif %}>Confirmada</option>
+                <option value="completed" {% if appointment['status'] == 'completed' %}selected{% endif %}>Completada</option>
+                <option value="cancelled" {% if appointment['status'] == 'cancelled' %}selected{% endif %}>Cancelada</option>
+            </select>
+        </div>
+        <div class="col-sm-4">
+            <button type="button" class="btn w-100 appointment-status-save-btn"
+                    data-appointment-id="{{ appointment['id'] }}"
+                    style="background: #B89BA3; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px;">
+                <i class="fas fa-save me-1"></i> Actualizar
+            </button>
+        </div>
+    </div>
+    <div class="appointment-status-feedback small mt-2" id="statusFeedback{{ appointment['id'] }}" aria-live="polite"></div>
+</div>
+{% endmacro %}
 
 <!-- Modales para Citas -->
 {% if recent_appointments %}
@@ -721,14 +763,7 @@
                     </div>
                     {% endif %}
 
-                    <!-- Estado Actual -->
-                    <div class="p-3" style="background: rgba(242, 226, 230, 0.2); border-radius: 10px;">
-                        <strong><i class="fas fa-info-circle me-2"></i>Estado:</strong>
-                        <span class="badge ms-2" style="background: {{ '#B89BA3' if appointment['status'] == 'completed' else '#CEB0B7' if appointment['status'] == 'pending' else '#ACACAD' }}; 
-                                    color: white; padding: 0.5rem 1rem; font-size: 0.9rem;">
-                            {{ 'Completada' if appointment['status'] == 'completed' else 'Pendiente' if appointment['status'] == 'pending' else 'Cancelada' }}
-                        </span>
-                    </div>
+                    {{ cita_estado_controls(appointment) }}
                 </div>
                 <div class="modal-footer">
                     <a href="tel:{{ appointment['phone'] }}" class="btn btn-success">
@@ -831,41 +866,7 @@
                     </div>
                     {% endif %}
 
-                    <!-- Estado Actual y Cambiar Estado -->
-                    <div class="p-3" style="background: rgba(206, 176, 183, 0.1); border-radius: 10px;">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div>
-                                <strong><i class="fas fa-info-circle me-2"></i>Estado Actual:</strong>
-                                <span class="badge ms-2" id="statusBadge{{ appointment['id'] }}" style="background: #B89BA3; color: white; padding: 0.5rem 1rem; font-size: 0.9rem;">
-                                    <i class="fas fa-check-circle me-1"></i>
-                                    Confirmada
-                                </span>
-                            </div>
-                        </div>
-                        
-                        <!-- Botones para Cambiar Estado -->
-                        <div class="mt-3">
-                            <strong class="d-block mb-2"><i class="fas fa-sync-alt me-2"></i>Cambiar Estado de la Cita:</strong>
-                            <div class="d-flex flex-wrap gap-2">
-                                <button class="btn btn-sm change-status-btn" data-appointment-id="{{ appointment['id'] }}" data-new-status="pending" 
-                                        style="background: #FF9800; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px;">
-                                    <i class="fas fa-clock me-1"></i> Marcar como Pendiente
-                                </button>
-                                <button class="btn btn-sm change-status-btn" data-appointment-id="{{ appointment['id'] }}" data-new-status="confirmed" 
-                                        style="background: #B89BA3; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px;">
-                                    <i class="fas fa-check-circle me-1"></i> Marcar como Confirmada
-                                </button>
-                                <button class="btn btn-sm change-status-btn" data-appointment-id="{{ appointment['id'] }}" data-new-status="completed" 
-                                        style="background: #4CAF50; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px;">
-                                    <i class="fas fa-check-double me-1"></i> Marcar como Completada
-                                </button>
-                                <button class="btn btn-sm change-status-btn" data-appointment-id="{{ appointment['id'] }}" data-new-status="cancelled" 
-                                        style="background: #ACACAD; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px;">
-                                    <i class="fas fa-times-circle me-1"></i> Marcar como Cancelada
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    {{ cita_estado_controls(appointment) }}
                 </div>
                 <div class="modal-footer">
                     <a href="tel:{{ appointment['phone'] }}" class="btn btn-success">
@@ -1233,38 +1234,63 @@ document.getElementById('sendReplyBtn').addEventListener('click', function() {
     });
 });
 
-// Cambiar estado de citas desde los modales
-document.querySelectorAll('.change-status-btn').forEach(button => {
+// Cambiar estado de citas desde el modal (sin recargar la página)
+const appointmentStatusConfig = {
+    pending: { color: '#FF9800', icon: 'fa-clock', text: 'Pendiente' },
+    confirmed: { color: '#B89BA3', icon: 'fa-check-circle', text: 'Confirmada' },
+    completed: { color: '#4CAF50', icon: 'fa-check-double', text: 'Completada' },
+    cancelled: { color: '#ACACAD', icon: 'fa-times-circle', text: 'Cancelada' }
+};
+
+function updateAppointmentStatusBadge(appointmentId, newStatus) {
+    const config = appointmentStatusConfig[newStatus];
+    if (!config) return;
+
+    const badge = document.getElementById(`statusBadge${appointmentId}`);
+    if (badge) {
+        badge.style.background = config.color;
+        badge.innerHTML = `<i class="fas ${config.icon} me-1"></i> ${config.text}`;
+    }
+
+    const listBadge = document.querySelector(`.appointment-card[data-appointment-id="${appointmentId}"] .appointment-list-status`);
+    if (listBadge) {
+        listBadge.style.background = config.color;
+        listBadge.innerHTML = `<i class="fas ${config.icon} me-1"></i> ${config.text}`;
+    }
+}
+
+function showAppointmentStatusFeedback(appointmentId, message, isError) {
+    const feedback = document.getElementById(`statusFeedback${appointmentId}`);
+    if (!feedback) return;
+    feedback.className = `appointment-status-feedback small mt-2 ${isError ? 'text-danger' : 'text-success'}`;
+    feedback.innerHTML = message;
+}
+
+document.querySelectorAll('.appointment-status-save-btn').forEach(button => {
     button.addEventListener('click', function() {
         const appointmentId = this.getAttribute('data-appointment-id');
-        const newStatus = this.getAttribute('data-new-status');
-        const btn = this;
-        
-        // Mensajes según el estado
-        const statusMessages = {
-            'pending': 'Pendiente',
-            'confirmed': 'Confirmada',
-            'completed': 'Completada',
-            'cancelled': 'Cancelada'
-        };
-        
-        // Confirmar acción
-        if (!confirm(`¿Estás seguro de que quieres cambiar el estado de esta cita a "${statusMessages[newStatus]}"?`)) {
+        const select = document.getElementById(`statusSelect${appointmentId}`);
+        if (!select) return;
+
+        const newStatus = select.value;
+        const currentStatus = select.dataset.currentStatus || newStatus;
+        const newStatusLabel = appointmentStatusConfig[newStatus]?.text || newStatus;
+
+        if (newStatus === currentStatus) {
+            showAppointmentStatusFeedback(appointmentId, '<i class="fas fa-info-circle me-1"></i>La cita ya tiene ese estado.', false);
             return;
         }
-        
-        // Deshabilitar todos los botones de cambio de estado
-        const allButtons = document.querySelectorAll(`[data-appointment-id="${appointmentId}"].change-status-btn`);
-        allButtons.forEach(b => {
-            b.disabled = true;
-            b.style.opacity = '0.6';
-        });
-        
-        // Cambiar texto del botón actual
-        const originalHTML = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Procesando...';
-        
-        // Hacer la petición
+
+        if (!confirm(`¿Cambiar el estado de esta cita a "${newStatusLabel}"?`)) {
+            return;
+        }
+
+        const saveBtn = this;
+        const originalHTML = saveBtn.innerHTML;
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Guardando...';
+        showAppointmentStatusFeedback(appointmentId, '', false);
+
         fetch(`/admin/appointments/${appointmentId}/status`, {
             method: 'POST',
             headers: {
@@ -1272,68 +1298,41 @@ document.querySelectorAll('.change-status-btn').forEach(button => {
                 'X-Requested-With': 'XMLHttpRequest'
             },
             credentials: 'same-origin',
-            body: JSON.stringify({
-                status: newStatus
-            })
+            body: JSON.stringify({ status: newStatus })
         })
         .then(response => {
-            if (!response.ok) {
-                throw new Error('Error en la respuesta del servidor');
-            }
+            if (!response.ok) throw new Error('Error en la respuesta del servidor');
             return response.json();
         })
         .then(data => {
-            if (data.success) {
-                // Actualizar el badge de estado
-                const statusBadge = document.getElementById(`statusBadge${appointmentId}`);
-                if (statusBadge) {
-                    // Colores y textos según estado
-                    const statusConfig = {
-                        'pending': { color: '#FF9800', icon: 'fa-clock', text: 'Pendiente' },
-                        'confirmed': { color: '#B89BA3', icon: 'fa-check-circle', text: 'Confirmada' },
-                        'completed': { color: '#4CAF50', icon: 'fa-check-double', text: 'Completada' },
-                        'cancelled': { color: '#ACACAD', icon: 'fa-times-circle', text: 'Cancelada' }
-                    };
-                    
-                    const config = statusConfig[newStatus];
-                    statusBadge.style.background = config.color;
-                    statusBadge.innerHTML = `<i class="fas ${config.icon} me-1"></i> ${config.text}`;
-                }
-                
-                // Mostrar mensaje según resultado del email al paciente
-                let alertMsg = `✅ Estado de la cita actualizado a: ${statusMessages[newStatus]}`;
-                if (data.has_patient_email === false) {
-                    alertMsg += '\n\n⚠️ El paciente no tiene email registrado. No se envió notificación.';
-                } else if (data.email_sent === true) {
-                    alertMsg += `\n\n📧 Notificación enviada a: ${data.patient_email}`;
-                } else if (data.email_sent === false) {
-                    alertMsg += `\n\n⚠️ No se pudo enviar el email a ${data.patient_email}. Revisa los logs de Railway y Resend.`;
-                }
-                alert(alertMsg);
-                
-                // Recargar la página para reflejar los cambios
-                location.reload();
-            } else {
-                alert(`❌ Error: ${data.error || 'No se pudo actualizar el estado'}`);
-                
-                // Re-habilitar botones
-                allButtons.forEach(b => {
-                    b.disabled = false;
-                    b.style.opacity = '1';
-                });
-                btn.innerHTML = originalHTML;
+            if (!data.success) {
+                throw new Error(data.error || 'No se pudo actualizar el estado');
             }
+
+            updateAppointmentStatusBadge(appointmentId, newStatus);
+            select.dataset.currentStatus = newStatus;
+
+            let feedback = `<i class="fas fa-check-circle me-1"></i>Estado actualizado a <strong>${newStatusLabel}</strong>.`;
+            if (data.has_patient_email === false) {
+                feedback += ' <span class="text-warning">El paciente no tiene email registrado.</span>';
+            } else if (data.email_sent === true) {
+                feedback += ` <i class="fas fa-envelope me-1"></i>Notificación enviada a ${data.patient_email}.`;
+            } else if (data.email_sent === false) {
+                feedback += ` <span class="text-warning">No se pudo enviar el email a ${data.patient_email}.</span>`;
+            }
+            showAppointmentStatusFeedback(appointmentId, feedback, false);
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('❌ Error al procesar la solicitud. Por favor, intenta de nuevo.');
-            
-            // Re-habilitar botones
-            allButtons.forEach(b => {
-                b.disabled = false;
-                b.style.opacity = '1';
-            });
-            btn.innerHTML = originalHTML;
+            showAppointmentStatusFeedback(
+                appointmentId,
+                `<i class="fas fa-exclamation-circle me-1"></i>${error.message || 'Error al actualizar. Intenta de nuevo.'}`,
+                true
+            );
+        })
+        .finally(() => {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = originalHTML;
         });
     });
 });
