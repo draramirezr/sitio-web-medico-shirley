@@ -536,7 +536,7 @@ RESEND_API_KEY = _clean_env_email('RESEND_API_KEY')
 SENDGRID_API_KEY = _clean_env_email('SENDGRID_API_KEY')
 
 # Email remitente (debe estar verificado en Resend o SendGrid)
-EMAIL_FROM = _clean_env_email('EMAIL_FROM', 'dra.ramirezr@gmail.com') or 'dra.ramirezr@gmail.com'
+EMAIL_FROM = _clean_env_email('EMAIL_FROM', 'info@draramirez.com') or 'info@draramirez.com'
 
 # Email destinatario (donde llegan notificaciones de cita y contacto)
 EMAIL_DESTINATARIO = _clean_env_email('EMAIL_DESTINATARIO', 'dra.ramirezr@gmail.com') or 'dra.ramirezr@gmail.com'
@@ -577,6 +577,9 @@ if EMAIL_CONFIGURED:
     key = RESEND_API_KEY if EMAIL_PROVIDER == 'resend' else SENDGRID_API_KEY
     if key and len(key) > 8:
         print(f"   🔑 API Key: {key[:8]}...{key[-4:]}")
+    if EMAIL_PROVIDER == 'resend' and ('@gmail.' in EMAIL_FROM.lower() or '@hotmail.' in EMAIL_FROM.lower() or '@yahoo.' in EMAIL_FROM.lower()):
+        print("   ⚠️ EMAIL_FROM no puede ser Gmail/Hotmail con Resend.")
+        print("   💡 Usa un correo de tu dominio verificado, ej. info@draramirez.com")
 else:
     print("⚠️ Email NO configurado - revisa RESEND_API_KEY o SENDGRID_API_KEY")
 if SMTP_CONFIGURED:
@@ -2239,7 +2242,7 @@ def _prepare_attachment_bytes(attachment_data):
         return attachment_data.read()
     return attachment_data
 
-def send_email_resend(to_email, subject, html_content, attachment_data=None, attachment_filename=None):
+def send_email_resend(to_email, subject, html_content, attachment_data=None, attachment_filename=None, reply_to=None):
     """Enviar email con Resend API."""
     try:
         if not RESEND_AVAILABLE:
@@ -2255,8 +2258,11 @@ def send_email_resend(to_email, subject, html_content, attachment_data=None, att
             "to": [to_email],
             "subject": subject,
             "html": html_content,
-            "reply_to": EMAIL_FROM,
         }
+        if reply_to:
+            params["reply_to"] = reply_to
+        elif EMAIL_FROM:
+            params["reply_to"] = EMAIL_FROM
         if attachment_data and attachment_filename:
             file_data = _prepare_attachment_bytes(attachment_data)
             params["attachments"] = [{
@@ -2267,11 +2273,15 @@ def send_email_resend(to_email, subject, html_content, attachment_data=None, att
         response = resend.Emails.send(params)
         email_id = response.get('id') if isinstance(response, dict) else getattr(response, 'id', 'ok')
         print(f"✅ Email enviado con Resend (id: {email_id})")
+        print(f"   📧 From: {_email_from_header()}")
         print(f"   📧 To: {to_email}")
         print(f"   📝 Subject: {subject}")
         return True
     except Exception as e:
         print(f"\n❌ Error al enviar email con Resend: {e}")
+        print(f"   📧 From configurado: {_email_from_header()}")
+        print(f"   📧 To: {to_email}")
+        print("   💡 Verifica en Resend: dominio verificado y EMAIL_FROM del mismo dominio.")
         import traceback
         traceback.print_exc()
         return False
@@ -2381,10 +2391,10 @@ def send_email_sendgrid(to_email, subject, html_content, attachment_data=None, a
         
         return False
 
-def send_email_api(to_email, subject, html_content, attachment_data=None, attachment_filename=None):
+def send_email_api(to_email, subject, html_content, attachment_data=None, attachment_filename=None, reply_to=None):
     """Enviar email usando Resend (preferido) o SendGrid."""
     if EMAIL_PROVIDER == 'resend':
-        return send_email_resend(to_email, subject, html_content, attachment_data, attachment_filename)
+        return send_email_resend(to_email, subject, html_content, attachment_data, attachment_filename, reply_to=reply_to)
     if EMAIL_PROVIDER == 'sendgrid':
         return send_email_sendgrid(to_email, subject, html_content, attachment_data, attachment_filename)
     print("\n⚠️ Email no configurado. Define RESEND_API_KEY o SENDGRID_API_KEY.")
@@ -2486,7 +2496,8 @@ def enviar_email_notificacion(name, email, phone, subject, message):
         success = send_email_api(
             to_email=EMAIL_DESTINATARIO,
             subject=f'🔔 Nuevo mensaje: {subject}',
-            html_content=html
+            html_content=html,
+            reply_to=email,
         )
         
         if success:
@@ -2553,7 +2564,8 @@ def enviar_email_cita(first_name, last_name, email, phone, appointment_date, app
         success = send_email_api(
             to_email=EMAIL_DESTINATARIO,
             subject=f'📅 Nueva Solicitud de Cita - {first_name} {last_name}',
-            html_content=html
+            html_content=html,
+            reply_to=email if email else None,
         )
         
         if success:
@@ -2766,12 +2778,10 @@ def contact():
             conn.commit()
             conn.close()
             
-            # Enviar email de notificación de manera asíncrona (no bloquea la respuesta)
-            try:
-                threading.Thread(target=enviar_email_notificacion, args=(name, email, phone, subject, message)).start()
-            except Exception as email_error:
-                # Si falla el email, solo lo registramos pero no detenemos el proceso
-                print(f"⚠️ Error al enviar email (no crítico): {email_error}")
+            # Enviar email de notificación (síncrono para no perderlo en Railway)
+            email_ok = enviar_email_notificacion(name, email, phone, subject, message)
+            if not email_ok:
+                print(f"⚠️ Mensaje guardado (ID contacto) pero email NO enviado a {EMAIL_DESTINATARIO}")
             
             flash('¡Mensaje enviado correctamente! Te contactaremos pronto.', 'success')
             return redirect(url_for('contact'))
@@ -2985,12 +2995,12 @@ def request_appointment():
             conn.commit()
             conn.close()
             
-            # Enviar email de notificación a la doctora de manera asíncrona (no bloquea la respuesta)
-            try:
-                threading.Thread(target=enviar_email_cita, args=(first_name, last_name, email, phone, appointment_date, appointment_time, appointment_type, medical_insurance, emergency_datetime, reason)).start()
-            except Exception as email_error:
-                # Si falla el email, solo lo registramos pero no detenemos el proceso
-                print(f"⚠️ Error al enviar email (no crítico): {email_error}")
+            email_ok = enviar_email_cita(
+                first_name, last_name, email, phone, appointment_date, appointment_time,
+                appointment_type, medical_insurance, emergency_datetime, reason
+            )
+            if not email_ok:
+                print(f"⚠️ Cita guardada pero email NO enviado a {EMAIL_DESTINATARIO}")
             
             flash('¡Cita solicitada correctamente! Te contactaremos para confirmar.', 'success')
             return redirect(url_for('request_appointment'))
