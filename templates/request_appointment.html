@@ -554,6 +554,9 @@ document.addEventListener('DOMContentLoaded', function() {
         serviceDetail.addEventListener('change', mapServiceToAppointmentType);
         mapServiceToAppointmentType();
     }
+
+    window.splitFullNameToHidden = splitFullNameToHidden;
+    window.mapServiceToAppointmentType = mapServiceToAppointmentType;
     
     // Cargar horarios disponibles desde el servidor (solo muestra horarios libres)
     function loadAvailableTimeSlots(fecha, dayOfWeek) {
@@ -623,6 +626,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
+            if (typeof splitFullNameToHidden === 'function') {
+                splitFullNameToHidden();
+            }
+            if (typeof mapServiceToAppointmentType === 'function') {
+                mapServiceToAppointmentType();
+            }
+
             // Deshabilitar botón mientras se procesa
             if (submitBtn) {
                 submitBtn.disabled = true;
@@ -649,8 +659,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     {% else %}
-    // Si no hay reCAPTCHA configurada, enviar normalmente
-    console.log('⚠️ reCAPTCHA no configurada');
+    // Si no hay reCAPTCHA configurada, sincronizar campos antes de enviar
+    const appointmentFormNoCaptcha = document.getElementById('appointmentForm');
+    if (appointmentFormNoCaptcha) {
+        appointmentFormNoCaptcha.addEventListener('submit', function() {
+            if (window.splitFullNameToHidden) window.splitFullNameToHidden();
+            if (window.mapServiceToAppointmentType) window.mapServiceToAppointmentType();
+        });
+    }
     {% endif %}
 </script>
 

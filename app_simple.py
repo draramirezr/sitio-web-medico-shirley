@@ -2266,7 +2266,11 @@ def send_email_resend(to_email, subject, html_content, attachment_data=None, att
             }]
 
         response = resend.Emails.send(params)
-        email_id = response.get('id') if isinstance(response, dict) else getattr(response, 'id', 'ok')
+        email_id = response.get('id') if isinstance(response, dict) else getattr(response, 'id', None)
+        if not email_id:
+            print(f"\n❌ Resend no confirmó el envío. Respuesta: {response}")
+            print(f"   📧 To: {to_email}")
+            return False
         print(f"✅ Email enviado con Resend (id: {email_id})")
         print(f"   📧 From: {_email_from_header()}")
         print(f"   📧 To: {to_email}")
@@ -2575,6 +2579,50 @@ def enviar_email_cita(first_name, last_name, email, phone, appointment_date, app
         traceback.print_exc()
         return False
 
+def _formato_fecha_hora_cita(fecha, hora):
+    """Normalizar fecha/hora (str, date, time, timedelta) para templates de email."""
+    from datetime import date, datetime, time, timedelta
+
+    fecha_fmt = None
+    if fecha is not None and fecha != '':
+        if isinstance(fecha, datetime):
+            fecha_fmt = fecha.strftime('%d/%m/%Y')
+        elif isinstance(fecha, date):
+            fecha_fmt = fecha.strftime('%d/%m/%Y')
+        else:
+            s = str(fecha).strip()
+            if 'T' in s:
+                s = s.split('T')[0]
+            if len(s) >= 10 and s[4] == '-' and s[7] == '-':
+                try:
+                    fecha_fmt = datetime.strptime(s[:10], '%Y-%m-%d').strftime('%d/%m/%Y')
+                except ValueError:
+                    fecha_fmt = s[:10]
+            else:
+                fecha_fmt = s
+
+    hora_fmt = None
+    if hora is not None and hora != '':
+        if isinstance(hora, time):
+            hora_fmt = hora.strftime('%H:%M')
+        elif isinstance(hora, timedelta):
+            total = int(hora.total_seconds())
+            h, rem = divmod(total, 3600)
+            m = rem // 60
+            hora_fmt = f'{h:02d}:{m:02d}'
+        elif isinstance(hora, datetime):
+            hora_fmt = hora.strftime('%H:%M')
+        else:
+            s = str(hora).strip()
+            if 'T' in s and len(s) >= 16:
+                hora_fmt = s[11:16]
+            elif len(s) >= 5 and s[2] == ':':
+                hora_fmt = s[:5]
+            else:
+                hora_fmt = s
+
+    return fecha_fmt, hora_fmt
+
 def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora, tipo, estatus, motivo=None):
     """Enviar email de confirmación de cambio de estatus de cita al paciente (Resend/SendGrid)."""
     try:
@@ -2589,6 +2637,9 @@ def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora
             print("⚠️ El paciente no tiene email registrado — no se puede enviar confirmación.")
             return False
 
+        fecha_fmt, hora_fmt = _formato_fecha_hora_cita(fecha, hora)
+        tipo_fmt = (tipo or 'consulta').strip()
+
         asuntos = {
             'pending': '⏳ Tu Cita está Pendiente de Confirmación',
             'confirmed': '✅ ¡Tu Cita ha sido Confirmada!',
@@ -2596,13 +2647,25 @@ def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora
             'completed': '✔️ Tu Cita ha sido Completada',
         }
 
-        html = template_confirmacion_cita(nombre, apellido, fecha, hora, tipo, estatus, motivo)
+        html = template_confirmacion_cita(nombre, apellido, fecha_fmt, hora_fmt, tipo_fmt, estatus, motivo)
+        subject = asuntos.get(estatus, '📅 Actualización de tu Cita')
+
         success = send_email_api(
             to_email=paciente_email,
-            subject=asuntos.get(estatus, '📅 Actualización de tu Cita'),
+            subject=subject,
             html_content=html,
             reply_to=EMAIL_FROM,
         )
+        if not success and estatus == 'pending':
+            print("   🔁 Reintentando envío al paciente (solicitud de cita)...")
+            import time
+            time.sleep(1.5)
+            success = send_email_api(
+                to_email=paciente_email,
+                subject=subject,
+                html_content=html,
+                reply_to=EMAIL_FROM,
+            )
 
         if success:
             print(f"✅ Confirmación de cita enviada a {paciente_email} ({nombre} {apellido}) — {estatus}")
@@ -2880,6 +2943,7 @@ def request_appointment():
             
             emergency_datetime = sanitize_input(request.form.get('emergency_datetime', ''))
             reason = sanitize_input(request.form.get('reason', ''))
+            service_detail = sanitize_input(request.form.get('service_detail', ''))
 
             # Requerir fecha y hora para servicios normales (no emergencia)
             if appointment_type in ["consulta", "estetico"]:
@@ -2956,23 +3020,34 @@ def request_appointment():
             ''', (first_name, last_name, email_val, phone, appointment_date_val, appointment_time_val, appointment_type, medical_insurance, emergency_datetime_val, reason_val))
             conn.commit()
             conn.close()
-            
+
+            tipo_paciente = service_detail or appointment_type
+            if appointment_type == 'emergencia' and emergency_datetime_val:
+                fecha_paciente = emergency_datetime_val
+                hora_paciente = emergency_datetime_val
+            else:
+                fecha_paciente = appointment_date_val
+                hora_paciente = appointment_time_val
+
+            print(f"\n📬 Enviando confirmación de solicitud al paciente: {email}")
+            paciente_email_ok = enviar_email_confirmacion_cita(
+                email, first_name, last_name,
+                fecha_paciente, hora_paciente, tipo_paciente, 'pending', reason_val
+            )
+            if not paciente_email_ok:
+                print(f"⚠️ Cita guardada pero confirmación NO enviada al paciente {email}")
+
             email_ok = enviar_email_cita(
                 first_name, last_name, email, phone, appointment_date, appointment_time,
                 appointment_type, medical_insurance, emergency_datetime, reason
             )
             if not email_ok:
                 print(f"⚠️ Cita guardada pero email NO enviado a {EMAIL_DESTINATARIO}")
-
-            paciente_email_ok = enviar_email_confirmacion_cita(
-                email_val, first_name, last_name,
-                appointment_date_val or emergency_datetime_val,
-                appointment_time_val, appointment_type, 'pending', reason_val
-            )
-            if not paciente_email_ok:
-                print(f"⚠️ Cita guardada pero confirmación NO enviada al paciente {email_val}")
             
-            flash('¡Cita solicitada correctamente! Te contactaremos para confirmar.', 'success')
+            if paciente_email_ok:
+                flash('¡Cita solicitada correctamente! Te enviamos un correo de confirmación.', 'success')
+            else:
+                flash('¡Cita solicitada correctamente! Si no recibes el correo en unos minutos, revisa spam o contáctanos.', 'warning')
             return redirect(url_for('request_appointment'))
             
         except Exception as e:
