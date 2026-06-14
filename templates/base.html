@@ -1323,15 +1323,80 @@
         }
 
         .site-footer-insurance {
-            margin-top: 28px;
+            margin-top: 32px;
             text-align: center;
         }
 
-        .site-footer-insurance-title {
-            color: rgba(255, 255, 255, 0.9) !important;
+        .site-footer-insurance-card {
+            padding: 26px 24px 22px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.10);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            box-shadow: 0 14px 34px rgba(0, 0, 0, 0.12);
+        }
+
+        .site-footer-insurance-kicker {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            color: rgba(255, 255, 255, 0.88) !important;
+            font-size: 0.78rem !important;
             font-weight: 700 !important;
-            font-size: 0.98rem !important;
-            margin-bottom: 14px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .site-footer-insurance-kicker i {
+            font-size: 0.95rem;
+        }
+
+        .site-footer-insurance-title {
+            color: #fff !important;
+            font-family: "Playfair Display", serif !important;
+            font-weight: 700 !important;
+            font-size: clamp(1.15rem, 2vw, 1.45rem) !important;
+            margin: 0 0 8px;
+            line-height: 1.3;
+        }
+
+        .site-footer-insurance-sub {
+            color: rgba(255, 255, 255, 0.78) !important;
+            font-size: 0.92rem !important;
+            margin: 0 0 18px;
+            line-height: 1.5;
+        }
+
+        .site-footer-insurance-badges {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .site-footer-insurance-badges li {
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.94);
+            color: #8B5A6B !important;
+            font-weight: 700 !important;
+            font-size: 0.82rem !important;
+            line-height: 1.2;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .site-footer-insurance-badges li:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .site-footer-insurance .site-footer-copy {
+            margin-top: 18px;
         }
 
         .site-footer-copy {
@@ -1384,6 +1449,12 @@
             }
             .site-footer-btn:hover,
             .site-footer-btn:active {
+                transform: none !important;
+            }
+            .site-footer-insurance-badges li {
+                transition: none !important;
+            }
+            .site-footer-insurance-badges li:hover {
                 transform: none !important;
             }
         }
@@ -1718,18 +1789,25 @@
                     </a>
                 </div>
 
-                <nav class="site-footer-seo" aria-label="Atención ginecológica por zona y servicio">
-                    <p class="site-footer-seo-title">Atención ginecológica en tu zona</p>
-                    <ul class="site-footer-seo-links">
-                        <li><a href="{{ url_for('seo_ginecologa_santo_domingo') }}">Ginecóloga en Santo Domingo</a></li>
-                        <li><a href="{{ url_for('seo_ginecologo_zona_oriental') }}">Ginecólogo en Zona Oriental</a></li>
-                        <li><a href="{{ url_for('seo_control_embarazo') }}">Control de embarazo</a></li>
-                        <li><a href="{{ url_for('seo_chequeo_ginecologico') }}">Chequeo ginecológico</a></li>
-                    </ul>
-                </nav>
-
                 <div class="site-footer-insurance" aria-label="Seguros médicos disponibles">
-                    <div class="site-footer-insurance-title">Trabajamos con los principales seguros médicos</div>
+                    <div class="site-footer-insurance-card">
+                        <div class="site-footer-insurance-kicker">
+                            <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                            Cobertura ARS
+                        </div>
+                        <h3 class="site-footer-insurance-title">Trabajamos con los principales seguros médicos</h3>
+                        <p class="site-footer-insurance-sub">Atención con seguro autorizado y consultas particulares</p>
+                        <ul class="site-footer-insurance-badges">
+                            <li>SENASA</li>
+                            <li>Humano</li>
+                            <li>Mapfre</li>
+                            <li>Universal</li>
+                            <li>ARS Palic</li>
+                            <li>Asemap</li>
+                            <li>Reservas</li>
+                            <li>Monumental</li>
+                        </ul>
+                    </div>
                     <div class="site-footer-copy" data-nosnippet>
                         {{ site_footer_copyright() }}
                     </div>
