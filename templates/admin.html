@@ -665,7 +665,11 @@
                             </div>
                             <div class="col-md-6 mb-2">
                                 <strong><i class="fas fa-envelope me-2"></i>Email:</strong><br>
+                                {% if appointment['email'] %}
                                 <a href="mailto:{{ appointment['email'] }}">{{ appointment['email'] }}</a>
+                                {% else %}
+                                <span class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i>Sin email — no se puede notificar</span>
+                                {% endif %}
                             </div>
                             <div class="col-md-6 mb-2">
                                 <strong><i class="fas fa-phone me-2"></i>Teléfono:</strong><br>
@@ -771,7 +775,11 @@
                             </div>
                             <div class="col-md-6 mb-2">
                                 <strong><i class="fas fa-envelope me-2"></i>Email:</strong><br>
+                                {% if appointment['email'] %}
                                 <a href="mailto:{{ appointment['email'] }}">{{ appointment['email'] }}</a>
+                                {% else %}
+                                <span class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i>Sin email — no se puede notificar</span>
+                                {% endif %}
                             </div>
                             <div class="col-md-6 mb-2">
                                 <strong><i class="fas fa-phone me-2"></i>Teléfono:</strong><br>
@@ -842,6 +850,10 @@
                                 <button class="btn btn-sm change-status-btn" data-appointment-id="{{ appointment['id'] }}" data-new-status="pending" 
                                         style="background: #FF9800; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px;">
                                     <i class="fas fa-clock me-1"></i> Marcar como Pendiente
+                                </button>
+                                <button class="btn btn-sm change-status-btn" data-appointment-id="{{ appointment['id'] }}" data-new-status="confirmed" 
+                                        style="background: #B89BA3; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px;">
+                                    <i class="fas fa-check-circle me-1"></i> Marcar como Confirmada
                                 </button>
                                 <button class="btn btn-sm change-status-btn" data-appointment-id="{{ appointment['id'] }}" data-new-status="completed" 
                                         style="background: #4CAF50; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px;">
@@ -1288,8 +1300,16 @@ document.querySelectorAll('.change-status-btn').forEach(button => {
                     statusBadge.innerHTML = `<i class="fas ${config.icon} me-1"></i> ${config.text}`;
                 }
                 
-                // Mostrar mensaje de éxito
-                alert(`✅ Estado de la cita actualizado a: ${statusMessages[newStatus]}`);
+                // Mostrar mensaje según resultado del email al paciente
+                let alertMsg = `✅ Estado de la cita actualizado a: ${statusMessages[newStatus]}`;
+                if (data.has_patient_email === false) {
+                    alertMsg += '\n\n⚠️ El paciente no tiene email registrado. No se envió notificación.';
+                } else if (data.email_sent === true) {
+                    alertMsg += `\n\n📧 Notificación enviada a: ${data.patient_email}`;
+                } else if (data.email_sent === false) {
+                    alertMsg += `\n\n⚠️ No se pudo enviar el email a ${data.patient_email}. Revisa los logs de Railway y Resend.`;
+                }
+                alert(alertMsg);
                 
                 // Recargar la página para reflejar los cambios
                 location.reload();

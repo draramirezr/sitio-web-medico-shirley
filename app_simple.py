@@ -2578,12 +2578,15 @@ def enviar_email_cita(first_name, last_name, email, phone, appointment_date, app
 def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora, tipo, estatus, motivo=None):
     """Enviar email de confirmación de cambio de estatus de cita al paciente (Resend/SendGrid)."""
     try:
+        paciente_email = (paciente_email or '').strip().lower()
+        print(f"\n📧 Confirmación cita → paciente: {paciente_email or '(vacío)'} | estatus: {estatus}")
+
         if not EMAIL_CONFIGURED:
-            print("\n⚠️ Email no configurado. Configura RESEND_API_KEY o SENDGRID_API_KEY en Railway.")
+            print("⚠️ Email no configurado. Configura RESEND_API_KEY o SENDGRID_API_KEY en Railway.")
             return False
 
         if not paciente_email:
-            print("\n⚠️ El paciente no tiene email registrado")
+            print("⚠️ El paciente no tiene email registrado — no se puede enviar confirmación.")
             return False
 
         asuntos = {
@@ -2832,7 +2835,7 @@ def request_appointment():
             full_name = sanitize_input(request.form.get('full_name', ''))
             first_name = sanitize_input(request.form.get('first_name', ''))
             last_name = sanitize_input(request.form.get('last_name', ''))
-            email = sanitize_input(request.form.get('email', ''))
+            email = sanitize_input(request.form.get('email', '')).strip().lower()
             phone = sanitize_input(request.form.get('phone', ''))
             appointment_date = sanitize_input(request.form.get('appointment_date', ''))
             appointment_time = sanitize_input(request.form.get('appointment_time', ''))
@@ -2866,9 +2869,9 @@ def request_appointment():
             if not all([first_name, last_name, phone, appointment_type, medical_insurance]):
                 flash('Por favor, completa todos los campos obligatorios.', 'danger')
                 return redirect(url_for('request_appointment'))
-            
-            if email and not validate_email(email):
-                flash('Por favor, ingresa un email válido.', 'danger')
+
+            if not email or not validate_email(email):
+                flash('Por favor, ingresa un email válido para recibir la confirmación de tu cita.', 'danger')
                 return redirect(url_for('request_appointment'))
             
             if len(first_name) > 50 or len(last_name) > 50:
@@ -2960,6 +2963,14 @@ def request_appointment():
             )
             if not email_ok:
                 print(f"⚠️ Cita guardada pero email NO enviado a {EMAIL_DESTINATARIO}")
+
+            paciente_email_ok = enviar_email_confirmacion_cita(
+                email_val, first_name, last_name,
+                appointment_date_val or emergency_datetime_val,
+                appointment_time_val, appointment_type, 'pending', reason_val
+            )
+            if not paciente_email_ok:
+                print(f"⚠️ Cita guardada pero confirmación NO enviada al paciente {email_val}")
             
             flash('¡Cita solicitada correctamente! Te contactaremos para confirmar.', 'success')
             return redirect(url_for('request_appointment'))
@@ -3449,11 +3460,10 @@ def update_appointment_status(appointment_id):
     conn.close()
     
     # Enviar email de confirmación al paciente si tiene email
-    if appointment['email']:
-        # Preparar los datos
+    email_paciente = (appointment.get('email') or '').strip().lower()
+    if email_paciente:
         nombre = appointment['first_name']
         apellido = appointment['last_name']
-        email_paciente = appointment['email']
         fecha = appointment['appointment_date'] if appointment['appointment_date'] else appointment['emergency_datetime']
         hora = appointment['appointment_time']
         tipo = appointment['appointment_type']
@@ -3465,7 +3475,7 @@ def update_appointment_status(appointment_id):
         if email_ok:
             flash(f'Estado de la cita actualizado y notificación enviada a {nombre} {apellido}', 'success')
         else:
-            flash(f'Estado actualizado, pero no se pudo enviar el email a {nombre} {apellido}', 'warning')
+            flash(f'Estado actualizado, pero no se pudo enviar el email a {email_paciente}', 'warning')
     else:
         flash('Estado de la cita actualizado (paciente sin email registrado)', 'warning')
     
@@ -3501,11 +3511,11 @@ def update_appointment_status_ajax(appointment_id):
         conn.commit()
         conn.close()
         
-        # Enviar email de confirmación al paciente si tiene email
-        if appointment['email']:
+        email_paciente = (appointment.get('email') or '').strip().lower()
+        email_ok = False
+        if email_paciente:
             nombre = appointment['first_name']
             apellido = appointment['last_name']
-            email_paciente = appointment['email']
             fecha = appointment['appointment_date'] if appointment['appointment_date'] else appointment['emergency_datetime']
             hora = appointment['appointment_time']
             tipo = appointment['appointment_type']
@@ -3519,7 +3529,9 @@ def update_appointment_status_ajax(appointment_id):
             'success': True,
             'message': f'Estado actualizado a: {new_status}',
             'new_status': new_status,
-            'email_sent': email_ok if appointment['email'] else False,
+            'has_patient_email': bool(email_paciente),
+            'patient_email': email_paciente or None,
+            'email_sent': email_ok if email_paciente else False,
         })
         
     except Exception as e:
