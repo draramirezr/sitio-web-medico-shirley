@@ -150,15 +150,15 @@
         display: inline-block;
     }
 
-    .contact-card a:hover {
-        color: var(--contact-rose);
-        text-decoration: none;
+    .contact-card-link:hover p {
+        color: var(--contact-rose) !important;
     }
 
     .contact-card.contact-card-link {
         display: block;
         color: inherit;
         text-decoration: none;
+        cursor: pointer;
     }
 
     .contact-card.contact-card-link:hover {
@@ -214,6 +214,22 @@
 
     .contact-form-wrap .form-control::placeholder {
         color: #B0B0B0;
+    }
+
+    .contact-form-wrap .form-control.is-invalid {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15);
+    }
+
+    .contact-field-error {
+        color: #dc3545;
+        font-size: 0.82rem;
+        margin-top: 6px;
+        display: none;
+    }
+
+    .contact-field-error.visible {
+        display: block;
     }
 
     .contact-submit-btn {
@@ -325,53 +341,59 @@
                     <h3>Dirección</h3>
                     <p>Av. Sabana Larga 123, Santo Domingo Este 11901</p>
                 </a>
-                            </div>
+            </div>
             <div class="col">
-                <div class="contact-card whatsapp">
+                <a class="contact-card contact-card-link whatsapp"
+                   href="https://wa.me/18297405073"
+                   target="_blank"
+                   rel="noopener noreferrer">
                     <div class="contact-icon-box">
                         <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
                             <path fill="currentColor" d="M19.11 17.45c-.22-.11-1.3-.64-1.5-.71-.2-.07-.35-.11-.5.11-.15.22-.57.71-.7.86-.13.15-.26.17-.48.06-.22-.11-.93-.34-1.77-1.1-.65-.58-1.09-1.3-1.22-1.52-.13-.22-.01-.34.1-.45.1-.1.22-.26.33-.39.11-.13.15-.22.22-.37.07-.15.04-.28-.02-.39-.06-.11-.5-1.21-.69-1.66-.18-.43-.36-.37-.5-.38h-.43c-.15 0-.39.06-.6.28-.2.22-.78.76-.78 1.86s.8 2.16.91 2.31c.11.15 1.58 2.41 3.83 3.37.54.23.96.37 1.29.47.54.17 1.03.15 1.42.09.43-.06 1.3-.53 1.48-1.04.18-.51.18-.95.13-1.04-.05-.09-.2-.15-.41-.26z"/>
                             <path fill="currentColor" d="M16 3C8.82 3 3 8.63 3 15.57c0 2.2.62 4.35 1.8 6.23L3.6 28.6l7.05-1.83c1.82.98 3.87 1.5 5.95 1.5 7.18 0 13-5.63 13-12.57C29.6 8.63 23.18 3 16 3zm0 22.63c-1.88 0-3.72-.5-5.33-1.44l-.38-.22-4.18 1.08 1.12-4.01-.25-.4a10.1 10.1 0 0 1-1.57-5.47C5.41 9.97 10.1 5.45 16 5.45c5.9 0 10.59 4.52 10.59 10.1 0 5.58-4.69 10.08-10.59 10.08z"/>
                         </svg>
-                            </div>
+                    </div>
                     <h3>WhatsApp</h3>
-                    <a href="https://wa.me/18297405073" target="_blank" rel="noopener noreferrer">(829) 740-5073</a>
-                            </div>
-                        </div>
-            <div class="col">
-                <div class="contact-card">
-                    <div class="contact-icon-box">
-                        <i class="fas fa-envelope"></i>
-                        </div>
-                    <h3>Email</h3>
-                    <a href="mailto:dra.ramirezr@gmail.com">dra.ramirezr@gmail.com</a>
-                </div>
+                    <p>(829) 740-5073</p>
+                </a>
             </div>
             <div class="col">
-                <div class="contact-card social">
+                <a class="contact-card contact-card-link"
+                   href="mailto:dra.ramirezr@gmail.com">
+                    <div class="contact-icon-box">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h3>Email</h3>
+                    <p>dra.ramirezr@gmail.com</p>
+                </a>
+            </div>
+            <div class="col">
+                <a class="contact-card contact-card-link social"
+                   href="https://www.linkedin.com/in/shirley-ramirez-montero-a10964168/"
+                   target="_blank"
+                   rel="noopener noreferrer">
                     <div class="contact-icon-box">
                         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                             <path fill="currentColor" d="M22.223 0H1.777C.795 0 0 .774 0 1.727v20.545C0 23.227.795 24 1.777 24h20.446C23.205 24 24 23.227 24 22.273V1.727C24 .774 23.205 0 22.223 0zM7.091 20.452H3.545V9h3.546v11.452zM5.318 7.433a2.059 2.059 0 1 1 0-4.118 2.059 2.059 0 0 1 0 4.118zM20.454 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.36V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.268 2.37 4.268 5.455v6.286z"/>
                         </svg>
                     </div>
                     <h3>LinkedIn</h3>
-                    <a href="https://www.linkedin.com/in/shirley-ramirez-montero-a10964168/" 
-                       target="_blank" 
-                       rel="noopener noreferrer">Shirley Ramírez Montero</a>
-                </div>
+                    <p>Shirley Ramírez Montero</p>
+                </a>
             </div>
             <div class="col">
-                <div class="contact-card social">
+                <a class="contact-card contact-card-link social"
+                   href="https://www.instagram.com/dra.ramirezr/"
+                   target="_blank"
+                   rel="noopener noreferrer">
                     <div class="contact-icon-box">
                         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                             <path fill="currentColor" d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9A5.5 5.5 0 0 1 16.5 22h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2zm0 2A3.5 3.5 0 0 0 4 7.5v9A3.5 3.5 0 0 0 7.5 20h9a3.5 3.5 0 0 0 3.5-3.5v-9A3.5 3.5 0 0 0 16.5 4h-9zm10.25 1.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
                         </svg>
                     </div>
                     <h3>Instagram</h3>
-                    <a href="https://www.instagram.com/dra.ramirezr/" 
-                       target="_blank" 
-                       rel="noopener noreferrer">@dra.ramirezr</a>
-                </div>
+                    <p>@dra.ramirezr</p>
+                </a>
             </div>
         </div>
         
@@ -381,17 +403,27 @@
             <form id="contactForm" method="POST">
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label class="form-label">Nombre Completo *</label>
-                        <input type="text" class="form-control" name="name" placeholder="Tu nombre completo" required>
+                        <label class="form-label" for="contact-name">Nombre Completo *</label>
+                        <input type="text" class="form-control" id="contact-name" name="name"
+                               placeholder="Tu nombre completo" required maxlength="60"
+                               autocomplete="name"
+                               pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+"
+                               title="Solo letras y espacios, máximo 60 caracteres">
+                        <div class="contact-field-error" id="contact-name-error">Solo letras y espacios, máximo 60 caracteres.</div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Correo Electrónico *</label>
                         <input type="email" class="form-control" name="email" placeholder="tu@email.com" required>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Teléfono *</label>
-                        <input type="tel" class="form-control" name="phone" placeholder="(809) 000-0000" required>
-                                </div>
+                        <label class="form-label" for="contact-phone">Teléfono *</label>
+                        <input type="tel" class="form-control" id="contact-phone" name="phone"
+                               placeholder="8090000000" required maxlength="10" inputmode="numeric"
+                               autocomplete="tel"
+                               pattern="[0-9]{10}"
+                               title="10 dígitos numéricos">
+                        <div class="contact-field-error" id="contact-phone-error">Debe tener exactamente 10 dígitos numéricos.</div>
+                    </div>
                     <div class="col-md-6">
                         <label class="form-label">Asunto *</label>
                         <input type="text" class="form-control" name="subject" placeholder="Motivo del mensaje" required>
@@ -431,6 +463,83 @@
 </section>
 
 <script>
+    const CONTACT_NAME_REGEX = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+$/;
+    const CONTACT_PHONE_REGEX = /^\d{10}$/;
+
+    function setContactFieldError(input, errorEl, message, hasError) {
+        if (!input || !errorEl) return hasError;
+        input.classList.toggle('is-invalid', hasError);
+        errorEl.textContent = message;
+        errorEl.classList.toggle('visible', hasError);
+        return hasError;
+    }
+
+    function sanitizeContactName(value) {
+        return value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]/g, '').replace(/\s+/g, ' ').slice(0, 60);
+    }
+
+    function sanitizeContactPhone(value) {
+        return value.replace(/\D/g, '').slice(0, 10);
+    }
+
+    function validateContactForm(showErrors) {
+        const nameInput = document.getElementById('contact-name');
+        const phoneInput = document.getElementById('contact-phone');
+        const nameError = document.getElementById('contact-name-error');
+        const phoneError = document.getElementById('contact-phone-error');
+        let isValid = true;
+
+        if (nameInput) {
+            const name = nameInput.value.trim();
+            const nameInvalid = !name || name.length > 60 || !CONTACT_NAME_REGEX.test(name);
+            if (setContactFieldError(nameInput, nameError, 'Solo letras y espacios, máximo 60 caracteres.', nameInvalid)) {
+                isValid = false;
+            }
+        }
+
+        if (phoneInput) {
+            const phone = phoneInput.value.trim();
+            const phoneInvalid = !CONTACT_PHONE_REGEX.test(phone);
+            if (setContactFieldError(phoneInput, phoneError, 'Debe tener exactamente 10 dígitos numéricos.', phoneInvalid)) {
+                isValid = false;
+            }
+        }
+
+        if (!isValid && showErrors) {
+            const firstInvalid = document.querySelector('#contactForm .is-invalid');
+            if (firstInvalid && typeof firstInvalid.focus === 'function') {
+                firstInvalid.focus();
+            }
+        }
+
+        return isValid;
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const nameInput = document.getElementById('contact-name');
+        const phoneInput = document.getElementById('contact-phone');
+
+        if (nameInput) {
+            nameInput.addEventListener('input', function () {
+                const sanitized = sanitizeContactName(this.value);
+                if (sanitized !== this.value) {
+                    this.value = sanitized;
+                }
+                setContactFieldError(this, document.getElementById('contact-name-error'), '', false);
+            });
+        }
+
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function () {
+                const sanitized = sanitizeContactPhone(this.value);
+                if (sanitized !== this.value) {
+                    this.value = sanitized;
+                }
+                setContactFieldError(this, document.getElementById('contact-phone-error'), '', false);
+            });
+        }
+    });
+
     // reCAPTCHA v3 para formulario de contacto
     console.log('🔐 reCAPTCHA SITE_KEY:', '{{ RECAPTCHA_SITE_KEY }}');
     
@@ -442,6 +551,10 @@
             e.preventDefault();
             const form = this;
             const submitBtn = document.getElementById('submit-btn');
+
+            if (!validateContactForm(true)) {
+                return;
+            }
             
             console.log('📝 Formulario enviado, ejecutando reCAPTCHA v3...');
             
@@ -477,6 +590,14 @@
     }
     {% else %}
     console.log('⚠️ reCAPTCHA no configurada - formulario se enviará sin validación');
+    const contactFormNoCaptcha = document.getElementById('contactForm');
+    if (contactFormNoCaptcha) {
+        contactFormNoCaptcha.addEventListener('submit', function(e) {
+            if (!validateContactForm(true)) {
+                e.preventDefault();
+            }
+        });
+    }
     {% endif %}
 </script>
 {% endblock %}

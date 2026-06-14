@@ -1340,6 +1340,30 @@
             font-size: 0.85rem !important;
         }
 
+        .site-footer-copy a {
+            color: rgba(255, 255, 255, 0.88) !important;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease, text-decoration-color 0.2s ease;
+        }
+
+        .site-footer-copy a:hover,
+        .site-footer-copy a:focus-visible {
+            color: #fff !important;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .site-footer-legal {
+            padding: 18px 0;
+            text-align: center;
+            background: linear-gradient(135deg, #8B5A6B 0%, #6B3A4B 100%);
+        }
+
+        .site-footer-legal .site-footer-copy {
+            margin-top: 0;
+        }
+
         @keyframes siteFooterBtnFloat {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-1px); }
@@ -1656,6 +1680,12 @@
     </main>
 
     {# Pie de página estilo /servicios (solo en páginas públicas) #}
+    {% macro site_footer_copyright() %}
+        &copy; 2026 Dra. Shirley Ramírez. Todos los derechos reservados.
+        <span aria-hidden="true"> | </span>
+        Desarrollado por <a href="https://franciscopaula.com" target="_blank" rel="noopener noreferrer">FranciscoPaula.com</a>
+    {% endmacro %}
+
     {% set SHOW_SITE_FOOTER = request.endpoint in [
         'index', 'services', 'about', 'contact', 'request_appointment', 'aesthetic_treatments',
         'seo_ginecologa_santo_domingo', 'seo_ginecologo_zona_oriental', 'seo_control_embarazo', 'seo_chequeo_ginecologico'
@@ -1701,9 +1731,17 @@
                 <div class="site-footer-insurance" aria-label="Seguros médicos disponibles">
                     <div class="site-footer-insurance-title">Trabajamos con los principales seguros médicos</div>
                     <div class="site-footer-copy" data-nosnippet>
-                        &copy; 2026 Dra. Shirley Ramírez. Todos los derechos reservados.
+                        {{ site_footer_copyright() }}
                     </div>
                 </div>
+            </div>
+        </div>
+    </footer>
+    {% else %}
+    <footer class="site-footer-legal" role="contentinfo">
+        <div class="container">
+            <div class="site-footer-copy" data-nosnippet>
+                {{ site_footer_copyright() }}
             </div>
         </div>
     </footer>

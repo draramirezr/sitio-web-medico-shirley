@@ -684,6 +684,25 @@ def validate_phone(phone):
     phone = re.sub(r'[^\d+]', '', phone)
     return len(phone) >= 10 and len(phone) <= 15
 
+_RE_NOMBRE_CONTACTO = re.compile(r'^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+$')
+_RE_TELEFONO_10 = re.compile(r'^\d{10}$')
+
+def validar_nombre_contacto(name):
+    """Nombre de contacto: solo letras y espacios, máximo 60 caracteres."""
+    name = re.sub(r'\s+', ' ', (name or '').strip())
+    if not name or len(name) > 60:
+        return None
+    if not _RE_NOMBRE_CONTACTO.fullmatch(name):
+        return None
+    return name
+
+def validar_telefono_contacto(phone):
+    """Teléfono de contacto: exactamente 10 dígitos numéricos."""
+    digits = re.sub(r'\D', '', phone or '')
+    if not _RE_TELEFONO_10.fullmatch(digits):
+        return None
+    return digits
+
 def validar_password_segura(password):
     """Validar que la contraseña cumpla con los requisitos de seguridad"""
     errores = []
@@ -2607,11 +2626,21 @@ def contact():
                     request_counts[f'{client_ip}_contact'] = []
                 request_counts[f'{client_ip}_contact'].append(current_time)
             
-            name = request.form['name']
-            email = request.form['email'].strip().lower()  # Normalizar email
-            phone = request.form.get('phone', '')
+            name = request.form.get('name', '')
+            email = request.form.get('email', '').strip().lower()  # Normalizar email
+            phone_raw = request.form.get('phone', '')
             subject = request.form['subject']
             message = request.form['message']
+
+            name = validar_nombre_contacto(name)
+            if not name:
+                flash('El nombre solo puede contener letras y espacios (máximo 60 caracteres).', 'warning')
+                return redirect(url_for('contact'))
+
+            phone = validar_telefono_contacto(phone_raw)
+            if not phone:
+                flash('El teléfono debe tener exactamente 10 dígitos numéricos.', 'warning')
+                return redirect(url_for('contact'))
             
             # Validar Google reCAPTCHA
             recaptcha_response = request.form.get('g-recaptcha-response')
