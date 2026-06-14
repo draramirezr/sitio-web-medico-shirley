@@ -36,16 +36,25 @@ except Exception:
 try:
     from sendgrid import SendGridAPIClient
     from sendgrid.helpers.mail import Mail, Email, To, Content, Attachment, FileContent, FileName, FileType, Disposition, TrackingSettings, ClickTracking
-    import base64
     SENDGRID_AVAILABLE = True
     print("✅ SendGrid API disponible")
 except ImportError:
     SENDGRID_AVAILABLE = False
     print("⚠️ SendGrid no disponible - instalar con: pip install sendgrid")
 
+# Resend — alternativa recomendada (API simple, funciona en Railway)
+try:
+    import resend
+    RESEND_AVAILABLE = True
+    print("✅ Resend API disponible")
+except ImportError:
+    RESEND_AVAILABLE = False
+    print("⚠️ Resend no disponible - instalar con: pip install resend")
+
 # Importar MySQL (obligatorio)
 import pymysql
 pymysql.install_as_MySQLdb()
+import base64
 
 # Función para parsear MySQL URL
 def parse_mysql_url(url):
@@ -511,20 +520,26 @@ def add_security_and_cache_headers(response):
     
     return response
 
-# ============ CONFIGURACIÓN DE EMAIL - SENDGRID API ============
-# SendGrid API (Railway bloquea SMTP, usamos API en su lugar)
+# ============ CONFIGURACIÓN DE EMAIL - RESEND / SENDGRID API ============
+# Railway bloquea SMTP; usamos API (Resend preferido, SendGrid como respaldo)
 
-# API Key de SendGrid (limpiar comillas que Railway agrega automáticamente)
-raw_api_key = os.getenv('SENDGRID_API_KEY')
-SENDGRID_API_KEY = raw_api_key.strip().strip('"').strip("'") if raw_api_key else None
+def _clean_env_email(var_name, default=''):
+    raw = os.getenv(var_name, default)
+    if raw and isinstance(raw, str):
+        return raw.strip().strip('"').strip("'")
+    return default
 
-# Email remitente (debe estar verificado en SendGrid)
-raw_email_from = os.getenv('EMAIL_FROM', 'dra.ramirezr@gmail.com')
-EMAIL_FROM = raw_email_from.strip().strip('"').strip("'") if raw_email_from else 'dra.ramirezr@gmail.com'
+# Resend API Key (https://resend.com/api-keys)
+RESEND_API_KEY = _clean_env_email('RESEND_API_KEY')
 
-# Email destinatario (donde llegan las notificaciones)
-raw_email_dest = os.getenv('EMAIL_DESTINATARIO', 'dra.ramirezr@gmail.com')
-EMAIL_DESTINATARIO = raw_email_dest.strip().strip('"').strip("'") if raw_email_dest else 'dra.ramirezr@gmail.com'
+# SendGrid API Key (respaldo)
+SENDGRID_API_KEY = _clean_env_email('SENDGRID_API_KEY')
+
+# Email remitente (debe estar verificado en Resend o SendGrid)
+EMAIL_FROM = _clean_env_email('EMAIL_FROM', 'dra.ramirezr@gmail.com') or 'dra.ramirezr@gmail.com'
+
+# Email destinatario (donde llegan notificaciones de cita y contacto)
+EMAIL_DESTINATARIO = _clean_env_email('EMAIL_DESTINATARIO', 'dra.ramirezr@gmail.com') or 'dra.ramirezr@gmail.com'
 
 # SMTP (Zoho u otros) — alternativa a SendGrid
 # Zoho: smtp.zoho.com | TLS 587 | SSL 465 | Autenticación: sí
@@ -544,16 +559,26 @@ raw_email_pass = os.getenv('EMAIL_PASSWORD', '')
 EMAIL_PASSWORD = raw_email_pass.strip().strip('"').strip("'") if raw_email_pass else ''
 SMTP_CONFIGURED = bool(EMAIL_HOST and EMAIL_USERNAME and EMAIL_PASSWORD)
 
-# Verificar configuración
-EMAIL_CONFIGURED = bool(SENDGRID_API_KEY and SENDGRID_AVAILABLE)
+# Proveedor de email por API (Resend tiene prioridad)
+if RESEND_API_KEY and RESEND_AVAILABLE:
+    EMAIL_PROVIDER = 'resend'
+    EMAIL_CONFIGURED = True
+elif SENDGRID_API_KEY and SENDGRID_AVAILABLE:
+    EMAIL_PROVIDER = 'sendgrid'
+    EMAIL_CONFIGURED = True
+else:
+    EMAIL_PROVIDER = None
+    EMAIL_CONFIGURED = False
 
 if EMAIL_CONFIGURED:
-    print(f"✅ Email configurado con SendGrid API")
+    print(f"✅ Email configurado con {EMAIL_PROVIDER.upper()} API")
     print(f"   📧 From: {EMAIL_FROM}")
     print(f"   📬 Notificaciones a: {EMAIL_DESTINATARIO}")
-    print(f"   🔑 API Key: {SENDGRID_API_KEY[:10]}...{SENDGRID_API_KEY[-4:] if SENDGRID_API_KEY else ''}")
+    key = RESEND_API_KEY if EMAIL_PROVIDER == 'resend' else SENDGRID_API_KEY
+    if key and len(key) > 8:
+        print(f"   🔑 API Key: {key[:8]}...{key[-4:]}")
 else:
-    print("⚠️ Email NO configurado - revisa SENDGRID_API_KEY")
+    print("⚠️ Email NO configurado - revisa RESEND_API_KEY o SENDGRID_API_KEY")
 if SMTP_CONFIGURED:
     modo = "SSL" if EMAIL_USE_SSL else ("TLS/STARTTLS" if EMAIL_USE_TLS else "sin cifrado extra")
     print(f"✅ SMTP configurado ({EMAIL_HOST}:{EMAIL_PORT}, {modo})")
@@ -2199,8 +2224,57 @@ def testimonials():
     return render_template('testimonials.html', testimonials=testimonials_with_dates)
 
 # ============================================================================
-# FUNCIONES DE ENVÍO DE EMAIL CON SENDGRID API
+# FUNCIONES DE ENVÍO DE EMAIL (RESEND / SENDGRID API)
 # ============================================================================
+
+def _email_from_header():
+    """Formato From para APIs de email."""
+    if EMAIL_FROM and '<' not in EMAIL_FROM:
+        return f"Dra. Shirley Ramírez <{EMAIL_FROM}>"
+    return EMAIL_FROM
+
+def _prepare_attachment_bytes(attachment_data):
+    if isinstance(attachment_data, BytesIO):
+        attachment_data.seek(0)
+        return attachment_data.read()
+    return attachment_data
+
+def send_email_resend(to_email, subject, html_content, attachment_data=None, attachment_filename=None):
+    """Enviar email con Resend API."""
+    try:
+        if not RESEND_AVAILABLE:
+            print("\n⚠️ Resend no está instalado. pip install resend")
+            return False
+        if not RESEND_API_KEY:
+            print("\n⚠️ RESEND_API_KEY no configurada.")
+            return False
+
+        resend.api_key = RESEND_API_KEY
+        params = {
+            "from": _email_from_header(),
+            "to": [to_email],
+            "subject": subject,
+            "html": html_content,
+            "reply_to": EMAIL_FROM,
+        }
+        if attachment_data and attachment_filename:
+            file_data = _prepare_attachment_bytes(attachment_data)
+            params["attachments"] = [{
+                "filename": attachment_filename,
+                "content": base64.b64encode(file_data).decode('ascii'),
+            }]
+
+        response = resend.Emails.send(params)
+        email_id = response.get('id') if isinstance(response, dict) else getattr(response, 'id', 'ok')
+        print(f"✅ Email enviado con Resend (id: {email_id})")
+        print(f"   📧 To: {to_email}")
+        print(f"   📝 Subject: {subject}")
+        return True
+    except Exception as e:
+        print(f"\n❌ Error al enviar email con Resend: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
 
 def send_email_sendgrid(to_email, subject, html_content, attachment_data=None, attachment_filename=None):
     """
@@ -2307,6 +2381,15 @@ def send_email_sendgrid(to_email, subject, html_content, attachment_data=None, a
         
         return False
 
+def send_email_api(to_email, subject, html_content, attachment_data=None, attachment_filename=None):
+    """Enviar email usando Resend (preferido) o SendGrid."""
+    if EMAIL_PROVIDER == 'resend':
+        return send_email_resend(to_email, subject, html_content, attachment_data, attachment_filename)
+    if EMAIL_PROVIDER == 'sendgrid':
+        return send_email_sendgrid(to_email, subject, html_content, attachment_data, attachment_filename)
+    print("\n⚠️ Email no configurado. Define RESEND_API_KEY o SENDGRID_API_KEY.")
+    return False
+
 def enviar_email_pdf_pacientes(medico_email, medico_nombre, pdf_buffer, num_pacientes, total):
     """Enviar email con PDF adjunto de pacientes agregados usando SendGrid API
     También envía copia a todos los médicos facturadores
@@ -2323,7 +2406,7 @@ def enviar_email_pdf_pacientes(medico_email, medico_nombre, pdf_buffer, num_paci
         filename = f'constancia_pacientes_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
         
         # Enviar al médico principal
-        success = send_email_sendgrid(
+        success = send_email_api(
             to_email=medico_email,
             subject=f'📋 Constancia - {num_pacientes} Paciente(s) Pendiente(s) de Facturación',
             html_content=html,
@@ -2359,7 +2442,7 @@ def enviar_email_pdf_pacientes(medico_email, medico_nombre, pdf_buffer, num_paci
                         pdf_copia = BytesIO(pdf_buffer.getvalue())
                         
                         # Enviar copia (sin esperar resultado)
-                        threading.Thread(target=send_email_sendgrid, args=(
+                        threading.Thread(target=send_email_api, args=(
                             med_fac['email'],
                             f'📋 [Copia] Constancia - {num_pacientes} Paciente(s) - {medico_nombre}',
                             html,
@@ -2390,7 +2473,7 @@ def enviar_email_notificacion(name, email, phone, subject, message):
         if not EMAIL_CONFIGURED:
             print("\n⚠️  CONFIGURACIÓN DE EMAIL NECESARIA")
             print("=" * 60)
-            print("Para recibir emails, configura SENDGRID_API_KEY")
+            print("Para recibir emails, configura RESEND_API_KEY (recomendado) o SENDGRID_API_KEY")
             print("=" * 60)
             print("\nPor ahora, el mensaje se guardó en la base de datos.")
             print("=" * 60 + "\n")
@@ -2400,7 +2483,7 @@ def enviar_email_notificacion(name, email, phone, subject, message):
         html = template_contacto(name, email, phone, subject, message)
         
         # Enviar usando SendGrid API
-        success = send_email_sendgrid(
+        success = send_email_api(
             to_email=EMAIL_DESTINATARIO,
             subject=f'🔔 Nuevo mensaje: {subject}',
             html_content=html
@@ -2429,7 +2512,7 @@ def enviar_email_recuperacion(email, nombre, link_recuperacion):
         html = template_recuperacion(nombre, link_recuperacion)
         
         # Enviar con SendGrid API
-        success = send_email_sendgrid(
+        success = send_email_api(
             to_email=email,
             subject='🔐 Recuperación de Contraseña - Panel Administrativo',
             html_content=html
@@ -2467,7 +2550,7 @@ def enviar_email_cita(first_name, last_name, email, phone, appointment_date, app
         )
         
         # Enviar usando SendGrid API
-        success = send_email_sendgrid(
+        success = send_email_api(
             to_email=EMAIL_DESTINATARIO,
             subject=f'📅 Nueva Solicitud de Cita - {first_name} {last_name}',
             html_content=html
@@ -2561,11 +2644,11 @@ def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora
         return False
 
 def send_email(destinatario, asunto, cuerpo):
-    """Función genérica para enviar emails HTML usando SendGrid API"""
+    """Función genérica para enviar emails HTML (wrapper de send_email_api)."""
     try:
         if not EMAIL_CONFIGURED:
             print("\n⚠️ CONFIGURACIÓN DE EMAIL PENDIENTE")
-            print("Por favor, configura SENDGRID_API_KEY")
+            print("Por favor, configura RESEND_API_KEY o SENDGRID_API_KEY")
             return False
         
         # Verificar que el destinatario tenga email
@@ -2579,8 +2662,7 @@ def send_email(destinatario, asunto, cuerpo):
         print(f"📧 Destinatario: {destinatario}")
         print(f"📝 Asunto: {asunto}")
         
-        # Enviar con SendGrid API
-        success = send_email_sendgrid(
+        success = send_email_api(
             to_email=destinatario,
             subject=asunto,
             html_content=cuerpo
@@ -3766,7 +3848,7 @@ def reply_to_message(message_id):
         """
         
         # Enviar email usando SendGrid
-        success = send_email_sendgrid(
+        success = send_email_api(
             to_email=to_email,
             subject=subject,
             html_content=html_content
@@ -7419,7 +7501,7 @@ def enviar_email_factura(destinatario, factura_id, ncf, pdf_buffer, monto_total=
         filename = f'Factura_{ncf}_{factura_id}.pdf'
         
         # Enviar con SendGrid API
-        success = send_email_sendgrid(
+        success = send_email_api(
             to_email=destinatario,
             subject=f'💰 Factura #{factura_id} - NCF: {ncf}',
             html_content=html,
@@ -9207,7 +9289,7 @@ def admin_usuarios_editar(usuario_id):
                 def enviar_email_async():
                     try:
                         html = template_nueva_contrasena(nombre, email, password)
-                        send_email_sendgrid(
+                        send_email_api(
                             to_email=email,
                             subject='🔐 Nueva Contraseña Temporal - Panel Administrativo',
                             html_content=html
@@ -9264,7 +9346,7 @@ if __name__ == '__main__':
     print("="*60)
     print(f"🌐 Entorno: {'PRODUCCIÓN' if not debug else 'DESARROLLO'}")
     print(f"🌐 Host: {host}:{port}")
-    print(f"📧 Email configurado (SendGrid): {'✅ SÍ' if EMAIL_CONFIGURED else '❌ NO'}")
+    print(f"📧 Email ({EMAIL_PROVIDER or 'sin configurar'}): {'✅ SÍ' if EMAIL_CONFIGURED else '❌ NO'}")
     print(f"📄 PDF disponible: {'✅ SÍ' if REPORTLAB_AVAILABLE else '❌ NO'}")
     print(f"🔒 Seguridad: {'✅ ACTIVADA' if not debug else '⚠️ DESARROLLO'}")
     print("="*60 + "\n")
