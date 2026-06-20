@@ -7327,7 +7327,7 @@ def generar_excel_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=Non
         # Datos de columna 1
         col1_row_start = row
         ws.merge_cells(f'A{row}:B{row}')
-        ws[f'A{row}'] = f'Fecha: {fecha}'
+        ws[f'A{row}'] = f'Fecha: {formato_fecha_pdf(fecha)}'
         ws[f'A{row}'].font = normal_font
         ws[f'A{row}'].border = thin_border
         row += 1
@@ -7363,7 +7363,7 @@ def generar_excel_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=Non
         
         if ncf_fecha_fin:
             ws.merge_cells(f'C{row_ncf}:D{row_ncf}')
-            ws[f'C{row_ncf}'] = f'Válido hasta: {ncf_fecha_fin}'
+            ws[f'C{row_ncf}'] = f'Válido hasta: {formato_fecha_pdf(ncf_fecha_fin)}'
             ws[f'C{row_ncf}'].font = normal_font
             ws[f'C{row_ncf}'].border = thin_border
         
@@ -7413,7 +7413,8 @@ def generar_excel_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=Non
         ws.cell(row=row, column=1, value=idx)
         ws.cell(row=row, column=2, value=paciente['nombre_paciente'])
         ws.cell(row=row, column=3, value=paciente['nss'])
-        ws.cell(row=row, column=4, value=paciente['fecha_servicio'])
+        fecha_cell = ws.cell(row=row, column=4, value=formato_fecha_pdf(paciente['fecha_servicio']))
+        fecha_cell.number_format = '@'
         ws.cell(row=row, column=5, value=paciente['autorizacion'])
         ws.cell(row=row, column=6, value=paciente['descripcion_servicio'])
         ws.cell(row=row, column=7, value=float(paciente['monto']))
@@ -7850,6 +7851,85 @@ def facturacion_editar_factura(factura_id):
                          pacientes_pendientes=pacientes_pendientes,
                          dias_restantes=dias_restantes,
                          dias_transcurridos=dias_transcurridos)
+
+@app.route('/facturacion/editar-factura/<int:factura_id>/actualizar-monto', methods=['POST'])
+@login_required
+def facturacion_actualizar_monto_detalle(factura_id):
+    """Actualizar monto de una línea de factura sin salir de la pantalla de edición."""
+    from datetime import datetime, timedelta
+
+    data = request.get_json(silent=True) or {}
+    detalle_id = data.get('detalle_id')
+    monto_raw = data.get('monto')
+
+    try:
+        detalle_id = int(detalle_id)
+        monto = float(str(monto_raw).replace(',', '').strip())
+    except (TypeError, ValueError):
+        return jsonify({'success': False, 'error': 'Monto inválido'}), 400
+
+    if monto < 0:
+        return jsonify({'success': False, 'error': 'El monto no puede ser negativo'}), 400
+
+    conn = get_db_connection()
+    try:
+        factura = conn.execute(
+            'SELECT id, fecha_factura FROM facturas WHERE id = %s AND activo = 1',
+            (factura_id,)
+        ).fetchone()
+        if not factura:
+            return jsonify({'success': False, 'error': 'Factura no encontrada'}), 404
+
+        fecha_factura = datetime.strptime(str(factura['fecha_factura']), '%Y-%m-%d')
+        if datetime.now() > fecha_factura + timedelta(days=30):
+            return jsonify({'success': False, 'error': 'Esta factura ya no se puede editar (más de 30 días)'}), 403
+
+        detalle = conn.execute('''
+            SELECT id, monto FROM facturas_detalle
+            WHERE id = %s AND factura_id = %s AND estado = 'facturado'
+        ''', (detalle_id, factura_id)).fetchone()
+        if not detalle:
+            return jsonify({'success': False, 'error': 'Paciente no encontrado en esta factura'}), 404
+
+        conn.execute('UPDATE facturas_detalle SET monto = %s WHERE id = %s', (monto, detalle_id))
+
+        total_result = conn.execute('''
+            SELECT COALESCE(SUM(monto), 0) as total
+            FROM facturas_detalle
+            WHERE factura_id = %s AND estado = 'facturado'
+        ''', (factura_id,)).fetchone()
+        nuevo_total = float(total_result['total']) if total_result['total'] else 0.0
+
+        conn.execute('UPDATE facturas SET total = %s WHERE id = %s', (nuevo_total, factura_id))
+
+        observacion = (
+            f"Monto actualizado (detalle #{detalle_id}: "
+            f"RD${float(detalle['monto']):,.2f} → RD${monto:,.2f}) "
+            f"por {current_user.nombre}. Nuevo total: RD${nuevo_total:,.2f}"
+        )
+        conn.execute('''
+            UPDATE facturas
+            SET observaciones = CONCAT(COALESCE(observaciones, ''), '\n[', NOW(), '] ', %s)
+            WHERE id = %s
+        ''', (observacion, factura_id))
+
+        conn.commit()
+
+        return jsonify({
+            'success': True,
+            'monto': monto,
+            'monto_formatted': f'RD$ {monto:,.2f}',
+            'total': nuevo_total,
+            'total_formatted': f'RD$ {nuevo_total:,.2f}',
+        })
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error al actualizar monto: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        conn.close()
 
 @app.route('/facturacion/dashboard')
 @login_required

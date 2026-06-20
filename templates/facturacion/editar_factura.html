@@ -113,11 +113,92 @@
         cursor: pointer;
         white-space: nowrap;
     }
+
+    .btn-accion-icon {
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        border: none;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        vertical-align: middle;
+    }
+
+    .btn-accion-icon i {
+        font-size: 0.85rem;
+        margin: 0;
+    }
+
+    .btn-editar-monto {
+        background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%);
+        color: white;
+        margin-right: 0.35rem;
+    }
+
+    .btn-editar-monto:hover,
+    .btn-editar-monto.activo {
+        background: linear-gradient(135deg, #B89BA3 0%, #A88B8F 100%);
+        transform: translateY(-1px);
+    }
+
+    .btn-eliminar-paciente.btn-accion-icon {
+        background: linear-gradient(135deg, #ACACAD 0%, #9A9A9B 100%);
+        color: white;
+        padding: 0;
+    }
+
+    .btn-eliminar-paciente.btn-accion-icon:hover {
+        background: linear-gradient(135deg, #9A9A9B 0%, #8A8A8B 100%);
+        transform: translateY(-1px);
+    }
+
+    .btn-eliminar-paciente.btn-accion-icon.marcado {
+        background: linear-gradient(135deg, #cc0000 0%, #990000 100%);
+    }
+
+    .celda-monto .monto-edit-wrapper {
+        display: none;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.35rem;
+    }
+
+    .celda-monto.editando .monto-display {
+        display: none;
+    }
+
+    .celda-monto.editando .monto-edit-wrapper {
+        display: inline-flex;
+    }
+
+    .celda-monto .monto-input {
+        width: 110px;
+        text-align: right;
+        font-size: 0.85rem;
+    }
+
+    .btn-guardar-monto-inline {
+        background: #4CAF50;
+        color: white;
+    }
+
+    .btn-cancelar-monto-inline {
+        background: #ACACAD;
+        color: white;
+    }
+
+    .celda-acciones {
+        white-space: nowrap;
+    }
     
     .btn-agregar-paciente i,
     .btn-eliminar-paciente i {
         font-size: 0.7rem;
-        margin-right: 0.2rem;
+        margin-right: 0;
     }
     
     .btn-agregar-paciente {
@@ -555,7 +636,7 @@
             </div>
             <div class="info-item">
                 <label>Total Actual</label>
-                <div class="valor">RD$ {{ "{:,.2f}".format(factura['total']) }}</div>
+                <div class="valor" id="totalFacturaActual">RD$ {{ "{:,.2f}".format(factura['total']) }}</div>
             </div>
         </div>
     </div>
@@ -585,8 +666,8 @@
                             <th>Fecha Servicio</th>
                             <th>Médico Consulta</th>
                             <th>Servicio</th>
-                            <th>Monto</th>
-                            <th style="width: 120px;">Acción</th>
+                            <th style="width: 140px;">Monto</th>
+                            <th style="width: 90px;">Acción</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -598,10 +679,33 @@
                             <td>{{ paciente['fecha_servicio']|fecha_es }}</td>
                             <td>{{ paciente['medico_nombre'] }}</td>
                             <td>{{ paciente['servicio_nombre'] or 'N/A' }}</td>
-                            <td class="text-end">RD$ {{ "{:,.2f}".format(paciente['monto']) }}</td>
-                            <td class="text-center">
-                                <button type="button" class="btn-eliminar-paciente" onclick="marcarParaEliminar({{ paciente['id'] }})">
-                                    <i class="fas fa-trash"></i> Eliminar
+                            <td class="text-end celda-monto" id="celda-monto-{{ paciente['id'] }}">
+                                <span class="monto-display">RD$ {{ "{:,.2f}".format(paciente['monto']) }}</span>
+                                <div class="monto-edit-wrapper">
+                                    <input type="number" class="form-control form-control-sm monto-input"
+                                           id="monto-input-{{ paciente['id'] }}"
+                                           value="{{ paciente['monto'] }}" min="0" step="0.01"
+                                           aria-label="Monto">
+                                    <button type="button" class="btn-accion-icon btn-guardar-monto-inline"
+                                            onclick="guardarMonto({{ paciente['id'] }})" title="Guardar monto">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button type="button" class="btn-accion-icon btn-cancelar-monto-inline"
+                                            onclick="cancelarEdicionMonto({{ paciente['id'] }})" title="Cancelar">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td class="text-center celda-acciones">
+                                <button type="button" class="btn-accion-icon btn-editar-monto"
+                                        id="btn-editar-{{ paciente['id'] }}"
+                                        onclick="toggleEditarMonto({{ paciente['id'] }})" title="Editar monto">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </button>
+                                <button type="button" class="btn-accion-icon btn-eliminar-paciente"
+                                        id="btn-eliminar-{{ paciente['id'] }}"
+                                        onclick="marcarParaEliminar({{ paciente['id'] }})" title="Eliminar">
+                                    <i class="fas fa-trash"></i>
                                 </button>
                             </td>
                         </tr>
@@ -683,9 +787,90 @@
 </div>
 
 <script>
+const FACTURA_ID = {{ factura['id'] }};
+
 // Arrays para almacenar los cambios
 let pacientesAgregar = [];
 let pacientesEliminar = [];
+
+function formatMontoDisplay(valor) {
+    return 'RD$ ' + Number(valor).toLocaleString('es-DO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function toggleEditarMonto(pacienteId) {
+    const celda = document.getElementById(`celda-monto-${pacienteId}`);
+    const btnEditar = document.getElementById(`btn-editar-${pacienteId}`);
+    const input = document.getElementById(`monto-input-${pacienteId}`);
+    if (!celda || !input) return;
+
+    const editando = celda.classList.toggle('editando');
+    if (btnEditar) btnEditar.classList.toggle('activo', editando);
+    if (editando) {
+        input.focus();
+        input.select();
+    }
+}
+
+function cancelarEdicionMonto(pacienteId) {
+    const row = document.getElementById(`row-factura-${pacienteId}`);
+    const input = document.getElementById(`monto-input-${pacienteId}`);
+    const celda = document.getElementById(`celda-monto-${pacienteId}`);
+    const btnEditar = document.getElementById(`btn-editar-${pacienteId}`);
+    if (!row || !input || !celda) return;
+
+    input.value = row.dataset.monto;
+    celda.classList.remove('editando');
+    if (btnEditar) btnEditar.classList.remove('activo');
+}
+
+async function guardarMonto(pacienteId) {
+    const row = document.getElementById(`row-factura-${pacienteId}`);
+    const input = document.getElementById(`monto-input-${pacienteId}`);
+    const celda = document.getElementById(`celda-monto-${pacienteId}`);
+    const display = celda ? celda.querySelector('.monto-display') : null;
+    const btnEditar = document.getElementById(`btn-editar-${pacienteId}`);
+    if (!row || !input || !display) return;
+
+    const monto = parseFloat(input.value);
+    if (isNaN(monto) || monto < 0) {
+        alert('Ingrese un monto válido (número mayor o igual a 0).');
+        return;
+    }
+
+    const montoAnterior = parseFloat(row.dataset.monto);
+    if (monto === montoAnterior) {
+        cancelarEdicionMonto(pacienteId);
+        return;
+    }
+
+    try {
+        const response = await fetch(`/facturacion/editar-factura/${FACTURA_ID}/actualizar-monto`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({ detalle_id: pacienteId, monto: monto })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+            throw new Error(data.error || 'No se pudo actualizar el monto');
+        }
+
+        row.dataset.monto = monto;
+        display.textContent = data.monto_formatted || formatMontoDisplay(monto);
+        const totalEl = document.getElementById('totalFacturaActual');
+        if (totalEl && data.total_formatted) {
+            totalEl.textContent = data.total_formatted;
+        }
+        celda.classList.remove('editando');
+        if (btnEditar) btnEditar.classList.remove('activo');
+    } catch (error) {
+        console.error(error);
+        alert('❌ ' + (error.message || 'Error al guardar el monto'));
+    }
+}
 
 function marcarParaAgregar(pacienteId) {
     const row = document.getElementById(`row-pendiente-${pacienteId}`);
@@ -711,20 +896,23 @@ function marcarParaAgregar(pacienteId) {
 
 function marcarParaEliminar(pacienteId) {
     const row = document.getElementById(`row-factura-${pacienteId}`);
-    const btn = row.querySelector('.btn-eliminar-paciente');
+    const btn = document.getElementById(`btn-eliminar-${pacienteId}`);
     
     if (pacientesEliminar.includes(pacienteId)) {
-        // Ya está marcado, desmarcar
         pacientesEliminar = pacientesEliminar.filter(id => id !== pacienteId);
-        btn.innerHTML = '<i class="fas fa-trash"></i> Eliminar';
-        btn.style.background = 'linear-gradient(135deg, #ff4444 0%, #cc0000 100%)';
+        if (btn) {
+            btn.classList.remove('marcado');
+            btn.innerHTML = '<i class="fas fa-trash"></i>';
+        }
         row.style.background = '';
     } else {
-        // Marcar para eliminar
         pacientesEliminar.push(pacienteId);
-        btn.innerHTML = '<i class="fas fa-check"></i> Marcado';
-        btn.style.background = 'linear-gradient(135deg, #cc0000 0%, #990000 100%)';
+        if (btn) {
+            btn.classList.add('marcado');
+            btn.innerHTML = '<i class="fas fa-check"></i>';
+        }
         row.style.background = 'rgba(255, 68, 68, 0.1)';
+        cancelarEdicionMonto(pacienteId);
     }
     
     actualizarContadores();
@@ -778,6 +966,21 @@ document.getElementById('formEditarFactura').addEventListener('submit', function
 
 // Inicializar contadores
 actualizarContadores();
+
+document.querySelectorAll('.monto-input').forEach(input => {
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const id = this.id.replace('monto-input-', '');
+            guardarMonto(parseInt(id, 10));
+        }
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            const id = this.id.replace('monto-input-', '');
+            cancelarEdicionMonto(parseInt(id, 10));
+        }
+    });
+});
 </script>
 
 {% endblock %}
