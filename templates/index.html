@@ -15,7 +15,7 @@
 {% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/home.min.css') }}">
+{# home.min.css quitado: duplicaba estilos, añadía ~20KB y fade-in con opacity:0 (mata LCP) #}
 
 {# Imágenes (se usan en secciones de inicio) #}
 {% set GYNECOLOGY_IMAGE = url_for('static', filename='images/servicios-ginecologia-general.webp') ~ '?v=1' %}

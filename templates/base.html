@@ -1,28 +1,40 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <!-- Google Tag Manager -->
-    <script>
-    (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-WHS5RKP2');
-    </script>
-    <!-- End Google Tag Manager -->
-
-    {% if not current_user.is_authenticated and google_gtag_loader_id %}
-    <!-- Google tag (gtag.js) + Google Ads -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ google_gtag_loader_id }}"></script>
+    {# GTM/gtag diferidos: no deben competir con LCP del hero en móvil #}
     <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    {% if google_tag_id %}gtag('config', '{{ google_tag_id }}');{% endif %}
-    {% if google_ads_id %}gtag('config', '{{ google_ads_id }}');{% endif %}
-    window.GOOGLE_ADS_CONVERSION_SEND_TO = '{{ google_ads_conversion_send_to }}';
+    window.GOOGLE_ADS_CONVERSION_SEND_TO = {{ (google_ads_conversion_send_to or '')|tojson }};
+    (function () {
+        var loaded = false;
+        function loadMarketing() {
+            if (loaded) return;
+            loaded = true;
+            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','GTM-WHS5RKP2');
+            {% if not current_user.is_authenticated and google_gtag_loader_id %}
+            var g = document.createElement('script');
+            g.async = true;
+            g.src = 'https://www.googletagmanager.com/gtag/js?id={{ google_gtag_loader_id }}';
+            g.onload = function () {
+                gtag('js', new Date());
+                {% if google_tag_id %}gtag('config', '{{ google_tag_id }}');{% endif %}
+                {% if google_ads_id %}gtag('config', '{{ google_ads_id }}');{% endif %}
+            };
+            document.head.appendChild(g);
+            {% endif %}
+        }
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(loadMarketing, { timeout: 3500 });
+        } else {
+            window.addEventListener('load', function () { setTimeout(loadMarketing, 1200); });
+        }
+    })();
     </script>
-    {% endif %}
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -227,13 +239,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
-    <!-- Google Fonts (evitar @import en CSS para reducir bloqueo) -->
+    <!-- Fuentes: solo pesos usados en hero/UI; carga no bloqueante -->
     <link rel="preload"
           as="style"
-          href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&family=Montserrat:wght@600;700&family=Playfair+Display:wght@700&display=swap"
           onload="this.onload=null;this.rel='stylesheet'">
     <noscript>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&family=Montserrat:wght@600;700&family=Playfair+Display:wght@700&display=swap">
     </noscript>
     
     <!-- CSS base -->
@@ -241,15 +253,18 @@
     
     <!-- Font Awesome -->
     {% if current_user.is_authenticated %}
-    <!-- Admin: cargar set completo para evitar iconos faltantes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     {% else %}
-    <!-- Público: subset local para performance -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome-minimal.min.css') }}?v=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome-minimal.min.css') }}?v=2">
     {% endif %}
     
-    <!-- CSS local (bundle) -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/site-bundle.css') }}?v=4.0">
+    {% if current_user.is_authenticated %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/site-bundle.css') }}?v=4.1">
+    {% else %}
+    {# Público: no bloquear LCP con 98KB de CSS secundario #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/site-bundle.css') }}?v=4.1" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/site-bundle.css') }}?v=4.1"></noscript>
+    {% endif %}
     
     <!-- Estilos Críticos Inline - Prevenir FOUC (Flash of Unstyled Content) -->
     <style>
@@ -1905,6 +1920,12 @@
 
     <script>
         (function () {
+            // Diferir el chatbot: no competir con LCP del hero
+            var booted = false;
+            function bootChatbot() {
+                if (booted) return;
+                booted = true;
+                var run = function () {
             const WA_NUMBER = '18297405073';
             const DEFAULT_ADDRESS = {{ site_address|tojson }};
             const DEFAULT_MAPS_QUERY = {{ site_plus_code|tojson }};
@@ -3724,6 +3745,25 @@
 
                 send(value);
             });
+                }; // end run
+                run();
+            }
+            function scheduleChatbot() {
+                if ('requestIdleCallback' in window) {
+                    requestIdleCallback(bootChatbot, { timeout: 4000 });
+                } else {
+                    window.addEventListener('load', function () { setTimeout(bootChatbot, 1500); });
+                }
+                // Si el usuario abre el chat antes, arrancar ya
+                document.addEventListener('click', function early(e) {
+                    var t = e.target && e.target.closest ? e.target.closest('#chatbotToggle, .chatbot-float') : null;
+                    if (t) {
+                        document.removeEventListener('click', early, true);
+                        bootChatbot();
+                    }
+                }, true);
+            }
+            scheduleChatbot();
         })();
     </script>
     
