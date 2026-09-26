@@ -10,8 +10,8 @@
 {% block twitter_description %}Atención ginecológica y obstétrica en Santo Domingo Este (Zona Oriental). Agenda tu cita.{% endblock %}
 
 {% block extra_meta %}
-  {# Preload solo de la imagen LCP real (foto del hero), no del fondo #}
-  <link rel="preload" as="image" href="{{ url_for('static', filename='images/dra-shirley-hero-lcp.webp') }}?v=1" fetchpriority="high" type="image/webp">
+  {# Preload = misma imagen del <img> hero (LCP). No precarregar el fondo 443KB. #}
+  <link rel="preload" as="image" href="{{ url_for('static', filename='images/dra-shirley-hero-lcp.webp') }}?v=3" fetchpriority="high" type="image/webp">
 {% endblock %}
 
 {% block content %}
@@ -39,17 +39,14 @@
         content: "";
         position: absolute;
         inset: 0;
-        /* Fondo ligero (~30KB). En móvil se desactiva para no competir con el LCP. */
-        background-image: url('{{ url_for('static', filename='images/dra-shirley-hero-bg.webp') }}?v=1');
+        /* Fondo liviano (~30KB). Evitar profesional.jpg (1.4MB) / .webp (443KB). */
+        background-image: url('{{ url_for('static', filename='images/dra-shirley-hero-bg.webp') }}?v=3');
         background-size: cover;
         background-position: var(--home-hero-bg-pos, 50% 18%);
         opacity: var(--home-hero-bg-opacity, 0.32);
         filter: saturate(1.02) contrast(1.02);
         transform: scale(1.02);
         pointer-events: none;
-    }
-    @media (max-width: 991px) {
-        .home-hero::after { display: none; }
     }
 
     .home-hero .container {
@@ -1708,11 +1705,15 @@
                     </a>
                 </div>
             </div>
+            {# Sin fade-in-up: opacity:0 retrasa el LCP hasta que corre JS #}
             <div class="home-hero-photo">
                 <picture>
-                    <source srcset="{{ url_for('static', filename='images/dra-shirley-hero-lcp.webp') }}?v=1" type="image/webp">
+                    <source
+                        type="image/webp"
+                        srcset="{{ url_for('static', filename='images/dra-shirley-hero-lcp.webp') }}?v=3"
+                    >
                     <img
-                        src="{{ url_for('static', filename='images/dra-shirley-hero-lcp.jpg') }}?v=1"
+                        src="{{ url_for('static', filename='images/dra-shirley-hero-lcp.jpg') }}?v=3"
                         alt="Dra. Shirley Ramírez, ginecóloga y obstetra en Santo Domingo Este"
                         width="800"
                         height="1200"

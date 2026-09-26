@@ -227,13 +227,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
-    <!-- Google Fonts: menos pesos = menos bloqueo en móvil -->
+    <!-- Google Fonts (evitar @import en CSS para reducir bloqueo) -->
     <link rel="preload"
           as="style"
-          href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&family=Playfair+Display:wght@700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap"
           onload="this.onload=null;this.rel='stylesheet'">
     <noscript>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&family=Playfair+Display:wght@700&display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap">
     </noscript>
     
     <!-- CSS base -->
@@ -251,8 +251,13 @@
     <!-- CSS local (bundle) -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/site-bundle.css') }}?v=4.0">
     
-    <!-- Estilos críticos: sin ocultar el body (el loader FOUC empeoraba FCP/LCP) -->
+    <!-- Estilos Críticos Inline - Prevenir FOUC (Flash of Unstyled Content) -->
     <style>
+        /* Contenido visible de inmediato (opacity:0 + loader mataban FCP/LCP en PageSpeed) */
+        body {
+            opacity: 1;
+        }
+        
         /* Estilos base críticos para prevenir layout shift */
         * {
             box-sizing: border-box;
