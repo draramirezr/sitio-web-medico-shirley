@@ -2,17 +2,10 @@
 
 {% block title %}Contacto - Dra. Shirley Ramírez | Agenda tu Cita en Santo Domingo 📞 829-740-5073{% endblock %}
 
-{% block description %}Contacta a la Dra. Shirley Ramírez - Ginecóloga en Santo Domingo. 📞 829-740-5073 | 📧 dra.ramirezr@gmail.com | 📍 República Dominicana, Santo Domingo. Agenda tu cita hoy. Horarios flexibles y atención inmediata.{% endblock %}
+{% block description %}Contacta a la Dra. Shirley Ramírez - Ginecóloga en Santo Domingo. 📞 829-740-5073 | 📍 Av. Sabana Larga 123, Santo Domingo Este. Agenda tu cita hoy.{% endblock %}
 
 {% block og_title %}Contacto - Agenda tu Cita con Dra. Shirley Ramírez | Santo Domingo{% endblock %}
-{% block og_description %}Contacta a la mejor ginecóloga en Santo Domingo. Teléfono: 829-740-5073. Ubicación: República Dominicana. Agenda tu cita hoy y recibe atención personalizada.{% endblock %}
-
-{% block extra_head %}
-<!-- Google reCAPTCHA v3 -->
-{% if RECAPTCHA_SITE_KEY %}
-<script src="https://www.google.com/recaptcha/api.js?render={{ RECAPTCHA_SITE_KEY }}"></script>
-{% endif %}
-{% endblock %}
+{% block og_description %}Contacta a la mejor ginecóloga en Santo Domingo. Teléfono: 829-740-5073. Agenda tu cita hoy y recibe atención personalizada.{% endblock %}
 
 {% block content %}
 <style>
@@ -329,7 +322,7 @@
 <!-- Contact Cards + Map + Form (misma lógica) -->
 <section class="contact-section">
     <div class="container">
-        <div class="row contact-cards-row row-cols-1 row-cols-sm-2 row-cols-lg-5 g-4 mb-5">
+        <div class="row contact-cards-row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4 mb-5">
             <div class="col">
                 <a class="contact-card contact-card-link"
                    href="{{ google_review_url }}"
@@ -370,16 +363,6 @@
                 </a>
             </div>
             <div class="col">
-                <a class="contact-card contact-card-link"
-                   href="mailto:dra.ramirezr@gmail.com">
-                    <div class="contact-icon-box">
-                        <i class="fas fa-envelope"></i>
-                    </div>
-                    <h3>Email</h3>
-                    <p>dra.ramirezr@gmail.com</p>
-                </a>
-            </div>
-            <div class="col">
                 <a class="contact-card contact-card-link social"
                    href="https://www.linkedin.com/in/shirley-ramirez-montero-a10964168/"
                    target="_blank"
@@ -408,58 +391,9 @@
                 </a>
             </div>
         </div>
-        
-        <!-- Formulario (mantener lógica POST + reCAPTCHA) -->
-        <div class="contact-form-wrap">
-            <h2 class="contact-form-title mb-4">Envíanos un Mensaje</h2>
-            <form id="contactForm" method="POST">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label" for="contact-name">Nombre Completo *</label>
-                        <input type="text" class="form-control" id="contact-name" name="name"
-                               placeholder="Tu nombre completo" required maxlength="60"
-                               autocomplete="name"
-                               pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+"
-                               title="Solo letras y espacios, máximo 60 caracteres">
-                        <div class="contact-field-error" id="contact-name-error">Solo letras y espacios, máximo 60 caracteres.</div>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Correo Electrónico *</label>
-                        <input type="email" class="form-control" name="email" placeholder="tu@email.com" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label" for="contact-phone">Teléfono *</label>
-                        <input type="tel" class="form-control" id="contact-phone" name="phone"
-                               placeholder="8090000000" required maxlength="10" inputmode="numeric"
-                               autocomplete="tel"
-                               pattern="[0-9]{10}"
-                               title="10 dígitos numéricos">
-                        <div class="contact-field-error" id="contact-phone-error">Debe tener exactamente 10 dígitos numéricos.</div>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Asunto *</label>
-                        <input type="text" class="form-control" name="subject" placeholder="Motivo del mensaje" required>
-                            </div>
-                    <div class="col-12">
-                        <label class="form-label">Mensaje *</label>
-                        <textarea class="form-control" name="message" rows="5" placeholder="Escribe tu mensaje..." required></textarea>
-                        </div>
-                </div>
-                
-                <!-- reCAPTCHA v3 - Invisible -->
-                <input type="hidden" id="recaptcha-token" name="g-recaptcha-response">
 
-                <div class="mt-4">
-                    <button type="submit" class="contact-submit-btn" id="submit-btn">
-                        <i class="fas fa-paper-plane"></i>
-                        Enviar Mensaje
-                    </button>
-                </div>
-            </form>
-                </div>
-                
         <!-- Map -->
-        <div class="contact-map mb-5" style="margin-top: 60px;">
+        <div class="contact-map mb-5" style="margin-top: 24px;">
             <iframe
                 src="{{ site_maps_embed_url }}"
                 width="100%"
@@ -470,146 +404,7 @@
                 referrerpolicy="no-referrer-when-downgrade"
                 title="Ubicación del consultorio — {{ site_plus_code }}"
             ></iframe>
-                            </div>
-                        </div>
+        </div>
+    </div>
 </section>
-
-<script>
-    const CONTACT_NAME_REGEX = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+$/;
-    const CONTACT_PHONE_REGEX = /^\d{10}$/;
-
-    function setContactFieldError(input, errorEl, message, hasError) {
-        if (!input || !errorEl) return hasError;
-        input.classList.toggle('is-invalid', hasError);
-        errorEl.textContent = message;
-        errorEl.classList.toggle('visible', hasError);
-        return hasError;
-    }
-
-    function sanitizeContactName(value) {
-        return value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]/g, '').replace(/\s+/g, ' ').slice(0, 60);
-    }
-
-    function sanitizeContactPhone(value) {
-        return value.replace(/\D/g, '').slice(0, 10);
-    }
-
-    function validateContactForm(showErrors) {
-        const nameInput = document.getElementById('contact-name');
-        const phoneInput = document.getElementById('contact-phone');
-        const nameError = document.getElementById('contact-name-error');
-        const phoneError = document.getElementById('contact-phone-error');
-        let isValid = true;
-
-        if (nameInput) {
-            const name = nameInput.value.trim();
-            const nameInvalid = !name || name.length > 60 || !CONTACT_NAME_REGEX.test(name);
-            if (setContactFieldError(nameInput, nameError, 'Solo letras y espacios, máximo 60 caracteres.', nameInvalid)) {
-                isValid = false;
-            }
-        }
-
-        if (phoneInput) {
-            const phone = phoneInput.value.trim();
-            const phoneInvalid = !CONTACT_PHONE_REGEX.test(phone);
-            if (setContactFieldError(phoneInput, phoneError, 'Debe tener exactamente 10 dígitos numéricos.', phoneInvalid)) {
-                isValid = false;
-            }
-        }
-
-        if (!isValid && showErrors) {
-            const firstInvalid = document.querySelector('#contactForm .is-invalid');
-            if (firstInvalid && typeof firstInvalid.focus === 'function') {
-                firstInvalid.focus();
-            }
-        }
-
-        return isValid;
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-        const nameInput = document.getElementById('contact-name');
-        const phoneInput = document.getElementById('contact-phone');
-
-        if (nameInput) {
-            nameInput.addEventListener('input', function () {
-                const sanitized = sanitizeContactName(this.value);
-                if (sanitized !== this.value) {
-                    this.value = sanitized;
-                }
-                setContactFieldError(this, document.getElementById('contact-name-error'), '', false);
-            });
-        }
-
-        if (phoneInput) {
-            phoneInput.addEventListener('input', function () {
-                const sanitized = sanitizeContactPhone(this.value);
-                if (sanitized !== this.value) {
-                    this.value = sanitized;
-                }
-                setContactFieldError(this, document.getElementById('contact-phone-error'), '', false);
-            });
-        }
-    });
-
-    // reCAPTCHA v3 para formulario de contacto
-    console.log('🔐 reCAPTCHA SITE_KEY:', '{{ RECAPTCHA_SITE_KEY }}');
-    
-    {% if RECAPTCHA_SITE_KEY %}
-    const contactForm = document.getElementById('contactForm');
-    if (contactForm) {
-        console.log('✅ Formulario de contacto encontrado, agregando listener reCAPTCHA v3');
-        contactForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const form = this;
-            const submitBtn = document.getElementById('submit-btn');
-
-            if (!validateContactForm(true)) {
-                return;
-            }
-            
-            console.log('📝 Formulario enviado, ejecutando reCAPTCHA v3...');
-            
-            // Deshabilitar botón mientras se procesa
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
-            }
-            
-            // Ejecutar reCAPTCHA v3
-            grecaptcha.ready(function() {
-                console.log('✅ grecaptcha.ready()');
-                grecaptcha.execute('{{ RECAPTCHA_SITE_KEY }}', {action: 'contact_form'}).then(function(token) {
-                    console.log('✅ Token generado:', token.substring(0, 50) + '...');
-                    document.getElementById('recaptcha-token').value = token;
-                    
-                    // Enviar formulario con el token
-                    form.removeEventListener('submit', arguments.callee);
-                    console.log('📤 Enviando formulario con token...');
-                    form.submit();
-                }).catch(function(error) {
-                    console.error('❌ Error reCAPTCHA:', error);
-                    alert('Error al verificar seguridad. Por favor, intenta de nuevo.');
-                    if (submitBtn) {
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Enviar Mensaje';
-                    }
-                });
-            });
-        });
-    } else {
-        console.error('❌ Formulario #contactForm no encontrado');
-    }
-    {% else %}
-    console.log('⚠️ reCAPTCHA no configurada - formulario se enviará sin validación');
-    const contactFormNoCaptcha = document.getElementById('contactForm');
-    if (contactFormNoCaptcha) {
-        contactFormNoCaptcha.addEventListener('submit', function(e) {
-            if (!validateContactForm(true)) {
-                e.preventDefault();
-            }
-        });
-    }
-    {% endif %}
-</script>
 {% endblock %}
