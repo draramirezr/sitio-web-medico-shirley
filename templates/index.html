@@ -151,6 +151,30 @@
         backdrop-filter: blur(8px);
     }
 
+    .home-hero-photo {
+        justify-self: end;
+        width: min(100%, 420px);
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 18px 40px rgba(58, 47, 51, 0.28);
+        border: 3px solid rgba(255, 255, 255, 0.55);
+        background: rgba(255, 255, 255, 0.12);
+    }
+    .home-hero-photo img {
+        display: block;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 4 / 5;
+        object-fit: cover;
+        object-position: center 18%;
+    }
+    @media (max-width: 991px) {
+        .home-hero-photo {
+            justify-self: center;
+            width: min(100%, 320px);
+            margin-top: 8px;
+        }
+    }
 
     .home-services {
         padding: 80px 0;
@@ -1666,7 +1690,7 @@
 <!-- ========== HERO (similar a capturas) ========== -->
 <section class="home-hero"
          style="--home-hero-bg-pos: 50% 18%;
-                --home-hero-bg-opacity: 0.38;">
+                --home-hero-bg-opacity: 0.22;">
     <div class="container">
         <div class="home-hero-grid">
             <div>
@@ -1688,6 +1712,15 @@
                         (829) 740-5073
                     </a>
                 </div>
+            </div>
+            <div class="home-hero-photo fade-in-up">
+                <img
+                    src="{{ url_for('static', filename='images/dra-shirley-share.jpg') }}?v=2"
+                    alt="Dra. Shirley Ramírez, ginecóloga y obstetra en Santo Domingo Este"
+                    width="1200"
+                    height="1500"
+                    fetchpriority="high"
+                >
             </div>
         </div>
     </div>
