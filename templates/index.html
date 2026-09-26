@@ -10,8 +10,8 @@
 {% block twitter_description %}Atención ginecológica y obstétrica en Santo Domingo Este (Zona Oriental). Agenda tu cita.{% endblock %}
 
 {% block extra_meta %}
-  {# Preload de la imagen principal (mejora LCP en Inicio) #}
-  <link rel="preload" as="image" href="{{ url_for('static', filename='images/dra-shirley-profesional.webp') }}?v=1" fetchpriority="high" type="image/webp">
+  {# Preload solo de la imagen LCP real (foto del hero), no del fondo #}
+  <link rel="preload" as="image" href="{{ url_for('static', filename='images/dra-shirley-hero-lcp.webp') }}?v=1" fetchpriority="high" type="image/webp">
 {% endblock %}
 
 {% block content %}
@@ -39,22 +39,17 @@
         content: "";
         position: absolute;
         inset: 0;
-        /* Fallback JPG + WebP cuando sea posible (más rápido) */
-        background-image: url('{{ url_for('static', filename='images/dra-shirley-profesional.jpg') }}?v=1');
-        background-image: -webkit-image-set(
-            url('{{ url_for('static', filename='images/dra-shirley-profesional.webp') }}?v=1') 1x,
-            url('{{ url_for('static', filename='images/dra-shirley-profesional.jpg') }}?v=1') 1x
-        );
-        background-image: image-set(
-            url('{{ url_for('static', filename='images/dra-shirley-profesional.webp') }}?v=1') type('image/webp') 1x,
-            url('{{ url_for('static', filename='images/dra-shirley-profesional.jpg') }}?v=1') type('image/jpeg') 1x
-        );
+        /* Fondo ligero (~30KB). En móvil se desactiva para no competir con el LCP. */
+        background-image: url('{{ url_for('static', filename='images/dra-shirley-hero-bg.webp') }}?v=1');
         background-size: cover;
         background-position: var(--home-hero-bg-pos, 50% 18%);
         opacity: var(--home-hero-bg-opacity, 0.32);
         filter: saturate(1.02) contrast(1.02);
         transform: scale(1.02);
         pointer-events: none;
+    }
+    @media (max-width: 991px) {
+        .home-hero::after { display: none; }
     }
 
     .home-hero .container {
@@ -1713,14 +1708,18 @@
                     </a>
                 </div>
             </div>
-            <div class="home-hero-photo fade-in-up">
-                <img
-                    src="{{ url_for('static', filename='images/dra-shirley-share.jpg') }}?v=2"
-                    alt="Dra. Shirley Ramírez, ginecóloga y obstetra en Santo Domingo Este"
-                    width="1200"
-                    height="1500"
-                    fetchpriority="high"
-                >
+            <div class="home-hero-photo">
+                <picture>
+                    <source srcset="{{ url_for('static', filename='images/dra-shirley-hero-lcp.webp') }}?v=1" type="image/webp">
+                    <img
+                        src="{{ url_for('static', filename='images/dra-shirley-hero-lcp.jpg') }}?v=1"
+                        alt="Dra. Shirley Ramírez, ginecóloga y obstetra en Santo Domingo Este"
+                        width="800"
+                        height="1200"
+                        fetchpriority="high"
+                        decoding="async"
+                    >
+                </picture>
             </div>
         </div>
     </div>
