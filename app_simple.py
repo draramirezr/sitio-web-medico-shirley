@@ -261,18 +261,18 @@ _DEFAULT_GOOGLE_REVIEW = (
 )
 GOOGLE_REVIEW_URL = (os.getenv('GOOGLE_REVIEW_URL') or _DEFAULT_GOOGLE_REVIEW).strip().strip('"').strip("'") or _DEFAULT_GOOGLE_REVIEW
 
-# NAP oficial (Plus Code del consultorio — debe coincidir con Google Business)
-SITE_ADDRESS = 'F4WM+VX Santo Domingo Este, República Dominicana'
+# NAP oficial — debe coincidir con Google Business Profile
+SITE_ADDRESS = 'Av. Sabana Larga 123, Santo Domingo Este 11901, República Dominicana'
 SITE_PLUS_CODE = 'F4WM+VX Santo Domingo Este, República Dominicana'
-# Coordenadas del Plus Code F4WM+VX (Open Location Code 77CGF4WM+VX)
-SITE_LAT = '18.497188'
-SITE_LNG = '-69.865063'
+# Coordenadas del pin en Google Maps (18°29'49.9"N 69°51'54.2"W / Plus Code F4WM+VX)
+SITE_LAT = '18.497194'
+SITE_LNG = '-69.865056'
 SITE_MAPS_QUERY = SITE_PLUS_CODE
 SITE_MAPS_URL = (
     'https://www.google.com/maps/search/?api=1&query='
     + quote_plus(SITE_MAPS_QUERY)
 )
-# Embed por coordenadas (más fiable que el Plus Code corto en iframes)
+# Embed por coordenadas del mismo pin de Google Business
 SITE_MAPS_EMBED_URL = (
     'https://www.google.com/maps?q='
     + quote_plus(f'{SITE_LAT},{SITE_LNG}')
