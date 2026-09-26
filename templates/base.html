@@ -32,6 +32,9 @@
     <meta name="description" content="{% block description %}Ginecóloga-obstetra en Santo Domingo Este (Zona Oriental). Chequeo ginecológico, control de embarazo y anticonceptivos. Agenda tu cita.{% endblock %}">
     <meta name="keywords" content="{% block keywords %}ginecóloga en Santo Domingo Este, ginecologa en santo domingo este, ginecóloga en Santo Domingo, ginecologa en santo domingo, ginecólogo zona oriental, ginecologo zona oriental, ginecólogo cerca de mí, ginecologo cerca de mi, obstetra en Santo Domingo, control de embarazo, chequeo ginecológico, chequeo ginecologico, salud femenina, consulta ginecológica, consulta ginecologica, control prenatal, planificación familiar, planificacion familiar, anticonceptivos, métodos anticonceptivos, metodos anticonceptivos{% endblock %}">
     <meta name="author" content="Dra. Shirley Ramírez">
+    {% if google_site_verification %}
+    <meta name="google-site-verification" content="{{ google_site_verification }}">
+    {% endif %}
     <meta name="robots" content="{% block robots %}index, follow, max-image-preview:large{% endblock %}">
     <link rel="canonical" href="https://www.draramirez.com{{ request.path }}">
     {% block extra_meta %}{% endblock %}

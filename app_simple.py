@@ -247,6 +247,12 @@ GOOGLE_ADS_CONVERSION_SEND_TO = (
 # ID principal para cargar gtag.js (Google tag unificada; si no hay, usa Ads)
 GOOGLE_GTAG_LOADER_ID = GOOGLE_TAG_ID or GOOGLE_ADS_ID
 
+# Google Search Console — meta tag (alternativa o complemento a TXT en DNS)
+# Valor sin el prefijo "google-site-verification="; solo el token.
+GOOGLE_SITE_VERIFICATION = (os.getenv('GOOGLE_SITE_VERIFICATION') or '').strip().strip('"').strip("'")
+if GOOGLE_SITE_VERIFICATION.lower().startswith('google-site-verification='):
+    GOOGLE_SITE_VERIFICATION = GOOGLE_SITE_VERIFICATION.split('=', 1)[1].strip()
+
 # Configuración de seguridad y sesiones
 app.config['SESSION_COOKIE_SECURE'] = PRODUCTION  # True en producción
 app.config['SESSION_COOKIE_HTTPONLY'] = True
@@ -948,13 +954,14 @@ def verificar_recaptcha(response_token):
 
 @app.context_processor
 def inject_recaptcha():
-    """Variables globales para templates (reCAPTCHA, Google Ads)."""
+    """Variables globales para templates (reCAPTCHA, Google Ads, Search Console)."""
     return {
         'RECAPTCHA_SITE_KEY': RECAPTCHA_SITE_KEY,
         'google_tag_id': GOOGLE_TAG_ID,
         'google_ads_id': GOOGLE_ADS_ID,
         'google_gtag_loader_id': GOOGLE_GTAG_LOADER_ID,
         'google_ads_conversion_send_to': GOOGLE_ADS_CONVERSION_SEND_TO,
+        'google_site_verification': GOOGLE_SITE_VERIFICATION,
     }
 
 # Filtro personalizado para formatear fechas a dd/mm/yyyy
