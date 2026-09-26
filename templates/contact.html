@@ -344,7 +344,7 @@
             </div>
             <div class="col">
                 <a class="contact-card contact-card-link"
-                   href="https://www.google.com/maps/search/?api=1&query=Av.%20Sabana%20Larga%20123%2C%20Santo%20Domingo%20Este%2011901"
+                   href="{{ site_maps_url }}"
                    target="_blank"
                    rel="noopener noreferrer">
                     <div class="contact-icon-box">
@@ -461,14 +461,14 @@
         <!-- Map -->
         <div class="contact-map mb-5" style="margin-top: 60px;">
             <iframe
-                src="https://www.google.com/maps?q=Av.%20Sabana%20Larga%20123,%20Santo%20Domingo%20Este%2011901&output=embed"
+                src="{{ site_maps_embed_url }}"
                 width="100%"
                 height="450"
                 style="border:0;"
                 allowfullscreen=""
                 loading="lazy"
                 referrerpolicy="no-referrer-when-downgrade"
-                title="Ubicación del consultorio"
+                title="Ubicación del consultorio — {{ site_plus_code }}"
             ></iframe>
                             </div>
                         </div>

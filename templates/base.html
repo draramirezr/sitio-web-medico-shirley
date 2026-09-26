@@ -40,8 +40,8 @@
     {% block extra_meta %}{% endblock %}
     <meta name="geo.placename" content="Santo Domingo Este, República Dominicana">
     <meta name="geo.region" content="DO-32">
-    <meta name="geo.position" content="18.489719;-69.865385">
-    <meta name="ICBM" content="18.489719, -69.865385">
+    <meta name="geo.position" content="{{ site_lat }};{{ site_lng }}">
+    <meta name="ICBM" content="{{ site_lat }}, {{ site_lng }}">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -145,15 +145,15 @@
         "postalCode": "11901",
         "addressCountry": "DO"
       },
-      "hasMap": "https://www.google.com/maps/search/?api=1&query=Av.%20Sabana%20Larga%20123%2C%20Santo%20Domingo%20Este%2011901",
+      "hasMap": "{{ site_maps_url }}",
       "areaServed": [
         "Santo Domingo Este",
         "Santo Domingo"
       ],
       "geo": {
         "@type": "GeoCoordinates",
-        "latitude": "18.489719",
-        "longitude": "-69.865385"
+        "latitude": "{{ site_lat }}",
+        "longitude": "{{ site_lng }}"
       },
       "telephone": "+1-829-740-5073",
       "email": "dra.ramirezr@gmail.com",
@@ -161,7 +161,7 @@
       "sameAs": [
         "https://www.linkedin.com/in/shirley-ramirez-montero-a10964168/",
         "https://www.instagram.com/dra.ramirezr/",
-        "https://www.google.com/maps/search/?api=1&query=Dra.+Shirley+Ramirez,+Av.+Sabana+Larga+123,+Santo+Domingo+Este"
+        "{{ site_maps_url }}"
       ],
       "openingHoursSpecification": [
         {
@@ -1950,7 +1950,9 @@
     <script>
         (function () {
             const WA_NUMBER = '18297405073';
-            const DEFAULT_ADDRESS = 'Av. Sabana Larga 123, Santo Domingo Este 11901';
+            const DEFAULT_ADDRESS = {{ site_address|tojson }};
+            const DEFAULT_MAPS_QUERY = {{ site_plus_code|tojson }};
+            const DEFAULT_MAPS_URL = {{ site_maps_url|tojson }};
             const SITE_EMAIL = 'dra.ramirezr@gmail.com';
             const SITE_PHONE_DISPLAY = '(829) 740-5073';
             // Link público solicitado (conversión). En local, el link interno también funciona.
@@ -2179,7 +2181,7 @@
                     answer: () => ({
                         text: `📍 ${DEFAULT_ADDRESS}\n\n¿Deseas agendar una cita?`,
                         actions: [
-                            { type: 'maps', label: 'Ver en Google Maps', address: DEFAULT_ADDRESS },
+                            { type: 'maps', label: 'Ver en Google Maps', address: DEFAULT_MAPS_QUERY },
                             { type: 'book', label: 'Agendar cita', href: APPT_URL }
                         ]
                     })
@@ -2585,7 +2587,7 @@
 
             const buildActionsHtml = (actions, waTextFallback) => {
                 if (!actions || actions.length === 0) return '';
-                const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(DEFAULT_ADDRESS)}`;
+                const mapsUrl = DEFAULT_MAPS_URL || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(DEFAULT_MAPS_QUERY || DEFAULT_ADDRESS)}`;
                 const buttons = actions.map(a => {
                     if (a.type === 'book') {
                         const href = a.href || APPT_URL;
@@ -2600,7 +2602,9 @@
                             ${a.label || 'WhatsApp'}</a>`;
                     }
                     if (a.type === 'maps') {
-                        const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a.address || DEFAULT_ADDRESS)}`;
+                        const url = a.type === 'maps'
+                            ? (DEFAULT_MAPS_URL || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a.address || DEFAULT_MAPS_QUERY || DEFAULT_ADDRESS)}`)
+                            : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a.address || DEFAULT_ADDRESS)}`;
                         return `<a class="chatbot-action-btn chatbot-action-btn--choice" href="${url}" target="_blank" rel="noopener noreferrer">
                             <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 1 7 7c0 5.25-7 13-7 13S5 14.25 5 9a7 7 0 0 1 7-7zm0 9.5A2.5 2.5 0 1 0 12 6.5a2.5 2.5 0 0 0 0 5z"/></svg>
                             ${a.label || 'Maps'}</a>`;
@@ -2663,7 +2667,9 @@
                                 return `<a class="chatbot-action-btn chatbot-action-btn--wa" href="${url}" target="_blank" rel="noopener noreferrer">${a.label}</a>`;
                             }
                             if (a.type === 'maps') {
-                                const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a.address || DEFAULT_ADDRESS)}`;
+                                const url = a.type === 'maps'
+                            ? (DEFAULT_MAPS_URL || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a.address || DEFAULT_MAPS_QUERY || DEFAULT_ADDRESS)}`)
+                            : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a.address || DEFAULT_ADDRESS)}`;
                                 return `<a class="chatbot-action-btn chatbot-action-btn--choice" href="${url}" target="_blank" rel="noopener noreferrer">${a.label}</a>`;
                             }
                             if (a.type === 'link') {

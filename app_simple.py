@@ -17,6 +17,7 @@ from markupsafe import escape
 from io import BytesIO
 import threading
 import mimetypes
+from urllib.parse import quote_plus
 
 # For Windows consoles (cp1252) avoid UnicodeEncodeError on emoji logs
 try:
@@ -262,6 +263,20 @@ GOOGLE_REVIEW_URL = (os.getenv('GOOGLE_REVIEW_URL') or _DEFAULT_GOOGLE_REVIEW).s
 
 # NAP oficial (debe coincidir con Google Business)
 SITE_ADDRESS = 'Av. Sabana Larga 123, Santo Domingo Este 11901'
+SITE_PLUS_CODE = 'F4WM+VX Santo Domingo Este'
+# Coordenadas del Plus Code F4WM+VX (Open Location Code)
+SITE_LAT = '18.497188'
+SITE_LNG = '-69.865063'
+SITE_MAPS_QUERY = SITE_PLUS_CODE
+SITE_MAPS_URL = (
+    'https://www.google.com/maps/search/?api=1&query='
+    + quote_plus(SITE_MAPS_QUERY)
+)
+SITE_MAPS_EMBED_URL = (
+    'https://www.google.com/maps?q='
+    + quote_plus(SITE_MAPS_QUERY)
+    + '&z=17&output=embed'
+)
 SITE_PHONE_DISPLAY = '(829) 740-5073'
 SITE_PHONE_E164 = '+18297405073'
 
@@ -976,7 +991,12 @@ def inject_recaptcha():
         'google_site_verification': GOOGLE_SITE_VERIFICATION,
         'google_review_url': GOOGLE_REVIEW_URL,
         'site_address': SITE_ADDRESS,
+        'site_plus_code': SITE_PLUS_CODE,
         'site_phone_display': SITE_PHONE_DISPLAY,
+        'site_maps_url': SITE_MAPS_URL,
+        'site_maps_embed_url': SITE_MAPS_EMBED_URL,
+        'site_lat': SITE_LAT,
+        'site_lng': SITE_LNG,
     }
 
 # Filtro personalizado para formatear fechas a dd/mm/yyyy
