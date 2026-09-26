@@ -253,6 +253,18 @@ GOOGLE_SITE_VERIFICATION = (os.getenv('GOOGLE_SITE_VERIFICATION') or '').strip()
 if GOOGLE_SITE_VERIFICATION.lower().startswith('google-site-verification='):
     GOOGLE_SITE_VERIFICATION = GOOGLE_SITE_VERIFICATION.split('=', 1)[1].strip()
 
+# Link directo "Escribir reseña" (Google Business → Obtener más reseñas)
+_DEFAULT_GOOGLE_REVIEW = (
+    'https://www.google.com/maps/search/?api=1&query='
+    'Dra.+Shirley+Ramirez,+Av.+Sabana+Larga+123,+Santo+Domingo+Este'
+)
+GOOGLE_REVIEW_URL = (os.getenv('GOOGLE_REVIEW_URL') or _DEFAULT_GOOGLE_REVIEW).strip().strip('"').strip("'") or _DEFAULT_GOOGLE_REVIEW
+
+# NAP oficial (debe coincidir con Google Business)
+SITE_ADDRESS = 'Av. Sabana Larga 123, Santo Domingo Este 11901'
+SITE_PHONE_DISPLAY = '(829) 740-5073'
+SITE_PHONE_E164 = '+18297405073'
+
 # Configuración de seguridad y sesiones
 app.config['SESSION_COOKIE_SECURE'] = PRODUCTION  # True en producción
 app.config['SESSION_COOKIE_HTTPONLY'] = True
@@ -962,6 +974,9 @@ def inject_recaptcha():
         'google_gtag_loader_id': GOOGLE_GTAG_LOADER_ID,
         'google_ads_conversion_send_to': GOOGLE_ADS_CONVERSION_SEND_TO,
         'google_site_verification': GOOGLE_SITE_VERIFICATION,
+        'google_review_url': GOOGLE_REVIEW_URL,
+        'site_address': SITE_ADDRESS,
+        'site_phone_display': SITE_PHONE_DISPLAY,
     }
 
 # Filtro personalizado para formatear fechas a dd/mm/yyyy

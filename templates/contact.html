@@ -332,6 +332,18 @@
         <div class="row contact-cards-row row-cols-1 row-cols-sm-2 row-cols-lg-5 g-4 mb-5">
             <div class="col">
                 <a class="contact-card contact-card-link"
+                   href="{{ google_review_url }}"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                    <div class="contact-icon-box">
+                        <i class="fab fa-google"></i>
+                    </div>
+                    <h3>Reseña Google</h3>
+                    <p>Déjanos tu opinión en Google</p>
+                </a>
+            </div>
+            <div class="col">
+                <a class="contact-card contact-card-link"
                    href="https://www.google.com/maps/search/?api=1&query=Av.%20Sabana%20Larga%20123%2C%20Santo%20Domingo%20Este%2011901"
                    target="_blank"
                    rel="noopener noreferrer">
@@ -339,7 +351,7 @@
                         <i class="fas fa-map-marker-alt"></i>
                     </div>
                     <h3>Dirección</h3>
-                    <p>Av. Sabana Larga 123, Santo Domingo Este 11901</p>
+                    <p>{{ site_address }}</p>
                 </a>
             </div>
             <div class="col">

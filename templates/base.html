@@ -159,7 +159,8 @@
       "url": "https://www.draramirez.com",
       "sameAs": [
         "https://www.linkedin.com/in/shirley-ramirez-montero-a10964168/",
-        "https://www.instagram.com/dra.ramirezr/"
+        "https://www.instagram.com/dra.ramirezr/",
+        "https://www.google.com/maps/search/?api=1&query=Dra.+Shirley+Ramirez,+Av.+Sabana+Larga+123,+Santo+Domingo+Este"
       ],
       "openingHoursSpecification": [
         {
@@ -172,7 +173,7 @@
       "aggregateRating": {
         "@type": "AggregateRating",
         "ratingValue": "5.0",
-        "reviewCount": "50",
+        "reviewCount": "2",
         "bestRating": "5",
         "worstRating": "1"
       },
@@ -1791,6 +1792,17 @@
                         WhatsApp
                     </a>
                 </div>
+
+                <nav class="site-footer-seo" aria-label="Atención ginecológica por zona y servicio">
+                    <p class="site-footer-seo-title">Atención ginecológica en tu zona</p>
+                    <ul class="site-footer-seo-links">
+                        <li><a href="{{ url_for('seo_ginecologa_santo_domingo') }}">Ginecóloga en Santo Domingo</a></li>
+                        <li><a href="{{ url_for('seo_ginecologo_zona_oriental') }}">Ginecóloga Zona Oriental</a></li>
+                        <li><a href="{{ url_for('seo_control_embarazo') }}">Control de embarazo</a></li>
+                        <li><a href="{{ url_for('seo_chequeo_ginecologico') }}">Chequeo ginecológico</a></li>
+                        <li><a href="{{ google_review_url }}" target="_blank" rel="noopener noreferrer">Reseña en Google</a></li>
+                    </ul>
+                </nav>
 
                 <div class="site-footer-insurance" aria-label="Seguros médicos disponibles">
                     <div class="site-footer-insurance-card">
