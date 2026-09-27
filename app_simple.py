@@ -264,18 +264,23 @@ GOOGLE_REVIEW_URL = (os.getenv('GOOGLE_REVIEW_URL') or _DEFAULT_GOOGLE_REVIEW).s
 # NAP oficial — debe coincidir con Google Business Profile
 SITE_ADDRESS = 'Av. Sabana Larga 123, Santo Domingo Este 11901, República Dominicana'
 SITE_PLUS_CODE = 'F4WM+VX Santo Domingo Este, República Dominicana'
-# Coordenadas del pin en Google Maps (18°29'49.9"N 69°51'54.2"W / Plus Code F4WM+VX)
-SITE_LAT = '18.497194'
-SITE_LNG = '-69.865056'
+# Pin exacto de la ficha "Dra. Shirley Ramirez" en Google Maps
+SITE_LAT = '18.4971899'
+SITE_LNG = '-69.865084'
+SITE_MAPS_PLACE_ID_HEX = '0x8eaf89d14db5e76b:0x2a4aedf3ef3c083d'
+SITE_MAPS_CID = str(int('2a4aedf3ef3c083d', 16))  # CID del negocio en Google
 SITE_MAPS_QUERY = SITE_PLUS_CODE
+# Enlace directo a la ficha (el que envió la doctora)
 SITE_MAPS_URL = (
-    'https://www.google.com/maps/search/?api=1&query='
-    + quote_plus(SITE_MAPS_QUERY)
+    'https://www.google.com/maps/place/Dra.+Shirley+Ramirez/'
+    '@18.4971899,-69.865084,17z/'
+    'data=!4m6!3m5!1s0x8eaf89d14db5e76b:0x2a4aedf3ef3c083d'
+    '!8m2!3d18.4971899!4d-69.865084!16s%2Fg%2F11jzcl6jxk'
 )
-# Embed por coordenadas del mismo pin de Google Business
+# Embed del mismo negocio (CID = pin de la ficha, no un punto genérico)
 SITE_MAPS_EMBED_URL = (
-    'https://www.google.com/maps?q='
-    + quote_plus(f'{SITE_LAT},{SITE_LNG}')
+    'https://www.google.com/maps?cid='
+    + SITE_MAPS_CID
     + '&hl=es&z=17&output=embed'
 )
 SITE_PHONE_DISPLAY = '(829) 740-5073'
