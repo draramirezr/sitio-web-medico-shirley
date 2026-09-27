@@ -11,7 +11,7 @@
 
 {% block extra_meta %}
   <link rel="preload" as="image"
-        href="{{ url_for('static', filename='images/dra-shirley-cutout-420.webp') }}?v=6"
+        href="{{ url_for('static', filename='images/dra-shirley-hero-bg.webp') }}?v=8"
         fetchpriority="high"
         type="image/webp">
 {% endblock %}
@@ -31,19 +31,35 @@
     /* ===== Home (Inicio) redesign: look like provided screenshots ===== */
     .home-hero {
         position: relative;
-        /* Evitar 78vh: en móvil el hero crece al cargar tipografías/imagen → CLS */
-        min-height: 0;
+        min-height: 78vh;
         display: flex;
         align-items: center;
         overflow: hidden;
-        /* Solo gradiente: el fondo CSS competía como LCP frente al <img> */
-        background:
-            linear-gradient(90deg, rgba(107, 58, 75, 0.72) 0%, rgba(107, 58, 75, 0.45) 52%, rgba(107, 58, 75, 0.28) 100%),
-            linear-gradient(135deg, #6B3A4B 0%, #8B5A6B 55%, #CEB0B7 100%);
+        background: #6B3A4B;
     }
 
+    /* Foto de fondo a pantalla completa (como antes) */
+    .home-hero-bg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 50% 18%;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    /* Overlay mauve semitransparente sobre la foto */
     .home-hero::after {
-        display: none;
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        background:
+            linear-gradient(90deg, rgba(107, 58, 75, 0.78) 0%, rgba(107, 58, 75, 0.55) 48%, rgba(107, 58, 75, 0.28) 100%),
+            linear-gradient(180deg, rgba(58, 40, 48, 0.18) 0%, rgba(58, 40, 48, 0.35) 100%);
+        pointer-events: none;
     }
 
     .home-hero .container {
@@ -55,9 +71,10 @@
 
     .home-hero-grid {
         display: grid;
-        grid-template-columns: 1.1fr 0.9fr;
-        gap: 40px;
+        grid-template-columns: 1fr;
+        gap: 0;
         align-items: center;
+        max-width: 40rem;
     }
 
     .home-hero-kicker {
@@ -140,35 +157,11 @@
         backdrop-filter: blur(8px);
     }
 
-    .home-hero-photo {
-        justify-self: end;
-        width: min(100%, 420px);
-        /* Sin marco: foto recortada transparente sobre el hero */
-        border: none;
-        border-radius: 0;
-        box-shadow: none;
-        background: transparent;
-        overflow: visible;
-        aspect-ratio: auto;
-        contain: none;
-        filter: drop-shadow(0 18px 28px rgba(45, 30, 35, 0.28));
-    }
-    .home-hero-photo picture,
-    .home-hero-photo img {
-        display: block;
-        width: 100%;
-        height: auto;
-        aspect-ratio: auto;
-        object-fit: contain;
-        object-position: center bottom;
-        background: transparent;
-    }
+    .home-hero-photo { display: none !important; }
+
     @media (max-width: 991px) {
-        .home-hero-photo {
-            justify-self: center;
-            width: min(100%, 300px);
-            margin-top: 12px;
-        }
+        .home-hero { min-height: 70vh; }
+        .home-hero .container { padding-top: 72px; padding-bottom: 56px; }
     }
 
     .home-services {
@@ -1591,8 +1584,18 @@
 </style>
 {% endif %}
 
-<!-- ========== HERO (similar a capturas) ========== -->
+<!-- ========== HERO (foto de fondo + overlay, como el diseño original) ========== -->
 <section class="home-hero">
+    <img
+        class="home-hero-bg"
+        src="{{ url_for('static', filename='images/dra-shirley-hero-bg.webp') }}?v=8"
+        alt=""
+        width="1200"
+        height="1800"
+        fetchpriority="high"
+        decoding="async"
+        aria-hidden="true"
+    >
     <div class="container">
         <div class="home-hero-grid">
             <div>
@@ -1613,23 +1616,6 @@
                         (829) 740-5073
                     </a>
                 </div>
-            </div>
-            {# LCP = esta imagen (fetchpriority). Sin fondo CSS ni decoding async. #}
-            <div class="home-hero-photo">
-                <picture>
-                    <source
-                        type="image/webp"
-                        srcset="{{ url_for('static', filename='images/dra-shirley-cutout-420.webp') }}?v=6"
-                    >
-                    <img
-                        src="{{ url_for('static', filename='images/dra-shirley-cutout.png') }}?v=6"
-                        alt="Dra. Shirley Ramírez, ginecóloga y obstetra en Santo Domingo Este"
-                        width="420"
-                        height="525"
-                        fetchpriority="high"
-                        decoding="async"
-                    >
-                </picture>
             </div>
         </div>
     </div>
