@@ -28,11 +28,19 @@
             document.head.appendChild(g);
             {% endif %}
         }
-        if ('requestIdleCallback' in window) {
-            requestIdleCallback(loadMarketing, { timeout: 3500 });
-        } else {
-            window.addEventListener('load', function () { setTimeout(loadMarketing, 1200); });
+        // Cargar tags tras interacción o a los 6s post-load (menos impacto en Lighthouse)
+        function armMarketing() {
+            loadMarketing();
+            ['scroll', 'click', 'touchstart', 'keydown'].forEach(function (ev) {
+                window.removeEventListener(ev, armMarketing, true);
+            });
         }
+        ['scroll', 'click', 'touchstart', 'keydown'].forEach(function (ev) {
+            window.addEventListener(ev, armMarketing, { once: true, passive: true, capture: true });
+        });
+        window.addEventListener('load', function () {
+            setTimeout(loadMarketing, 6000);
+        });
     })();
     </script>
     
@@ -246,32 +254,38 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&family=Montserrat:wght@600;700&family=Playfair+Display:wght@700&display=swap">
     </noscript>
     
-    {# Bootstrap local (evita cadena CDN lenta ~2s en PageSpeed) #}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}?v=5.3.0">
-    
-    {# Font Awesome diferido: no bloquear LCP ni descargar 250KB de webfonts en el critical path #}
+    {# CSS crítico mínimo en línea; Bootstrap/bundle se diferirán en público (ver abajo) #}
     {% if current_user.is_authenticated %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}?v=5.3.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/site-bundle.css') }}?v=4.3">
     {% else %}
+    {# Público: no bloquear FCP/LCP con Bootstrap (casi todo unused) ni bundle #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}?v=5.3.0" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/site-bundle.css') }}?v=4.3" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome-minimal.min.css') }}?v=3" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome-minimal.min.css') }}?v=3"></noscript>
+    <noscript>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}?v=5.3.0">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/site-bundle.css') }}?v=4.3">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome-minimal.min.css') }}?v=3">
+    </noscript>
     {% endif %}
-    
-    {# Bundle síncrono otra vez: diferirlo causó CLS 0.296 al aplicar estilos tarde #}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/site-bundle.css') }}?v=4.2">
     
     <!-- Estilos Críticos Inline - Prevenir FOUC (Flash of Unstyled Content) -->
     <style>
         /* Contenido visible de inmediato (opacity:0 + loader mataban FCP/LCP en PageSpeed) */
         body {
             opacity: 1;
+            font-family: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+            line-height: 1.5;
+            margin: 0;
+            color: #282828;
+            background-color: #F2E2E6;
         }
         
         /* Estilos base críticos para prevenir layout shift */
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
         }
         
         html {
@@ -284,6 +298,94 @@
             height: auto;
             display: block;
         }
+
+        /* Bootstrap mínimo para above-the-fold (nav + container) mientras carga el CSS completo */
+        .container {
+            width: 100%;
+            max-width: 1140px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+        .navbar {
+            position: relative;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+        }
+        .navbar > .container {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .navbar-brand {
+            padding-top: 0.3rem;
+            padding-bottom: 0.3rem;
+            margin-right: 1rem;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .d-flex { display: flex !important; }
+        .flex-column { flex-direction: column !important; }
+        .ms-auto { margin-left: auto !important; }
+        .ms-2 { margin-left: 0.5rem !important; }
+        .collapse:not(.show) { display: none; }
+        .navbar-toggler {
+            padding: 0.25rem 0.75rem;
+            font-size: 1.25rem;
+            line-height: 1;
+            background-color: transparent;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 0.375rem;
+            cursor: pointer;
+        }
+        .navbar-toggler-icon {
+            display: inline-block;
+            width: 1.5em;
+            height: 1.5em;
+            vertical-align: middle;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 100%;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%280, 0, 0, 0.55%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+        .navbar-expand-lg .navbar-toggler { display: none; }
+        @media (max-width: 991.98px) {
+            .navbar-expand-lg .navbar-toggler { display: block; }
+            .navbar-expand-lg .navbar-collapse {
+                flex-basis: 100%;
+                width: 100%;
+            }
+        }
+        @media (min-width: 992px) {
+            .navbar-expand-lg {
+                flex-wrap: nowrap;
+                justify-content: flex-start;
+            }
+            .navbar-expand-lg .navbar-collapse {
+                display: flex !important;
+                flex-basis: auto;
+            }
+            .navbar-expand-lg .navbar-nav {
+                display: flex;
+                flex-direction: row;
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                align-items: center;
+            }
+            .navbar-nav .nav-link {
+                display: block;
+                padding: 0.5rem 1rem;
+                color: #4A4A4A;
+                text-decoration: none;
+            }
+        }
+        .shadow-sm { box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075); }
         
         /* Font Display Swap para Font Awesome - Mejora FCP en 40ms */
         @font-face {

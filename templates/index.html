@@ -10,17 +10,25 @@
 {% block twitter_description %}Atención ginecológica y obstétrica en Santo Domingo Este (Zona Oriental). Agenda tu cita.{% endblock %}
 
 {% block extra_meta %}
-  {# Preload = misma imagen del <img> hero (LCP). No precarregar el fondo 443KB. #}
-  <link rel="preload" as="image" href="{{ url_for('static', filename='images/dra-shirley-hero-lcp.webp') }}?v=4" fetchpriority="high" type="image/webp">
+  {# Preload móvil (LCP real ~314px). Desktop usa 800 via srcset. #}
+  <link rel="preload" as="image"
+        href="{{ url_for('static', filename='images/dra-shirley-hero-lcp-400.webp') }}?v=5"
+        imagesrcset="{{ url_for('static', filename='images/dra-shirley-hero-lcp-400.webp') }}?v=5 400w, {{ url_for('static', filename='images/dra-shirley-hero-lcp.webp') }}?v=5 800w"
+        imagesizes="(max-width: 991px) 320px, 420px"
+        fetchpriority="high"
+        type="image/webp">
 {% endblock %}
 
 {% block content %}
 {# home.min.css quitado: duplicaba estilos, añadía ~20KB y fade-in con opacity:0 (mata LCP) #}
 
 {# Imágenes (se usan en secciones de inicio) #}
-{% set GYNECOLOGY_IMAGE = url_for('static', filename='images/servicios-ginecologia-general.webp') ~ '?v=1' %}
-{% set OBSTETRICS_IMAGE = url_for('static', filename='images/servicios-obstetricia-embarazo.webp') ~ '?v=1' %}
-{% set AESTHETIC_IMAGE = url_for('static', filename='images/servicios-tratamientos-esteticos.webp') ~ '?v=2' %}
+{% set GYNECOLOGY_IMAGE = url_for('static', filename='images/servicios-ginecologia-general-400.webp') ~ '?v=5' %}
+{% set GYNECOLOGY_IMAGE_2X = url_for('static', filename='images/servicios-ginecologia-general.webp') ~ '?v=5' %}
+{% set OBSTETRICS_IMAGE = url_for('static', filename='images/servicios-obstetricia-embarazo-400.webp') ~ '?v=5' %}
+{% set OBSTETRICS_IMAGE_2X = url_for('static', filename='images/servicios-obstetricia-embarazo.webp') ~ '?v=5' %}
+{% set AESTHETIC_IMAGE = url_for('static', filename='images/servicios-tratamientos-esteticos-400.webp') ~ '?v=5' %}
+{% set AESTHETIC_IMAGE_2X = url_for('static', filename='images/servicios-tratamientos-esteticos.webp') ~ '?v=5' %}
 
 <style>
     /* ===== Home (Inicio) redesign: look like provided screenshots ===== */
@@ -1612,15 +1620,18 @@
                 <picture>
                     <source
                         type="image/webp"
-                        srcset="{{ url_for('static', filename='images/dra-shirley-hero-lcp.webp') }}?v=4"
+                        srcset="{{ url_for('static', filename='images/dra-shirley-hero-lcp-400.webp') }}?v=5 400w, {{ url_for('static', filename='images/dra-shirley-hero-lcp.webp') }}?v=5 800w"
+                        sizes="(max-width: 991px) 320px, 420px"
                     >
                     <img
-                        src="{{ url_for('static', filename='images/dra-shirley-hero-lcp.jpg') }}?v=4"
+                        src="{{ url_for('static', filename='images/dra-shirley-hero-lcp-400.jpg') }}?v=5"
+                        srcset="{{ url_for('static', filename='images/dra-shirley-hero-lcp-400.jpg') }}?v=5 400w, {{ url_for('static', filename='images/dra-shirley-hero-lcp.jpg') }}?v=5 800w"
+                        sizes="(max-width: 991px) 320px, 420px"
                         alt="Dra. Shirley Ramírez, ginecóloga y obstetra en Santo Domingo Este"
-                        width="800"
-                        height="1200"
+                        width="400"
+                        height="600"
                         fetchpriority="high"
-                        decoding="sync"
+                        decoding="async"
                     >
                 </picture>
             </div>
@@ -1642,7 +1653,11 @@
         <div class="row g-4">
             <div class="col-lg-4 col-md-6">
                 <div class="home-service-card">
-                    <img src="{{ GYNECOLOGY_IMAGE }}" alt="Ginecología General" loading="lazy">
+                    <img src="{{ GYNECOLOGY_IMAGE }}"
+                         srcset="{{ GYNECOLOGY_IMAGE }} 400w, {{ GYNECOLOGY_IMAGE_2X }} 900w"
+                         sizes="(max-width: 991px) 92vw, 378px"
+                         width="400" height="266"
+                         alt="Ginecología General" loading="lazy" decoding="async">
                     <div class="home-service-body">
                         <div class="home-service-icon" aria-hidden="true">
                             <i class="fas fa-stethoscope"></i>
@@ -1660,7 +1675,11 @@
 
             <div class="col-lg-4 col-md-6">
                 <div class="home-service-card">
-                    <img src="{{ OBSTETRICS_IMAGE }}" alt="Obstetricia y Embarazo" loading="lazy">
+                    <img src="{{ OBSTETRICS_IMAGE }}"
+                         srcset="{{ OBSTETRICS_IMAGE }} 400w, {{ OBSTETRICS_IMAGE_2X }} 900w"
+                         sizes="(max-width: 991px) 92vw, 378px"
+                         width="400" height="266"
+                         alt="Obstetricia y Embarazo" loading="lazy" decoding="async">
                     <div class="home-service-body">
                         <div class="home-service-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24" focusable="false">
@@ -1681,7 +1700,11 @@
 
             <div class="col-lg-4 col-md-6">
                 <div class="home-service-card">
-                    <img src="{{ AESTHETIC_IMAGE }}" alt="Tratamientos Estéticos" loading="lazy">
+                    <img src="{{ AESTHETIC_IMAGE }}"
+                         srcset="{{ AESTHETIC_IMAGE }} 400w, {{ AESTHETIC_IMAGE_2X }} 900w"
+                         sizes="(max-width: 991px) 92vw, 378px"
+                         width="400" height="266"
+                         alt="Tratamientos Estéticos" loading="lazy" decoding="async">
                     <div class="home-service-body">
                         <div class="home-service-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24" focusable="false">
@@ -1741,7 +1764,11 @@
             </div>
             <div class="col-lg-6">
                 <div class="home-why-media">
-                    <img src="{{ GYNECOLOGY_IMAGE }}" alt="Consulta ginecológica" loading="lazy">
+                    <img src="{{ GYNECOLOGY_IMAGE }}"
+                         srcset="{{ GYNECOLOGY_IMAGE }} 400w, {{ GYNECOLOGY_IMAGE_2X }} 900w"
+                         sizes="(max-width: 991px) 92vw, 540px"
+                         width="400" height="266"
+                         alt="Consulta ginecológica" loading="lazy" decoding="async">
                     <div class="home-why-badge" aria-label="Más de 10 años de experiencia">
                         <strong>10+</strong>
                         <span>Años de experiencia</span>
