@@ -1650,6 +1650,10 @@ class MySQLConnectionWrapper:
     def cursor(self):
         return self._conn.cursor()
 
+    @property
+    def lastrowid(self):
+        return self._cursor.lastrowid if self._cursor else None
+
 def get_db_connection():
     """Obtener conexión a MySQL con optimizaciones - RETORNA WRAPPER"""
     try:
@@ -2620,8 +2624,8 @@ def enviar_email_recuperacion(email, nombre, link_recuperacion):
         print(f"❌ Error al enviar email de recuperación: {e}")
         return False
 
-def enviar_email_cita(first_name, last_name, email, phone, appointment_date, appointment_time, appointment_type, medical_insurance, emergency_datetime, reason):
-    """Enviar email de notificación de cita a la doctora usando SendGrid API"""
+def enviar_email_cita(first_name, last_name, email, phone, appointment_date, appointment_time, appointment_type, medical_insurance, emergency_datetime, reason, appointment_id=None):
+    """Enviar email de notificación de cita a la doctora (con enlaces para confirmar/cancelar)."""
     try:
         # Verificar configuración
         if not EMAIL_CONFIGURED:
@@ -2634,12 +2638,20 @@ def enviar_email_cita(first_name, last_name, email, phone, appointment_date, app
         tipo_cita = f"{appointment_type} {'(EMERGENCIA)' if appointment_type == 'emergencia' else ''}".strip()
         seguro = medical_insurance if medical_insurance else "No especificado"
         motivo = reason if reason else "No especificado"
+
+        confirm_url = cancel_url = None
+        if appointment_id:
+            base = _canonical_base_url()
+            with app.app_context():
+                confirm_url = f"{base}{url_for('cita_accion_email', token=_cita_accion_token(appointment_id, 'confirmed'))}"
+                cancel_url = f"{base}{url_for('cita_accion_email', token=_cita_accion_token(appointment_id, 'cancelled'))}"
         
         # Usar template estandarizado
         html = template_cita(
             first_name, last_name, email if email else "No proporcionado", 
             phone, fecha, hora if hora else "URGENTE", tipo_cita, 
-            seguro, emergency_datetime if appointment_type == "emergencia" else None, motivo
+            seguro, emergency_datetime if appointment_type == "emergencia" else None, motivo,
+            confirm_url=confirm_url, cancel_url=cancel_url,
         )
         
         # Enviar usando SendGrid API
@@ -2662,6 +2674,76 @@ def enviar_email_cita(first_name, last_name, email, phone, appointment_date, app
         traceback.print_exc()
         return False
 
+def _cita_accion_token(appointment_id, action):
+    """Token firmado para confirmar/cancelar cita desde el correo (válido 14 días)."""
+    from itsdangerous import URLSafeTimedSerializer
+    s = URLSafeTimedSerializer(app.secret_key, salt='cita-accion-email-v1')
+    return s.dumps({'id': int(appointment_id), 'a': action})
+
+def _cita_accion_from_token(token, max_age=14 * 24 * 3600):
+    from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
+    s = URLSafeTimedSerializer(app.secret_key, salt='cita-accion-email-v1')
+    try:
+        data = s.loads(token, max_age=max_age)
+        appointment_id = int(data.get('id'))
+        action = (data.get('a') or '').strip().lower()
+        if action not in ('confirmed', 'cancelled'):
+            return None, None
+        return appointment_id, action
+    except SignatureExpired:
+        return None, 'expired'
+    except (BadSignature, TypeError, ValueError):
+        return None, None
+
+def aplicar_accion_cita_desde_email(appointment_id, action):
+    """
+    Confirmar o cancelar cita desde enlace del correo.
+    Notifica al paciente si el estado cambia.
+    """
+    conn = get_db_connection()
+    appointment = conn.execute(
+        'SELECT * FROM appointments WHERE id = %s',
+        (appointment_id,)
+    ).fetchone()
+    if not appointment:
+        conn.close()
+        return {'ok': False, 'error': 'not_found', 'appointment': None}
+
+    current = (appointment.get('status') or 'pending').strip().lower()
+    if current == action:
+        conn.close()
+        return {'ok': True, 'error': None, 'appointment': appointment, 'already': True, 'status': action}
+
+    if current in ('completed',) and action == 'confirmed':
+        conn.close()
+        return {'ok': False, 'error': 'already_completed', 'appointment': appointment, 'status': current}
+
+    conn.execute(
+        'UPDATE appointments SET status = %s WHERE id = %s',
+        (action, appointment_id)
+    )
+    conn.commit()
+    conn.close()
+
+    appointment = dict(appointment)
+    appointment['status'] = action
+
+    email_paciente = (appointment.get('email') or '').strip().lower()
+    if email_paciente:
+        fecha = appointment.get('appointment_date') or appointment.get('emergency_datetime')
+        hora = appointment.get('appointment_time')
+        enviar_email_confirmacion_cita(
+            email_paciente,
+            appointment.get('first_name') or '',
+            appointment.get('last_name') or '',
+            fecha,
+            hora,
+            appointment.get('appointment_type') or 'consulta',
+            action,
+            appointment.get('reason'),
+        )
+
+    return {'ok': True, 'error': None, 'appointment': appointment, 'already': False, 'status': action}
 def _formato_fecha_hora_cita(fecha, hora):
     """Normalizar fecha/hora (str, date, time, timedelta) para templates de email."""
     from datetime import date, datetime, time, timedelta
@@ -3081,13 +3163,36 @@ def enviar_correos_prueba(to_email):
             'Consulta ginecológica', 'confirmed', 'Cita de prueba del sistema'
         ),
     )
+
+    # Cita real pendiente para que Confirmar/Cancelar del correo funcionen
+    conn = get_db_connection()
+    conn.execute('''
+        INSERT INTO appointments
+        (first_name, last_name, email, phone, appointment_date, appointment_time,
+         appointment_type, medical_insurance, emergency_datetime, reason, status)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    ''', (
+        'Paula', 'Prueba', to_email, '8297405073',
+        '2026-10-15', '10:00', 'consulta', 'Particular', None,
+        'Cita de prueba del sistema (enlace confirmar)', 'pending'
+    ))
+    prueba_cita_id = conn.lastrowid
+    conn.commit()
+    conn.close()
+
+    with app.app_context():
+        confirm_url = f"{base}{url_for('cita_accion_email', token=_cita_accion_token(prueba_cita_id, 'confirmed'))}"
+        cancel_url = f"{base}{url_for('cita_accion_email', token=_cita_accion_token(prueba_cita_id, 'cancelled'))}"
+
     _send(
         'aviso_doctora',
         '[PRUEBA] Nueva solicitud de cita — Paula Prueba',
         template_cita(
             'Paula', 'Prueba', to_email, '8297405073',
             '15/10/2026', '10:00 a.m.', 'Consulta', 'Particular', '',
-            'Cita de prueba del sistema'
+            'Cita de prueba del sistema',
+            confirm_url=confirm_url,
+            cancel_url=cancel_url,
         ),
     )
     _send(
@@ -3469,6 +3574,7 @@ def request_appointment():
                 INSERT INTO appointments (first_name, last_name, email, phone, appointment_date, appointment_time, appointment_type, medical_insurance, emergency_datetime, reason)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ''', (first_name, last_name, email_val, phone, appointment_date_val, appointment_time_val, appointment_type, medical_insurance, emergency_datetime_val, reason_val))
+            appointment_id = conn.lastrowid
             conn.commit()
             conn.close()
 
@@ -3494,7 +3600,8 @@ def request_appointment():
 
             email_ok = enviar_email_cita(
                 first_name, last_name, email, phone, appointment_date, appointment_time,
-                appointment_type, medical_insurance, emergency_datetime, reason
+                appointment_type, medical_insurance, emergency_datetime, reason,
+                appointment_id=appointment_id,
             )
             if not email_ok:
                 print(f"⚠️ Cita guardada pero email NO enviado a {EMAIL_DESTINATARIO}")
@@ -3846,6 +3953,63 @@ def admin_recordatorios_anuales():
         resultado=resultado,
         min_days=ANNUAL_REMINDER_MIN_DAYS,
         extra_days=ANNUAL_REMINDER_EXTRA_DAYS,
+    )
+
+@app.route('/cita/accion/<token>', methods=['GET', 'POST'])
+def cita_accion_email(token):
+    """Confirmar o cancelar cita desde el correo de la doctora (enlace firmado)."""
+    appointment_id, action = _cita_accion_from_token(token)
+    if action == 'expired':
+        return render_template(
+            'cita_accion_email.html',
+            state='expired',
+            appointment=None,
+            action=None,
+        ), 410
+    if not appointment_id or not action:
+        return render_template(
+            'cita_accion_email.html',
+            state='invalid',
+            appointment=None,
+            action=None,
+        ), 400
+
+    conn = get_db_connection()
+    appointment = conn.execute(
+        'SELECT * FROM appointments WHERE id = %s',
+        (appointment_id,)
+    ).fetchone()
+    conn.close()
+    if not appointment:
+        return render_template(
+            'cita_accion_email.html',
+            state='not_found',
+            appointment=None,
+            action=action,
+        ), 404
+
+    if request.method == 'POST':
+        result = aplicar_accion_cita_desde_email(appointment_id, action)
+        if not result['ok']:
+            return render_template(
+                'cita_accion_email.html',
+                state=result.get('error') or 'error',
+                appointment=result.get('appointment') or appointment,
+                action=action,
+            )
+        return render_template(
+            'cita_accion_email.html',
+            state='done',
+            appointment=result['appointment'],
+            action=action,
+            already=result.get('already', False),
+        )
+
+    return render_template(
+        'cita_accion_email.html',
+        state='confirm',
+        appointment=appointment,
+        action=action,
     )
 
 @app.route('/recordatorio/baja/<token>', methods=['GET', 'POST'])

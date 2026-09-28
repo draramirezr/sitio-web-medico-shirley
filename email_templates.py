@@ -115,7 +115,7 @@ def template_contacto(nombre, email, telefono, asunto, mensaje):
     
     return get_base_template("📧", "Nuevo Mensaje de Contacto", content)
 
-def template_cita(nombre, apellido, email, telefono, fecha, hora, tipo, seguro, emergencia, motivo):
+def template_cita(nombre, apellido, email, telefono, fecha, hora, tipo, seguro, emergencia, motivo, confirm_url=None, cancel_url=None):
     """Template para emails de citas (notificación a la doctora)"""
     tel_wa = telefono.replace('+', '').replace('-', '').replace(' ', '').replace('(', '').replace(')', '')
     seguro_html = (
@@ -128,6 +128,32 @@ def template_cita(nombre, apellido, email, telefono, fecha, hora, tipo, seguro, 
         f'<strong>Urgencia / emergencia:</strong> {emergencia}</p>'
         if emergencia else ''
     )
+    acciones_cita = ''
+    if confirm_url or cancel_url:
+        confirm_btn = (
+            f'''<a href="{confirm_url}"
+           style="display: inline-block; padding: 14px 36px; background: #2E7D32; color: white !important; text-decoration: none; border-radius: 28px; font-weight: 600; font-size: 15px; margin: 5px;">
+            Confirmar cita
+        </a>'''
+            if confirm_url else ''
+        )
+        cancel_btn = (
+            f'''<a href="{cancel_url}"
+           style="display: inline-block; padding: 14px 28px; background: #fff; color: #C62828 !important; text-decoration: none; border-radius: 28px; font-weight: 600; font-size: 15px; margin: 5px; border: 2px solid #C62828;">
+            Cancelar cita
+        </a>'''
+            if cancel_url else ''
+        )
+        acciones_cita = f'''
+    <div style="text-align: center; margin: 28px 0 8px 0; padding: 18px; background: #F1F8F2; border-radius: 10px; border: 1px solid #C8E6C9;">
+        <p style="margin: 0 0 14px 0; color: #2E7D32; font-size: 14px; font-weight: 600;">
+            Puedes confirmar o cancelar esta cita con un clic:
+        </p>
+        {confirm_btn}
+        {cancel_btn}
+    </div>
+    '''
+
     content = f"""
     <div style="color: #282828; line-height: 1.7; margin: 10px 0 22px 0; font-size: 15px;">
         <p style="margin: 0 0 12px 0;">Hola Doctora,</p>
@@ -173,7 +199,9 @@ def template_cita(nombre, apellido, email, telefono, fecha, hora, tipo, seguro, 
         <p style="margin: 0; color: #282828; line-height: 1.7; font-size: 14px; white-space: pre-wrap;">{motivo}</p>
     </div>
 
-    <div style="text-align: center; margin-top: 28px;">
+    {acciones_cita}
+
+    <div style="text-align: center; margin-top: 20px;">
         <a href="https://wa.me/{tel_wa}?text=Hola%20{nombre}%20{apellido},%20te%20contacto%20desde%20el%20consultorio%20de%20la%20Dra.%20Shirley%20Ram%C3%ADrez%20sobre%20tu%20cita"
            style="display: inline-block; padding: 14px 32px; background: #25D366; color: white !important; text-decoration: none; border-radius: 28px; font-weight: 600; font-size: 15px; margin: 5px;">
             Escribir por WhatsApp

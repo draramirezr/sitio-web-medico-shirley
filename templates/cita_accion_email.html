@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de cita — Dra. Shirley Ramírez{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container" style="max-width: 560px;">
+        <div class="p-4 p-md-5" style="background:#fff;border-radius:16px;border:1px solid #E8D5DA;">
+            {% if state == 'invalid' %}
+            <h1 class="h4 mb-3" style="color:#6B5C62;">Enlace no válido</h1>
+            <p class="mb-0 text-muted">Este enlace no es válido. Usa el botón del correo más reciente o gestiona la cita desde el panel.</p>
+
+            {% elif state == 'expired' %}
+            <h1 class="h4 mb-3" style="color:#6B5C62;">Enlace expirado</h1>
+            <p class="mb-0 text-muted">Este enlace ya no es válido (caduca a los 14 días). Confirma o cancela la cita desde el panel de administración.</p>
+
+            {% elif state == 'not_found' %}
+            <h1 class="h4 mb-3" style="color:#6B5C62;">Cita no encontrada</h1>
+            <p class="mb-0 text-muted">No encontramos esta cita. Puede haber sido eliminada.</p>
+
+            {% elif state == 'already_completed' %}
+            <h1 class="h4 mb-3" style="color:#6B5C62;">Cita ya completada</h1>
+            <p class="mb-0 text-muted">Esta cita ya está marcada como completada y no se puede confirmar de nuevo.</p>
+
+            {% elif state == 'done' %}
+            <h1 class="h4 mb-3" style="color:#2E7D32;">
+                {% if action == 'confirmed' %}Cita confirmada{% else %}Cita cancelada{% endif %}
+            </h1>
+            {% if already %}
+            <p class="mb-3 text-muted">Esta cita ya estaba en ese estado.</p>
+            {% else %}
+            <p class="mb-3">
+                {% if action == 'confirmed' %}
+                Confirmaste la cita. Si la paciente tiene email, le enviamos la notificación.
+                {% else %}
+                Cancelaste la cita. Si la paciente tiene email, le enviamos la notificación.
+                {% endif %}
+            </p>
+            {% endif %}
+            {% if appointment %}
+            <div class="p-3 mb-3" style="background:#F8F4F5;border-radius:10px;">
+                <p class="mb-1"><strong>{{ appointment.first_name }} {{ appointment.last_name }}</strong></p>
+                <p class="mb-1 text-muted small">{{ appointment.appointment_date or appointment.emergency_datetime }} {% if appointment.appointment_time %}· {{ appointment.appointment_time }}{% endif %}</p>
+                <p class="mb-0 text-muted small">{{ appointment.appointment_type }}</p>
+            </div>
+            {% endif %}
+            <a href="{{ url_for('admin_appointments') }}" class="btn" style="background:#8B5A6B;color:#fff;">Ver citas en el panel</a>
+
+            {% elif state == 'confirm' %}
+            <h1 class="h4 mb-3" style="color:#6B5C62;">
+                {% if action == 'confirmed' %}Confirmar cita{% else %}Cancelar cita{% endif %}
+            </h1>
+            <p class="mb-3">
+                {% if action == 'confirmed' %}
+                ¿Confirmas la cita de <strong>{{ appointment.first_name }} {{ appointment.last_name }}</strong>?
+                {% else %}
+                ¿Cancelas la cita de <strong>{{ appointment.first_name }} {{ appointment.last_name }}</strong>?
+                {% endif %}
+            </p>
+            <div class="p-3 mb-4" style="background:#F8F4F5;border-radius:10px;">
+                <p class="mb-1 text-muted small">Fecha: {{ appointment.appointment_date or appointment.emergency_datetime }}</p>
+                {% if appointment.appointment_time %}<p class="mb-1 text-muted small">Hora: {{ appointment.appointment_time }}</p>{% endif %}
+                <p class="mb-0 text-muted small">Tipo: {{ appointment.appointment_type }}</p>
+                <p class="mb-0 text-muted small mt-2">Estado actual: {{ appointment.status }}</p>
+            </div>
+            <form method="POST" class="d-flex flex-wrap gap-2">
+                <button type="submit" class="btn"
+                    style="background:{% if action == 'confirmed' %}#2E7D32{% else %}#C62828{% endif %};color:#fff;">
+                    {% if action == 'confirmed' %}Sí, confirmar cita{% else %}Sí, cancelar cita{% endif %}
+                </button>
+                <a href="{{ url_for('index') }}" class="btn btn-link" style="color:#8B7A80;">Volver</a>
+            </form>
+            {% else %}
+            <h1 class="h4 mb-3" style="color:#6B5C62;">No se pudo completar</h1>
+            <p class="mb-0 text-muted">Ocurrió un problema al actualizar la cita. Inténtalo desde el panel.</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
