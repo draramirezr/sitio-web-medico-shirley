@@ -357,10 +357,49 @@ def template_factura(factura_id, ncf, monto_total):
     
     return get_base_template("💰", f"Factura #{factura_id} - NCF: {ncf}", content)
 
-def template_confirmacion_cita(nombre, apellido, fecha, hora, tipo, estatus, motivo=None):
+def template_confirmacion_cita(nombre, apellido, fecha, hora, tipo, estatus, motivo=None, review_url=None):
     """Template para confirmación de cambio de estatus de cita al paciente"""
     maps_url = "https://www.google.com/maps/place/Dra.+Shirley+Ramirez/@18.4971899,-69.865084,17z/data=!4m6!3m5!1s0x8eaf89d14db5e76b:0x2a4aedf3ef3c083d!8m2!3d18.4971899!4d-69.865084!16s%2Fg%2F11jzcl6jxk"
     direccion = "Av. Sabana Larga 123, Santo Domingo Este 11901"
+    review_url = (review_url or (
+        'https://www.google.com/search?q=Dra.+Shirley+Ramirez'
+        '#lrd=0x8eaf89d14db5e76b:0x2a4aedf3ef3c083d,3,,,,'
+    )).strip()
+
+    # Correo especial al completar la consulta: agradecimiento + reseña Google
+    if (estatus or '').strip().lower() == 'completed':
+        nombre_corto = (nombre or '').strip() or 'hola'
+        content = f"""
+    <div style="color: #282828; line-height: 1.75; margin: 8px 0 20px 0; font-size: 15px;">
+        <p style="margin: 0 0 16px 0;">Hola <strong style="color: #6B5C62;">{nombre_corto}</strong>,</p>
+        <p style="margin: 0 0 16px 0;">
+            Gracias por confiar en nosotros para el cuidado de tu salud.
+            Fue un placer atenderte; esperamos que te hayas sentido cómoda durante tu consulta.
+        </p>
+        <p style="margin: 0;">
+            Tu opinión es muy importante para nosotros. Si deseas compartir tu experiencia,
+            puedes dejarnos una reseña en Google. Solo te tomará un minuto y puede ayudar
+            a otras mujeres a encontrar atención ginecológica de confianza.
+        </p>
+    </div>
+
+    <div style="text-align: center; margin: 32px 0 24px 0;">
+        <a href="{review_url}"
+           style="display: inline-block; padding: 15px 36px; background: #8B5A6B; color: white !important; text-decoration: none; border-radius: 28px; font-weight: 600; font-size: 15px;">
+            Dejar mi reseña en Google
+        </a>
+    </div>
+
+    <div style="margin-top: 28px; padding-top: 18px; border-top: 1px solid #E8D5DA;">
+        <p style="margin: 0 0 6px 0; color: #282828; font-size: 15px;">Un abrazo,</p>
+        <p style="margin: 0; color: #6B5C62; font-weight: 700; font-size: 15px;">Dra. Shirley Ramírez</p>
+        <p style="margin: 4px 0 0 0; color: #8B7A80; font-size: 13px;">Ginecóloga • Obstetra</p>
+        <p style="margin: 4px 0 0 0;">
+            <a href="https://www.draramirez.com" style="color: #8B5A6B; text-decoration: none; font-size: 13px;">www.draramirez.com</a>
+        </p>
+    </div>
+        """
+        return get_base_template("", "Gracias por tu visita", content)
 
     estatus_config = {
         'pending': {
@@ -405,17 +444,6 @@ def template_confirmacion_cita(nombre, apellido, fecha, hora, tipo, estatus, mot
                 'Si deseas reagendar, escríbenos por WhatsApp o solicita una nueva cita en la web.'
             ),
             'accion': 'Estamos para ayudarte cuando lo necesites.',
-        },
-        'completed': {
-            'color': '#1565C0',
-            'bg': '#E3F2FD',
-            'icon': '',
-            'titulo': 'Gracias por tu visita',
-            'mensaje': (
-                '<strong style="color: #1565C0;">Gracias por confiar en nosotros.</strong> '
-                'Tu cita ha sido completada. Esperamos haberte brindado una excelente atención.'
-            ),
-            'accion': 'Si tienes alguna pregunta o deseas agendar un seguimiento, contáctanos por WhatsApp.',
         },
     }
 

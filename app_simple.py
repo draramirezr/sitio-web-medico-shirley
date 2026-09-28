@@ -2821,7 +2821,10 @@ def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora
             'completed': 'Gracias por tu visita — Dra. Shirley Ramírez',
         }
 
-        html = template_confirmacion_cita(nombre, apellido, fecha_fmt, hora_fmt, tipo_fmt, estatus, motivo)
+        html = template_confirmacion_cita(
+            nombre, apellido, fecha_fmt, hora_fmt, tipo_fmt, estatus, motivo,
+            review_url=GOOGLE_REVIEW_URL if estatus == 'completed' else None,
+        )
         subject = asuntos.get(estatus, 'Actualización de tu cita — Dra. Shirley Ramírez')
 
         success = send_email_api(
