@@ -224,7 +224,7 @@
                                     <span>Nombre Completo</span>
                                     <span class="required-asterisk">*</span>
                                 </label>
-                                <input type="text" class="form-control" id="full_name" name="full_name" placeholder="Tu nombre completo" autocomplete="name" required>
+                                <input type="text" class="form-control" id="full_name" name="full_name" placeholder="Tu nombre completo" autocomplete="name" inputmode="text" pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+" title="Solo letras, sin números" required>
                                 <!-- Mantener compatibilidad con backend -->
                                 <input type="hidden" name="first_name" id="first_name">
                                 <input type="hidden" name="last_name" id="last_name">
@@ -236,7 +236,7 @@
                                     <span>Teléfono</span>
                                     <span class="required-asterisk">*</span>
                                 </label>
-                                <input type="tel" class="form-control" id="phone" name="phone" placeholder="(809) 000-0000" autocomplete="tel" required>
+                                <input type="tel" class="form-control" id="phone" name="phone" placeholder="(809) 000-0000" autocomplete="tel" inputmode="numeric" pattern="[0-9+\-\s()]+" title="Solo números" required>
                             </div>
 
                             <div class="col-md-6">
@@ -517,6 +517,73 @@ document.addEventListener('DOMContentLoaded', function() {
     if (fullName) {
         fullName.addEventListener('input', splitFullNameToHidden);
         splitFullNameToHidden();
+    }
+
+    // Nombre Completo: no permitir números al escribir (ni pegar)
+    function bindNoDigits(el, onChange) {
+        if (!el) return;
+        const clean = function() {
+            const before = el.value;
+            const after = before.replace(/[0-9]/g, '');
+            if (before !== after) {
+                const pos = el.selectionStart;
+                el.value = after;
+                if (typeof pos === 'number') {
+                    const n = Math.max(0, pos - (before.length - after.length));
+                    try { el.setSelectionRange(n, n); } catch (e) {}
+                }
+            }
+            if (onChange) onChange();
+        };
+        el.addEventListener('beforeinput', function(e) {
+            if (e.data && /[0-9]/.test(e.data)) e.preventDefault();
+        });
+        el.addEventListener('keypress', function(e) {
+            if (e.key && /[0-9]/.test(e.key)) e.preventDefault();
+        });
+        el.addEventListener('input', clean);
+        el.addEventListener('paste', function() { setTimeout(clean, 0); });
+        clean();
+    }
+
+    // Teléfono: solo números y formato (no letras)
+    function bindPhoneOnly(el) {
+        if (!el) return;
+        const clean = function() {
+            const before = el.value;
+            const after = before.replace(/[^\d+\-\s()]/g, '');
+            if (before !== after) {
+                const pos = el.selectionStart;
+                el.value = after;
+                if (typeof pos === 'number') {
+                    const n = Math.max(0, pos - (before.length - after.length));
+                    try { el.setSelectionRange(n, n); } catch (e) {}
+                }
+            }
+        };
+        el.addEventListener('beforeinput', function(e) {
+            if (e.data && /[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/.test(e.data)) e.preventDefault();
+        });
+        el.addEventListener('keypress', function(e) {
+            if (e.key && /[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/.test(e.key)) e.preventDefault();
+        });
+        el.addEventListener('input', clean);
+        el.addEventListener('paste', function() { setTimeout(clean, 0); });
+        clean();
+    }
+
+    bindNoDigits(fullName, splitFullNameToHidden);
+    bindPhoneOnly(document.getElementById('phone'));
+    if (fullName) {
+        fullName.setAttribute('inputmode', 'text');
+        fullName.setAttribute('pattern', '[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+');
+        fullName.setAttribute('title', 'Solo letras (sin números)');
+    }
+    const phoneEl = document.getElementById('phone');
+    if (phoneEl) {
+        phoneEl.setAttribute('inputmode', 'tel');
+        phoneEl.setAttribute('pattern', '[0-9+\\-\\s()]+');
+        phoneEl.setAttribute('title', 'Solo números');
     }
 
     function setNormalScheduleVisible(visible) {

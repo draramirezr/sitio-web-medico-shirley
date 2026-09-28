@@ -3562,6 +3562,17 @@ def request_appointment():
             if len(first_name) > 50 or len(last_name) > 50:
                 flash('Los nombres no pueden exceder 50 caracteres.', 'danger')
                 return redirect(url_for('request_appointment'))
+
+            nombre_completo_check = f'{first_name} {last_name}'.strip()
+            if re.search(r'\d', nombre_completo_check):
+                flash('El nombre no puede contener números.', 'danger')
+                return redirect(url_for('request_appointment'))
+            if re.search(r'[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]', phone or ''):
+                flash('El teléfono solo puede contener números.', 'danger')
+                return redirect(url_for('request_appointment'))
+            if not validate_phone(phone):
+                flash('Por favor, ingresa un teléfono válido (mínimo 10 dígitos).', 'danger')
+                return redirect(url_for('request_appointment'))
             
             emergency_datetime = sanitize_input(request.form.get('emergency_datetime', ''))
             reason = sanitize_input(request.form.get('reason', ''))
