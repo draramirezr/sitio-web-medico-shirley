@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 Sistema de Templates de Email Unificado
 Plantillas HTML profesionales con diseño estándar
@@ -459,6 +459,54 @@ def template_confirmacion_cita(nombre, apellido, fecha, hora, tipo, estatus, mot
     """
 
     return get_base_template(config['icon'], config['titulo'], content)
+
+
+def template_recordatorio_anual(nombre, apellido, fecha_ultima, cita_url, unsubscribe_url):
+    """Recordatorio anual de chequeo rutinario (solo pacientes con opt-in)."""
+    content = f"""
+    <div style="color: #282828; line-height: 1.75; margin: 8px 0 20px 0; font-size: 15px;">
+        <p style="margin: 0 0 14px 0;">Hola <strong style="color: #6B5C62;">{nombre} {apellido}</strong>,</p>
+        <p style="margin: 0 0 14px 0;">
+            <strong style="color: #6B5C62;">Gracias por confiar en nosotros.</strong>
+            Según nuestros registros, tu última cita fue el
+            <strong>{fecha_ultima}</strong>.
+        </p>
+        <p style="margin: 0;">
+            En ginecología, el chequeo rutinario suele corresponder cerca de un año después.
+            Si deseas agendar tu control, estamos para ayudarte.
+        </p>
+    </div>
+
+    <div style="background-color: #F8F4F5; padding: 20px 22px; border-radius: 10px; margin: 22px 0; border-left: 4px solid #CEB0B7;">
+        <p style="margin: 0; color: #6B5C62; font-weight: 600; font-size: 15px; line-height: 1.6;">
+            Este es solo un recordatorio de prevención. No reemplaza una evaluación médica
+            y no implica que tengas un problema de salud.
+        </p>
+    </div>
+
+    <div style="text-align: center; margin-top: 28px;">
+        <a href="{cita_url}"
+           style="display: inline-block; padding: 14px 36px; background: #8B5A6B; color: white !important; text-decoration: none; border-radius: 28px; font-weight: 600; font-size: 15px; margin: 5px;">
+            Solicitar cita
+        </a>
+        <a href="https://wa.me/18297405073?text=Hola%2C%20me%20gustar%C3%ADa%20agendar%20mi%20chequeo%20rutinario"
+           style="display: inline-block; padding: 14px 32px; background: #25D366; color: white !important; text-decoration: none; border-radius: 28px; font-weight: 600; font-size: 15px; margin: 5px;">
+            WhatsApp
+        </a>
+    </div>
+
+    <div style="margin-top: 32px; padding-top: 18px; border-top: 1px solid #E8D5DA; text-align: center;">
+        <p style="margin: 0; color: #999; font-size: 12px; line-height: 1.5;">
+            Recibes este correo porque aceptaste recordatorios anuales al solicitar una cita.<br>
+            <a href="{unsubscribe_url}" style="color: #8B7A80; text-decoration: underline;">
+                Cancelar recordatorios anuales
+            </a>
+        </p>
+    </div>
+    """
+    return get_base_template("", "Recordatorio de chequeo anual", content)
+
+
 def template_bienvenida_facturacion(nombre, email, password_temporal, link_admin, puede_generar_facturas=False):
     """Template para email de bienvenida a usuarios de facturación
     

@@ -110,7 +110,8 @@ try:
         template_constancia_pdf,
         template_factura,
         template_confirmacion_cita,
-        template_nueva_contrasena
+        template_nueva_contrasena,
+        template_recordatorio_anual,
     )
     EMAIL_TEMPLATES_AVAILABLE = True
 except ImportError as e:
@@ -125,6 +126,7 @@ except ImportError as e:
     def template_factura(*args): return "Email template no disponible"
     def template_confirmacion_cita(*args): return "Email template no disponible"
     def template_nueva_contrasena(*args): return "Email template no disponible"
+    def template_recordatorio_anual(*args): return "Email template no disponible"
 
 # Importar Flask-Compress de forma opcional
 try:
@@ -285,6 +287,12 @@ SITE_MAPS_EMBED_URL = (
 )
 SITE_PHONE_DISPLAY = '(829) 740-5073'
 SITE_PHONE_E164 = '+18297405073'
+
+# Recordatorios anuales de chequeo (opt-in + cron)
+CRON_SECRET = (os.getenv('CRON_SECRET') or '').strip()
+ANNUAL_REMINDER_MIN_DAYS = int(os.getenv('ANNUAL_REMINDER_MIN_DAYS', '335'))  # ~11 meses
+ANNUAL_REMINDER_COOLDOWN_DAYS = int(os.getenv('ANNUAL_REMINDER_COOLDOWN_DAYS', '300'))
+ANNUAL_REMINDER_BATCH_LIMIT = int(os.getenv('ANNUAL_REMINDER_BATCH_LIMIT', '40'))
 
 # Configuración de seguridad y sesiones
 app.config['SESSION_COOKIE_SECURE'] = PRODUCTION  # True en producción
@@ -1293,6 +1301,26 @@ def init_db():
     except:
         cursor.execute("ALTER TABLE appointments ADD COLUMN emergency_datetime VARCHAR(50)")
         print("✅ Columna 'emergency_datetime' agregada a la tabla appointments")
+
+    # Preferencias de recordatorio anual (opt-in)
+    cursor.execute(adapt_sql_for_database('''
+        CREATE TABLE IF NOT EXISTS patient_followup_prefs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email VARCHAR(255) NOT NULL,
+            first_name TEXT,
+            last_name TEXT,
+            phone TEXT,
+            annual_opt_in BOOLEAN DEFAULT 0,
+            unsubscribed_at TIMESTAMP NULL,
+            last_annual_sent_at TIMESTAMP NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    '''))
+    try:
+        cursor.execute('CREATE UNIQUE INDEX idx_followup_prefs_email ON patient_followup_prefs (email)')
+    except Exception:
+        pass
     
     # Tabla de tratamientos estéticos ginecológicos
     cursor.execute(adapt_sql_for_database('''
@@ -2728,6 +2756,254 @@ def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora
         traceback.print_exc()
         return False
 
+# ============ RECORDATORIOS ANUALES (OPT-IN) ============
+_FOLLOWUP_SCHEMA_READY = False
+
+def _ensure_followup_schema():
+    """Crear tabla de preferencias de recordatorio si no existe (Railway/gunicorn)."""
+    global _FOLLOWUP_SCHEMA_READY
+    if _FOLLOWUP_SCHEMA_READY:
+        return True
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(adapt_sql_for_database('''
+            CREATE TABLE IF NOT EXISTS patient_followup_prefs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                email VARCHAR(255) NOT NULL,
+                first_name TEXT,
+                last_name TEXT,
+                phone TEXT,
+                annual_opt_in BOOLEAN DEFAULT 0,
+                unsubscribed_at TIMESTAMP NULL,
+                last_annual_sent_at TIMESTAMP NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        '''))
+        try:
+            cursor.execute('CREATE UNIQUE INDEX idx_followup_prefs_email ON patient_followup_prefs (email)')
+        except Exception:
+            pass
+        conn.commit()
+        conn.close()
+        _FOLLOWUP_SCHEMA_READY = True
+        return True
+    except Exception as e:
+        print(f"⚠️ No se pudo preparar patient_followup_prefs: {e}")
+        return False
+
+def _followup_token(email):
+    """Token firmado para baja de recordatorios (sin expiración larga)."""
+    from itsdangerous import URLSafeSerializer
+    s = URLSafeSerializer(app.secret_key, salt='annual-reminder-unsub-v1')
+    return s.dumps({'e': (email or '').strip().lower()})
+
+def _followup_email_from_token(token):
+    from itsdangerous import URLSafeSerializer, BadSignature
+    s = URLSafeSerializer(app.secret_key, salt='annual-reminder-unsub-v1')
+    try:
+        data = s.loads(token)
+        return (data.get('e') or '').strip().lower()
+    except BadSignature:
+        return None
+
+def _parse_appointment_date(value):
+    if not value:
+        return None
+    try:
+        text = str(value).strip()[:10]
+        return datetime.strptime(text, '%Y-%m-%d').date()
+    except Exception:
+        return None
+
+def upsert_annual_reminder_opt_in(email, first_name, last_name, phone):
+    """Guardar consentimiento de recordatorio anual (opt-in explícito)."""
+    email_n = (email or '').strip().lower()
+    if not email_n or not validate_email(email_n):
+        return False
+    if not _ensure_followup_schema():
+        return False
+    try:
+        conn = get_db_connection()
+        existing = conn.execute(
+            'SELECT id FROM patient_followup_prefs WHERE email = %s',
+            (email_n,)
+        ).fetchone()
+        if existing:
+            conn.execute('''
+                UPDATE patient_followup_prefs
+                SET first_name = %s, last_name = %s, phone = %s,
+                    annual_opt_in = 1, unsubscribed_at = NULL,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE email = %s
+            ''', (first_name, last_name, phone, email_n))
+        else:
+            conn.execute('''
+                INSERT INTO patient_followup_prefs
+                (email, first_name, last_name, phone, annual_opt_in, unsubscribed_at)
+                VALUES (%s, %s, %s, %s, 1, NULL)
+            ''', (email_n, first_name, last_name, phone))
+        conn.commit()
+        conn.close()
+        print(f"✅ Opt-in recordatorio anual: {email_n}")
+        return True
+    except Exception as e:
+        print(f"⚠️ Error guardando opt-in anual: {e}")
+        return False
+
+def unsubscribe_annual_reminder(email):
+    email_n = (email or '').strip().lower()
+    if not email_n:
+        return False
+    if not _ensure_followup_schema():
+        return False
+    try:
+        conn = get_db_connection()
+        conn.execute('''
+            UPDATE patient_followup_prefs
+            SET annual_opt_in = 0, unsubscribed_at = CURRENT_TIMESTAMP,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE email = %s
+        ''', (email_n,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"⚠️ Error en baja de recordatorio: {e}")
+        return False
+
+def _ultima_cita_completada(conn, email):
+    row = conn.execute('''
+        SELECT id, first_name, last_name, phone, appointment_date, emergency_datetime
+        FROM appointments
+        WHERE LOWER(email) = %s AND status = 'completed'
+        ORDER BY COALESCE(appointment_date, LEFT(emergency_datetime, 10)) DESC, id DESC
+        LIMIT 1
+    ''', (email,)).fetchone()
+    return row
+
+def _tiene_cita_futura(conn, email, hoy):
+    hoy_s = hoy.strftime('%Y-%m-%d')
+    row = conn.execute('''
+        SELECT id FROM appointments
+        WHERE LOWER(email) = %s
+          AND status IN ('pending', 'confirmed')
+          AND (
+            (appointment_date IS NOT NULL AND appointment_date >= %s)
+            OR (emergency_datetime IS NOT NULL AND LEFT(emergency_datetime, 10) >= %s)
+          )
+        LIMIT 1
+    ''', (email, hoy_s, hoy_s)).fetchone()
+    return bool(row)
+
+def listar_candidatas_recordatorio_anual(hoy=None):
+    """Pacientes opted-in elegibles para recordatorio anual."""
+    if not _ensure_followup_schema():
+        return []
+    hoy = hoy or obtener_fecha_rd()
+    conn = get_db_connection()
+    prefs = conn.execute('''
+        SELECT email, first_name, last_name, phone, last_annual_sent_at
+        FROM patient_followup_prefs
+        WHERE annual_opt_in = 1
+          AND unsubscribed_at IS NULL
+          AND email IS NOT NULL AND email != ''
+    ''').fetchall()
+
+    candidatas = []
+    for pref in prefs:
+        email = (pref.get('email') or '').strip().lower()
+        if not email:
+            continue
+        if _tiene_cita_futura(conn, email, hoy):
+            continue
+        ultima = _ultima_cita_completada(conn, email)
+        if not ultima:
+            continue
+        fecha_raw = ultima.get('appointment_date') or ultima.get('emergency_datetime')
+        fecha_ult = _parse_appointment_date(fecha_raw)
+        if not fecha_ult:
+            continue
+        dias = (hoy - fecha_ult).days
+        if dias < ANNUAL_REMINDER_MIN_DAYS:
+            continue
+        last_sent = pref.get('last_annual_sent_at')
+        if last_sent:
+            try:
+                if isinstance(last_sent, datetime):
+                    sent_date = last_sent.date()
+                elif hasattr(last_sent, 'year') and hasattr(last_sent, 'month') and not isinstance(last_sent, str):
+                    sent_date = last_sent
+                else:
+                    sent_date = datetime.strptime(str(last_sent)[:10], '%Y-%m-%d').date()
+                if (hoy - sent_date).days < ANNUAL_REMINDER_COOLDOWN_DAYS:
+                    continue
+            except Exception:
+                pass
+        candidatas.append({
+            'email': email,
+            'first_name': ultima.get('first_name') or pref.get('first_name') or '',
+            'last_name': ultima.get('last_name') or pref.get('last_name') or '',
+            'phone': ultima.get('phone') or pref.get('phone') or '',
+            'fecha_ultima': fecha_ult,
+            'dias_desde_ultima': dias,
+        })
+        if len(candidatas) >= ANNUAL_REMINDER_BATCH_LIMIT:
+            break
+    conn.close()
+    return candidatas
+
+def enviar_recordatorio_anual(paciente):
+    """Enviar un recordatorio anual y marcar last_annual_sent_at."""
+    email = paciente['email']
+    nombre = paciente['first_name']
+    apellido = paciente['last_name']
+    fecha_fmt = paciente['fecha_ultima'].strftime('%d/%m/%Y')
+    base = _canonical_base_url()
+    cita_url = f"{base}{url_for('request_appointment')}"
+    unsub_url = f"{base}{url_for('recordatorio_baja', token=_followup_token(email))}"
+    html = template_recordatorio_anual(nombre, apellido, fecha_fmt, cita_url, unsub_url)
+    ok = send_email_api(
+        to_email=email,
+        subject='Recordatorio de chequeo anual — Dra. Shirley Ramírez',
+        html_content=html,
+        reply_to=EMAIL_FROM,
+    )
+    if ok:
+        conn = get_db_connection()
+        conn.execute('''
+            UPDATE patient_followup_prefs
+            SET last_annual_sent_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+            WHERE email = %s
+        ''', (email,))
+        conn.commit()
+        conn.close()
+    return ok
+
+def procesar_recordatorios_anuales(dry_run=True):
+    """Lista o envía recordatorios anuales. dry_run=True no envía."""
+    candidatas = listar_candidatas_recordatorio_anual()
+    enviados = []
+    fallidos = []
+    if dry_run:
+        return {'dry_run': True, 'candidatas': candidatas, 'enviados': [], 'fallidos': []}
+    for p in candidatas:
+        try:
+            if enviar_recordatorio_anual(p):
+                enviados.append(p['email'])
+            else:
+                fallidos.append(p['email'])
+        except Exception as e:
+            print(f"❌ Recordatorio anual falló para {p.get('email')}: {e}")
+            fallidos.append(p.get('email'))
+    return {
+        'dry_run': False,
+        'candidatas': candidatas,
+        'enviados': enviados,
+        'fallidos': fallidos,
+    }
+
 def send_email(destinatario, asunto, cuerpo):
     """Función genérica para enviar emails HTML (wrapper de send_email_api)."""
     try:
@@ -3069,6 +3345,10 @@ def request_appointment():
             conn.commit()
             conn.close()
 
+            # Consentimiento opcional: recordatorio anual de chequeo
+            if request.form.get('annual_reminder_opt_in') in ('1', 'on', 'true', 'yes'):
+                upsert_annual_reminder_opt_in(email_val, first_name, last_name, phone)
+
             tipo_paciente = service_detail or appointment_type
             if appointment_type == 'emergencia' and emergency_datetime_val:
                 fecha_paciente = emergency_datetime_val
@@ -3404,6 +3684,69 @@ def admin_appointments():
     conn.close()
     
     return render_template('admin_appointments.html', appointments=appointments)
+
+@app.route('/admin/recordatorios-anuales', methods=['GET', 'POST'])
+@login_required
+def admin_recordatorios_anuales():
+    """Vista previa y envío manual de recordatorios anuales de chequeo."""
+    if request.method == 'POST' and (request.form.get('accion') or '').strip() == 'enviar':
+        resultado = procesar_recordatorios_anuales(dry_run=False)
+        flash(
+            f"Recordatorios enviados: {len(resultado['enviados'])}. "
+            f"Fallidos: {len(resultado['fallidos'])}.",
+            'success' if not resultado['fallidos'] else 'warning'
+        )
+    else:
+        resultado = procesar_recordatorios_anuales(dry_run=True)
+
+    return render_template(
+        'admin_recordatorios_anuales.html',
+        resultado=resultado,
+        min_days=ANNUAL_REMINDER_MIN_DAYS,
+        cooldown_days=ANNUAL_REMINDER_COOLDOWN_DAYS,
+    )
+
+@app.route('/recordatorio/baja/<token>', methods=['GET', 'POST'])
+def recordatorio_baja(token):
+    """Cancelar recordatorios anuales (enlace del correo)."""
+    email = _followup_email_from_token(token)
+    if not email:
+        return render_template('recordatorio_baja.html', ok=False, email=None, done=False), 400
+
+    if request.method == 'POST' or request.args.get('confirm') == '1':
+        unsubscribe_annual_reminder(email)
+        return render_template('recordatorio_baja.html', ok=True, email=email, done=True)
+
+    return render_template('recordatorio_baja.html', ok=True, email=email, done=False)
+
+@app.route('/cron/recordatorios-anuales', methods=['GET', 'POST'])
+def cron_recordatorios_anuales():
+    """
+    Endpoint para cron (Railway/GitHub Actions).
+    Auth: header X-Cron-Secret o ?key= igual a CRON_SECRET.
+    """
+    if not CRON_SECRET:
+        return jsonify({'ok': False, 'error': 'CRON_SECRET no configurado'}), 503
+    provided = (
+        request.headers.get('X-Cron-Secret')
+        or request.args.get('key')
+        or request.form.get('key')
+        or ''
+    ).strip()
+    if not provided or len(provided) != len(CRON_SECRET) or not secrets.compare_digest(provided, CRON_SECRET):
+        return jsonify({'ok': False, 'error': 'No autorizado'}), 401
+
+    dry_run = str(request.args.get('dry_run', '0')).lower() in ('1', 'true', 'yes')
+    resultado = procesar_recordatorios_anuales(dry_run=dry_run)
+    return jsonify({
+        'ok': True,
+        'dry_run': resultado['dry_run'],
+        'candidatas': len(resultado['candidatas']),
+        'enviados': len(resultado['enviados']),
+        'fallidos': len(resultado['fallidos']),
+        'emails_enviados': resultado['enviados'],
+        'emails_fallidos': resultado['fallidos'],
+    })
 
 @app.route('/admin/messages')
 @login_required

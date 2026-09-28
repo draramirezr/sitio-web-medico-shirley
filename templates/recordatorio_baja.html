@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Recordatorios anuales{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container" style="max-width: 560px;">
+        <div class="p-4 p-md-5" style="background:#fff;border-radius:16px;border:1px solid #E8D5DA;">
+            {% if not ok %}
+            <h1 class="h4 mb-3" style="color:#6B5C62;">Enlace no válido</h1>
+            <p class="mb-0 text-muted">Este enlace de cancelación no es válido o ya expiró. Si necesitas ayuda, escríbenos por WhatsApp.</p>
+            {% elif done %}
+            <h1 class="h4 mb-3" style="color:#6B5C62;">Listo</h1>
+            <p class="mb-3">Cancelamos los recordatorios anuales para <strong>{{ email }}</strong>.</p>
+            <p class="mb-0 text-muted">Si más adelante deseas volver a recibirlos, márcalo al solicitar una nueva cita.</p>
+            {% else %}
+            <h1 class="h4 mb-3" style="color:#6B5C62;">Cancelar recordatorios</h1>
+            <p class="mb-4">¿Deseas dejar de recibir el recordatorio anual de chequeo en <strong>{{ email }}</strong>?</p>
+            <form method="POST">
+                <button type="submit" class="btn" style="background:#8B5A6B;color:#fff;">Sí, cancelar recordatorios</button>
+                <a href="{{ url_for('index') }}" class="btn btn-link" style="color:#8B7A80;">Volver al inicio</a>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
