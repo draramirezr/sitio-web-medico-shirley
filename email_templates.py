@@ -21,27 +21,19 @@ def get_email_footer():
     """Footer estándar para todos los emails"""
     return """
     <div style="background-color: #F2E2E6; padding: 25px; text-align: center; border-radius: 0 0 15px 15px; margin-top: 20px;">
-        <div style="border-top: 2px solid #CEB0B7; padding-top: 20px; margin-bottom: 15px;">
-            <p style="color: #ACACAD; font-size: 14px; margin: 8px 0; font-weight: 600;">
-                📞 829-740-5073 | 📧 dra.ramirezr@gmail.com
+        <div style="border-top: 2px solid #CEB0B7; padding-top: 20px; margin-bottom: 12px;">
+            <p style="color: #6B5C62; font-size: 14px; margin: 6px 0; font-weight: 600;">
+                (829) 740-5073 &nbsp;·&nbsp; WhatsApp disponible
             </p>
-            <p style="color: #ACACAD; font-size: 13px; margin: 8px 0;">
-                📍 Santo Domingo | República Dominicana
+            <p style="color: #8B7A80; font-size: 13px; margin: 6px 0;">
+                Av. Sabana Larga 123, Santo Domingo Este 11901
+            </p>
+            <p style="color: #8B7A80; font-size: 13px; margin: 6px 0;">
+                <a href="https://www.draramirez.com" style="color: #8B5A6B; text-decoration: none;">www.draramirez.com</a>
             </p>
         </div>
-        <div style="margin-top: 15px;">
-            <a href="https://www.linkedin.com/in/shirley-ramirez-montero-a10964168/" 
-               style="display: inline-block; margin: 0 8px; color: #CEB0B7; text-decoration: none; font-size: 20px;">
-                🔗 LinkedIn
-            </a>
-            <a href="https://www.instagram.com/dra.ramirezr/" 
-               style="display: inline-block; margin: 0 8px; color: #CEB0B7; text-decoration: none; font-size: 20px;">
-                📷 Instagram
-            </a>
-        </div>
-        <p style="color: #999; font-size: 11px; margin: 15px 0 0 0; line-height: 1.4;">
-            Este email fue enviado desde el sistema de gestión médica<br>
-            <strong>Dra. Shirley Ramírez</strong> • &copy; 2025 • Todos los derechos reservados
+        <p style="color: #999; font-size: 11px; margin: 12px 0 0 0; line-height: 1.4;">
+            Dra. Shirley Ramírez · Ginecóloga y Obstetra
         </p>
     </div>
     """

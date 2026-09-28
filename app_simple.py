@@ -2610,7 +2610,7 @@ def enviar_email_cita(first_name, last_name, email, phone, appointment_date, app
         # Enviar usando SendGrid API
         success = send_email_api(
             to_email=EMAIL_DESTINATARIO,
-            subject=f'📅 Nueva Solicitud de Cita - {first_name} {last_name}',
+            subject=f'Nueva solicitud de cita — {first_name} {last_name}',
             html_content=html,
             reply_to=email if email else None,
         )
@@ -2689,14 +2689,14 @@ def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora
         tipo_fmt = (tipo or 'consulta').strip()
 
         asuntos = {
-            'pending': '⏳ Tu Cita está Pendiente de Confirmación',
-            'confirmed': '✅ ¡Tu Cita ha sido Confirmada!',
-            'cancelled': '❌ Tu Cita ha sido Cancelada',
-            'completed': '✔️ Tu Cita ha sido Completada',
+            'pending': 'Recibimos tu solicitud de cita — Dra. Shirley Ramírez',
+            'confirmed': 'Tu cita está confirmada — Dra. Shirley Ramírez',
+            'cancelled': 'Tu cita fue cancelada — Dra. Shirley Ramírez',
+            'completed': 'Gracias por tu visita — Dra. Shirley Ramírez',
         }
 
         html = template_confirmacion_cita(nombre, apellido, fecha_fmt, hora_fmt, tipo_fmt, estatus, motivo)
-        subject = asuntos.get(estatus, '📅 Actualización de tu Cita')
+        subject = asuntos.get(estatus, 'Actualización de tu cita — Dra. Shirley Ramírez')
 
         success = send_email_api(
             to_email=paciente_email,
