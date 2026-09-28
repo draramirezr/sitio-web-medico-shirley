@@ -2741,6 +2741,7 @@ def aplicar_accion_cita_desde_email(appointment_id, action):
             appointment.get('appointment_type') or 'consulta',
             action,
             appointment.get('reason'),
+            appointment_id=appointment_id,
         )
 
     return {'ok': True, 'error': None, 'appointment': appointment, 'already': False, 'status': action}
@@ -2788,11 +2789,15 @@ def _formato_fecha_hora_cita(fecha, hora):
 
     return fecha_fmt, hora_fmt
 
-def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora, tipo, estatus, motivo=None):
-    """Enviar email de confirmación de cambio de estatus de cita al paciente (Resend/SendGrid)."""
+def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora, tipo, estatus, motivo=None, appointment_id=None, force=False):
+    """Enviar email de confirmación de cambio de estatus de cita al paciente (Resend/SendGrid).
+
+    Anti-duplicados: no reenvía el mismo estatus para la misma cita en 24 h (salvo force=True).
+    """
     try:
         paciente_email = (paciente_email or '').strip().lower()
-        print(f"\n📧 Confirmación cita → paciente: {paciente_email or '(vacío)'} | estatus: {estatus}")
+        estatus = (estatus or '').strip().lower()
+        print(f"\n📧 Confirmación cita → paciente: {paciente_email or '(vacío)'} | estatus: {estatus} | cita_id: {appointment_id}")
 
         if not EMAIL_CONFIGURED:
             print("⚠️ Email no configurado. Configura RESEND_API_KEY o SENDGRID_API_KEY en Railway.")
@@ -2801,6 +2806,10 @@ def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora
         if not paciente_email:
             print("⚠️ El paciente no tiene email registrado — no se puede enviar confirmación.")
             return False
+
+        if not force and _ya_se_envio_email_cita(appointment_id, paciente_email, estatus):
+            print(f"⏭️ Omitido email duplicado ({estatus}) para {paciente_email} cita={appointment_id}")
+            return True  # tratado como éxito: ya se notificó
 
         fecha_fmt, hora_fmt = _formato_fecha_hora_cita(fecha, hora)
         tipo_fmt = (tipo or 'consulta').strip()
@@ -2833,6 +2842,7 @@ def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora
             )
 
         if success:
+            _registrar_email_cita_enviado(appointment_id, paciente_email, estatus)
             print(f"✅ Confirmación de cita enviada a {paciente_email} ({nombre} {apellido}) — {estatus}")
         else:
             print(f"⚠️ Cita actualizada pero email NO enviado a {paciente_email}")
@@ -2844,6 +2854,88 @@ def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora
         import traceback
         traceback.print_exc()
         return False
+
+_EMAIL_LOG_SCHEMA_READY = False
+
+def _ensure_appointment_email_log():
+    global _EMAIL_LOG_SCHEMA_READY
+    if _EMAIL_LOG_SCHEMA_READY:
+        return True
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(adapt_sql_for_database('''
+            CREATE TABLE IF NOT EXISTS appointment_email_log (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                appointment_id INT NULL,
+                email VARCHAR(255) NOT NULL,
+                estatus VARCHAR(50) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        '''))
+        try:
+            cursor.execute('CREATE INDEX idx_appt_email_log_appt ON appointment_email_log (appointment_id, estatus)')
+        except Exception:
+            pass
+        try:
+            cursor.execute('CREATE INDEX idx_appt_email_log_email ON appointment_email_log (email, estatus, created_at)')
+        except Exception:
+            pass
+        conn.commit()
+        conn.close()
+        _EMAIL_LOG_SCHEMA_READY = True
+        return True
+    except Exception as e:
+        print(f"⚠️ No se pudo preparar appointment_email_log: {e}")
+        return False
+
+def _ya_se_envio_email_cita(appointment_id, email, estatus, horas=24):
+    """True si ya se envió el mismo estatus para esa cita (o email) en las últimas N horas."""
+    if not _ensure_appointment_email_log():
+        return False
+    email_n = (email or '').strip().lower()
+    estatus_n = (estatus or '').strip().lower()
+    if not email_n or not estatus_n:
+        return False
+    try:
+        from datetime import datetime, timedelta
+        cutoff = datetime.utcnow() - timedelta(hours=int(horas))
+        conn = get_db_connection()
+        if appointment_id:
+            row = conn.execute('''
+                SELECT id FROM appointment_email_log
+                WHERE appointment_id = %s AND estatus = %s AND created_at >= %s
+                LIMIT 1
+            ''', (int(appointment_id), estatus_n, cutoff)).fetchone()
+        else:
+            row = conn.execute('''
+                SELECT id FROM appointment_email_log
+                WHERE email = %s AND estatus = %s AND appointment_id IS NULL AND created_at >= %s
+                LIMIT 1
+            ''', (email_n, estatus_n, cutoff)).fetchone()
+        conn.close()
+        return bool(row)
+    except Exception as e:
+        print(f"⚠️ Error consultando appointment_email_log: {e}")
+        return False
+
+def _registrar_email_cita_enviado(appointment_id, email, estatus):
+    if not _ensure_appointment_email_log():
+        return
+    try:
+        conn = get_db_connection()
+        conn.execute('''
+            INSERT INTO appointment_email_log (appointment_id, email, estatus)
+            VALUES (%s, %s, %s)
+        ''', (
+            int(appointment_id) if appointment_id else None,
+            (email or '').strip().lower(),
+            (estatus or '').strip().lower(),
+        ))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"⚠️ Error registrando appointment_email_log: {e}")
 
 # ============ RECORDATORIOS ANUALES (OPT-IN) ============
 _FOLLOWUP_SCHEMA_READY = False
@@ -3122,49 +3214,33 @@ def enviar_recordatorio_anual(paciente):
         conn.close()
     return ok
 
+_prueba_email_lock = Lock()
+_prueba_email_last = {}  # email -> timestamp
+
 def enviar_correos_prueba(to_email):
-    """Enviar muestras: cita paciente, aviso doctora y recordatorio anual."""
+    """Enviar UNA muestra del aviso a la doctora (con Confirmar/Cancelar). Máx. 1 cada 15 min."""
     to_email = (to_email or '').strip().lower()
     if not to_email or not validate_email(to_email):
         return {'ok': False, 'error': 'Email inválido', 'results': []}
     if not EMAIL_CONFIGURED:
         return {'ok': False, 'error': 'Email no configurado', 'results': []}
 
-    base = _canonical_base_url()
-    with app.app_context():
-        cita_url = f"{base}{url_for('request_appointment')}"
-        unsub_url = f"{base}{url_for('recordatorio_baja', token=_followup_token(to_email))}"
+    now = time.time()
+    with _prueba_email_lock:
+        last = _prueba_email_last.get(to_email, 0)
+        if now - last < 15 * 60:
+            mins = int((15 * 60 - (now - last)) / 60) + 1
+            return {
+                'ok': False,
+                'error': f'Espera {mins} min para otra prueba al mismo correo (evita spam).',
+                'results': [],
+            }
+        _prueba_email_last[to_email] = now
 
+    base = _canonical_base_url()
     results = []
 
-    def _send(label, subject, html):
-        ok = send_email_api(
-            to_email=to_email,
-            subject=subject,
-            html_content=html,
-            reply_to=EMAIL_FROM,
-        )
-        results.append({'label': label, 'ok': ok})
-        return ok
-
-    _send(
-        'cita_solicitud',
-        '[PRUEBA] Recibimos tu solicitud de cita — Dra. Shirley Ramírez',
-        template_confirmacion_cita(
-            'Paula', 'Prueba', '15/10/2026', '10:00 a.m.',
-            'Consulta ginecológica', 'pending', 'Cita de prueba del sistema'
-        ),
-    )
-    _send(
-        'cita_confirmada',
-        '[PRUEBA] Tu cita está confirmada — Dra. Shirley Ramírez',
-        template_confirmacion_cita(
-            'Paula', 'Prueba', '15/10/2026', '10:00 a.m.',
-            'Consulta ginecológica', 'confirmed', 'Cita de prueba del sistema'
-        ),
-    )
-
-    # Cita real pendiente para que Confirmar/Cancelar del correo funcionen
+    # Una sola cita real pendiente para probar Confirmar/Cancelar
     conn = get_db_connection()
     conn.execute('''
         INSERT INTO appointments
@@ -3184,34 +3260,21 @@ def enviar_correos_prueba(to_email):
         confirm_url = f"{base}{url_for('cita_accion_email', token=_cita_accion_token(prueba_cita_id, 'confirmed'))}"
         cancel_url = f"{base}{url_for('cita_accion_email', token=_cita_accion_token(prueba_cita_id, 'cancelled'))}"
 
-    _send(
-        'aviso_doctora',
-        '[PRUEBA] Nueva solicitud de cita — Paula Prueba',
-        template_cita(
-            'Paula', 'Prueba', to_email, '8297405073',
-            '15/10/2026', '10:00 a.m.', 'Consulta', 'Particular', '',
-            'Cita de prueba del sistema',
-            confirm_url=confirm_url,
-            cancel_url=cancel_url,
-        ),
+    html = template_cita(
+        'Paula', 'Prueba', to_email, '8297405073',
+        '15/10/2026', '10:00 a.m.', 'Consulta', 'Particular', '',
+        'Cita de prueba del sistema',
+        confirm_url=confirm_url,
+        cancel_url=cancel_url,
     )
-    _send(
-        'recordatorio_anual',
-        '[PRUEBA] Recordatorio de chequeo anual — Dra. Shirley Ramírez',
-        template_recordatorio_anual(
-            'Paula', 'Prueba', '20/09/2025', cita_url, unsub_url, es_extra=False
-        ),
+    ok = send_email_api(
+        to_email=to_email,
+        subject='[PRUEBA] Nueva solicitud de cita — Paula Prueba',
+        html_content=html,
+        reply_to=EMAIL_FROM,
     )
-    _send(
-        'recordatorio_extra',
-        '[PRUEBA] Un recordatorio amable sobre tu chequeo — Dra. Shirley Ramírez',
-        template_recordatorio_anual(
-            'Paula', 'Prueba', '20/09/2025', cita_url, unsub_url, es_extra=True
-        ),
-    )
-
-    ok_all = all(r['ok'] for r in results)
-    return {'ok': ok_all, 'error': None, 'results': results}
+    results.append({'label': 'aviso_doctora', 'ok': ok})
+    return {'ok': ok, 'error': None if ok else 'No se pudo enviar', 'results': results}
 
 def procesar_recordatorios_anuales(dry_run=True):
     """Lista o envía recordatorios anuales. dry_run=True no envía."""
@@ -3593,7 +3656,8 @@ def request_appointment():
             print(f"\n📬 Enviando confirmación de solicitud al paciente: {email}")
             paciente_email_ok = enviar_email_confirmacion_cita(
                 email, first_name, last_name,
-                fecha_paciente, hora_paciente, tipo_paciente, 'pending', reason_val
+                fecha_paciente, hora_paciente, tipo_paciente, 'pending', reason_val,
+                appointment_id=appointment_id,
             )
             if not paciente_email_ok:
                 print(f"⚠️ Cita guardada pero confirmación NO enviada al paciente {email}")
@@ -3936,12 +4000,9 @@ def admin_recordatorios_anuales():
             to_email = (request.form.get('test_email') or '').strip().lower()
             prueba = enviar_correos_prueba(to_email)
             if prueba['ok']:
-                flash(f'Correos de prueba enviados a {to_email}. Revisa bandeja y spam.', 'success')
+                flash(f'Correo de prueba enviado a {to_email} (1 aviso con Confirmar/Cancelar).', 'success')
             else:
-                detalle = ', '.join(
-                    f"{r['label']}={'OK' if r['ok'] else 'FAIL'}" for r in prueba.get('results') or []
-                ) or (prueba.get('error') or 'Error')
-                flash(f'No se pudieron enviar todas las pruebas ({detalle}).', 'warning')
+                flash(prueba.get('error') or 'No se pudo enviar la prueba.', 'warning')
             resultado = procesar_recordatorios_anuales(dry_run=True)
         else:
             resultado = procesar_recordatorios_anuales(dry_run=True)
@@ -4211,7 +4272,7 @@ def guardar_tema_pagina():
 @login_required
 def update_appointment_status(appointment_id):
     """Actualizar estado de cita y enviar notificación al paciente"""
-    new_status = request.form['status']
+    new_status = (request.form.get('status') or '').strip().lower()
     
     conn = get_db_connection()
     
@@ -4224,6 +4285,12 @@ def update_appointment_status(appointment_id):
     if not appointment:
         flash('Cita no encontrada', 'error')
         conn.close()
+        return redirect(url_for('admin_appointments'))
+
+    old_status = (appointment.get('status') or 'pending').strip().lower()
+    if old_status == new_status:
+        conn.close()
+        flash('El estado ya estaba actualizado. No se reenvió correo.', 'info')
         return redirect(url_for('admin_appointments'))
     
     # Actualizar estado
@@ -4242,7 +4309,8 @@ def update_appointment_status(appointment_id):
         motivo = appointment['reason'] if appointment['reason'] else None
         
         email_ok = enviar_email_confirmacion_cita(
-            email_paciente, nombre, apellido, fecha, hora, tipo, new_status, motivo
+            email_paciente, nombre, apellido, fecha, hora, tipo, new_status, motivo,
+            appointment_id=appointment_id,
         )
         if email_ok:
             flash(f'Estado de la cita actualizado y notificación enviada a {nombre} {apellido}', 'success')
@@ -4259,7 +4327,7 @@ def update_appointment_status_ajax(appointment_id):
     """Actualizar estado de cita via AJAX (JSON)"""
     try:
         data = request.get_json()
-        new_status = data.get('status')
+        new_status = (data.get('status') or '').strip().lower()
         
         # Validar el estado
         valid_statuses = ['pending', 'confirmed', 'completed', 'cancelled']
@@ -4277,6 +4345,16 @@ def update_appointment_status_ajax(appointment_id):
         if not appointment:
             conn.close()
             return jsonify({'success': False, 'error': 'Cita no encontrada'}), 404
+
+        old_status = (appointment.get('status') or 'pending').strip().lower()
+        if old_status == new_status:
+            conn.close()
+            return jsonify({
+                'success': True,
+                'message': f'El estado ya era: {new_status}',
+                'email_sent': False,
+                'skipped_duplicate': True,
+            })
         
         # Actualizar estado
         conn.execute('UPDATE appointments SET status = %s WHERE id = %s', (new_status, appointment_id))
@@ -4294,16 +4372,17 @@ def update_appointment_status_ajax(appointment_id):
             motivo = appointment['reason'] if appointment['reason'] else None
             
             email_ok = enviar_email_confirmacion_cita(
-                email_paciente, nombre, apellido, fecha, hora, tipo, new_status, motivo
+                email_paciente, nombre, apellido, fecha, hora, tipo, new_status, motivo,
+                appointment_id=appointment_id,
             )
         
         return jsonify({
             'success': True,
             'message': f'Estado actualizado a: {new_status}',
+            'email_sent': bool(email_ok),
             'new_status': new_status,
             'has_patient_email': bool(email_paciente),
             'patient_email': email_paciente or None,
-            'email_sent': email_ok if email_paciente else False,
         })
         
     except Exception as e:
