@@ -288,11 +288,12 @@ SITE_MAPS_EMBED_URL = (
 SITE_PHONE_DISPLAY = '(829) 740-5073'
 SITE_PHONE_E164 = '+18297405073'
 
-# Recordatorios anuales de chequeo (opt-in + cron)
+# Recordatorios anuales de chequeo (opt-in)
 CRON_SECRET = (os.getenv('CRON_SECRET') or '').strip()
-ANNUAL_REMINDER_MIN_DAYS = int(os.getenv('ANNUAL_REMINDER_MIN_DAYS', '335'))  # ~11 meses
-ANNUAL_REMINDER_COOLDOWN_DAYS = int(os.getenv('ANNUAL_REMINDER_COOLDOWN_DAYS', '300'))
+ANNUAL_REMINDER_MIN_DAYS = int(os.getenv('ANNUAL_REMINDER_MIN_DAYS', '335'))  # ~11 meses (1.er aviso)
+ANNUAL_REMINDER_EXTRA_DAYS = int(os.getenv('ANNUAL_REMINDER_EXTRA_DAYS', '400'))  # ~13 meses (único extra)
 ANNUAL_REMINDER_BATCH_LIMIT = int(os.getenv('ANNUAL_REMINDER_BATCH_LIMIT', '40'))
+ANNUAL_REMINDER_MAX_PER_CYCLE = 2  # 1.er + 1 extra; luego silencio hasta nueva cita completada
 
 # Configuración de seguridad y sesiones
 app.config['SESSION_COOKIE_SECURE'] = PRODUCTION  # True en producción
@@ -1313,6 +1314,7 @@ def init_db():
             annual_opt_in BOOLEAN DEFAULT 0,
             unsubscribed_at TIMESTAMP NULL,
             last_annual_sent_at TIMESTAMP NULL,
+            annual_cycle_sent_count INT DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -1321,6 +1323,11 @@ def init_db():
         cursor.execute('CREATE UNIQUE INDEX idx_followup_prefs_email ON patient_followup_prefs (email)')
     except Exception:
         pass
+    try:
+        cursor.execute('SELECT annual_cycle_sent_count FROM patient_followup_prefs LIMIT 1')
+    except Exception:
+        cursor.execute('ALTER TABLE patient_followup_prefs ADD COLUMN annual_cycle_sent_count INT DEFAULT 0')
+        print("✅ Columna 'annual_cycle_sent_count' agregada a patient_followup_prefs")
     
     # Tabla de tratamientos estéticos ginecológicos
     cursor.execute(adapt_sql_for_database('''
@@ -2777,6 +2784,7 @@ def _ensure_followup_schema():
                 annual_opt_in BOOLEAN DEFAULT 0,
                 unsubscribed_at TIMESTAMP NULL,
                 last_annual_sent_at TIMESTAMP NULL,
+                annual_cycle_sent_count INT DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
@@ -2785,6 +2793,11 @@ def _ensure_followup_schema():
             cursor.execute('CREATE UNIQUE INDEX idx_followup_prefs_email ON patient_followup_prefs (email)')
         except Exception:
             pass
+        try:
+            cursor.execute('SELECT annual_cycle_sent_count FROM patient_followup_prefs LIMIT 1')
+        except Exception:
+            cursor.execute('ALTER TABLE patient_followup_prefs ADD COLUMN annual_cycle_sent_count INT DEFAULT 0')
+            print("✅ Columna 'annual_cycle_sent_count' agregada a patient_followup_prefs")
         conn.commit()
         conn.close()
         _FOLLOWUP_SCHEMA_READY = True
@@ -2817,6 +2830,32 @@ def _parse_appointment_date(value):
     except Exception:
         return None
 
+def _as_date_value(value):
+    """Normalizar datetime/date/str a date."""
+    if not value:
+        return None
+    try:
+        if isinstance(value, datetime):
+            return value.date()
+        if hasattr(value, 'year') and hasattr(value, 'month') and not isinstance(value, str):
+            return value
+        return datetime.strptime(str(value)[:10], '%Y-%m-%d').date()
+    except Exception:
+        return None
+
+def _ciclo_recordatorio_count(pref, fecha_ultima):
+    """
+    Contador del ciclo actual (desde la última cita completada).
+    Si hay una cita completada posterior al último envío, el ciclo se reinicia (0).
+    """
+    last_sent = _as_date_value(pref.get('last_annual_sent_at'))
+    if not last_sent or (fecha_ultima and fecha_ultima > last_sent):
+        return 0
+    try:
+        return int(pref.get('annual_cycle_sent_count') or 0)
+    except Exception:
+        return 0
+
 def upsert_annual_reminder_opt_in(email, first_name, last_name, phone):
     """Guardar consentimiento de recordatorio anual (opt-in explícito)."""
     email_n = (email or '').strip().lower()
@@ -2841,8 +2880,8 @@ def upsert_annual_reminder_opt_in(email, first_name, last_name, phone):
         else:
             conn.execute('''
                 INSERT INTO patient_followup_prefs
-                (email, first_name, last_name, phone, annual_opt_in, unsubscribed_at)
-                VALUES (%s, %s, %s, %s, 1, NULL)
+                (email, first_name, last_name, phone, annual_opt_in, unsubscribed_at, annual_cycle_sent_count)
+                VALUES (%s, %s, %s, %s, 1, NULL, 0)
             ''', (email_n, first_name, last_name, phone))
         conn.commit()
         conn.close()
@@ -2898,13 +2937,18 @@ def _tiene_cita_futura(conn, email, hoy):
     return bool(row)
 
 def listar_candidatas_recordatorio_anual(hoy=None):
-    """Pacientes opted-in elegibles para recordatorio anual."""
+    """
+    Elegibles:
+    - 1.er aviso ~11 meses (cycle_count 0)
+    - 1 extra ~13 meses si no agendó (cycle_count 1)
+    - Luego silencio hasta una nueva cita completada
+    """
     if not _ensure_followup_schema():
         return []
     hoy = hoy or obtener_fecha_rd()
     conn = get_db_connection()
     prefs = conn.execute('''
-        SELECT email, first_name, last_name, phone, last_annual_sent_at
+        SELECT email, first_name, last_name, phone, last_annual_sent_at, annual_cycle_sent_count
         FROM patient_followup_prefs
         WHERE annual_opt_in = 1
           AND unsubscribed_at IS NULL
@@ -2926,21 +2970,23 @@ def listar_candidatas_recordatorio_anual(hoy=None):
         if not fecha_ult:
             continue
         dias = (hoy - fecha_ult).days
-        if dias < ANNUAL_REMINDER_MIN_DAYS:
-            continue
-        last_sent = pref.get('last_annual_sent_at')
-        if last_sent:
-            try:
-                if isinstance(last_sent, datetime):
-                    sent_date = last_sent.date()
-                elif hasattr(last_sent, 'year') and hasattr(last_sent, 'month') and not isinstance(last_sent, str):
-                    sent_date = last_sent
-                else:
-                    sent_date = datetime.strptime(str(last_sent)[:10], '%Y-%m-%d').date()
-                if (hoy - sent_date).days < ANNUAL_REMINDER_COOLDOWN_DAYS:
-                    continue
-            except Exception:
-                pass
+        cycle_count = _ciclo_recordatorio_count(pref, fecha_ult)
+
+        if cycle_count >= ANNUAL_REMINDER_MAX_PER_CYCLE:
+            continue  # silencio hasta nueva cita completada
+
+        if cycle_count == 0:
+            if dias < ANNUAL_REMINDER_MIN_DAYS:
+                continue
+            tipo = 'primero'
+            next_count = 1
+        else:
+            # cycle_count == 1 → único recordatorio extra
+            if dias < ANNUAL_REMINDER_EXTRA_DAYS:
+                continue
+            tipo = 'extra'
+            next_count = 2
+
         candidatas.append({
             'email': email,
             'first_name': ultima.get('first_name') or pref.get('first_name') or '',
@@ -2948,6 +2994,8 @@ def listar_candidatas_recordatorio_anual(hoy=None):
             'phone': ultima.get('phone') or pref.get('phone') or '',
             'fecha_ultima': fecha_ult,
             'dias_desde_ultima': dias,
+            'tipo': tipo,
+            'next_count': next_count,
         })
         if len(candidatas) >= ANNUAL_REMINDER_BATCH_LIMIT:
             break
@@ -2955,18 +3003,27 @@ def listar_candidatas_recordatorio_anual(hoy=None):
     return candidatas
 
 def enviar_recordatorio_anual(paciente):
-    """Enviar un recordatorio anual y marcar last_annual_sent_at."""
+    """Enviar recordatorio (1.er o extra) y actualizar contador del ciclo."""
     email = paciente['email']
     nombre = paciente['first_name']
     apellido = paciente['last_name']
     fecha_fmt = paciente['fecha_ultima'].strftime('%d/%m/%Y')
+    es_extra = paciente.get('tipo') == 'extra'
+    next_count = int(paciente.get('next_count') or 1)
     base = _canonical_base_url()
     cita_url = f"{base}{url_for('request_appointment')}"
     unsub_url = f"{base}{url_for('recordatorio_baja', token=_followup_token(email))}"
-    html = template_recordatorio_anual(nombre, apellido, fecha_fmt, cita_url, unsub_url)
+    html = template_recordatorio_anual(
+        nombre, apellido, fecha_fmt, cita_url, unsub_url, es_extra=es_extra
+    )
+    subject = (
+        'Un recordatorio amable sobre tu chequeo — Dra. Shirley Ramírez'
+        if es_extra else
+        'Recordatorio de chequeo anual — Dra. Shirley Ramírez'
+    )
     ok = send_email_api(
         to_email=email,
-        subject='Recordatorio de chequeo anual — Dra. Shirley Ramírez',
+        subject=subject,
         html_content=html,
         reply_to=EMAIL_FROM,
     )
@@ -2974,9 +3031,11 @@ def enviar_recordatorio_anual(paciente):
         conn = get_db_connection()
         conn.execute('''
             UPDATE patient_followup_prefs
-            SET last_annual_sent_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+            SET last_annual_sent_at = CURRENT_TIMESTAMP,
+                annual_cycle_sent_count = %s,
+                updated_at = CURRENT_TIMESTAMP
             WHERE email = %s
-        ''', (email,))
+        ''', (next_count, email))
         conn.commit()
         conn.close()
     return ok
@@ -3703,7 +3762,7 @@ def admin_recordatorios_anuales():
         'admin_recordatorios_anuales.html',
         resultado=resultado,
         min_days=ANNUAL_REMINDER_MIN_DAYS,
-        cooldown_days=ANNUAL_REMINDER_COOLDOWN_DAYS,
+        extra_days=ANNUAL_REMINDER_EXTRA_DAYS,
     )
 
 @app.route('/recordatorio/baja/<token>', methods=['GET', 'POST'])

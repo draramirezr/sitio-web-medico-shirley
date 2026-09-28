@@ -461,11 +461,23 @@ def template_confirmacion_cita(nombre, apellido, fecha, hora, tipo, estatus, mot
     return get_base_template(config['icon'], config['titulo'], content)
 
 
-def template_recordatorio_anual(nombre, apellido, fecha_ultima, cita_url, unsubscribe_url):
+def template_recordatorio_anual(nombre, apellido, fecha_ultima, cita_url, unsubscribe_url, es_extra=False):
     """Recordatorio anual de chequeo rutinario (solo pacientes con opt-in)."""
-    content = f"""
-    <div style="color: #282828; line-height: 1.75; margin: 8px 0 20px 0; font-size: 15px;">
-        <p style="margin: 0 0 14px 0;">Hola <strong style="color: #6B5C62;">{nombre} {apellido}</strong>,</p>
+    if es_extra:
+        cuerpo = f"""
+        <p style="margin: 0 0 14px 0;">
+            <strong style="color: #6B5C62;">Solo un recordatorio amable.</strong>
+            Hace un tiempo te escribimos sobre tu chequeo rutinario
+            (última cita el <strong>{fecha_ultima}</strong>).
+        </p>
+        <p style="margin: 0;">
+            Si ya agendaste o no deseas este control ahora, puedes ignorar este mensaje
+            o cancelar los recordatorios abajo. Si quieres venir, estamos para ayudarte.
+        </p>
+        """
+        titulo = "Un recordatorio amable"
+    else:
+        cuerpo = f"""
         <p style="margin: 0 0 14px 0;">
             <strong style="color: #6B5C62;">Gracias por confiar en nosotros.</strong>
             Según nuestros registros, tu última cita fue el
@@ -475,6 +487,13 @@ def template_recordatorio_anual(nombre, apellido, fecha_ultima, cita_url, unsubs
             En ginecología, el chequeo rutinario suele corresponder cerca de un año después.
             Si deseas agendar tu control, estamos para ayudarte.
         </p>
+        """
+        titulo = "Recordatorio de chequeo anual"
+
+    content = f"""
+    <div style="color: #282828; line-height: 1.75; margin: 8px 0 20px 0; font-size: 15px;">
+        <p style="margin: 0 0 14px 0;">Hola <strong style="color: #6B5C62;">{nombre} {apellido}</strong>,</p>
+        {cuerpo}
     </div>
 
     <div style="background-color: #F8F4F5; padding: 20px 22px; border-radius: 10px; margin: 22px 0; border-left: 4px solid #CEB0B7;">
@@ -504,7 +523,7 @@ def template_recordatorio_anual(nombre, apellido, fecha_ultima, cita_url, unsubs
         </p>
     </div>
     """
-    return get_base_template("", "Recordatorio de chequeo anual", content)
+    return get_base_template("", titulo, content)
 
 
 def template_bienvenida_facturacion(nombre, email, password_temporal, link_admin, puede_generar_facturas=False):

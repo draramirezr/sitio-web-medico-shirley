@@ -10,8 +10,7 @@
             <div>
                 <h1 class="h3 mb-1" style="color: #6B5C62;">Recordatorios anuales</h1>
                 <p class="text-muted mb-0">
-                    Pacientes con consentimiento que llevan ~{{ min_days }} días desde su última cita completada
-                    (sin reenvío antes de {{ cooldown_days }} días).
+                    Ciclo: 1.er aviso a ~{{ min_days }} días · 1 extra a ~{{ extra_days }} días si no agenda · luego silencio hasta una nueva cita completada.
                 </p>
             </div>
             <a href="{{ url_for('admin_appointments') }}" class="btn btn-outline-secondary btn-sm">Volver a citas</a>
@@ -35,6 +34,7 @@
                         <th>Email</th>
                         <th>Última cita</th>
                         <th>Días</th>
+                        <th>Aviso</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -44,20 +44,30 @@
                         <td>{{ p.email }}</td>
                         <td>{{ p.fecha_ultima.strftime('%d/%m/%Y') }}</td>
                         <td>{{ p.dias_desde_ultima }}</td>
+                        <td>
+                            {% if p.tipo == 'extra' %}
+                            <span class="badge text-bg-secondary">Extra (2.º)</span>
+                            {% else %}
+                            <span class="badge text-bg-primary">1.er aviso</span>
+                            {% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
 
-        <form method="POST" onsubmit="return confirm('¿Enviar el recordatorio anual a estas pacientes?');">
+        <form method="POST" onsubmit="return confirm('¿Enviar estos recordatorios ahora?');">
             <input type="hidden" name="accion" value="enviar">
             <button type="submit" class="btn" style="background:#8B5A6B;color:#fff;">
                 Enviar recordatorios ahora
             </button>
         </form>
         {% else %}
-        <p class="text-muted">No hay candidatas en este momento. Cuando alguien marque el consentimiento al pedir cita y pase ~11 meses desde una cita <strong>completada</strong>, aparecerá aquí.</p>
+        <p class="text-muted mb-0">
+            No hay candidatas ahora. Aparecerán con opt-in + cita <strong>completada</strong>:
+            primero a ~11 meses; si no agenda, un extra a ~13 meses; después silencio hasta la próxima visita.
+        </p>
         {% endif %}
     </div>
 </section>
