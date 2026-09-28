@@ -336,19 +336,12 @@
             </div>
         <div class="col-xl-3 col-lg-6 col-md-6 animate-in" style="animation-delay: 0.3s">
             <div class="stat-card">
-                <i class="fas fa-envelope"></i>
-                    <h4>{{ stats.unread_messages }}</h4>
-                <p>Sin Leer</p>
-                </div>
-        </div>
-        <div class="col-xl-3 col-lg-6 col-md-6 animate-in" style="animation-delay: 0.4s">
-            <div class="stat-card">
                 <i class="fas fa-star"></i>
                 <h4>{{ stats.total_testimonials }}</h4>
                 <p>Testimonios</p>
             </div>
         </div>
-        <div class="col-xl-3 col-lg-6 col-md-6 animate-in" style="animation-delay: 0.5s">
+        <div class="col-xl-3 col-lg-6 col-md-6 animate-in" style="animation-delay: 0.4s">
             <div class="stat-card stat-card-visits">
                 <i class="fas fa-eye"></i>
                 <h4>{{ "{:,}".format(stats.total_visits) }}</h4>
@@ -359,7 +352,7 @@
     
     <div class="row g-4">
         <!-- Citas Pendientes -->
-        <div class="col-lg-6 animate-in" style="animation-delay: 0.6s">
+        <div class="col-lg-12 animate-in" style="animation-delay: 0.6s">
             <div class="admin-section-card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
@@ -428,76 +421,6 @@
                 <div class="card-footer bg-white border-0 text-center" style="border-radius: 0 0 15px 15px; padding: 1rem;">
                     <a href="{{ url_for('admin_appointments') }}" class="btn btn-sm btn-view-more">
                         <i class="fas fa-eye me-2"></i>Ver Todas las Citas
-                    </a>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Mensajes Recientes -->
-        <div class="col-lg-6 animate-in" style="animation-delay: 0.7s">
-            <div class="admin-section-card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="fas fa-envelope-open me-2"></i>
-                        Mensajes Sin Leer
-                    </h5>
-                    <span class="badge" style="background: #dc3545; color: white; font-size: 0.9rem;">{{ stats.unread_messages }} Sin Leer</span>
-                </div>
-                <div class="card-body" style="min-height: 200px; max-height: 450px; overflow-y: auto;">
-                    {% if recent_messages %}
-                                {% for message in recent_messages %}
-                        <div class="message-card mb-3" data-bs-toggle="modal" data-bs-target="#messageModal{{ message['id'] }}" 
-                                    style="background: {{ 'rgba(242, 226, 230, 0.25)' if not message['read'] else 'rgba(248, 249, 250, 0.5)' }}; 
-                                    border-left: 4px solid {{ 'var(--primary-color)' if not message['read'] else '#dee2e6' }}; 
-                                    border-radius: 10px; padding: 1rem; transition: all 0.3s ease; cursor: pointer;
-                                    {{ 'border: 2px solid var(--primary-color);' if not message['read'] else '' }}">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div class="flex-grow-1">
-                                    <div class="d-flex align-items-center mb-2">
-                                        <div class="avatar-circle me-2" style="width: 40px; height: 40px; border-radius: 50%; 
-                                                    background: {{ '#CEB0B7' if not message['read'] else '#dee2e6' }}; 
-                                                    display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
-                                            {{ message['name'][0] }}
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <h6 class="mb-0" style="color: var(--text-dark); font-weight: {{ '800' if not message['read'] else '600' }};">
-                                                    {{ message['name'] }}
-                                                    {% if not message['read'] %}
-                                                    <span class="badge bg-danger ms-2" style="font-size: 0.65rem; padding: 0.2rem 0.5rem; vertical-align: middle;">NUEVO</span>
-                                                    {% endif %}
-                                                </h6>
-                                            </div>
-                                            <small class="text-muted">
-                                                <i class="fas fa-envelope me-1"></i>{{ message['email'] }}
-                                            </small>
-                                        </div>
-                                    </div>
-                                    <div class="mb-2">
-                                        <strong style="color: var(--primary-color); font-size: 0.9rem;">
-                                            <i class="fas fa-tag me-1"></i>{{ message['subject'] }}
-                                        </strong>
-                                    </div>
-                                    <p class="mb-2" style="font-size: 0.9rem; color: var(--text-dark); line-height: 1.5;">
-                                        {{ message['message'][:100] }}{{ '...' if message['message']|length > 100 else '' }}
-                                    </p>
-                                    <small style="color: var(--text-muted); font-size: 0.8rem;">
-                                        <i class="fas fa-clock me-1"></i>{{ message['created_at']|fecha_es }}
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-                                {% endfor %}
-                    {% else %}
-                        <div class="text-center py-5">
-                            <i class="fas fa-envelope-open" style="font-size: 4rem; color: rgba(206, 176, 183, 0.3); margin-bottom: 1rem;"></i>
-                            <p style="color: var(--text-muted); font-size: 1.1rem; margin: 0;">No hay mensajes recientes</p>
-                    </div>
-                    {% endif %}
-                </div>
-                <div class="card-footer bg-white border-0 text-center" style="border-radius: 0 0 15px 15px; padding: 1rem;">
-                    <a href="{{ url_for('admin_messages') }}" class="btn btn-sm btn-view-more">
-                        <i class="fas fa-eye me-2"></i>Ver Todos los Mensajes
                     </a>
                 </div>
             </div>
@@ -591,12 +514,6 @@
                     <a href="{{ url_for('admin_appointments') }}" class="quick-action-btn">
                         <i class="fas fa-calendar"></i>
                         <span>Gestionar Citas</span>
-                    </a>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <a href="{{ url_for('admin_messages') }}" class="quick-action-btn">
-                        <i class="fas fa-envelope"></i>
-                        <span>Ver Mensajes</span>
                     </a>
                 </div>
                 {% endif %}
@@ -878,96 +795,6 @@
                     </a>
                     <a href="{{ url_for('admin_appointments') }}" class="btn btn-primary">
                         <i class="fas fa-eye me-2"></i>Ver Todas las Citas
-                    </a>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endfor %}
-{% endif %}
-
-<!-- Modales para Mensajes -->
-{% if recent_messages %}
-    {% for message in recent_messages %}
-    <div class="modal fade" id="messageModal{{ message['id'] }}" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header" style="background: linear-gradient(135deg, #CEB0B7 0%, #B89CA3 100%); color: white;">
-                    <h5 class="modal-title">
-                        <i class="fas fa-envelope-open me-2"></i>
-                        Mensaje de {{ message['name'] }}
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Información del Remitente -->
-                    <div class="mb-4 p-3" style="background: linear-gradient(135deg, rgba(206, 176, 183, 0.1) 0%, rgba(242, 226, 230, 0.2) 100%); border-radius: 10px;">
-                        <h6 class="mb-3" style="color: #CEB0B7; font-weight: 700;">
-                            <i class="fas fa-user me-2"></i>Información del Contacto
-                        </h6>
-                        <div class="row">
-                            <div class="col-md-6 mb-2">
-                                <strong><i class="fas fa-user-circle me-2"></i>Nombre:</strong><br>
-                                {{ message['name'] }}
-                            </div>
-                            <div class="col-md-6 mb-2">
-                                <strong><i class="fas fa-envelope me-2"></i>Email:</strong><br>
-                                <a href="mailto:{{ message['email'] }}">{{ message['email'] }}</a>
-                            </div>
-                            {% if message['phone'] %}
-                            <div class="col-md-6 mb-2">
-                                <strong><i class="fas fa-phone me-2"></i>Teléfono:</strong><br>
-                                <a href="tel:{{ message['phone'] }}">{{ message['phone'] }}</a>
-                            </div>
-                            {% endif %}
-                            <div class="col-md-6 mb-2">
-                                <strong><i class="fas fa-calendar-alt me-2"></i>Fecha:</strong><br>
-                                {{ message['created_at']|fecha_es }}
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Asunto -->
-                    <div class="mb-3 p-3" style="background: #E3F2FD; border-radius: 10px; border-left: 4px solid #2196F3;">
-                        <strong><i class="fas fa-tag me-2"></i>Asunto:</strong><br>
-                        <p class="mt-2 mb-0">{{ message['subject'] }}</p>
-                    </div>
-
-                    <!-- Mensaje -->
-                    <div class="mb-3 p-3" style="background: #F8F9FA; border-radius: 10px; border-left: 4px solid #CEB0B7;">
-                        <strong><i class="fas fa-comment-dots me-2"></i>Mensaje Completo:</strong><br>
-                        <p class="mt-2 mb-0" style="white-space: pre-wrap;">{{ message['message'] }}</p>
-                    </div>
-
-                    <!-- Estado -->
-                    <div class="p-3" style="background: {{ 'rgba(255, 243, 205, 0.5)' if not message['read'] else 'rgba(232, 245, 233, 0.5)' }}; border-radius: 10px;">
-                        <strong><i class="fas fa-info-circle me-2"></i>Estado:</strong>
-                        <span class="badge ms-2" style="background: {{ '#dc3545' if not message['read'] else '#4CAF50' }}; color: white; padding: 0.5rem 1rem; font-size: 0.9rem;">
-                            {{ 'Sin Leer' if not message['read'] else 'Leído' }}
-                        </span>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    {% if message['phone'] %}
-                    <a href="https://wa.me/{{ message['phone'].replace('(', '').replace(')', '').replace('-', '').replace(' ', '') }}?text=Hola%20{{ message['name'].replace(' ', '%20') }},%20te%20contacto%20desde%20el%20consultorio%20de%20la%20Dra.%20Shirley%20Ram%C3%ADrez" 
-                       class="btn" style="background: #25D366; color: white;" target="_blank">
-                        <i class="fab fa-whatsapp me-2"></i>WhatsApp
-                    </a>
-                    {% endif %}
-                    <button class="btn btn-primary reply-email-btn" data-message-id="{{ message['id'] }}" data-email="{{ message['email'] }}" data-name="{{ message['name'] }}" data-subject="{{ message['subject'] }}">
-                        <i class="fas fa-reply me-2"></i>Responder Email
-                    </button>
-                    {% if not message['read'] %}
-                    <button class="btn btn-success mark-read-btn-modal" data-message-id="{{ message['id'] }}">
-                        <i class="fas fa-check me-2"></i>Marcar como Leído
-                    </button>
-                    {% endif %}
-                    <button class="btn btn-danger block-sender-btn" data-message-id="{{ message['id'] }}" data-email="{{ message['email'] }}">
-                        <i class="fas fa-ban me-2"></i>Bloquear Remitente
-                    </button>
-                    <a href="{{ url_for('admin_messages') }}" class="btn btn-info">
-                        <i class="fas fa-eye me-2"></i>Ver Todos los Mensajes
                     </a>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 </div>
