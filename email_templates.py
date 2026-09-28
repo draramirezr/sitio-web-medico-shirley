@@ -116,58 +116,76 @@ def template_contacto(nombre, email, telefono, asunto, mensaje):
     return get_base_template("📧", "Nuevo Mensaje de Contacto", content)
 
 def template_cita(nombre, apellido, email, telefono, fecha, hora, tipo, seguro, emergencia, motivo):
-    """Template para emails de citas"""
+    """Template para emails de citas (notificación a la doctora)"""
+    tel_wa = telefono.replace('+', '').replace('-', '').replace(' ', '').replace('(', '').replace(')', '')
+    seguro_html = (
+        f'<p style="margin: 10px 0; color: #282828; font-size: 15px;">'
+        f'<strong style="color: #6B5C62;">Seguro:</strong> {seguro}</p>'
+        if seguro else ''
+    )
+    emergencia_html = (
+        f'<p style="margin: 10px 0; color: #D32F2F; font-size: 15px;">'
+        f'<strong>Urgencia / emergencia:</strong> {emergencia}</p>'
+        if emergencia else ''
+    )
     content = f"""
-    <div style="background: linear-gradient(135deg, rgba(206, 176, 183, 0.15) 0%, rgba(242, 226, 230, 0.3) 100%); padding: 25px; border-radius: 10px; margin: 20px 0; border: 2px solid #CEB0B7;">
-        <p style="margin: 12px 0; color: #282828; font-size: 15px;">
-            <strong style="color: #ACACAD; font-weight: 600;">👤 Paciente:</strong> {nombre} {apellido}
-        </p>
-        <p style="margin: 12px 0; color: #282828; font-size: 15px;">
-            <strong style="color: #ACACAD; font-weight: 600;">📧 Email:</strong> 
-            <a href="mailto:{email}" style="color: #CEB0B7; text-decoration: none; font-weight: 500;">{email}</a>
-        </p>
-        <p style="margin: 12px 0; color: #282828; font-size: 15px;">
-            <strong style="color: #ACACAD; font-weight: 600;">📱 Teléfono:</strong> 
-            <a href="tel:{telefono}" style="color: #CEB0B7; text-decoration: none; font-weight: 500;">{telefono}</a>
+    <div style="color: #282828; line-height: 1.7; margin: 10px 0 22px 0; font-size: 15px;">
+        <p style="margin: 0 0 12px 0;">Hola Doctora,</p>
+        <p style="margin: 0;">
+            Tienes una nueva solicitud de cita de
+            <strong style="color: #6B5C62;">{nombre} {apellido}</strong>.
+            Aquí tienes el resumen para confirmarla o contactarla:
         </p>
     </div>
-    
-    <div style="background-color: #FFF9E6; padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #FFC107;">
-        <p style="margin: 12px 0; color: #282828; font-size: 15px;">
-            <strong style="color: #F57C00; font-weight: 600;">📅 Fecha:</strong> {fecha}
+
+    <div style="background-color: #F8F4F5; padding: 20px 22px; border-radius: 10px; margin: 18px 0; border: 1px solid #E8D5DA;">
+        <p style="margin: 0 0 12px 0; color: #6B5C62; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.03em;">Paciente</p>
+        <p style="margin: 8px 0; color: #282828; font-size: 15px;">
+            <strong style="color: #8B7A80;">Nombre:</strong> {nombre} {apellido}
         </p>
-        <p style="margin: 12px 0; color: #282828; font-size: 15px;">
-            <strong style="color: #F57C00; font-weight: 600;">🕐 Hora:</strong> {hora}
+        <p style="margin: 8px 0; color: #282828; font-size: 15px;">
+            <strong style="color: #8B7A80;">Teléfono:</strong>
+            <a href="tel:{telefono}" style="color: #8B5A6B; text-decoration: none; font-weight: 500;">{telefono}</a>
         </p>
-        <p style="margin: 12px 0; color: #282828; font-size: 15px;">
-            <strong style="color: #F57C00; font-weight: 600;">🏥 Tipo:</strong> {tipo}
+        <p style="margin: 8px 0; color: #282828; font-size: 15px;">
+            <strong style="color: #8B7A80;">Email:</strong>
+            <a href="mailto:{email}" style="color: #8B5A6B; text-decoration: none; font-weight: 500;">{email}</a>
         </p>
-        {f'<p style="margin: 12px 0; color: #282828; font-size: 15px;"><strong style="color: #F57C00; font-weight: 600;">🏥 Seguro:</strong> {seguro}</p>' if seguro else ''}
-        {f'<p style="margin: 12px 0; color: #D32F2F; font-size: 15px;"><strong style="color: #D32F2F; font-weight: 600;">⚠️ EMERGENCIA:</strong> {emergencia}</p>' if emergencia else ''}
     </div>
-    
-    <div style="background-color: #fff; padding: 20px; border-left: 4px solid #CEB0B7; margin: 20px 0; border-radius: 5px;">
-        <p style="margin: 0 0 10px 0; color: #ACACAD; font-weight: 600; font-size: 15px;">💬 Motivo de la Cita:</p>
+
+    <div style="background-color: #FFF8F0; padding: 20px 22px; border-radius: 10px; margin: 18px 0; border-left: 4px solid #CEB0B7;">
+        <p style="margin: 0 0 12px 0; color: #6B5C62; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.03em;">Cita solicitada</p>
+        <p style="margin: 8px 0; color: #282828; font-size: 15px;">
+            <strong style="color: #8B7A80;">Fecha:</strong> {fecha}
+        </p>
+        <p style="margin: 8px 0; color: #282828; font-size: 15px;">
+            <strong style="color: #8B7A80;">Hora:</strong> {hora}
+        </p>
+        <p style="margin: 8px 0; color: #282828; font-size: 15px;">
+            <strong style="color: #8B7A80;">Tipo:</strong> {tipo}
+        </p>
+        {seguro_html}
+        {emergencia_html}
+    </div>
+
+    <div style="background-color: #fff; padding: 18px 20px; border-left: 4px solid #CEB0B7; margin: 18px 0; border-radius: 4px;">
+        <p style="margin: 0 0 8px 0; color: #6B5C62; font-weight: 600; font-size: 14px;">Motivo</p>
         <p style="margin: 0; color: #282828; line-height: 1.7; font-size: 14px; white-space: pre-wrap;">{motivo}</p>
     </div>
-    
-    <div style="text-align: center; margin-top: 30px;">
-        <a href="tel:{telefono}" 
-           style="display: inline-block; padding: 14px 35px; background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white !important; text-decoration: none; border-radius: 25px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3); margin: 5px;">
-            📞 Llamar al Paciente
+
+    <div style="text-align: center; margin-top: 28px;">
+        <a href="https://wa.me/{tel_wa}?text=Hola%20{nombre}%20{apellido},%20te%20contacto%20desde%20el%20consultorio%20de%20la%20Dra.%20Shirley%20Ram%C3%ADrez%20sobre%20tu%20cita"
+           style="display: inline-block; padding: 14px 32px; background: #25D366; color: white !important; text-decoration: none; border-radius: 28px; font-weight: 600; font-size: 15px; margin: 5px;">
+            Escribir por WhatsApp
         </a>
-        <a href="mailto:{email}" 
-           style="display: inline-block; padding: 14px 35px; background: linear-gradient(135deg, #ACACAD 0%, #949495 100%); color: white !important; text-decoration: none; border-radius: 25px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 12px rgba(172, 172, 173, 0.3); margin: 5px;">
-            📧 Enviar Email
-        </a>
-        <a href="https://wa.me/{telefono.replace('+', '').replace('-', '').replace(' ', '').replace('(', '').replace(')', '')}?text=Hola%20{nombre}%20{apellido},%20te%20contacto%20desde%20el%20consultorio%20de%20la%20Dra.%20Shirley%20Ram%C3%ADrez%20sobre%20tu%20cita" 
-           style="display: inline-block; padding: 14px 35px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white !important; text-decoration: none; border-radius: 25px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4); margin: 5px;">
-            💬 Contactar vía WhatsApp
+        <a href="tel:{telefono}"
+           style="display: inline-block; padding: 14px 28px; background: #8B5A6B; color: white !important; text-decoration: none; border-radius: 28px; font-weight: 600; font-size: 15px; margin: 5px;">
+            Llamar
         </a>
     </div>
     """
-    
-    return get_base_template("📅", f"Nueva Solicitud de Cita - {nombre} {apellido}", content)
+
+    return get_base_template("", f"Nueva solicitud de cita — {nombre} {apellido}", content)
 
 def template_recuperacion(nombre, link_recuperacion):
     """Template para emails de recuperación de contraseña"""
@@ -313,106 +331,134 @@ def template_factura(factura_id, ncf, monto_total):
 
 def template_confirmacion_cita(nombre, apellido, fecha, hora, tipo, estatus, motivo=None):
     """Template para confirmación de cambio de estatus de cita al paciente"""
-    
-    # Configurar colores y mensajes según el estatus
+    maps_url = "https://www.google.com/maps/place/Dra.+Shirley+Ramirez/@18.4971899,-69.865084,17z/data=!4m6!3m5!1s0x8eaf89d14db5e76b:0x2a4aedf3ef3c083d!8m2!3d18.4971899!4d-69.865084!16s%2Fg%2F11jzcl6jxk"
+    direccion = "Av. Sabana Larga 123, Santo Domingo Este 11901"
+
     estatus_config = {
         'pending': {
-            'color': '#FF9800',
-            'bg': '#FFF3E0',
-            'icon': '⏳',
-            'titulo': 'Cita Pendiente de Confirmación',
-            'mensaje': 'Tu solicitud de cita ha sido recibida y está <strong>pendiente de confirmación</strong>.',
-            'accion': 'Nos pondremos en contacto contigo pronto para confirmar la disponibilidad.'
+            'color': '#8B5A6B',
+            'bg': '#F8F4F5',
+            'icon': '',
+            'titulo': 'Recibimos tu solicitud',
+            'mensaje': (
+                '<strong style="color: #6B5C62;">Gracias por confiar en nosotros.</strong><br>'
+                'Recibimos tu solicitud de cita. En las próximas horas te confirmamos '
+                'la disponibilidad por WhatsApp o llamada.'
+            ),
+            'accion': (
+                '<strong style="color: #6B5C62;">Próximos pasos</strong><br>'
+                '1. Revisamos tu solicitud<br>'
+                '2. Te confirmamos fecha y hora<br>'
+                '3. El día de la cita, llega 10 minutos antes'
+            ),
         },
         'confirmed': {
-            'color': '#4CAF50',
+            'color': '#2E7D32',
             'bg': '#E8F5E9',
-            'icon': '✅',
-            'titulo': '¡Cita Confirmada!',
-            'mensaje': 'Tu cita ha sido <strong>confirmada exitosamente</strong>.',
-            'accion': 'Te esperamos en la fecha y hora indicadas. Por favor, llega 10 minutos antes.'
+            'icon': '',
+            'titulo': 'Tu cita está confirmada',
+            'mensaje': (
+                '<strong style="color: #2E7D32;">¡Tu cita está confirmada!</strong> '
+                'Gracias por elegirnos. Te esperamos el <strong>{fecha}</strong> '
+                'a las <strong>{hora}</strong>.'
+            ),
+            'accion': (
+                'Por favor, llega 10 minutos antes. '
+                'Si no puedes asistir, avísanos por WhatsApp para reagendar.'
+            ),
         },
         'cancelled': {
-            'color': '#F44336',
+            'color': '#C62828',
             'bg': '#FFEBEE',
-            'icon': '❌',
-            'titulo': 'Cita Cancelada',
-            'mensaje': 'Lamentamos informarte que tu cita ha sido <strong>cancelada</strong>.',
-            'accion': 'Si deseas reagendar, contáctanos o solicita una nueva cita desde nuestra página web.'
+            'icon': '',
+            'titulo': 'Tu cita fue cancelada',
+            'mensaje': (
+                'Lamentamos informarte que tu cita ha sido <strong>cancelada</strong>. '
+                'Si deseas reagendar, escríbenos por WhatsApp o solicita una nueva cita en la web.'
+            ),
+            'accion': 'Estamos para ayudarte cuando lo necesites.',
         },
         'completed': {
-            'color': '#2196F3',
+            'color': '#1565C0',
             'bg': '#E3F2FD',
-            'icon': '✔️',
-            'titulo': 'Cita Completada',
-            'mensaje': 'Tu cita ha sido <strong>completada</strong>. Gracias por confiar en nosotros.',
-            'accion': 'Esperamos haberte brindado una excelente atención. No dudes en contactarnos si tienes alguna pregunta.'
-        }
+            'icon': '',
+            'titulo': 'Gracias por tu visita',
+            'mensaje': (
+                '<strong style="color: #1565C0;">Gracias por confiar en nosotros.</strong> '
+                'Tu cita ha sido completada. Esperamos haberte brindado una excelente atención.'
+            ),
+            'accion': 'Si tienes alguna pregunta o deseas agendar un seguimiento, contáctanos por WhatsApp.',
+        },
     }
-    
+
     config = estatus_config.get(estatus, estatus_config['pending'])
-    
+    mensaje = config['mensaje'].format(fecha=fecha or 'por confirmar', hora=hora or 'por confirmar')
+    motivo_html = (
+        f'<p style="margin: 10px 0; color: #282828; font-size: 15px;">'
+        f'<strong style="color: #8B7A80;">Motivo:</strong> {motivo}</p>'
+        if motivo else ''
+    )
+
     content = f"""
-    <div style="color: #282828; line-height: 1.8; margin: 20px 0; font-size: 15px;">
-        <p style="margin: 15px 0;">Hola <strong style="color: #ACACAD;">{nombre} {apellido}</strong>,</p>
-        <p style="margin: 15px 0;">
-            {config['mensaje']}
+    <div style="color: #282828; line-height: 1.75; margin: 8px 0 20px 0; font-size: 15px;">
+        <p style="margin: 0 0 14px 0;">Hola <strong style="color: #6B5C62;">{nombre} {apellido}</strong>,</p>
+        <p style="margin: 0;">
+            {mensaje}
         </p>
     </div>
-    
-    <div style="background: linear-gradient(135deg, {config['bg']} 0%, {config['bg']}dd 100%); padding: 25px; border-radius: 10px; margin: 25px 0; border: 2px solid {config['color']}; text-align: center;">
-        <div style="font-size: 48px; margin-bottom: 15px;">
-            {config['icon']}
-        </div>
-        <h3 style="color: {config['color']}; margin: 10px 0; font-size: 20px; font-weight: 700;">
+
+    <div style="background-color: {config['bg']}; padding: 18px 20px; border-radius: 10px; margin: 22px 0; border-left: 4px solid {config['color']};">
+        <p style="margin: 0; color: {config['color']}; font-weight: 700; font-size: 17px;">
             {config['titulo']}
-        </h3>
+        </p>
     </div>
-    
-    <div style="background-color: #F2E2E6; padding: 20px; border-radius: 10px; margin: 20px 0;">
-        <p style="margin: 0 0 10px 0; color: #ACACAD; font-weight: 600; font-size: 15px;">📋 Detalles de tu Cita:</p>
-        <p style="margin: 10px 0; color: #282828; font-size: 15px;">
-            <strong style="color: #ACACAD; font-weight: 600;">📅 Fecha:</strong> {fecha if fecha else 'Por confirmar'}
+
+    <div style="background-color: #F8F4F5; padding: 20px 22px; border-radius: 10px; margin: 20px 0;">
+        <p style="margin: 0 0 12px 0; color: #6B5C62; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.03em;">
+            Detalles de tu solicitud
         </p>
-        <p style="margin: 10px 0; color: #282828; font-size: 15px;">
-            <strong style="color: #ACACAD; font-weight: 600;">🕐 Hora:</strong> {hora if hora else 'Por confirmar'}
+        <p style="margin: 8px 0; color: #282828; font-size: 15px;">
+            <strong style="color: #8B7A80;">Fecha:</strong> {fecha if fecha else 'Por confirmar'}
         </p>
-        <p style="margin: 10px 0; color: #282828; font-size: 15px;">
-            <strong style="color: #ACACAD; font-weight: 600;">🏥 Tipo:</strong> {tipo}
+        <p style="margin: 8px 0; color: #282828; font-size: 15px;">
+            <strong style="color: #8B7A80;">Hora:</strong> {hora if hora else 'Por confirmar'}
         </p>
-        {f'<p style="margin: 10px 0; color: #282828; font-size: 15px;"><strong style="color: #ACACAD; font-weight: 600;">💬 Motivo:</strong> {motivo}</p>' if motivo else ''}
+        <p style="margin: 8px 0; color: #282828; font-size: 15px;">
+            <strong style="color: #8B7A80;">Tipo:</strong> {tipo}
+        </p>
+        {motivo_html}
     </div>
-    
-    <div style="background-color: #fff; padding: 20px; border-left: 4px solid {config['color']}; margin: 20px 0; border-radius: 5px;">
+
+    <div style="background-color: #fff; padding: 18px 20px; border-left: 4px solid {config['color']}; margin: 20px 0; border-radius: 4px;">
         <p style="margin: 0; color: #282828; line-height: 1.7; font-size: 14px;">
             {config['accion']}
         </p>
     </div>
-    
-    <div style="background-color: #E3F2FD; padding: 20px; border-radius: 10px; margin: 25px 0; border-left: 4px solid #2196F3;">
-        <p style="margin: 0 0 10px 0; color: #1565C0; font-weight: 600; font-size: 15px;">📞 ¿Necesitas ayuda?</p>
-        <p style="margin: 8px 0; color: #1976D2; font-size: 14px;">
-            • Teléfono: <a href="tel:+18297405073" style="color: #2196F3; text-decoration: none; font-weight: 600;">829-740-5073</a>
+
+    <div style="background-color: #F8F4F5; padding: 18px 20px; border-radius: 10px; margin: 22px 0;">
+        <p style="margin: 0 0 8px 0; color: #6B5C62; font-weight: 600; font-size: 14px;">Consultorio</p>
+        <p style="margin: 0 0 10px 0; color: #282828; font-size: 14px; line-height: 1.5;">
+            {direccion}
         </p>
-        <p style="margin: 8px 0; color: #1976D2; font-size: 14px;">
-            • Email: <a href="mailto:dra.ramirezr@gmail.com" style="color: #2196F3; text-decoration: none; font-weight: 600;">dra.ramirezr@gmail.com</a>
-        </p>
-    </div>
-    
-    <div style="text-align: center; margin-top: 30px;">
-        <a href="tel:+18297405073" 
-           style="display: inline-block; padding: 14px 35px; background: linear-gradient(135deg, #CEB0B7 0%, #B89CA3 100%); color: white !important; text-decoration: none; border-radius: 25px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 12px rgba(206, 176, 183, 0.4); margin: 5px;">
-            📞 Llamar Ahora
+        <a href="{maps_url}"
+           style="color: #8B5A6B; font-size: 14px; font-weight: 600; text-decoration: none;">
+            Ver ubicación en Google Maps →
         </a>
-        <a href="https://wa.me/18297405073" 
-           style="display: inline-block; padding: 14px 35px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white !important; text-decoration: none; border-radius: 25px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4); margin: 5px;">
-            💬 WhatsApp
+    </div>
+
+    <div style="text-align: center; margin-top: 28px;">
+        <a href="https://wa.me/18297405073?text=Hola%2C%20necesito%20ayuda%20con%20mi%20cita"
+           style="display: inline-block; padding: 14px 36px; background: #25D366; color: white !important; text-decoration: none; border-radius: 28px; font-weight: 600; font-size: 15px; margin: 5px;">
+            WhatsApp
+        </a>
+        <a href="tel:+18297405073"
+           style="display: inline-block; padding: 14px 28px; background: #CEB0B7; color: white !important; text-decoration: none; border-radius: 28px; font-weight: 600; font-size: 15px; margin: 5px;">
+            Llamar (829) 740-5073
         </a>
     </div>
     """
-    
-    return get_base_template(config['icon'], config['titulo'], content)
 
+    return get_base_template(config['icon'], config['titulo'], content)
 def template_bienvenida_facturacion(nombre, email, password_temporal, link_admin, puede_generar_facturas=False):
     """Template para email de bienvenida a usuarios de facturación
     
