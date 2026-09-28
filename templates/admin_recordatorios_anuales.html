@@ -64,11 +64,25 @@
             </button>
         </form>
         {% else %}
-        <p class="text-muted mb-0">
+        <p class="text-muted mb-4">
             No hay candidatas ahora. Aparecerán con opt-in + cita <strong>completada</strong>:
             primero a ~11 meses; si no agenda, un extra a ~13 meses; después silencio hasta la próxima visita.
         </p>
         {% endif %}
+
+        <hr class="my-4">
+        <h2 class="h5" style="color:#6B5C62;">Enviar correos de prueba</h2>
+        <p class="text-muted small">Envía muestras: solicitud de cita, cita confirmada, aviso a la doctora, recordatorio anual y recordatorio extra.</p>
+        <form method="POST" class="row g-2 align-items-end" style="max-width:520px;">
+            <input type="hidden" name="accion" value="prueba">
+            <div class="col-sm-8">
+                <label class="form-label" for="test_email">Email de destino</label>
+                <input class="form-control" type="email" id="test_email" name="test_email" value="ing.fpaula@gmail.com" required>
+            </div>
+            <div class="col-sm-4">
+                <button type="submit" class="btn w-100" style="background:#CEB0B7;color:#fff;">Enviar prueba</button>
+            </div>
+        </form>
     </div>
 </section>
 {% endblock %}

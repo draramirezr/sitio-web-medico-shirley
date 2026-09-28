@@ -3040,6 +3040,74 @@ def enviar_recordatorio_anual(paciente):
         conn.close()
     return ok
 
+def enviar_correos_prueba(to_email):
+    """Enviar muestras: cita paciente, aviso doctora y recordatorio anual."""
+    to_email = (to_email or '').strip().lower()
+    if not to_email or not validate_email(to_email):
+        return {'ok': False, 'error': 'Email inválido', 'results': []}
+    if not EMAIL_CONFIGURED:
+        return {'ok': False, 'error': 'Email no configurado', 'results': []}
+
+    base = _canonical_base_url()
+    with app.app_context():
+        cita_url = f"{base}{url_for('request_appointment')}"
+        unsub_url = f"{base}{url_for('recordatorio_baja', token=_followup_token(to_email))}"
+
+    results = []
+
+    def _send(label, subject, html):
+        ok = send_email_api(
+            to_email=to_email,
+            subject=subject,
+            html_content=html,
+            reply_to=EMAIL_FROM,
+        )
+        results.append({'label': label, 'ok': ok})
+        return ok
+
+    _send(
+        'cita_solicitud',
+        '[PRUEBA] Recibimos tu solicitud de cita — Dra. Shirley Ramírez',
+        template_confirmacion_cita(
+            'Paula', 'Prueba', '15/10/2026', '10:00 a.m.',
+            'Consulta ginecológica', 'pending', 'Cita de prueba del sistema'
+        ),
+    )
+    _send(
+        'cita_confirmada',
+        '[PRUEBA] Tu cita está confirmada — Dra. Shirley Ramírez',
+        template_confirmacion_cita(
+            'Paula', 'Prueba', '15/10/2026', '10:00 a.m.',
+            'Consulta ginecológica', 'confirmed', 'Cita de prueba del sistema'
+        ),
+    )
+    _send(
+        'aviso_doctora',
+        '[PRUEBA] Nueva solicitud de cita — Paula Prueba',
+        template_cita(
+            'Paula', 'Prueba', to_email, '8297405073',
+            '15/10/2026', '10:00 a.m.', 'Consulta', 'Particular', '',
+            'Cita de prueba del sistema'
+        ),
+    )
+    _send(
+        'recordatorio_anual',
+        '[PRUEBA] Recordatorio de chequeo anual — Dra. Shirley Ramírez',
+        template_recordatorio_anual(
+            'Paula', 'Prueba', '20/09/2025', cita_url, unsub_url, es_extra=False
+        ),
+    )
+    _send(
+        'recordatorio_extra',
+        '[PRUEBA] Un recordatorio amable sobre tu chequeo — Dra. Shirley Ramírez',
+        template_recordatorio_anual(
+            'Paula', 'Prueba', '20/09/2025', cita_url, unsub_url, es_extra=True
+        ),
+    )
+
+    ok_all = all(r['ok'] for r in results)
+    return {'ok': ok_all, 'error': None, 'results': results}
+
 def procesar_recordatorios_anuales(dry_run=True):
     """Lista o envía recordatorios anuales. dry_run=True no envía."""
     candidatas = listar_candidatas_recordatorio_anual()
@@ -3748,13 +3816,28 @@ def admin_appointments():
 @login_required
 def admin_recordatorios_anuales():
     """Vista previa y envío manual de recordatorios anuales de chequeo."""
-    if request.method == 'POST' and (request.form.get('accion') or '').strip() == 'enviar':
-        resultado = procesar_recordatorios_anuales(dry_run=False)
-        flash(
-            f"Recordatorios enviados: {len(resultado['enviados'])}. "
-            f"Fallidos: {len(resultado['fallidos'])}.",
-            'success' if not resultado['fallidos'] else 'warning'
-        )
+    if request.method == 'POST':
+        accion = (request.form.get('accion') or '').strip()
+        if accion == 'enviar':
+            resultado = procesar_recordatorios_anuales(dry_run=False)
+            flash(
+                f"Recordatorios enviados: {len(resultado['enviados'])}. "
+                f"Fallidos: {len(resultado['fallidos'])}.",
+                'success' if not resultado['fallidos'] else 'warning'
+            )
+        elif accion == 'prueba':
+            to_email = (request.form.get('test_email') or '').strip().lower()
+            prueba = enviar_correos_prueba(to_email)
+            if prueba['ok']:
+                flash(f'Correos de prueba enviados a {to_email}. Revisa bandeja y spam.', 'success')
+            else:
+                detalle = ', '.join(
+                    f"{r['label']}={'OK' if r['ok'] else 'FAIL'}" for r in prueba.get('results') or []
+                ) or (prueba.get('error') or 'Error')
+                flash(f'No se pudieron enviar todas las pruebas ({detalle}).', 'warning')
+            resultado = procesar_recordatorios_anuales(dry_run=True)
+        else:
+            resultado = procesar_recordatorios_anuales(dry_run=True)
     else:
         resultado = procesar_recordatorios_anuales(dry_run=True)
 
