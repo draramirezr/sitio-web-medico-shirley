@@ -361,10 +361,7 @@ def template_confirmacion_cita(nombre, apellido, fecha, hora, tipo, estatus, mot
     """Template para confirmación de cambio de estatus de cita al paciente"""
     maps_url = "https://www.google.com/maps/place/Dra.+Shirley+Ramirez/@18.4971899,-69.865084,17z/data=!4m6!3m5!1s0x8eaf89d14db5e76b:0x2a4aedf3ef3c083d!8m2!3d18.4971899!4d-69.865084!16s%2Fg%2F11jzcl6jxk"
     direccion = "Av. Sabana Larga 123, Santo Domingo Este 11901"
-    review_url = (review_url or (
-        'https://www.google.com/search?q=Dra.+Shirley+Ramirez'
-        '#lrd=0x8eaf89d14db5e76b:0x2a4aedf3ef3c083d,3,,,,'
-    )).strip()
+    review_url = (review_url or 'https://g.page/r/CT0IPO_z7UoqEBM/review').strip()
 
     # Correo especial al completar la consulta: agradecimiento + reseña Google
     if (estatus or '').strip().lower() == 'completed':

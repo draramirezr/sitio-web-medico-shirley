@@ -259,10 +259,8 @@ if GOOGLE_SITE_VERIFICATION.lower().startswith('google-site-verification='):
     GOOGLE_SITE_VERIFICATION = GOOGLE_SITE_VERIFICATION.split('=', 1)[1].strip()
 
 # Link directo "Escribir reseña" (Google Business → Obtener más reseñas)
-_DEFAULT_GOOGLE_REVIEW = (
-    'https://www.google.com/search?q=Dra.+Shirley+Ramirez'
-    '#lrd=0x8eaf89d14db5e76b:0x2a4aedf3ef3c083d,3,,,,'
-)
+# g.page funciona en PC y celular; el formato #lrd= de Search falla en móvil.
+_DEFAULT_GOOGLE_REVIEW = 'https://g.page/r/CT0IPO_z7UoqEBM/review'
 GOOGLE_REVIEW_URL = (os.getenv('GOOGLE_REVIEW_URL') or _DEFAULT_GOOGLE_REVIEW).strip().strip('"').strip("'") or _DEFAULT_GOOGLE_REVIEW
 
 # NAP oficial — debe coincidir con Google Business Profile
