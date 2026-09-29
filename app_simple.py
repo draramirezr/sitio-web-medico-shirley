@@ -112,6 +112,7 @@ try:
         template_confirmacion_cita,
         template_nueva_contrasena,
         template_recordatorio_anual,
+        template_recordatorio_cita_24h,
     )
     EMAIL_TEMPLATES_AVAILABLE = True
 except ImportError as e:
@@ -127,6 +128,7 @@ except ImportError as e:
     def template_confirmacion_cita(*args): return "Email template no disponible"
     def template_nueva_contrasena(*args): return "Email template no disponible"
     def template_recordatorio_anual(*args): return "Email template no disponible"
+    def template_recordatorio_cita_24h(*args): return "Email template no disponible"
 
 # Importar Flask-Compress de forma opcional
 try:
@@ -294,6 +296,8 @@ ANNUAL_REMINDER_MIN_DAYS = int(os.getenv('ANNUAL_REMINDER_MIN_DAYS', '335'))  # 
 ANNUAL_REMINDER_EXTRA_DAYS = int(os.getenv('ANNUAL_REMINDER_EXTRA_DAYS', '400'))  # ~13 meses (único extra)
 ANNUAL_REMINDER_BATCH_LIMIT = int(os.getenv('ANNUAL_REMINDER_BATCH_LIMIT', '40'))
 ANNUAL_REMINDER_MAX_PER_CYCLE = 2  # 1.er + 1 extra; luego silencio hasta nueva cita completada
+PRE_APPOINTMENT_REMINDER_BATCH_LIMIT = int(os.getenv('PRE_APPOINTMENT_REMINDER_BATCH_LIMIT', '80'))
+PRE_APPOINTMENT_REMINDER_STATUS = 'reminder_24h'  # clave en appointment_email_log
 
 # Configuración de seguridad y sesiones
 app.config['SESSION_COOKIE_SECURE'] = PRODUCTION  # True en producción
@@ -3302,6 +3306,98 @@ def procesar_recordatorios_anuales(dry_run=True):
         'fallidos': fallidos,
     }
 
+def listar_citas_recordatorio_24h(hoy=None):
+    """Citas confirmadas para mañana (zona RD) con email, sin recordatorio previo."""
+    from datetime import timedelta
+    hoy = hoy or obtener_fecha_rd()
+    manana = hoy + timedelta(days=1)
+    manana_s = manana.strftime('%Y-%m-%d')
+    _ensure_appointment_email_log()
+    conn = get_db_connection()
+    rows = conn.execute('''
+        SELECT id, first_name, last_name, email, phone,
+               appointment_date, appointment_time, appointment_type, emergency_datetime
+        FROM appointments
+        WHERE status = 'confirmed'
+          AND email IS NOT NULL AND email != ''
+          AND (
+            appointment_date = %s
+            OR LEFT(COALESCE(emergency_datetime, ''), 10) = %s
+          )
+        ORDER BY appointment_time ASC, id ASC
+        LIMIT %s
+    ''', (manana_s, manana_s, PRE_APPOINTMENT_REMINDER_BATCH_LIMIT)).fetchall()
+    conn.close()
+
+    candidatas = []
+    for row in rows:
+        email = (row.get('email') or '').strip().lower()
+        if not email or not validate_email(email):
+            continue
+        appt_id = row.get('id')
+        if _ya_se_envio_email_cita(appt_id, email, PRE_APPOINTMENT_REMINDER_STATUS, horas=72):
+            continue
+        fecha_raw = row.get('appointment_date') or row.get('emergency_datetime')
+        fecha_fmt, hora_fmt = _formato_fecha_hora_cita(fecha_raw, row.get('appointment_time'))
+        if not fecha_fmt and row.get('emergency_datetime'):
+            fecha_fmt, hora_fmt = _formato_fecha_hora_cita(
+                row.get('emergency_datetime'), row.get('emergency_datetime')
+            )
+        candidatas.append({
+            'id': appt_id,
+            'email': email,
+            'first_name': row.get('first_name') or '',
+            'last_name': row.get('last_name') or '',
+            'fecha': fecha_fmt or manana.strftime('%d/%m/%Y'),
+            'hora': hora_fmt or '',
+            'tipo': row.get('appointment_type') or 'consulta',
+            'fecha_cita': manana,
+        })
+    return candidatas
+
+def enviar_recordatorio_cita_24h(cita):
+    """Enviar recordatorio de cita para mañana y registrar en log."""
+    email = cita['email']
+    nombre = (cita.get('first_name') or '').strip() or 'hola'
+    apellido = (cita.get('last_name') or '').strip()
+    html = template_recordatorio_cita_24h(
+        nombre, apellido, cita.get('fecha'), cita.get('hora'), cita.get('tipo'),
+        maps_url=SITE_MAPS_URL,
+    )
+    ok = send_email_api(
+        to_email=email,
+        subject='Recordatorio: tu cita es mañana — Dra. Shirley Ramírez',
+        html_content=html,
+        reply_to=EMAIL_FROM,
+    )
+    if ok:
+        _registrar_email_cita_enviado(cita.get('id'), email, PRE_APPOINTMENT_REMINDER_STATUS)
+        print(f"✅ Recordatorio 24h enviado a {email} (cita {cita.get('id')})")
+    return ok
+
+def procesar_recordatorios_cita_24h(dry_run=True):
+    """Lista o envía recordatorios de citas confirmadas para mañana."""
+    candidatas = listar_citas_recordatorio_24h()
+    enviados = []
+    fallidos = []
+    if dry_run:
+        return {'dry_run': True, 'candidatas': candidatas, 'enviados': [], 'fallidos': []}
+    for c in candidatas:
+        try:
+            if enviar_recordatorio_cita_24h(c):
+                enviados.append(c['email'])
+            else:
+                fallidos.append(c['email'])
+        except Exception as e:
+            print(f"❌ Recordatorio 24h falló para {c.get('email')}: {e}")
+            fallidos.append(c.get('email'))
+    return {
+        'dry_run': False,
+        'candidatas': candidatas,
+        'enviados': enviados,
+        'fallidos': fallidos,
+    }
+
 def send_email(destinatario, asunto, cuerpo):
     """Función genérica para enviar emails HTML (wrapper de send_email_api)."""
     try:
@@ -3998,16 +4094,25 @@ def admin_appointments():
 @app.route('/admin/recordatorios-anuales', methods=['GET', 'POST'])
 @login_required
 def admin_recordatorios_anuales():
-    """Vista previa y envío manual de recordatorios anuales de chequeo."""
+    """Vista previa y envío: recordatorios anuales + recordatorios 24h previos a cita."""
+    resultado_24h = None
     if request.method == 'POST':
         accion = (request.form.get('accion') or '').strip()
         if accion == 'enviar':
             resultado = procesar_recordatorios_anuales(dry_run=False)
             flash(
-                f"Recordatorios enviados: {len(resultado['enviados'])}. "
+                f"Recordatorios anuales enviados: {len(resultado['enviados'])}. "
                 f"Fallidos: {len(resultado['fallidos'])}.",
                 'success' if not resultado['fallidos'] else 'warning'
             )
+        elif accion == 'enviar_24h':
+            resultado_24h = procesar_recordatorios_cita_24h(dry_run=False)
+            flash(
+                f"Recordatorios 24h enviados: {len(resultado_24h['enviados'])}. "
+                f"Fallidos: {len(resultado_24h['fallidos'])}.",
+                'success' if not resultado_24h['fallidos'] else 'warning'
+            )
+            resultado = procesar_recordatorios_anuales(dry_run=True)
         elif accion == 'prueba':
             to_email = (request.form.get('test_email') or '').strip().lower()
             prueba = enviar_correos_prueba(to_email)
@@ -4021,11 +4126,16 @@ def admin_recordatorios_anuales():
     else:
         resultado = procesar_recordatorios_anuales(dry_run=True)
 
+    if resultado_24h is None:
+        resultado_24h = procesar_recordatorios_cita_24h(dry_run=True)
+
     return render_template(
         'admin_recordatorios_anuales.html',
         resultado=resultado,
+        resultado_24h=resultado_24h,
         min_days=ANNUAL_REMINDER_MIN_DAYS,
         extra_days=ANNUAL_REMINDER_EXTRA_DAYS,
+        manana_rd=(obtener_fecha_rd() + timedelta(days=1)).strftime('%d/%m/%Y'),
     )
 
 @app.route('/cita/accion/<token>', methods=['GET', 'POST'])
@@ -4117,6 +4227,35 @@ def cron_recordatorios_anuales():
 
     dry_run = str(request.args.get('dry_run', '0')).lower() in ('1', 'true', 'yes')
     resultado = procesar_recordatorios_anuales(dry_run=dry_run)
+    return jsonify({
+        'ok': True,
+        'dry_run': resultado['dry_run'],
+        'candidatas': len(resultado['candidatas']),
+        'enviados': len(resultado['enviados']),
+        'fallidos': len(resultado['fallidos']),
+        'emails_enviados': resultado['enviados'],
+        'emails_fallidos': resultado['fallidos'],
+    })
+
+@app.route('/cron/recordatorios-cita-24h', methods=['GET', 'POST'])
+def cron_recordatorios_cita_24h():
+    """
+    Cron diario: recordatorio a pacientes con cita confirmada para mañana (RD).
+    Auth: header X-Cron-Secret o ?key= igual a CRON_SECRET.
+    """
+    if not CRON_SECRET:
+        return jsonify({'ok': False, 'error': 'CRON_SECRET no configurado'}), 503
+    provided = (
+        request.headers.get('X-Cron-Secret')
+        or request.args.get('key')
+        or request.form.get('key')
+        or ''
+    ).strip()
+    if not provided or len(provided) != len(CRON_SECRET) or not secrets.compare_digest(provided, CRON_SECRET):
+        return jsonify({'ok': False, 'error': 'No autorizado'}), 401
+
+    dry_run = str(request.args.get('dry_run', '0')).lower() in ('1', 'true', 'yes')
+    resultado = procesar_recordatorios_cita_24h(dry_run=dry_run)
     return jsonify({
         'ok': True,
         'dry_run': resultado['dry_run'],

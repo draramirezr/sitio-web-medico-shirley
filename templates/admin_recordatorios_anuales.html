@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Recordatorios anuales - Panel Admin | Dra. Shirley Ramírez{% endblock %}
+{% block title %}Recordatorios - Panel Admin | Dra. Shirley Ramírez{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
@@ -8,13 +8,63 @@
     <div class="container" style="max-width: 900px;">
         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
             <div>
-                <h1 class="h3 mb-1" style="color: #6B5C62;">Recordatorios anuales</h1>
-                <p class="text-muted mb-0">
-                    Ciclo: 1.er aviso a ~{{ min_days }} días · 1 extra a ~{{ extra_days }} días si no agenda · luego silencio hasta una nueva cita completada.
-                </p>
+                <h1 class="h3 mb-1" style="color: #6B5C62;">Recordatorios</h1>
+                <p class="text-muted mb-0">Anuales de chequeo y aviso 24 h antes de la cita.</p>
             </div>
             <a href="{{ url_for('admin_appointments') }}" class="btn btn-outline-secondary btn-sm">Volver a citas</a>
         </div>
+
+        <h2 class="h5 mb-3" style="color:#6B5C62;">Recordatorio 24 h antes (citas de mañana)</h2>
+        <p class="text-muted small mb-3">
+            Citas <strong>confirmadas</strong> para el <strong>{{ manana_rd }}</strong> (zona RD). Se envía una sola vez por cita.
+        </p>
+        <div class="alert alert-light border mb-3">
+            <strong>{{ resultado_24h.candidatas|length }}</strong> cita(s) para mañana.
+            {% if resultado_24h.dry_run %}
+            <span class="text-muted">Vista previa.</span>
+            {% else %}
+            Enviados: {{ resultado_24h.enviados|length }} · Fallidos: {{ resultado_24h.fallidos|length }}
+            {% endif %}
+        </div>
+        {% if resultado_24h.candidatas %}
+        <div class="table-responsive mb-3">
+            <table class="table table-sm align-middle">
+                <thead>
+                    <tr>
+                        <th>Paciente</th>
+                        <th>Email</th>
+                        <th>Hora</th>
+                        <th>Tipo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in resultado_24h.candidatas %}
+                    <tr>
+                        <td>{{ p.first_name }} {{ p.last_name }}</td>
+                        <td>{{ p.email }}</td>
+                        <td>{{ p.hora or '—' }}</td>
+                        <td>{{ p.tipo }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <form method="POST" class="mb-5" onsubmit="return confirm('¿Enviar recordatorios de cita para mañana?');">
+            <input type="hidden" name="accion" value="enviar_24h">
+            <button type="submit" class="btn" style="background:#2E7D32;color:#fff;">
+                Enviar recordatorios 24 h ahora
+            </button>
+        </form>
+        {% else %}
+        <p class="text-muted mb-5">No hay citas confirmadas para mañana pendientes de recordatorio.</p>
+        {% endif %}
+
+        <hr class="my-4">
+
+        <h2 class="h5 mb-2" style="color:#6B5C62;">Recordatorios anuales</h2>
+        <p class="text-muted mb-3">
+            Ciclo: 1.er aviso a ~{{ min_days }} días · 1 extra a ~{{ extra_days }} días si no agenda · luego silencio hasta una nueva cita completada.
+        </p>
 
         <div class="alert alert-light border mb-4">
             <strong>{{ resultado.candidatas|length }}</strong> paciente(s) elegible(s) ahora.
@@ -57,16 +107,15 @@
             </table>
         </div>
 
-        <form method="POST" onsubmit="return confirm('¿Enviar estos recordatorios ahora?');">
+        <form method="POST" onsubmit="return confirm('¿Enviar estos recordatorios anuales ahora?');">
             <input type="hidden" name="accion" value="enviar">
             <button type="submit" class="btn" style="background:#8B5A6B;color:#fff;">
-                Enviar recordatorios ahora
+                Enviar recordatorios anuales
             </button>
         </form>
         {% else %}
         <p class="text-muted mb-4">
-            No hay candidatas ahora. Aparecerán con opt-in + cita <strong>completada</strong>:
-            primero a ~11 meses; si no agenda, un extra a ~13 meses; después silencio hasta la próxima visita.
+            No hay candidatas anuales ahora. Aparecerán con opt-in + cita <strong>completada</strong>.
         </p>
         {% endif %}
 

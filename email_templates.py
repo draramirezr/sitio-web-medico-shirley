@@ -582,6 +582,62 @@ def template_recordatorio_anual(nombre, apellido, fecha_ultima, cita_url, unsubs
     return get_base_template("", titulo, content)
 
 
+def template_recordatorio_cita_24h(nombre, apellido, fecha, hora, tipo, maps_url=None):
+    """Recordatorio ~24 h antes de una cita confirmada."""
+    maps_url = maps_url or (
+        'https://www.google.com/maps/place/Dra.+Shirley+Ramirez/'
+        '@18.4971899,-69.865084,17z/'
+        'data=!4m6!3m5!1s0x8eaf89d14db5e76b:0x2a4aedf3ef3c083d'
+        '!8m2!3d18.4971899!4d-69.865084!16s%2Fg%2F11jzcl6jxk'
+    )
+    tipo_txt = tipo or 'Consulta'
+    hora_txt = hora or 'Por confirmar'
+    content = f"""
+    <div style="color: #282828; line-height: 1.75; margin: 8px 0 20px 0; font-size: 15px;">
+        <p style="margin: 0 0 16px 0;">Hola <strong style="color: #6B5C62;">{nombre}</strong>,</p>
+        <p style="margin: 0 0 16px 0;">
+            Te recordamos que tienes una cita <strong>mañana</strong>:
+        </p>
+    </div>
+
+    <div style="background-color: #F8F4F5; padding: 20px 22px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #CEB0B7;">
+        <p style="margin: 8px 0; color: #282828; font-size: 15px;">
+            <strong style="color: #8B7A80;">Fecha:</strong> {fecha}
+        </p>
+        <p style="margin: 8px 0; color: #282828; font-size: 15px;">
+            <strong style="color: #8B7A80;">Hora:</strong> {hora_txt}
+        </p>
+        <p style="margin: 8px 0; color: #282828; font-size: 15px;">
+            <strong style="color: #8B7A80;">Tipo:</strong> {tipo_txt}
+        </p>
+    </div>
+
+    <div style="background-color: #fff; padding: 18px 20px; border-left: 4px solid #8B5A6B; margin: 20px 0; border-radius: 4px;">
+        <p style="margin: 0; color: #282828; line-height: 1.7; font-size: 14px;">
+            Te esperamos. Por favor, llega <strong>10 minutos antes</strong>.
+            Si no puedes asistir, avísanos por WhatsApp para reagendar.
+        </p>
+    </div>
+
+    <div style="text-align: center; margin-top: 28px;">
+        <a href="https://wa.me/18297405073?text=Hola%2C%20necesito%20reagendar%20o%20consultar%20sobre%20mi%20cita%20de%20ma%C3%B1ana"
+           style="display: inline-block; padding: 14px 36px; background: #25D366; color: white !important; text-decoration: none; border-radius: 28px; font-weight: 600; font-size: 15px; margin: 5px;">
+            WhatsApp
+        </a>
+        <a href="{maps_url}"
+           style="display: inline-block; padding: 14px 28px; background: #CEB0B7; color: white !important; text-decoration: none; border-radius: 28px; font-weight: 600; font-size: 15px; margin: 5px;">
+            Ver ubicación
+        </a>
+    </div>
+
+    <div style="margin-top: 28px; padding-top: 18px; border-top: 1px solid #E8D5DA;">
+        <p style="margin: 0; color: #6B5C62; font-weight: 700; font-size: 15px;">Dra. Shirley Ramírez</p>
+        <p style="margin: 4px 0 0 0; color: #8B7A80; font-size: 13px;">Ginecóloga • Obstetra</p>
+    </div>
+    """
+    return get_base_template("", "Recordatorio: tu cita es mañana", content)
+
+
 def template_bienvenida_facturacion(nombre, email, password_temporal, link_admin, puede_generar_facturas=False):
     """Template para email de bienvenida a usuarios de facturación
     
