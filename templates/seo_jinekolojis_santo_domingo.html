@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block html_lang %}ht{% endblock %}
+{% block title %}Jinekològ Santo Domingo Este | Dra. Shirley Ramírez (Kreyòl){% endblock %}
+{% block description %}Doktè fanm / jinekològ nan Santo Domingo Este (Zòn Oriental). Konsiltasyon, chèkè, swen gwosès ak planin familyal. Pran randevou sou WhatsApp: 829-740-5073.{% endblock %}
+{% block og_title %}Jinekològ Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
+{% block og_description %}Doktè fanm nan Santo Domingo Este. Konsiltasyon, chèkè, swen gwosès. Pran randevou.{% endblock %}
+{% block twitter_title %}Jinekològ Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
+{% block twitter_description %}Doktè fanm nan Santo Domingo Este (Zòn Oriental). Pran randevou sou WhatsApp.{% endblock %}
+{% block schema_page_name %}Jinekològ Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
+{% block schema_page_description %}Doktè fanm / jinekològ nan Santo Domingo Este, Zòn Oriental. Paj an kreyòl ayisyen.{% endblock %}
+{% block extra_meta %}
+<link rel="alternate" hreflang="ht" href="https://www.draramirez.com/jinekolojis-santo-domingo">
+<link rel="alternate" hreflang="es-DO" href="https://www.draramirez.com/ginecologa-santo-domingo">
+<link rel="alternate" hreflang="x-default" href="https://www.draramirez.com/">
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="mb-4 text-center">
+        <img
+          src="{{ url_for('static', filename='images/dra-shirley-share.jpg') }}?v=10"
+          alt="Dra. Shirley Ramírez, doktè fanm / jinekològ nan Santo Domingo Este"
+          width="1200"
+          height="630"
+          class="img-fluid rounded"
+          style="max-width:100%;height:auto;border-radius:16px;"
+          loading="eager"
+          decoding="async"
+        >
+      </div>
+
+      <p class="small text-muted mb-2">
+        <a href="{{ url_for('seo_ginecologa_santo_domingo') }}" class="text-decoration-none" style="color: var(--title-color);">Español</a>
+        <span aria-hidden="true"> · </span>
+        <span style="color: var(--title-color); font-weight: 600;">Kreyòl</span>
+      </p>
+
+      <h1 class="display-5 fw-bold mb-3" style="color: var(--title-color);">Jinekològ nan Santo Domingo Este</h1>
+      <p class="lead text-muted mb-4">
+        Bonjou. Mwen se <strong>Dra. Shirley Ramírez</strong>, <strong>doktè fanm</strong> (jinekològ ak obstetrik)
+        nan <strong>Santo Domingo Este (Zòn Oriental)</strong>.
+        N ap resevwa pasyan ki pale <strong>kreyòl</strong> ak <strong>panyòl</strong>.
+      </p>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <div class="p-3 h-100" style="background: rgba(206, 176, 183, 0.10); border-radius: 12px; border-left: 4px solid var(--primary-color);">
+            <h2 class="h5 fw-bold mb-2" style="color: var(--title-color);">Pran randevou</h2>
+            <p class="text-muted mb-3">
+              Ou ka ekri nou sou WhatsApp oswa ranpli fòm lan. N ap ede w chwazi kalite konsiltasyon an.
+            </p>
+            <a class="btn btn-primary" href="{{ url_for('request_appointment') }}">
+              <i class="fas fa-calendar-plus me-2"></i>Pran randevou
+            </a>
+            <a class="btn btn-outline-primary ms-2"
+               href="https://wa.me/18297405073?text=Bonjou%20Dokt%C3%A8%2C%20mwen%20ta%20renmen%20pran%20yon%20randevou%20(jinekol%C3%B2g)."
+               target="_blank"
+               rel="noopener noreferrer"
+               data-gtm-event="whatsapp_click"
+               data-gtm-location="seo_kreyol">
+              <i class="fab fa-whatsapp me-2"></i>WhatsApp
+            </a>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="p-3 h-100" style="background: rgba(206, 176, 183, 0.10); border-radius: 12px; border-left: 4px solid var(--primary-color);">
+            <h2 class="h5 fw-bold mb-2" style="color: var(--title-color);">Adrès</h2>
+            <p class="text-muted mb-2">
+              <strong>Santo Domingo Este (Zòn Oriental)</strong>. Adrès: <strong>{{ site_address }}</strong>.
+            </p>
+            <a class="text-decoration-none" href="{{ site_maps_url }}" target="_blank" rel="noopener noreferrer">
+              <i class="fas fa-map-marker-alt me-2"></i>Wè nan Google Maps
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="h4 fw-bold mt-4" style="color: var(--title-color);">Sèvis prensipal</h2>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="p-3 h-100" style="border: 1px solid rgba(206, 176, 183, 0.35); border-radius: 12px;">
+            <h3 class="h5 fw-bold mb-2" style="color: var(--title-color);">Konsiltasyon / chèkè</h3>
+            <p class="text-muted mb-0">
+              Egzamen ak oryantasyon pou sante fanm. Prevansyon ak swen regilye.
+            </p>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="p-3 h-100" style="border: 1px solid rgba(206, 176, 183, 0.35); border-radius: 12px;">
+            <h3 class="h5 fw-bold mb-2" style="color: var(--title-color);">Swen gwosès</h3>
+            <p class="text-muted mb-0">
+              Kontwòl prenatal (swen pandan w ansent) ak swivi gwosès.
+            </p>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="p-3 h-100" style="border: 1px solid rgba(206, 176, 183, 0.35); border-radius: 12px;">
+            <h3 class="h5 fw-bold mb-2" style="color: var(--title-color);">Planin familyal</h3>
+            <p class="text-muted mb-0">
+              Konsèy sou metòd kontrasepsyon selon sitiyasyon w.
+            </p>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="p-3 h-100" style="border: 1px solid rgba(206, 176, 183, 0.35); border-radius: 12px;">
+            <h3 class="h5 fw-bold mb-2" style="color: var(--title-color);">Sante fanm</h3>
+            <p class="text-muted mb-0">
+              Atansyon respektè pou diferan etap nan lavi w.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="h4 fw-bold mt-5" style="color: var(--title-color);">Kesyon yo poze souvan</h2>
+      <div class="accordion" id="faqSeoHt">
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="qht1">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#aht1" aria-expanded="true" aria-controls="aht1">
+              Èske nou pale kreyòl?
+            </button>
+          </h3>
+          <div id="aht1" class="accordion-collapse collapse show" aria-labelledby="qht1" data-bs-parent="#faqSeoHt">
+            <div class="accordion-body text-muted">
+              Nou resevwa pasyan ki pale kreyòl ak panyòl. Ou ka ekri nou sou WhatsApp nan lang ou pi alèz.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="qht2">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#aht2" aria-expanded="false" aria-controls="aht2">
+              Kijan pou m pran randevou?
+            </button>
+          </h3>
+          <div id="aht2" class="accordion-collapse collapse" aria-labelledby="qht2" data-bs-parent="#faqSeoHt">
+            <div class="accordion-body text-muted">
+              Voye mesaj sou WhatsApp nan <strong>829-740-5073</strong> oswa itilize fòm “Pran randevou”.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="qht3">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#aht3" aria-expanded="false" aria-controls="aht3">
+              Ki kote klinik la ye?
+            </button>
+          </h3>
+          <div id="aht3" class="accordion-collapse collapse" aria-labelledby="qht3" data-bs-parent="#faqSeoHt">
+            <div class="accordion-body text-muted">
+              Nan <strong>Santo Domingo Este (Zòn Oriental)</strong>: {{ site_address }}.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center mt-5">
+        <a class="btn btn-primary btn-lg"
+           href="https://wa.me/18297405073?text=Bonjou%20Dokt%C3%A8%2C%20mwen%20ta%20renmen%20pran%20yon%20randevou%20(jinekol%C3%B2g)."
+           target="_blank"
+           rel="noopener noreferrer"
+           data-gtm-event="whatsapp_click"
+           data-gtm-location="seo_kreyol_cta">
+          <i class="fab fa-whatsapp me-2"></i>Pran randevou sou WhatsApp
+        </a>
+      </div>
+
+      <p class="text-muted small text-center mt-4 mb-0">
+        Paj an kreyòl ·
+        <a href="{{ url_for('seo_ginecologa_santo_domingo') }}">Wè vèsyon panyòl</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

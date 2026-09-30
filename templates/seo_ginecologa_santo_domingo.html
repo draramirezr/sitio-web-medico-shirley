@@ -9,6 +9,12 @@
 {% block schema_page_name %}Médica ginecóloga en Santo Domingo | Dra. Shirley Ramírez{% endblock %}
 {% block schema_page_description %}Médica ginecóloga y obstetra en Santo Domingo Este (Zona Oriental).{% endblock %}
 
+{% block extra_meta %}
+<link rel="alternate" hreflang="es-DO" href="https://www.draramirez.com/ginecologa-santo-domingo">
+<link rel="alternate" hreflang="ht" href="https://www.draramirez.com/jinekolojis-santo-domingo">
+<link rel="alternate" hreflang="x-default" href="https://www.draramirez.com/">
+{% endblock %}
+
 {% block content %}
 <div class="container py-5">
   <div class="row justify-content-center">
@@ -25,6 +31,12 @@
           decoding="async"
         >
       </div>
+
+      <p class="small text-muted mb-2">
+        <span style="color: var(--title-color); font-weight: 600;">Español</span>
+        <span aria-hidden="true"> · </span>
+        <a href="{{ url_for('seo_jinekolojis_santo_domingo') }}" class="text-decoration-none" style="color: var(--title-color);">Kreyòl</a>
+      </p>
 
       <h1 class="display-5 fw-bold mb-3" style="color: var(--title-color);">Médica ginecóloga en Santo Domingo</h1>
       <p class="lead text-muted mb-4">

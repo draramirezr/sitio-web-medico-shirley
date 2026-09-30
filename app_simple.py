@@ -2296,6 +2296,11 @@ def seo_chequeo_ginecologico():
     """Landing SEO para chequeo ginecológico"""
     return render_template('seo_chequeo_ginecologico.html')
 
+@app.route('/jinekolojis-santo-domingo')
+def seo_jinekolojis_santo_domingo():
+    """Landing en kreyòl ayisyen (público haitiano en RD)"""
+    return render_template('seo_jinekolojis_santo_domingo.html')
+
 @app.route('/testimonios')
 def testimonials():
     """Página de testimonios con rotación diaria y fechas dinámicas"""
@@ -10071,6 +10076,7 @@ def sitemap():
         {'path': url_for('seo_ginecologo_zona_oriental'), 'priority': '0.9', 'changefreq': 'weekly'},
         {'path': url_for('seo_control_embarazo'), 'priority': '0.9', 'changefreq': 'weekly'},
         {'path': url_for('seo_chequeo_ginecologico'), 'priority': '0.9', 'changefreq': 'weekly'},
+        {'path': url_for('seo_jinekolojis_santo_domingo'), 'priority': '0.85', 'changefreq': 'weekly'},
     ]
     
     today = datetime.now().strftime('%Y-%m-%d')
