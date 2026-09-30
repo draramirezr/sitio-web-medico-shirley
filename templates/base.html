@@ -1866,13 +1866,15 @@
                 <h2>¿Lista para Cuidar tu Salud?</h2>
                 {% endif %}
                 <div class="site-footer-actions">
+                    {% if request.endpoint != 'seo_jinekolojis_santo_domingo' %}
                     <a class="site-footer-btn" href="{{ url_for('request_appointment') }}">
                         <svg viewBox="0 0 24 24" aria-hidden="true">
                             <path fill="currentColor" d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1h1.5A2.5 2.5 0 0 1 22 6.5v13A2.5 2.5 0 0 1 19.5 22h-15A2.5 2.5 0 0 1 2 19.5v-13A2.5 2.5 0 0 1 4.5 4H6V3a1 1 0 0 1 1-1zm0 5H4v12.5c0 .28.22.5.5.5h15c.28 0 .5-.22.5-.5V7h-3v1a1 1 0 1 1-2 0V7H8v1a1 1 0 1 1-2 0V7z"/>
                             <path fill="currentColor" d="M6.5 10.5h3v3h-3v-3zm4.5 0h3v3h-3v-3zm4.5 0h3v3h-3v-3zM6.5 15h3v3h-3v-3zm4.5 0h3v3h-3v-3z"/>
                         </svg>
-                        {% if request.endpoint == 'seo_jinekolojis_santo_domingo' %}Pran randevou{% else %}Agendar Consulta{% endif %}
+                        Agendar Consulta
                     </a>
+                    {% endif %}
                     <a class="site-footer-btn"
                        href="{% if request.endpoint == 'seo_jinekolojis_santo_domingo' %}https://wa.me/18297405073?text=Bonjou%20Dokt%C3%A8%2C%20mwen%20ta%20renmen%20pran%20yon%20randevou%20(jinekol%C3%B2g).{% else %}https://wa.me/18297405073?text=Hola,%20me%20gustar%C3%ADa%20agendar%20una%20consulta{% endif %}"
                        target="_blank"
