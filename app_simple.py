@@ -10022,7 +10022,7 @@ def sitemap():
     sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     sitemap_xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
     sitemap_xml += 'xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n'
-    og_image = f"{base_url}{_canonicalize_path(url_for('static', filename='images/dra-shirley-profesional.jpg'))}"
+    og_image = f"{base_url}{_canonicalize_path(url_for('static', filename='images/dra-shirley-share.jpg'))}?v=10"
     
     for url in urls:
         loc = f"{base_url}{_canonicalize_path(url.get('path', '/'))}"

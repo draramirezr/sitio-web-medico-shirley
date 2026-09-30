@@ -49,8 +49,8 @@
     <title>{% block title %}Ginecóloga en Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}</title>
     
     <!-- Meta Tags SEO -->
-    <meta name="description" content="{% block description %}Ginecóloga-obstetra en Santo Domingo Este (Zona Oriental). Chequeo ginecológico, control de embarazo y anticonceptivos. Agenda tu cita.{% endblock %}">
-    <meta name="keywords" content="{% block keywords %}ginecóloga en Santo Domingo Este, ginecologa en santo domingo este, ginecóloga en Santo Domingo, ginecologa en santo domingo, ginecólogo zona oriental, ginecologo zona oriental, ginecólogo cerca de mí, ginecologo cerca de mi, obstetra en Santo Domingo, control de embarazo, chequeo ginecológico, chequeo ginecologico, salud femenina, consulta ginecológica, consulta ginecologica, control prenatal, planificación familiar, planificacion familiar, anticonceptivos, métodos anticonceptivos, metodos anticonceptivos{% endblock %}">
+    <meta name="description" content="{% block description %}Médica ginecóloga y obstetra en Santo Domingo Este (Zona Oriental). Chequeo ginecológico, control de embarazo y anticonceptivos. Agenda tu cita.{% endblock %}">
+    <meta name="keywords" content="{% block keywords %}médico ginecólogo, medico ginecologo, médica ginecóloga, medica ginecologa, ginecóloga en Santo Domingo Este, ginecologa en santo domingo este, ginecóloga en Santo Domingo, ginecólogo zona oriental, ginecologo zona oriental, obstetra en Santo Domingo, control de embarazo, chequeo ginecológico, salud femenina, consulta ginecológica, control prenatal, anticonceptivos{% endblock %}">
     <meta name="author" content="Dra. Shirley Ramírez">
     {% if google_site_verification %}
     <meta name="google-site-verification" content="{{ google_site_verification }}">
@@ -67,14 +67,14 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.draramirez.com{{ request.path }}">
     <meta property="og:title" content="{% block og_title %}Dra. Shirley Ramírez - Ginecóloga y Obstetra en Santo Domingo Este{% endblock %}">
-    <meta property="og:description" content="{% block og_description %}Experta en Ginecología Estética Láser: Rejuvenecimiento vaginal, tensado y labioplastia. Control prenatal y salud femenina integral.{% endblock %}">
-    <meta property="og:image" content="https://www.draramirez.com{{ url_for('static', filename='images/dra-shirley-share.jpg') }}?v=9">
-    <meta property="og:image:secure_url" content="https://www.draramirez.com{{ url_for('static', filename='images/dra-shirley-share.jpg') }}?v=9">
+    <meta property="og:description" content="{% block og_description %}Médica ginecóloga y obstetra en Santo Domingo Este. Consulta ginecológica, control prenatal y salud femenina. Agenda tu cita.{% endblock %}">
+    <meta property="og:image" content="https://www.draramirez.com{{ url_for('static', filename='images/dra-shirley-share.jpg') }}?v=10">
+    <meta property="og:image:secure_url" content="https://www.draramirez.com{{ url_for('static', filename='images/dra-shirley-share.jpg') }}?v=10">
     <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Dra. Shirley Ramírez - Ginecóloga y Obstetra en Santo Domingo Este">
-    <link rel="image_src" href="https://www.draramirez.com{{ url_for('static', filename='images/dra-shirley-share.jpg') }}?v=9">
+    <meta property="og:image:alt" content="Dra. Shirley Ramírez - Médica ginecóloga y obstetra en Santo Domingo Este">
+    <link rel="image_src" href="https://www.draramirez.com{{ url_for('static', filename='images/dra-shirley-share.jpg') }}?v=10">
     <meta property="og:locale" content="es_DO">
     <meta property="og:site_name" content="Dra. Shirley Ramírez">
     
@@ -82,24 +82,45 @@
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://www.draramirez.com{{ request.path }}">
     <meta property="twitter:title" content="{% block twitter_title %}Dra. Shirley Ramírez - Ginecóloga y Obstetra en Santo Domingo Este{% endblock %}">
-    <meta property="twitter:description" content="{% block twitter_description %}Experta en Ginecología Estética Láser: Rejuvenecimiento vaginal, tensado y labioplastia. Control prenatal.{% endblock %}">
-    <meta property="twitter:image" content="https://www.draramirez.com{{ url_for('static', filename='images/dra-shirley-share.jpg') }}?v=9">
-    <meta property="twitter:image:alt" content="Dra. Shirley Ramírez - Ginecóloga y Obstetra en Santo Domingo Este">
+    <meta property="twitter:description" content="{% block twitter_description %}Médica ginecóloga y obstetra en Santo Domingo Este. Control prenatal y salud femenina.{% endblock %}">
+    <meta property="twitter:image" content="https://www.draramirez.com{{ url_for('static', filename='images/dra-shirley-share.jpg') }}?v=10">
+    <meta property="twitter:image:alt" content="Dra. Shirley Ramírez - Médica ginecóloga y obstetra en Santo Domingo Este">
     <meta property="twitter:domain" content="draramirez.com">
     
-    <!-- Schema.org Structured Data para SEO Médico - Optimizado para Google -->
+    <!-- Schema.org: médico + señal de imagen preferida para Google -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "@id": "https://www.draramirez.com{{ request.path }}#webpage",
+      "url": "https://www.draramirez.com{{ request.path }}",
+      "name": "{% block schema_page_name %}Dra. Shirley Ramírez - Ginecóloga y Obstetra{% endblock %}",
+      "description": "{% block schema_page_description %}Médica ginecóloga y obstetra en Santo Domingo Este (Zona Oriental).{% endblock %}",
+      "inLanguage": "es-DO",
+      "isPartOf": { "@type": "WebSite", "name": "Dra. Shirley Ramírez", "url": "https://www.draramirez.com" },
+      "primaryImageOfPage": {
+        "@type": "ImageObject",
+        "url": "https://www.draramirez.com{{ url_for('static', filename='images/dra-shirley-share.jpg') }}?v=10",
+        "width": 1200,
+        "height": 630
+      },
+      "mainEntity": { "@id": "https://www.draramirez.com/#physician" }
+    }
+    </script>
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": ["Physician", "MedicalBusiness", "LocalBusiness"],
+      "@id": "https://www.draramirez.com/#physician",
       "name": "Dra. Shirley Ramírez - Ginecóloga y Obstetra",
-      "alternateName": "Dra. Shirley Ramírez",
+      "alternateName": ["Dra. Shirley Ramírez", "Médica ginecóloga Santo Domingo Este", "Médico ginecólogo Zona Oriental"],
+      "jobTitle": "Médica ginecóloga y obstetra",
       "image": {
         "@type": "ImageObject",
-        "url": "https://www.draramirez.com{{ url_for('static', filename='images/dra-shirley-share.jpg') }}?v=9",
+        "url": "https://www.draramirez.com{{ url_for('static', filename='images/dra-shirley-share.jpg') }}?v=10",
         "width": 1200,
         "height": 630,
-        "caption": "Dra. Shirley Ramírez - Ginecóloga y Obstetra en Santo Domingo Este"
+        "caption": "Dra. Shirley Ramírez - Médica ginecóloga y obstetra en Santo Domingo Este"
       },
       "logo": {
         "@type": "ImageObject",
@@ -107,7 +128,8 @@
         "width": 250,
         "height": 250
       },
-      "description": "Ginecóloga y obstetra en Santo Domingo Este (Zona Oriental). Chequeo ginecológico, control de embarazo, planificación familiar y salud femenina. Agenda tu cita.",
+      "description": "Médica ginecóloga y obstetra en Santo Domingo Este (Zona Oriental). Consulta ginecológica, control de embarazo, planificación familiar y salud femenina. Agenda tu cita.",
+      "knowsAbout": ["Ginecología", "Obstetricia", "Médico ginecólogo", "Médica ginecóloga", "Control prenatal", "Chequeo ginecológico", "Salud femenina"],
       "medicalSpecialty": ["Gynecology", "Obstetrics", "Women's Health", "Reproductive Medicine", "Aesthetic Gynecology", "Laser Gynecology"],
       "availableService": [
         {
@@ -1864,8 +1886,8 @@
                 <nav class="site-footer-seo" aria-label="Atención ginecológica por zona y servicio">
                     <p class="site-footer-seo-title">Atención ginecológica en tu zona</p>
                     <ul class="site-footer-seo-links">
-                        <li><a href="{{ url_for('seo_ginecologa_santo_domingo') }}">Ginecóloga en Santo Domingo</a></li>
-                        <li><a href="{{ url_for('seo_ginecologo_zona_oriental') }}">Ginecóloga Zona Oriental</a></li>
+                        <li><a href="{{ url_for('seo_ginecologa_santo_domingo') }}">Médica ginecóloga en Santo Domingo</a></li>
+                        <li><a href="{{ url_for('seo_ginecologo_zona_oriental') }}">Médico ginecólogo Zona Oriental</a></li>
                         <li><a href="{{ url_for('seo_control_embarazo') }}">Control de embarazo</a></li>
                         <li><a href="{{ url_for('seo_chequeo_ginecologico') }}">Chequeo ginecológico</a></li>
                         <li><a href="{{ google_review_url }}" target="_blank" rel="noopener noreferrer">Reseña en Google</a></li>

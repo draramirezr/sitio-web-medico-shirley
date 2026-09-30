@@ -1,20 +1,36 @@
 {% extends "base.html" %}
 
-{% block title %}Ginecóloga en Santo Domingo | Dra. Shirley Ramírez (Santo Domingo Este){% endblock %}
+{% block title %}Médica Ginecóloga en Santo Domingo | Dra. Shirley Ramírez{% endblock %}
 
-{% block description %}Ginecóloga y Obstetra en Santo Domingo (Zona Oriental / Santo Domingo Este). Atención integral: consulta ginecológica, control prenatal, planificación familiar y ginecología estética. Agenda tu cita por WhatsApp: 829-740-5073.{% endblock %}
+{% block description %}Médica ginecóloga y obstetra en Santo Domingo (Zona Oriental / Santo Domingo Este). Consulta ginecológica, control prenatal, planificación familiar y ginecología estética. WhatsApp: 829-740-5073.{% endblock %}
 
-{% block og_title %}Ginecóloga en Santo Domingo | Dra. Shirley Ramírez{% endblock %}
-{% block og_description %}Consulta ginecológica y obstétrica en Santo Domingo (Zona Oriental / Santo Domingo Este). Agenda tu cita por WhatsApp: 829-740-5073.{% endblock %}
+{% block og_title %}Médica Ginecóloga en Santo Domingo | Dra. Shirley Ramírez{% endblock %}
+{% block og_description %}Médico ginecólogo / médica ginecóloga en Santo Domingo Este. Agenda tu cita por WhatsApp: 829-740-5073.{% endblock %}
+{% block schema_page_name %}Médica ginecóloga en Santo Domingo | Dra. Shirley Ramírez{% endblock %}
+{% block schema_page_description %}Médica ginecóloga y obstetra en Santo Domingo Este (Zona Oriental).{% endblock %}
 
 {% block content %}
 <div class="container py-5">
   <div class="row justify-content-center">
     <div class="col-lg-10">
-      <h1 class="display-5 fw-bold mb-3" style="color: var(--title-color);">Ginecóloga en Santo Domingo</h1>
+      <div class="mb-4 text-center">
+        <img
+          src="{{ url_for('static', filename='images/dra-shirley-share.jpg') }}?v=10"
+          alt="Dra. Shirley Ramírez, médica ginecóloga y obstetra en Santo Domingo"
+          width="1200"
+          height="630"
+          class="img-fluid rounded"
+          style="max-width:100%;height:auto;border-radius:16px;"
+          loading="eager"
+          decoding="async"
+        >
+      </div>
+
+      <h1 class="display-5 fw-bold mb-3" style="color: var(--title-color);">Médica ginecóloga en Santo Domingo</h1>
       <p class="lead text-muted mb-4">
-        Soy la <strong>Dra. Shirley Ramírez</strong>, <strong>Ginecóloga y Obstetra</strong>. Atiendo pacientes en la
+        Soy la <strong>Dra. Shirley Ramírez</strong>, <strong>médica ginecóloga y obstetra</strong>. Atiendo pacientes en la
         <strong>Zona Oriental (Santo Domingo Este)</strong> y recibo consultas de <strong>Santo Domingo</strong> y zonas cercanas.
+        Si buscas un <strong>médico ginecólogo</strong> de confianza, aquí puedes agendar tu evaluación.
       </p>
 
       <div class="row g-3 mb-4">
