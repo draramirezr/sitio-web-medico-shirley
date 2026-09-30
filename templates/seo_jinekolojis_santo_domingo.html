@@ -16,7 +16,61 @@
 {% endblock %}
 
 {% block content %}
-<div class="container py-5">
+<style>
+  .seo-ht-page {
+    font-family: var(--font-body, 'Be Vietnam Pro', sans-serif);
+    color: var(--text-dark, #282828);
+  }
+  .seo-ht-page h1,
+  .seo-ht-page h2.h4,
+  .seo-ht-page .seo-ht-heading {
+    font-family: "Playfair Display", serif !important;
+    color: #8B5A6B !important;
+  }
+  .seo-ht-page h2.h5,
+  .seo-ht-page h3.h5 {
+    font-family: var(--font-titles, 'Montserrat', sans-serif) !important;
+    color: #8B5A6B !important;
+  }
+  .seo-ht-faq.accordion {
+    --bs-accordion-btn-bg: #fff;
+    --bs-accordion-active-bg: rgba(206, 176, 183, 0.14);
+    --bs-accordion-active-color: #8B5A6B;
+    --bs-accordion-btn-color: #4A4A4A;
+    --bs-accordion-border-color: rgba(206, 176, 183, 0.45);
+    --bs-accordion-btn-focus-border-color: rgba(206, 176, 183, 0.65);
+    --bs-accordion-btn-focus-box-shadow: 0 0 0 0.2rem rgba(206, 176, 183, 0.25);
+    --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%238B5A6B'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+    --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%238B5A6B'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+  }
+  .seo-ht-faq .accordion-item {
+    border: 1px solid rgba(206, 176, 183, 0.45);
+    border-radius: 12px !important;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+    background: #fff;
+  }
+  .seo-ht-faq .accordion-item:not(:first-of-type) {
+    border-top: 1px solid rgba(206, 176, 183, 0.45);
+  }
+  .seo-ht-faq .accordion-button {
+    font-family: var(--font-body, 'Be Vietnam Pro', sans-serif) !important;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #4A4A4A;
+    box-shadow: none !important;
+  }
+  .seo-ht-faq .accordion-button:not(.collapsed) {
+    color: #8B5A6B;
+    background: rgba(206, 176, 183, 0.14);
+  }
+  .seo-ht-faq .accordion-body {
+    font-family: var(--font-body, 'Be Vietnam Pro', sans-serif) !important;
+    color: #6B6B6B;
+    line-height: 1.75;
+  }
+</style>
+<div class="container py-5 seo-ht-page">
   <div class="row justify-content-center">
     <div class="col-lg-10">
       <div class="mb-4 text-center">
@@ -33,12 +87,12 @@
       </div>
 
       <p class="small text-muted mb-2">
-        <a href="{{ url_for('seo_ginecologa_santo_domingo') }}" class="text-decoration-none" style="color: var(--title-color);">Español</a>
+        <a href="{{ url_for('seo_ginecologa_santo_domingo') }}" class="text-decoration-none" style="color: #8B5A6B;">Español</a>
         <span aria-hidden="true"> · </span>
-        <span style="color: var(--title-color); font-weight: 600;">Kreyòl</span>
+        <span style="color: #8B5A6B; font-weight: 600;">Kreyòl</span>
       </p>
 
-      <h1 class="display-5 fw-bold mb-3" style="color: var(--title-color);">Jinekològ nan Santo Domingo Este</h1>
+      <h1 class="display-5 fw-bold mb-3 seo-ht-heading">Jinekològ nan Santo Domingo Este</h1>
       <p class="lead text-muted mb-3">
         Bonjou. Mwen se <strong>Dra. Shirley Ramírez</strong>, <strong>doktè fanm</strong>
         (jinekològ ak obstetrik) nan <strong>Santo Domingo Este (Zòn Oriental)</strong>.
@@ -51,8 +105,8 @@
 
       <div class="row g-3 mb-4">
         <div class="col-md-6">
-          <div class="p-3 h-100" style="background: rgba(206, 176, 183, 0.10); border-radius: 12px; border-left: 4px solid var(--primary-color);">
-            <h2 class="h5 fw-bold mb-2" style="color: var(--title-color);">Pran randevou</h2>
+          <div class="p-3 h-100" style="background: rgba(206, 176, 183, 0.10); border-radius: 12px; border-left: 4px solid #CEB0B7;">
+            <h2 class="h5 fw-bold mb-2">Pran randevou</h2>
             <p class="text-muted mb-3">
               Voye mesaj sou WhatsApp. N ap ede w chwazi kalite konsiltasyon an epi fikse jou a.
             </p>
@@ -67,13 +121,13 @@
           </div>
         </div>
         <div class="col-md-6">
-          <div class="p-3 h-100" style="background: rgba(206, 176, 183, 0.10); border-radius: 12px; border-left: 4px solid var(--primary-color);">
-            <h2 class="h5 fw-bold mb-2" style="color: var(--title-color);">Adrès</h2>
+          <div class="p-3 h-100" style="background: rgba(206, 176, 183, 0.10); border-radius: 12px; border-left: 4px solid #CEB0B7;">
+            <h2 class="h5 fw-bold mb-2">Adrès</h2>
             <p class="text-muted mb-2">
               <strong>Santo Domingo Este (Zòn Oriental)</strong>.<br>
               Adrès: <strong>{{ site_address }}</strong>.
             </p>
-            <a class="text-decoration-none" href="{{ site_maps_url }}" target="_blank" rel="noopener noreferrer">
+            <a class="text-decoration-none" href="{{ site_maps_url }}" target="_blank" rel="noopener noreferrer" style="color: #8B5A6B;">
               <i class="fas fa-map-marker-alt me-2"></i>Wè nan Google Maps
             </a>
           </div>
@@ -81,7 +135,7 @@
       </div>
 
       <div class="p-3 mb-4" style="background: rgba(206, 176, 183, 0.10); border-radius: 12px; border: 1px solid rgba(206, 176, 183, 0.35);">
-        <h2 class="h5 fw-bold mb-2" style="color: var(--title-color);">
+        <h2 class="h5 fw-bold mb-2">
           <i class="fas fa-credit-card me-2" aria-hidden="true"></i>Pèyman
         </h2>
         <p class="text-muted mb-0">
@@ -90,11 +144,11 @@
         </p>
       </div>
 
-      <h2 class="h4 fw-bold mt-4" style="color: var(--title-color);">Sèvis prensipal</h2>
+      <h2 class="h4 fw-bold mt-4 seo-ht-heading">Sèvis prensipal</h2>
       <div class="row g-3">
         <div class="col-md-6">
           <div class="p-3 h-100" style="border: 1px solid rgba(206, 176, 183, 0.35); border-radius: 12px;">
-            <h3 class="h5 fw-bold mb-2" style="color: var(--title-color);">Konsiltasyon / chèkè</h3>
+            <h3 class="h5 fw-bold mb-2">Konsiltasyon / chèkè</h3>
             <p class="text-muted mb-0">
               Egzamen ak oryantasyon pou sante fanm. Prevansyon ak swen regilye.
             </p>
@@ -102,7 +156,7 @@
         </div>
         <div class="col-md-6">
           <div class="p-3 h-100" style="border: 1px solid rgba(206, 176, 183, 0.35); border-radius: 12px;">
-            <h3 class="h5 fw-bold mb-2" style="color: var(--title-color);">Swen gwosès</h3>
+            <h3 class="h5 fw-bold mb-2">Swen gwosès</h3>
             <p class="text-muted mb-0">
               Kontwòl prenatal (swen pandan w ansent) ak swivi gwosès.
             </p>
@@ -110,7 +164,7 @@
         </div>
         <div class="col-md-6">
           <div class="p-3 h-100" style="border: 1px solid rgba(206, 176, 183, 0.35); border-radius: 12px;">
-            <h3 class="h5 fw-bold mb-2" style="color: var(--title-color);">Planin familyal</h3>
+            <h3 class="h5 fw-bold mb-2">Planin familyal</h3>
             <p class="text-muted mb-0">
               Konsèy sou metòd kontrasepsyon selon sitiyasyon w.
             </p>
@@ -118,7 +172,7 @@
         </div>
         <div class="col-md-6">
           <div class="p-3 h-100" style="border: 1px solid rgba(206, 176, 183, 0.35); border-radius: 12px;">
-            <h3 class="h5 fw-bold mb-2" style="color: var(--title-color);">Sante fanm</h3>
+            <h3 class="h5 fw-bold mb-2">Sante fanm</h3>
             <p class="text-muted mb-0">
               Atansyon respektè pou diferan etap nan lavi w.
             </p>
@@ -126,8 +180,8 @@
         </div>
       </div>
 
-      <h2 class="h4 fw-bold mt-5" style="color: var(--title-color);">Kesyon yo poze souvan</h2>
-      <div class="accordion" id="faqSeoHt">
+      <h2 class="h4 fw-bold mt-5 seo-ht-heading">Kesyon yo poze souvan</h2>
+      <div class="accordion seo-ht-faq" id="faqSeoHt">
         <div class="accordion-item">
           <h3 class="accordion-header" id="qht1">
             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#aht1" aria-expanded="true" aria-controls="aht1">
@@ -135,7 +189,7 @@
             </button>
           </h3>
           <div id="aht1" class="accordion-collapse collapse show" aria-labelledby="qht1" data-bs-parent="#faqSeoHt">
-            <div class="accordion-body text-muted">
+            <div class="accordion-body">
               <strong>Wi.</strong> Nou aksepte <strong>kat kredi</strong> (tout tip kat kredi).
               Si ou gen yon kesyon sou pèyman an, ekri nou sou WhatsApp anvan randevou a.
             </div>
@@ -144,63 +198,37 @@
         <div class="accordion-item">
           <h3 class="accordion-header" id="qht2">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#aht2" aria-expanded="false" aria-controls="aht2">
-              Èske nou pale kreyòl?
-            </button>
-          </h3>
-          <div id="aht2" class="accordion-collapse collapse" aria-labelledby="qht2" data-bs-parent="#faqSeoHt">
-            <div class="accordion-body text-muted">
-              Nou resevwa pasyan ki pale <strong>kreyòl</strong> ak <strong>panyòl</strong>.
-              Ou ka ekri nou sou WhatsApp nan lang ou pi alèz.
-            </div>
-          </div>
-        </div>
-        <div class="accordion-item">
-          <h3 class="accordion-header" id="qht3">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#aht3" aria-expanded="false" aria-controls="aht3">
               Kijan pou m pran randevou?
             </button>
           </h3>
-          <div id="aht3" class="accordion-collapse collapse" aria-labelledby="qht3" data-bs-parent="#faqSeoHt">
-            <div class="accordion-body text-muted">
+          <div id="aht2" class="accordion-collapse collapse" aria-labelledby="qht2" data-bs-parent="#faqSeoHt">
+            <div class="accordion-body">
               Voye mesaj sou WhatsApp nan <strong>829-740-5073</strong>.
               Di nou ki tip konsiltasyon ou bezwen epi n ap fikse jou ak lè a.
             </div>
           </div>
         </div>
         <div class="accordion-item">
-          <h3 class="accordion-header" id="qht4">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#aht4" aria-expanded="false" aria-controls="aht4">
+          <h3 class="accordion-header" id="qht3">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#aht3" aria-expanded="false" aria-controls="aht3">
               Ki kote klinik la ye?
             </button>
           </h3>
-          <div id="aht4" class="accordion-collapse collapse" aria-labelledby="qht4" data-bs-parent="#faqSeoHt">
-            <div class="accordion-body text-muted">
+          <div id="aht3" class="accordion-collapse collapse" aria-labelledby="qht3" data-bs-parent="#faqSeoHt">
+            <div class="accordion-body">
               Nan <strong>Santo Domingo Este (Zòn Oriental)</strong>: {{ site_address }}.
               Ou ka wè li sou Google Maps.
             </div>
           </div>
         </div>
         <div class="accordion-item">
-          <h3 class="accordion-header" id="qht5">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#aht5" aria-expanded="false" aria-controls="aht5">
-              Kisa m dwe pote nan konsiltasyon an?
-            </button>
-          </h3>
-          <div id="aht5" class="accordion-collapse collapse" aria-labelledby="qht5" data-bs-parent="#faqSeoHt">
-            <div class="accordion-body text-muted">
-              Si ou gen rezilta laboratwa, pap oswa dosye medikal, pote yo.
-              Si ou pa genyen, ou ka vini kanmenm: n ap oryante w.
-            </div>
-          </div>
-        </div>
-        <div class="accordion-item">
-          <h3 class="accordion-header" id="qht6">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#aht6" aria-expanded="false" aria-controls="aht6">
+          <h3 class="accordion-header" id="qht4">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#aht4" aria-expanded="false" aria-controls="aht4">
               Èske nou travay ak asirans (ARS)?
             </button>
           </h3>
-          <div id="aht6" class="accordion-collapse collapse" aria-labelledby="qht6" data-bs-parent="#faqSeoHt">
-            <div class="accordion-body text-muted">
+          <div id="aht4" class="accordion-collapse collapse" aria-labelledby="qht4" data-bs-parent="#faqSeoHt">
+            <div class="accordion-body">
               Nou travay ak plizyè asirans medikal (ARS).
               Ekri nou sou WhatsApp ak non asirans ou a pou n konfime.
             </div>
@@ -224,7 +252,7 @@
 
       <p class="text-muted small text-center mt-4 mb-0">
         Paj an kreyòl ·
-        <a href="{{ url_for('seo_ginecologa_santo_domingo') }}">Wè vèsyon panyòl</a>
+        <a href="{{ url_for('seo_ginecologa_santo_domingo') }}" style="color: #8B5A6B;">Wè vèsyon panyòl</a>
       </p>
     </div>
   </div>
