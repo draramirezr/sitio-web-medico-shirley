@@ -818,6 +818,50 @@ def obtener_fecha_rd():
     tz_rd = timezone(timedelta(hours=-4))
     return datetime.now(tz_rd).date()
 
+def _fecha_de_cita(appointment):
+    """Fecha (date) de la cita desde appointment_date o emergency_datetime."""
+    from datetime import datetime, date
+    raw = None
+    if isinstance(appointment, dict):
+        raw = appointment.get('appointment_date') or appointment.get('emergency_datetime')
+    else:
+        raw = getattr(appointment, 'appointment_date', None) or getattr(appointment, 'emergency_datetime', None)
+    if raw is None:
+        return None
+    if isinstance(raw, datetime):
+        return raw.date()
+    if isinstance(raw, date):
+        return raw
+    s = str(raw).strip()
+    if not s:
+        return None
+    # YYYY-MM-DD… o ISO
+    try:
+        return datetime.fromisoformat(s.replace('Z', '')[:19]).date()
+    except ValueError:
+        pass
+    for fmt, n in (('%Y-%m-%d', 10), ('%d/%m/%Y', 10)):
+        try:
+            return datetime.strptime(s[:n], fmt).date()
+        except ValueError:
+            continue
+    return None
+
+def puede_marcar_cita_completada(appointment, hoy=None):
+    """
+    Completada solo si la fecha de hoy (RD) es igual o posterior a la fecha de la cita.
+    """
+    hoy = hoy or obtener_fecha_rd()
+    fecha = _fecha_de_cita(appointment)
+    if fecha is None:
+        return False, 'La cita no tiene una fecha válida para completarla.'
+    if hoy < fecha:
+        return False, (
+            f'No se puede marcar como completada antes del día de la cita '
+            f'({fecha.strftime("%d/%m/%Y")}).'
+        )
+    return True, None
+
 FECHA_MIN_CONSULTA_DIAS = 45
 CITA_FECHA_MAX_DIAS = 30
 
@@ -4441,6 +4485,13 @@ def update_appointment_status(appointment_id):
         conn.close()
         flash('El estado ya estaba actualizado. No se reenvió correo.', 'info')
         return redirect(url_for('admin_appointments'))
+
+    if new_status == 'completed':
+        ok_completed, err_completed = puede_marcar_cita_completada(appointment)
+        if not ok_completed:
+            conn.close()
+            flash(err_completed, 'warning')
+            return redirect(url_for('admin_appointments'))
     
     # Actualizar estado
     conn.execute('UPDATE appointments SET status = %s WHERE id = %s', (new_status, appointment_id))
@@ -4504,6 +4555,12 @@ def update_appointment_status_ajax(appointment_id):
                 'email_sent': False,
                 'skipped_duplicate': True,
             })
+
+        if new_status == 'completed':
+            ok_completed, err_completed = puede_marcar_cita_completada(appointment)
+            if not ok_completed:
+                conn.close()
+                return jsonify({'success': False, 'error': err_completed}), 400
         
         # Actualizar estado
         conn.execute('UPDATE appointments SET status = %s WHERE id = %s', (new_status, appointment_id))

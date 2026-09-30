@@ -1117,15 +1117,15 @@ document.querySelectorAll('.appointment-status-save-btn').forEach(button => {
             credentials: 'same-origin',
             body: JSON.stringify({ status: newStatus })
         })
-        .then(response => {
-            if (!response.ok) throw new Error('Error en la respuesta del servidor');
-            return response.json();
-        })
-        .then(data => {
-            if (!data.success) {
+        .then(async response => {
+            let data = {};
+            try { data = await response.json(); } catch (_) {}
+            if (!response.ok || !data.success) {
                 throw new Error(data.error || 'No se pudo actualizar el estado');
             }
-
+            return data;
+        })
+        .then(data => {
             updateAppointmentStatusBadge(appointmentId, newStatus);
             select.dataset.currentStatus = newStatus;
 
@@ -1141,6 +1141,7 @@ document.querySelectorAll('.appointment-status-save-btn').forEach(button => {
         })
         .catch(error => {
             console.error('Error:', error);
+            select.value = currentStatus;
             showAppointmentStatusFeedback(
                 appointmentId,
                 `<i class="fas fa-exclamation-circle me-1"></i>${error.message || 'Error al actualizar. Intenta de nuevo.'}`,
