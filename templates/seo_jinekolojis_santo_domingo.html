@@ -2,13 +2,13 @@
 
 {% block html_lang %}ht{% endblock %}
 {% block title %}Jinekològ Santo Domingo Este | Dra. Shirley Ramírez (Kreyòl){% endblock %}
-{% block description %}Doktè fanm / jinekològ nan Santo Domingo Este (Zòn Oriental). Konsiltasyon, chèkè, swen gwosès ak planin familyal. Pran randevou sou WhatsApp: 829-740-5073.{% endblock %}
+{% block description %}Doktè fanm / jinekològ nan Santo Domingo Este (Zòn Oriental). Konsiltasyon, chèkè, swen gwosès ak planin familyal. Nou aksepte kat kredi. Pran randevou sou WhatsApp: 829-740-5073.{% endblock %}
 {% block og_title %}Jinekològ Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
-{% block og_description %}Doktè fanm nan Santo Domingo Este. Konsiltasyon, chèkè, swen gwosès. Pran randevou.{% endblock %}
+{% block og_description %}Doktè fanm nan Santo Domingo Este. Konsiltasyon, chèkè, swen gwosès. Nou aksepte kat kredi. Pran randevou sou WhatsApp.{% endblock %}
 {% block twitter_title %}Jinekològ Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
-{% block twitter_description %}Doktè fanm nan Santo Domingo Este (Zòn Oriental). Pran randevou sou WhatsApp.{% endblock %}
+{% block twitter_description %}Doktè fanm nan Santo Domingo Este (Zòn Oriental). Nou aksepte kat kredi. Pran randevou sou WhatsApp.{% endblock %}
 {% block schema_page_name %}Jinekològ Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
-{% block schema_page_description %}Doktè fanm / jinekològ nan Santo Domingo Este, Zòn Oriental. Paj an kreyòl ayisyen.{% endblock %}
+{% block schema_page_description %}Doktè fanm / jinekològ nan Santo Domingo Este, Zòn Oriental. Paj an kreyòl ayisyen. Nou aksepte kat kredi.{% endblock %}
 {% block extra_meta %}
 <link rel="alternate" hreflang="ht" href="https://www.draramirez.com/jinekolojis-santo-domingo">
 <link rel="alternate" hreflang="es-DO" href="https://www.draramirez.com/ginecologa-santo-domingo">
@@ -39,10 +39,14 @@
       </p>
 
       <h1 class="display-5 fw-bold mb-3" style="color: var(--title-color);">Jinekològ nan Santo Domingo Este</h1>
-      <p class="lead text-muted mb-4">
-        Bonjou. Mwen se <strong>Dra. Shirley Ramírez</strong>, <strong>doktè fanm</strong> (jinekològ ak obstetrik)
-        nan <strong>Santo Domingo Este (Zòn Oriental)</strong>.
+      <p class="lead text-muted mb-3">
+        Bonjou. Mwen se <strong>Dra. Shirley Ramírez</strong>, <strong>doktè fanm</strong>
+        (jinekològ ak obstetrik) nan <strong>Santo Domingo Este (Zòn Oriental)</strong>.
+      </p>
+      <p class="text-muted mb-4" style="line-height: 1.85;">
         N ap resevwa pasyan ki pale <strong>kreyòl</strong> ak <strong>panyòl</strong>.
+        Ou ka ekri nou nan lang ou pi alèz. Nou ofri konsiltasyon, chèkè, swen gwosès ak planin familyal
+        ak yon atansyon respektè ak klè.
       </p>
 
       <div class="row g-3 mb-4">
@@ -50,7 +54,7 @@
           <div class="p-3 h-100" style="background: rgba(206, 176, 183, 0.10); border-radius: 12px; border-left: 4px solid var(--primary-color);">
             <h2 class="h5 fw-bold mb-2" style="color: var(--title-color);">Pran randevou</h2>
             <p class="text-muted mb-3">
-              Ekri nou sou WhatsApp. N ap ede w chwazi kalite konsiltasyon an.
+              Voye mesaj sou WhatsApp. N ap ede w chwazi kalite konsiltasyon an epi fikse jou a.
             </p>
             <a class="btn btn-primary"
                href="https://wa.me/18297405073?text=Bonjou%20Dokt%C3%A8%2C%20mwen%20ta%20renmen%20pran%20yon%20randevou%20(jinekol%C3%B2g)."
@@ -66,13 +70,24 @@
           <div class="p-3 h-100" style="background: rgba(206, 176, 183, 0.10); border-radius: 12px; border-left: 4px solid var(--primary-color);">
             <h2 class="h5 fw-bold mb-2" style="color: var(--title-color);">Adrès</h2>
             <p class="text-muted mb-2">
-              <strong>Santo Domingo Este (Zòn Oriental)</strong>. Adrès: <strong>{{ site_address }}</strong>.
+              <strong>Santo Domingo Este (Zòn Oriental)</strong>.<br>
+              Adrès: <strong>{{ site_address }}</strong>.
             </p>
             <a class="text-decoration-none" href="{{ site_maps_url }}" target="_blank" rel="noopener noreferrer">
               <i class="fas fa-map-marker-alt me-2"></i>Wè nan Google Maps
             </a>
           </div>
         </div>
+      </div>
+
+      <div class="p-3 mb-4" style="background: rgba(206, 176, 183, 0.10); border-radius: 12px; border: 1px solid rgba(206, 176, 183, 0.35);">
+        <h2 class="h5 fw-bold mb-2" style="color: var(--title-color);">
+          <i class="fas fa-credit-card me-2" aria-hidden="true"></i>Pèyman
+        </h2>
+        <p class="text-muted mb-0">
+          <strong>Wi, nou aksepte kat kredi</strong> (tout tip kat kredi).
+          Ou ka mande detay sou WhatsApp anvan randevou a.
+        </p>
       </div>
 
       <h2 class="h4 fw-bold mt-4" style="color: var(--title-color);">Sèvis prensipal</h2>
@@ -116,36 +131,78 @@
         <div class="accordion-item">
           <h3 class="accordion-header" id="qht1">
             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#aht1" aria-expanded="true" aria-controls="aht1">
-              Èske nou pale kreyòl?
+              Èske nou aksepte pèyman ak kat kredi?
             </button>
           </h3>
           <div id="aht1" class="accordion-collapse collapse show" aria-labelledby="qht1" data-bs-parent="#faqSeoHt">
             <div class="accordion-body text-muted">
-              Nou resevwa pasyan ki pale kreyòl ak panyòl. Ou ka ekri nou sou WhatsApp nan lang ou pi alèz.
+              <strong>Wi.</strong> Nou aksepte <strong>kat kredi</strong> (tout tip kat kredi).
+              Si ou gen yon kesyon sou pèyman an, ekri nou sou WhatsApp anvan randevou a.
             </div>
           </div>
         </div>
         <div class="accordion-item">
           <h3 class="accordion-header" id="qht2">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#aht2" aria-expanded="false" aria-controls="aht2">
-              Kijan pou m pran randevou?
+              Èske nou pale kreyòl?
             </button>
           </h3>
           <div id="aht2" class="accordion-collapse collapse" aria-labelledby="qht2" data-bs-parent="#faqSeoHt">
             <div class="accordion-body text-muted">
-              Voye mesaj sou WhatsApp nan <strong>829-740-5073</strong>. N ap reponn ou pou fikse randevou a.
+              Nou resevwa pasyan ki pale <strong>kreyòl</strong> ak <strong>panyòl</strong>.
+              Ou ka ekri nou sou WhatsApp nan lang ou pi alèz.
             </div>
           </div>
         </div>
         <div class="accordion-item">
           <h3 class="accordion-header" id="qht3">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#aht3" aria-expanded="false" aria-controls="aht3">
-              Ki kote klinik la ye?
+              Kijan pou m pran randevou?
             </button>
           </h3>
           <div id="aht3" class="accordion-collapse collapse" aria-labelledby="qht3" data-bs-parent="#faqSeoHt">
             <div class="accordion-body text-muted">
+              Voye mesaj sou WhatsApp nan <strong>829-740-5073</strong>.
+              Di nou ki tip konsiltasyon ou bezwen epi n ap fikse jou ak lè a.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="qht4">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#aht4" aria-expanded="false" aria-controls="aht4">
+              Ki kote klinik la ye?
+            </button>
+          </h3>
+          <div id="aht4" class="accordion-collapse collapse" aria-labelledby="qht4" data-bs-parent="#faqSeoHt">
+            <div class="accordion-body text-muted">
               Nan <strong>Santo Domingo Este (Zòn Oriental)</strong>: {{ site_address }}.
+              Ou ka wè li sou Google Maps.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="qht5">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#aht5" aria-expanded="false" aria-controls="aht5">
+              Kisa m dwe pote nan konsiltasyon an?
+            </button>
+          </h3>
+          <div id="aht5" class="accordion-collapse collapse" aria-labelledby="qht5" data-bs-parent="#faqSeoHt">
+            <div class="accordion-body text-muted">
+              Si ou gen rezilta laboratwa, pap oswa dosye medikal, pote yo.
+              Si ou pa genyen, ou ka vini kanmenm: n ap oryante w.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="qht6">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#aht6" aria-expanded="false" aria-controls="aht6">
+              Èske nou travay ak asirans (ARS)?
+            </button>
+          </h3>
+          <div id="aht6" class="accordion-collapse collapse" aria-labelledby="qht6" data-bs-parent="#faqSeoHt">
+            <div class="accordion-body text-muted">
+              Nou travay ak plizyè asirans medikal (ARS).
+              Ekri nou sou WhatsApp ak non asirans ou a pou n konfime.
             </div>
           </div>
         </div>
@@ -160,6 +217,9 @@
            data-gtm-location="seo_kreyol_cta">
           <i class="fab fa-whatsapp me-2"></i>Pran randevou sou WhatsApp
         </a>
+        <p class="text-muted small mt-3 mb-0">
+          WhatsApp · Nou aksepte kat kredi
+        </p>
       </div>
 
       <p class="text-muted small text-center mt-4 mb-0">
