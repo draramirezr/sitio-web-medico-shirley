@@ -3596,7 +3596,7 @@ def horarios_disponibles():
     
     try:
         # Parsear la fecha para obtener el día de la semana
-        from datetime import datetime
+        from datetime import datetime, timedelta, time as time_cls
         fecha_obj = datetime.strptime(fecha, '%Y-%m-%d')
         dia_semana = fecha_obj.weekday()  # 0=Lunes, 1=Martes, 3=Jueves
         
@@ -3614,23 +3614,57 @@ def horarios_disponibles():
         else:
             return jsonify({'horarios': []})
         
+        def _norm_hora(val):
+            """Normaliza TIME/str a HH:MM para comparar con horarios_base."""
+            if val is None:
+                return None
+            if isinstance(val, timedelta):
+                total = int(val.total_seconds())
+                if total < 0:
+                    return None
+                hh, rem = divmod(total, 3600)
+                mm = (rem // 60)
+                return f"{hh:02d}:{mm:02d}"
+            if isinstance(val, time_cls):
+                return val.strftime('%H:%M')
+            if isinstance(val, datetime):
+                return val.strftime('%H:%M')
+            s = str(val).strip()
+            if not s:
+                return None
+            # "15:00:00", "15:00", "3:00 PM", etc.
+            for fmt in ('%H:%M:%S', '%H:%M', '%I:%M %p', '%I:%M:%S %p'):
+                try:
+                    return datetime.strptime(s, fmt).strftime('%H:%M')
+                except ValueError:
+                    continue
+            if len(s) >= 5 and s[2] == ':':
+                return s[:5]
+            return s
+
         # Obtener citas ya agendadas para esa fecha (que no estén canceladas)
         conn = get_db_connection()
         citas_ocupadas = conn.execute(
-            'SELECT appointment_time FROM appointments WHERE appointment_date = %s AND status != "cancelled"',
-            (fecha,)
+            'SELECT appointment_time FROM appointments WHERE appointment_date = %s AND status != %s',
+            (fecha, 'cancelled')
         ).fetchall()
         conn.close()
         
-        # Crear lista de horarios ocupados
-        horarios_ocupados = [cita[0] for cita in citas_ocupadas if cita[0]]
+        # DictCursor: filas son dict, no tuplas
+        horarios_ocupados = set()
+        for cita in citas_ocupadas or []:
+            raw = cita.get('appointment_time') if isinstance(cita, dict) else (cita[0] if cita else None)
+            hora_n = _norm_hora(raw)
+            if hora_n:
+                horarios_ocupados.add(hora_n)
         
         # Filtrar horarios disponibles
-        horarios_disponibles = [h for h in horarios_base if h not in horarios_ocupados]
+        horarios_libres = [h for h in horarios_base if h not in horarios_ocupados]
         
-        return jsonify({'horarios': horarios_disponibles})
+        return jsonify({'horarios': horarios_libres})
         
     except Exception as e:
+        print(f"❌ Error horarios_disponibles({fecha}): {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/solicitar-cita', methods=['GET', 'POST'])
