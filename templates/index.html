@@ -683,20 +683,61 @@
 <!-- Banner Superior Dinámico con Textos Rotativos -->
 <div class="patria-banner-dinamico">
     <div class="textos-rotativos">
-        <div class="texto-item active">🇩🇴 ORGULLOSAMENTE DOMINICANA 🇩🇴</div>
-        <div class="texto-item">"En este mes de la patria celebra nuestra independencia con salud"</div>
-        <div class="texto-item">27 de Febrero {{ ano_actual }} - Día de la Independencia Nacional</div>
+        <div class="texto-item active">
+            <span class="flag-do" aria-hidden="true"></span>
+            ORGULLOSAMENTE DOMINICANA
+            <span class="flag-do" aria-hidden="true"></span>
+        </div>
+        <div class="texto-item">En este mes de la patria, celebra nuestra independencia con salud</div>
+        <div class="texto-item">27 de Febrero {{ ano_actual }} — Día de la Independencia Nacional</div>
     </div>
 </div>
 
 <!-- Estilos del Tema Mes de la Patria -->
 <style>
-    /* Banner Superior Dinámico */
+    /* Bandera RD en CSS (Windows no muestra bien el emoji 🇩🇴) */
+    .flag-do {
+        display: inline-block;
+        width: 28px;
+        height: 18px;
+        vertical-align: -3px;
+        margin: 0 8px;
+        border-radius: 2px;
+        box-shadow: 0 1px 3px rgba(0,0,0,.35);
+        background:
+            linear-gradient(#002D62, #002D62) left top / 42% 42% no-repeat,
+            linear-gradient(#CE1126, #CE1126) right top / 42% 42% no-repeat,
+            linear-gradient(#CE1126, #CE1126) left bottom / 42% 42% no-repeat,
+            linear-gradient(#002D62, #002D62) right bottom / 42% 42% no-repeat,
+            #fff;
+        position: relative;
+    }
+    .flag-do::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 18%;
+        transform: translateX(-50%);
+        background: #fff;
+    }
+    .flag-do::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 18%;
+        transform: translateY(-50%);
+        background: #fff;
+    }
+
     .patria-banner-dinamico {
-        background: linear-gradient(135deg, #002D62 0%, #CE1126 100%);
+        background: linear-gradient(90deg, #002D62 0%, #CE1126 50%, #002D62 100%);
         color: white;
         text-align: center;
-        padding: 15px 20px;
+        padding: 14px 20px;
         font-size: 16px;
         font-weight: 700;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -705,9 +746,9 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        border-bottom: 3px solid #fff;
     }
     
-    /* Contenedor de textos rotativos */
     .textos-rotativos {
         position: relative;
         width: 100%;
@@ -739,7 +780,6 @@
         transform: translateY(-30px);
     }
     
-    /* Borde animado tricolor - NO tocar hero-image-container */
     .borde-tricolor-rotante {
         position: absolute;
         top: -15px;
@@ -763,7 +803,6 @@
         to { transform: rotate(360deg); }
     }
     
-    /* Máscara interna para crear el efecto de borde */
     .borde-tricolor-rotante::after {
         content: '';
         position: absolute;
@@ -776,37 +815,19 @@
         z-index: 1;
     }
     
-    /* Asegurar que la imagen esté encima del borde */
     .hero-image-container picture,
     .hero-image-container img {
         position: relative;
         z-index: 2;
     }
     
-    /* Responsive para móviles y tablets */
     @media (max-width: 768px) {
         .patria-banner-dinamico {
             font-size: 14px;
             padding: 12px 15px;
         }
-        
-        .textos-rotativos {
-            height: 22px;
-        }
-        
-        .borde-tricolor-rotante {
-            top: -12px;
-            left: -12px;
-            right: -12px;
-            bottom: -12px;
-        }
-        
-        .borde-tricolor-rotante::after {
-            top: 8px;
-            left: 8px;
-            right: 8px;
-            bottom: 8px;
-        }
+        .flag-do { width: 24px; height: 15px; margin: 0 6px; }
+        .textos-rotativos { height: 22px; }
     }
     
     @media (max-width: 480px) {
@@ -814,59 +835,44 @@
             font-size: 12px;
             padding: 10px 10px;
         }
-        
-        .textos-rotativos {
-            height: 20px;
-        }
-        
-        .texto-item {
-            font-size: 12px;
-        }
-        
-        .borde-tricolor-rotante {
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
-        }
-        
-        .borde-tricolor-rotante::after {
-            top: 6px;
-            left: 6px;
-            right: 6px;
-            bottom: 6px;
-        }
+        .flag-do { width: 22px; height: 14px; margin: 0 4px; }
+        .textos-rotativos { height: 20px; }
+        .texto-item { font-size: 12px; }
     }
 </style>
 {% endif %}
 
 {% if tema == 'san_valentin' %}
-<!-- Banner Superior Dinámico San Valentín -->
+<!-- Banner Superior Dinámico San Valentín (rojo) -->
 <div class="valentin-banner-dinamico">
     <div class="textos-rotativos-valentin">
-        <div class="texto-valentin-item active"><i class="fas fa-heart" style="color: #FFB6C1;"></i> FELIZ DÍA DE SAN VALENTÍN <i class="fas fa-heart" style="color: #FFB6C1;"></i></div>
-        <div class="texto-valentin-item"><i class="fas fa-heartbeat" style="color: #FFB6C1;"></i> "Cuida tu salud con amor - Ama tu cuerpo" <i class="fas fa-heartbeat" style="color: #FFB6C1;"></i></div>
-        <div class="texto-valentin-item">14 de Febrero {{ ano_actual }} - Día del Amor y la Amistad</div>
+        <div class="texto-valentin-item active"><i class="fas fa-heart"></i> FELIZ DÍA DE SAN VALENTÍN <i class="fas fa-heart"></i></div>
+        <div class="texto-valentin-item"><i class="fas fa-heartbeat"></i> Cuida tu salud con amor — ama tu cuerpo</div>
+        <div class="texto-valentin-item">14 de Febrero {{ ano_actual }} — Día del Amor y la Amistad</div>
     </div>
 </div>
 
 <!-- Estilos del Tema San Valentín -->
 <style>
-    /* Banner Superior Dinámico */
     .valentin-banner-dinamico {
-        background: linear-gradient(135deg, #FF1493 0%, #FF69B4 50%, #FF1493 100%);
-        color: white;
+        background: linear-gradient(90deg, #8B0000 0%, #DC143C 45%, #B22222 100%);
+        color: #fff;
         text-align: center;
         padding: 15px 20px;
         font-size: 16px;
         font-weight: 700;
-        box-shadow: 0 4px 15px rgba(255, 20, 147, 0.4);
+        box-shadow: 0 4px 15px rgba(139, 0, 0, 0.35);
         overflow: hidden;
         min-height: 50px;
         display: flex;
         align-items: center;
         justify-content: center;
         filter: none !important;
+        border-bottom: 3px solid #FFD700;
+    }
+    .valentin-banner-dinamico i {
+        color: #FFD700;
+        margin: 0 6px;
     }
     
     .textos-rotativos-valentin {
@@ -906,8 +912,8 @@
         right: -18px;
         bottom: -18px;
         border-radius: 50%;
-        background: radial-gradient(circle, #FF1493 0%, #FF69B4 40%, #FFB6C1 70%, #FFC0CB 100%);
-        opacity: 0.6;
+        background: radial-gradient(circle, #8B0000 0%, #DC143C 45%, #FF6B6B 100%);
+        opacity: 0.55;
         z-index: 0;
         animation: pulsar-corazon 2s ease-in-out infinite;
         pointer-events: none;
@@ -916,7 +922,7 @@
     @keyframes pulsar-corazon {
         0%, 100% {
             transform: scale(1);
-            opacity: 0.6;
+            opacity: 0.55;
         }
         50% {
             transform: scale(1.05);
@@ -947,7 +953,7 @@
         position: absolute;
         font-size: 50px;
         opacity: 0.12;
-        color: #FF1493 !important;
+        color: #DC143C !important;
         animation: flotar-corazon-valentin 18s linear infinite;
         pointer-events: none;
         z-index: 0;
@@ -955,7 +961,7 @@
     }
     
     .corazon-flotante i {
-        color: #FF1493 !important;
+        color: #DC143C !important;
         filter: none !important;
     }
     
@@ -1584,6 +1590,118 @@
 </style>
 {% endif %}
 
+{% if tema == 'navidad' %}
+<div class="navidad-banner-dinamico">
+    <div class="textos-rotativos-navidad">
+        <div class="texto-navidad-item active"><i class="fas fa-tree"></i> Esta Navidad, el mejor regalo es cuidarte <i class="fas fa-gift"></i></div>
+        <div class="texto-navidad-item"><i class="fas fa-star"></i> Feliz Navidad — salud, paz y bienestar</div>
+        <div class="texto-navidad-item">15–26 de Diciembre {{ ano_actual }}</div>
+    </div>
+</div>
+<style>
+    .navidad-banner-dinamico {
+        background: linear-gradient(90deg, #0B3D2E 0%, #165B3A 40%, #8B1E1E 100%);
+        color: #fff;
+        text-align: center;
+        padding: 14px 20px;
+        font-size: 16px;
+        font-weight: 700;
+        box-shadow: 0 4px 15px rgba(11, 61, 46, 0.3);
+        overflow: hidden;
+        min-height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-bottom: 3px solid #D4AF37;
+    }
+    .navidad-banner-dinamico i { color: #D4AF37; margin: 0 6px; }
+    .textos-rotativos-navidad {
+        position: relative;
+        width: 100%;
+        height: 25px;
+        overflow: hidden;
+    }
+    .texto-navidad-item {
+        position: absolute;
+        width: 100%;
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s ease;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding: 0 10px;
+    }
+    .texto-navidad-item.active { opacity: 1; transform: translateY(0); }
+    .texto-navidad-item.exit { opacity: 0; transform: translateY(-30px); }
+    @media (max-width: 768px) {
+        .navidad-banner-dinamico { font-size: 14px; padding: 12px 15px; }
+        .textos-rotativos-navidad { height: 22px; }
+    }
+    @media (max-width: 480px) {
+        .navidad-banner-dinamico { font-size: 12px; padding: 10px; }
+        .textos-rotativos-navidad { height: 20px; }
+        .texto-navidad-item { font-size: 12px; }
+    }
+</style>
+{% endif %}
+
+{% if tema == 'ano_nuevo' %}
+<div class="ano-nuevo-banner-dinamico">
+    <div class="textos-rotativos-ano-nuevo">
+        <div class="texto-ano-nuevo-item active"><i class="fas fa-star"></i> Año nuevo, salud nueva <i class="fas fa-star"></i></div>
+        <div class="texto-ano-nuevo-item"><i class="fas fa-star"></i> Empieza {{ ano_actual }} cuidándote con cariño</div>
+        <div class="texto-ano-nuevo-item">Feliz Año Nuevo — tu bienestar primero</div>
+    </div>
+</div>
+<style>
+    .ano-nuevo-banner-dinamico {
+        background: linear-gradient(90deg, #1a1a2e 0%, #16213e 45%, #0f3460 100%);
+        color: #fff;
+        text-align: center;
+        padding: 14px 20px;
+        font-size: 16px;
+        font-weight: 700;
+        box-shadow: 0 4px 15px rgba(15, 52, 96, 0.35);
+        overflow: hidden;
+        min-height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-bottom: 3px solid #FFD700;
+    }
+    .ano-nuevo-banner-dinamico i { color: #FFD700; margin: 0 6px; }
+    .textos-rotativos-ano-nuevo {
+        position: relative;
+        width: 100%;
+        height: 25px;
+        overflow: hidden;
+    }
+    .texto-ano-nuevo-item {
+        position: absolute;
+        width: 100%;
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s ease;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding: 0 10px;
+    }
+    .texto-ano-nuevo-item.active { opacity: 1; transform: translateY(0); }
+    .texto-ano-nuevo-item.exit { opacity: 0; transform: translateY(-30px); }
+    @media (max-width: 768px) {
+        .ano-nuevo-banner-dinamico { font-size: 14px; padding: 12px 15px; }
+        .textos-rotativos-ano-nuevo { height: 22px; }
+    }
+    @media (max-width: 480px) {
+        .ano-nuevo-banner-dinamico { font-size: 12px; padding: 10px; }
+        .textos-rotativos-ano-nuevo { height: 20px; }
+        .texto-ano-nuevo-item { font-size: 12px; }
+    }
+</style>
+{% endif %}
+
 <!-- ========== HERO (foto de fondo + overlay, como el diseño original) ========== -->
 <section class="home-hero">
     <img
@@ -1951,6 +2069,40 @@
         }
         
         setInterval(rotarTextoMujer, 4000);
+    });
+</script>
+{% endif %}
+
+{% if tema == 'navidad' %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const textos = document.querySelectorAll('.texto-navidad-item');
+        if (!textos.length) return;
+        let i = 0;
+        setInterval(function() {
+            textos[i].classList.remove('active');
+            textos[i].classList.add('exit');
+            i = (i + 1) % textos.length;
+            setTimeout(function() { textos.forEach(t => t.classList.remove('exit')); }, 800);
+            textos[i].classList.add('active');
+        }, 4000);
+    });
+</script>
+{% endif %}
+
+{% if tema == 'ano_nuevo' %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const textos = document.querySelectorAll('.texto-ano-nuevo-item');
+        if (!textos.length) return;
+        let i = 0;
+        setInterval(function() {
+            textos[i].classList.remove('active');
+            textos[i].classList.add('exit');
+            i = (i + 1) % textos.length;
+            setTimeout(function() { textos.forEach(t => t.classList.remove('exit')); }, 800);
+            textos[i].classList.add('active');
+        }, 4000);
     });
 </script>
 {% endif %}

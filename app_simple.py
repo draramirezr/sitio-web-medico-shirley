@@ -2245,7 +2245,12 @@ def index():
         dia_actual = today.day
         
         # Auto-activación especial por fecha
-        if mes_actual == 2 and dia_actual == 14:
+        if mes_actual == 1 and 1 <= dia_actual <= 10:
+            # 1–10 de Enero: Año Nuevo
+            if tema in ('original', 'navidad'):
+                if actualizar_configuracion('tema_principal', 'ano_nuevo'):
+                    tema = 'ano_nuevo'
+        elif mes_actual == 2 and dia_actual == 14:
             # 14 de Febrero: San Valentín (reemplaza Mes de la Patria ese día)
             if tema != 'san_valentin':
                 if actualizar_configuracion('tema_principal', 'san_valentin'):
@@ -2262,8 +2267,15 @@ def index():
             # Octubre: activar Cáncer de Mama
             if actualizar_configuracion('tema_principal', 'cancer_mama'):
                 tema = 'cancer_mama'
+        elif mes_actual == 12 and 15 <= dia_actual <= 26 and tema == 'original':
+            # 15–26 de Diciembre: Navidad
+            if actualizar_configuracion('tema_principal', 'navidad'):
+                tema = 'navidad'
         
         # Auto-desactivación al terminar el mes o día especial
+        elif mes_actual == 1 and dia_actual >= 11 and tema == 'ano_nuevo':
+            if actualizar_configuracion('tema_principal', 'original'):
+                tema = 'original'
         elif mes_actual == 2 and dia_actual == 15 and tema == 'san_valentin':
             # 15 de Febrero: volver a Mes de la Patria
             if actualizar_configuracion('tema_principal', 'mes_patria'):
@@ -2278,6 +2290,17 @@ def index():
                 tema = 'original'
         elif mes_actual == 11 and tema == 'cancer_mama':
             # Noviembre: desactivar Cáncer de Mama
+            if actualizar_configuracion('tema_principal', 'original'):
+                tema = 'original'
+        elif mes_actual == 12 and dia_actual >= 27 and tema == 'navidad':
+            # 27+ Diciembre: quitar Navidad
+            if actualizar_configuracion('tema_principal', 'original'):
+                tema = 'original'
+        elif mes_actual not in (1,) and tema == 'ano_nuevo':
+            # Fuera de enero: quitar Año Nuevo
+            if actualizar_configuracion('tema_principal', 'original'):
+                tema = 'original'
+        elif mes_actual != 12 and tema == 'navidad':
             if actualizar_configuracion('tema_principal', 'original'):
                 tema = 'original'
     except Exception as e:
@@ -4689,7 +4712,7 @@ def guardar_tema_pagina():
     nuevo_tema = request.form.get('theme', 'original')
     
     # Validar que sea un tema válido
-    if nuevo_tema not in ['original', 'mes_patria', 'san_valentin', 'mes_mujer', 'cancer_mama']:
+    if nuevo_tema not in ['original', 'mes_patria', 'san_valentin', 'mes_mujer', 'cancer_mama', 'navidad', 'ano_nuevo']:
         flash('Tema inválido', 'error')
         return redirect(url_for('admin_visor_pagina'))
     
@@ -4698,10 +4721,12 @@ def guardar_tema_pagina():
         # Nombres de temas
         nombres_temas = {
             'original': 'Diseño Original',
-            'mes_patria': '🇩🇴 Mes de la Patria',
-            'san_valentin': '💕 San Valentín',
-            'mes_mujer': '♀ Mes de la Mujer',
-            'cancer_mama': '🎗️ Cáncer de Mama'
+            'mes_patria': 'Mes de la Patria',
+            'san_valentin': 'San Valentín',
+            'mes_mujer': 'Mes de la Mujer',
+            'cancer_mama': 'Cáncer de Mama',
+            'navidad': 'Navidad',
+            'ano_nuevo': 'Año Nuevo',
         }
         nombre_tema = nombres_temas.get(nuevo_tema, 'Diseño Original')
         flash(f'✅ Tema actualizado a: {nombre_tema}', 'success')

@@ -97,6 +97,44 @@
     .radio-label {
         flex: 1;
     }
+
+    /* Bandera RD CSS (Windows muestra "DO" con el emoji) */
+    .flag-do {
+        display: inline-block;
+        width: 22px;
+        height: 14px;
+        vertical-align: -2px;
+        margin-right: 6px;
+        border-radius: 2px;
+        box-shadow: 0 1px 2px rgba(0,0,0,.25);
+        background:
+            linear-gradient(#002D62, #002D62) left top / 42% 42% no-repeat,
+            linear-gradient(#CE1126, #CE1126) right top / 42% 42% no-repeat,
+            linear-gradient(#CE1126, #CE1126) left bottom / 42% 42% no-repeat,
+            linear-gradient(#002D62, #002D62) right bottom / 42% 42% no-repeat,
+            #fff;
+        position: relative;
+    }
+    .flag-do::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 18%;
+        transform: translateX(-50%);
+        background: #fff;
+    }
+    .flag-do::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 18%;
+        transform: translateY(-50%);
+        background: #fff;
+    }
     
     .radio-title {
         font-size: 18px;
@@ -307,10 +345,12 @@
             <div class="current-badge">
                 ✅ Actual: 
                 {% if tema_actual == 'original' %}Diseño Original
-                {% elif tema_actual == 'mes_patria' %}🇩🇴 Mes de la Patria
-                {% elif tema_actual == 'san_valentin' %}💕 San Valentín
-                {% elif tema_actual == 'mes_mujer' %}♀ Mes de la Mujer
-                {% elif tema_actual == 'cancer_mama' %}🎗️ Cáncer de Mama
+                {% elif tema_actual == 'mes_patria' %}Mes de la Patria
+                {% elif tema_actual == 'san_valentin' %}San Valentín
+                {% elif tema_actual == 'mes_mujer' %}Mes de la Mujer
+                {% elif tema_actual == 'cancer_mama' %}Cáncer de Mama
+                {% elif tema_actual == 'navidad' %}Navidad
+                {% elif tema_actual == 'ano_nuevo' %}Año Nuevo
                 {% else %}Diseño Original
                 {% endif %}
             </div>
@@ -333,8 +373,8 @@
                 <label class="radio-option {% if tema_actual == 'mes_patria' %}selected{% endif %}" onclick="selectTheme(this, 'mes_patria')">
                     <input type="radio" name="theme" value="mes_patria" {% if tema_actual == 'mes_patria' %}checked{% endif %}>
                     <div class="radio-label">
-                        <div class="radio-title">🇩🇴 Mes de la Patria</div>
-                        <div class="radio-description">Banner tricolor + Borde tricolor (Febrero)</div>
+                        <div class="radio-title"><span class="flag-do" aria-hidden="true"></span> Mes de la Patria</div>
+                        <div class="radio-description">Banner tricolor azul/rojo + bandera (Febrero)</div>
                     </div>
                 </label>
                 
@@ -342,8 +382,8 @@
                 <label class="radio-option {% if tema_actual == 'san_valentin' %}selected{% endif %}" onclick="selectTheme(this, 'san_valentin')">
                     <input type="radio" name="theme" value="san_valentin" {% if tema_actual == 'san_valentin' %}checked{% endif %}>
                     <div class="radio-label">
-                        <div class="radio-title">💕 San Valentín</div>
-                        <div class="radio-description">Corazones románticos (Solo 14 de Febrero)</div>
+                        <div class="radio-title"><i class="fas fa-heart" style="color:#DC143C;"></i> San Valentín</div>
+                        <div class="radio-description">Banner rojo romántico (14 de Febrero)</div>
                     </div>
                 </label>
                 
@@ -351,8 +391,8 @@
                 <label class="radio-option {% if tema_actual == 'mes_mujer' %}selected{% endif %}" onclick="selectTheme(this, 'mes_mujer')">
                     <input type="radio" name="theme" value="mes_mujer" {% if tema_actual == 'mes_mujer' %}checked{% endif %}>
                     <div class="radio-label">
-                        <div class="radio-title">♀ Mes de la Mujer</div>
-                        <div class="radio-description">Banner morado + Símbolo ♀ (Marzo)</div>
+                        <div class="radio-title"><i class="fas fa-venus" style="color:#9B59B6;"></i> Mes de la Mujer</div>
+                        <div class="radio-description">Banner morado + símbolo ♀ (Marzo)</div>
                     </div>
                 </label>
                 
@@ -360,12 +400,29 @@
                 <label class="radio-option {% if tema_actual == 'cancer_mama' %}selected{% endif %}" onclick="selectTheme(this, 'cancer_mama')">
                     <input type="radio" name="theme" value="cancer_mama" {% if tema_actual == 'cancer_mama' %}checked{% endif %}>
                     <div class="radio-label">
-                        <div class="radio-title">🎗️ Cáncer de Mama</div>
-                        <div class="radio-description">Banner rosa + Lazos rosas (Octubre)</div>
+                        <div class="radio-title"><i class="fas fa-ribbon" style="color:#E91E8C;"></i> Cáncer de Mama</div>
+                        <div class="radio-description">Banner rosa + lazos (Octubre)</div>
                     </div>
                 </label>
-            </div>
-            
+
+                <!-- Opción 6: Navidad -->
+                <label class="radio-option {% if tema_actual == 'navidad' %}selected{% endif %}" onclick="selectTheme(this, 'navidad')">
+                    <input type="radio" name="theme" value="navidad" {% if tema_actual == 'navidad' %}checked{% endif %}>
+                    <div class="radio-label">
+                        <div class="radio-title"><i class="fas fa-tree" style="color:#165B3A;"></i> Navidad</div>
+                        <div class="radio-description">Mensaje navideño corto (15–26 de Diciembre)</div>
+                    </div>
+                </label>
+
+                <!-- Opción 7: Año Nuevo -->
+                <label class="radio-option {% if tema_actual == 'ano_nuevo' %}selected{% endif %}" onclick="selectTheme(this, 'ano_nuevo')">
+                    <input type="radio" name="theme" value="ano_nuevo" {% if tema_actual == 'ano_nuevo' %}checked{% endif %}>
+                    <div class="radio-label">
+                        <div class="radio-title"><i class="fas fa-star" style="color:#D4AF37;"></i> Año Nuevo</div>
+                        <div class="radio-description">Saludo de año nuevo (1–10 de Enero)</div>
+                    </div>
+                </label>
+            </div>            
             <!-- Botones -->
             <button type="submit" class="btn-save">
                 <i class="fas fa-save me-2"></i> Guardar Cambios
