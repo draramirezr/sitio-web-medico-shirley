@@ -2255,7 +2255,7 @@ def index():
             if tema != 'san_valentin':
                 if actualizar_configuracion('tema_principal', 'san_valentin'):
                     tema = 'san_valentin'
-        elif mes_actual == 2 and tema == 'original':
+        elif mes_actual == 2 and tema in ('original', 'navidad', 'ano_nuevo'):
             # Resto de Febrero: activar Mes de la Patria
             if actualizar_configuracion('tema_principal', 'mes_patria'):
                 tema = 'mes_patria'
@@ -2272,8 +2272,8 @@ def index():
             if actualizar_configuracion('tema_principal', 'navidad'):
                 tema = 'navidad'
         
-        # Auto-desactivación al terminar el mes o día especial
-        elif mes_actual == 1 and dia_actual >= 11 and tema == 'ano_nuevo':
+        # Auto-desactivación al terminar el período (NO borrar si el admin prueba fuera de temporada)
+        elif mes_actual == 1 and dia_actual >= 11 and tema in ('ano_nuevo', 'navidad'):
             if actualizar_configuracion('tema_principal', 'original'):
                 tema = 'original'
         elif mes_actual == 2 and dia_actual == 15 and tema == 'san_valentin':
@@ -2294,13 +2294,6 @@ def index():
                 tema = 'original'
         elif mes_actual == 12 and dia_actual >= 27 and tema == 'navidad':
             # 27+ Diciembre: quitar Navidad
-            if actualizar_configuracion('tema_principal', 'original'):
-                tema = 'original'
-        elif mes_actual not in (1,) and tema == 'ano_nuevo':
-            # Fuera de enero: quitar Año Nuevo
-            if actualizar_configuracion('tema_principal', 'original'):
-                tema = 'original'
-        elif mes_actual != 12 and tema == 'navidad':
             if actualizar_configuracion('tema_principal', 'original'):
                 tema = 'original'
     except Exception as e:
