@@ -1338,21 +1338,22 @@
 
 <!-- Estilos del Tema Mes de la Mujer -->
 <style>
-    /* Banner Superior Dinámico Morado */
+    /* Banner Superior Dinámico — PMS 2645 (púrpura) */
     .mujer-banner-dinamico {
-        background: linear-gradient(135deg, #8B008B 0%, #9370DB 100%);
+        background: linear-gradient(90deg, #8B6BC7 0%, #AD96DC 45%, #9A7FD0 100%);
         color: white;
         text-align: center;
         padding: 15px 20px;
         font-size: 16px;
         font-weight: 700;
-        box-shadow: 0 4px 15px rgba(139, 0, 139, 0.3);
+        box-shadow: 0 4px 15px rgba(173, 150, 220, 0.45);
         overflow: hidden;
         min-height: 50px;
         display: flex;
         align-items: center;
         justify-content: center;
         filter: none !important;
+        border-bottom: 3px solid #6E52B0;
     }
     
     /* Contenedor de textos rotativos */
@@ -1398,10 +1399,10 @@
         bottom: -15px;
         border-radius: 50%;
         background: conic-gradient(
-            #8B008B 0deg 90deg,
-            #DA70D6 90deg 180deg,
-            #9370DB 180deg 270deg,
-            #DA70D6 270deg 360deg
+            #AD96DC 0deg 90deg,
+            #8B6BC7 90deg 180deg,
+            #6E52B0 180deg 270deg,
+            #AD96DC 270deg 360deg
         );
         z-index: 0;
         animation: rotar-borde-mujer 10s linear infinite;
@@ -1437,7 +1438,7 @@
         position: absolute;
         font-size: 60px;
         opacity: 0.08;
-        color: #8B008B !important;
+        color: #AD96DC !important;
         animation: flotar-simbolo-mujer 18s linear infinite;
         pointer-events: none;
         z-index: 0;
@@ -1445,7 +1446,7 @@
     }
     
     .simbolo-mujer-flotante i {
-        color: #8B008B !important;
+        color: #AD96DC !important;
         filter: none !important;
     }
     
@@ -1560,15 +1561,15 @@
     }
 </style>
 
-<!-- Override: adaptar banner al nuevo diseño (minimal premium) -->
+<!-- Override: Mes de la Mujer — PMS 2645 (#AD96DC) -->
 <style>
     .mujer-banner-dinamico{
-        background: linear-gradient(90deg, rgba(232,160,191,.42) 0%, rgba(245,245,245,.95) 45%, rgba(232,160,191,.34) 100%) !important;
-        color: #333333 !important;
-        box-shadow: 0 10px 24px rgba(17,24,39,.08) !important;
-        border-bottom: 1px solid rgba(232,160,191,.35) !important;
-        padding: 10px 14px !important;
-        min-height: 40px !important;
+        background: linear-gradient(90deg, #8B6BC7 0%, #AD96DC 50%, #8B6BC7 100%) !important;
+        color: #fff !important;
+        box-shadow: 0 8px 22px rgba(173, 150, 220, 0.35) !important;
+        border-bottom: 3px solid #6E52B0 !important;
+        padding: 12px 16px !important;
+        min-height: 46px !important;
         font-weight: 700 !important;
         letter-spacing: .02em;
     }
@@ -1576,12 +1577,12 @@
         height: 22px !important;
     }
     .texto-mujer-item{
-        color: #333333 !important;
-        font-size: 0.92rem !important;
+        color: #fff !important;
+        font-size: 0.95rem !important;
         font-weight: 700 !important;
     }
     @media (max-width: 480px){
-        .mujer-banner-dinamico{ padding: 9px 12px !important; }
+        .mujer-banner-dinamico{ padding: 10px 12px !important; }
         .texto-mujer-item{ font-size: 0.82rem !important; }
     }
     /* Desactivar adornos antiguos si existen */
