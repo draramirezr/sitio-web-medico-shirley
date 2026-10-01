@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Horario de citas - Panel Admin | Dra. Shirley Ramírez{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+<section class="py-4">
+    <div class="container" style="max-width: 920px;">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div>
+                <h1 class="h3 mb-1" style="color: #6B5C62;">Horario de citas</h1>
+                <p class="text-muted mb-0">
+                    Define qué días de la semana y en qué rango de horas se pueden agendar citas.
+                    No son fechas del calendario: es el horario semanal recurrente.
+                </p>
+            </div>
+            <a href="{{ url_for('admin_appointments') }}" class="btn btn-outline-secondary btn-sm">Volver a citas</a>
+        </div>
+
+        <div class="alert alert-light border mb-4">
+            <strong>Así se verá en el formulario público:</strong>
+            <div class="mt-1 text-muted">{{ hint }}</div>
+        </div>
+
+        <form method="POST">
+            <div class="table-responsive mb-3">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Activo</th>
+                            <th>Día</th>
+                            <th>Desde</th>
+                            <th>Hasta</th>
+                            <th>Intervalo (min)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in schedule %}
+                        <tr {% if row.enabled %}style="background: rgba(206,176,183,0.12);"{% endif %}>
+                            <td>
+                                <input type="checkbox"
+                                       class="form-check-input"
+                                       name="enabled_{{ row.day_of_week }}"
+                                       value="1"
+                                       {% if row.enabled %}checked{% endif %}
+                                       aria-label="Activar {{ row.nombre }}">
+                            </td>
+                            <td class="fw-semibold" style="color:#6B5C62;">{{ row.nombre }}</td>
+                            <td style="min-width:120px;">
+                                <input type="time"
+                                       class="form-control form-control-sm"
+                                       name="start_{{ row.day_of_week }}"
+                                       value="{{ row.start_time }}"
+                                       required>
+                            </td>
+                            <td style="min-width:120px;">
+                                <input type="time"
+                                       class="form-control form-control-sm"
+                                       name="end_{{ row.day_of_week }}"
+                                       value="{{ row.end_time }}"
+                                       required>
+                            </td>
+                            <td style="max-width:110px;">
+                                <input type="number"
+                                       class="form-control form-control-sm"
+                                       name="slot_{{ row.day_of_week }}"
+                                       value="{{ row.slot_minutes }}"
+                                       min="5" max="120" step="5"
+                                       required>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="text-muted small mb-3">
+                Ejemplo: Martes 13:00–18:00 con intervalo 30 → genera 13:00, 13:30 … 18:00.
+                Solo las horas libres (sin cita ocupada) se muestran al paciente.
+            </p>
+
+            <button type="submit" class="btn" style="background:#8B5A6B;color:#fff;">
+                Guardar horario
+            </button>
+        </form>
+    </div>
+</section>
+{% endblock %}

@@ -879,6 +879,128 @@ def fecha_maxima_cita_rd(hoy_rd=None):
         hoy_rd = obtener_fecha_rd()
     return hoy_rd + timedelta(days=CITA_FECHA_MAX_DIAS)
 
+# weekday Python: 0=Lunes … 6=Domingo
+DIAS_SEMANA_ES = {
+    0: 'Lunes',
+    1: 'Martes',
+    2: 'Miércoles',
+    3: 'Jueves',
+    4: 'Viernes',
+    5: 'Sábado',
+    6: 'Domingo',
+}
+# Defaults actuales del consultorio (antes estaban hardcodeados)
+_DEFAULT_WEEKLY_SCHEDULE = [
+    # (day_of_week, enabled, start, end, slot_minutes)
+    (0, 0, '09:00', '17:00', 30),
+    (1, 1, '13:00', '18:00', 30),  # Martes
+    (2, 0, '09:00', '17:00', 30),
+    (3, 1, '08:00', '13:00', 30),  # Jueves
+    (4, 0, '09:00', '17:00', 30),
+    (5, 0, '09:00', '13:00', 30),
+    (6, 0, '09:00', '13:00', 30),
+]
+
+def _ensure_appointment_weekly_schedule():
+    """Crea y siembra horario semanal de citas (día + rango de horas)."""
+    conn = get_db_connection()
+    try:
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS appointment_weekly_schedule (
+                day_of_week TINYINT NOT NULL,
+                enabled TINYINT(1) NOT NULL DEFAULT 0,
+                start_time VARCHAR(5) NOT NULL DEFAULT '09:00',
+                end_time VARCHAR(5) NOT NULL DEFAULT '17:00',
+                slot_minutes INT NOT NULL DEFAULT 30,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (day_of_week)
+            )
+        ''')
+        for day, enabled, start, end, slot in _DEFAULT_WEEKLY_SCHEDULE:
+            conn.execute('''
+                INSERT IGNORE INTO appointment_weekly_schedule
+                    (day_of_week, enabled, start_time, end_time, slot_minutes)
+                VALUES (%s, %s, %s, %s, %s)
+            ''', (day, enabled, start, end, slot))
+        conn.commit()
+    except Exception as e:
+        print(f"⚠️ No se pudo preparar appointment_weekly_schedule: {e}")
+    finally:
+        conn.close()
+
+def obtener_horario_semanal_citas():
+    """Lista de 7 filas del horario semanal (orden Lun→Dom)."""
+    _ensure_appointment_weekly_schedule()
+    conn = get_db_connection()
+    rows = conn.execute('''
+        SELECT day_of_week, enabled, start_time, end_time, slot_minutes
+        FROM appointment_weekly_schedule
+        ORDER BY day_of_week ASC
+    ''').fetchall()
+    conn.close()
+    by_day = {int(r['day_of_week']): r for r in (rows or [])}
+    result = []
+    for day in range(7):
+        r = by_day.get(day) or {
+            'day_of_week': day,
+            'enabled': 0,
+            'start_time': '09:00',
+            'end_time': '17:00',
+            'slot_minutes': 30,
+        }
+        result.append({
+            'day_of_week': day,
+            'nombre': DIAS_SEMANA_ES[day],
+            'enabled': bool(int(r.get('enabled') or 0)),
+            'start_time': (r.get('start_time') or '09:00')[:5],
+            'end_time': (r.get('end_time') or '17:00')[:5],
+            'slot_minutes': int(r.get('slot_minutes') or 30),
+            # JS Date.getDay(): Dom=0 … Sáb=6
+            'js_day': (day + 1) % 7,
+        })
+    return result
+
+def generar_slots_horario(start_hm, end_hm, slot_minutes=30):
+    """Genera HH:MM desde start hasta end inclusive, cada N minutos."""
+    from datetime import datetime, timedelta
+    try:
+        start = datetime.strptime((start_hm or '')[:5], '%H:%M')
+        end = datetime.strptime((end_hm or '')[:5], '%H:%M')
+        step = max(5, int(slot_minutes or 30))
+    except Exception:
+        return []
+    if end < start:
+        return []
+    out = []
+    cur = start
+    guard = 0
+    while cur <= end and guard < 200:
+        out.append(cur.strftime('%H:%M'))
+        cur += timedelta(minutes=step)
+        guard += 1
+    return out
+
+def horario_del_dia(day_of_week):
+    """Fila de horario para un weekday Python, o None si no existe."""
+    for row in obtener_horario_semanal_citas():
+        if row['day_of_week'] == int(day_of_week):
+            return row
+    return None
+
+def dias_habiles_js():
+    """Días habilitados en índice JS (getDay)."""
+    return [r['js_day'] for r in obtener_horario_semanal_citas() if r['enabled']]
+
+def texto_hint_dias_habiles():
+    """Texto corto para el formulario público."""
+    activos = [r for r in obtener_horario_semanal_citas() if r['enabled']]
+    if not activos:
+        return 'Por ahora no hay días disponibles para agendar en línea.'
+    partes = []
+    for r in activos:
+        partes.append(f"{r['nombre']} {r['start_time']}–{r['end_time']}")
+    return 'Disponible: ' + '; '.join(partes) + '.'
+
 def normalizar_estado_facturacion(estado_raw):
     """Normaliza el filtro de estado a 'pendiente' o 'facturado'."""
     estado = (estado_raw or 'pendiente').strip().lower()
@@ -1348,6 +1470,25 @@ def init_db():
     except:
         cursor.execute("ALTER TABLE appointments ADD COLUMN emergency_datetime VARCHAR(50)")
         print("✅ Columna 'emergency_datetime' agregada a la tabla appointments")
+
+    # Horario semanal configurable (día de semana + rango de horas)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS appointment_weekly_schedule (
+            day_of_week TINYINT NOT NULL,
+            enabled TINYINT(1) NOT NULL DEFAULT 0,
+            start_time VARCHAR(5) NOT NULL DEFAULT '09:00',
+            end_time VARCHAR(5) NOT NULL DEFAULT '17:00',
+            slot_minutes INT NOT NULL DEFAULT 30,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (day_of_week)
+        )
+    ''')
+    for day, enabled, start, end, slot in _DEFAULT_WEEKLY_SCHEDULE:
+        cursor.execute('''
+            INSERT IGNORE INTO appointment_weekly_schedule
+                (day_of_week, enabled, start_time, end_time, slot_minutes)
+            VALUES (%s, %s, %s, %s, %s)
+        ''', (day, enabled, start, end, slot))
 
     # Preferencias de recordatorio anual (opt-in)
     cursor.execute(adapt_sql_for_database('''
@@ -3588,31 +3729,30 @@ def contact():
 
 @app.route('/api/horarios-disponibles', methods=['GET'])
 def horarios_disponibles():
-    """API para obtener horarios disponibles según la fecha"""
+    """API para obtener horarios disponibles según la fecha (obedece horario semanal admin)."""
     fecha = request.args.get('fecha')
     
     if not fecha:
         return jsonify({'error': 'Fecha requerida'}), 400
     
     try:
-        # Parsear la fecha para obtener el día de la semana
         from datetime import datetime, timedelta, time as time_cls
         fecha_obj = datetime.strptime(fecha, '%Y-%m-%d')
-        dia_semana = fecha_obj.weekday()  # 0=Lunes, 1=Martes, 3=Jueves
-        
-        # Definir horarios según el día
-        if dia_semana == 1:  # Martes
-            horarios_base = [
-                '13:00', '13:30', '14:00', '14:30', '15:00', 
-                '15:30', '16:00', '16:30', '17:00', '17:30', '18:00'
-            ]
-        elif dia_semana == 3:  # Jueves
-            horarios_base = [
-                '08:00', '08:30', '09:00', '09:30', '10:00',
-                '10:30', '11:00', '11:30', '12:00', '12:30', '13:00'
-            ]
-        else:
-            return jsonify({'horarios': []})
+        dia_semana = fecha_obj.weekday()  # 0=Lunes … 6=Domingo
+
+        cfg = horario_del_dia(dia_semana)
+        if not cfg or not cfg.get('enabled'):
+            return jsonify({'horarios': [], 'rango': None, 'dia': DIAS_SEMANA_ES.get(dia_semana)})
+
+        horarios_base = generar_slots_horario(
+            cfg['start_time'], cfg['end_time'], cfg.get('slot_minutes') or 30
+        )
+        if not horarios_base:
+            return jsonify({
+                'horarios': [],
+                'rango': f"{cfg['start_time']}–{cfg['end_time']}",
+                'dia': cfg['nombre'],
+            })
         
         def _norm_hora(val):
             """Normaliza TIME/str a HH:MM para comparar con horarios_base."""
@@ -3632,7 +3772,6 @@ def horarios_disponibles():
             s = str(val).strip()
             if not s:
                 return None
-            # "15:00:00", "15:00", "3:00 PM", etc.
             for fmt in ('%H:%M:%S', '%H:%M', '%I:%M %p', '%I:%M:%S %p'):
                 try:
                     return datetime.strptime(s, fmt).strftime('%H:%M')
@@ -3642,7 +3781,6 @@ def horarios_disponibles():
                 return s[:5]
             return s
 
-        # Obtener citas ya agendadas para esa fecha (que no estén canceladas)
         conn = get_db_connection()
         citas_ocupadas = conn.execute(
             'SELECT appointment_time FROM appointments WHERE appointment_date = %s AND status != %s',
@@ -3650,7 +3788,6 @@ def horarios_disponibles():
         ).fetchall()
         conn.close()
         
-        # DictCursor: filas son dict, no tuplas
         horarios_ocupados = set()
         for cita in citas_ocupadas or []:
             raw = cita.get('appointment_time') if isinstance(cita, dict) else (cita[0] if cita else None)
@@ -3658,10 +3795,14 @@ def horarios_disponibles():
             if hora_n:
                 horarios_ocupados.add(hora_n)
         
-        # Filtrar horarios disponibles
         horarios_libres = [h for h in horarios_base if h not in horarios_ocupados]
         
-        return jsonify({'horarios': horarios_libres})
+        return jsonify({
+            'horarios': horarios_libres,
+            'rango': f"{cfg['start_time']}–{cfg['end_time']}",
+            'dia': cfg['nombre'],
+            'slot_minutes': cfg.get('slot_minutes') or 30,
+        })
         
     except Exception as e:
         print(f"❌ Error horarios_disponibles({fecha}): {e}")
@@ -3770,6 +3911,17 @@ def request_appointment():
                         return redirect(url_for('request_appointment'))
                     if fecha_cita > max_cita:
                         flash(f'La fecha preferida no puede ser más de {CITA_FECHA_MAX_DIAS} días desde hoy.', 'danger')
+                        return redirect(url_for('request_appointment'))
+                    cfg_dia = horario_del_dia(fecha_cita.weekday())
+                    if not cfg_dia or not cfg_dia.get('enabled'):
+                        flash('Ese día no está disponible para citas. Elige otro día habilitado.', 'warning')
+                        return redirect(url_for('request_appointment'))
+                    slots_ok = generar_slots_horario(
+                        cfg_dia['start_time'], cfg_dia['end_time'], cfg_dia.get('slot_minutes') or 30
+                    )
+                    hora_n = str(appointment_time or '')[:5]
+                    if hora_n not in slots_ok:
+                        flash('Esa hora no está dentro del horario disponible para ese día.', 'warning')
                         return redirect(url_for('request_appointment'))
                 except Exception:
                     flash('Por favor, selecciona una fecha válida para tu cita.', 'danger')
@@ -3883,6 +4035,8 @@ def request_appointment():
         fecha_max_cita=max_cita.strftime('%Y-%m-%d'),
         fecha_max_cita_es=max_cita.strftime('%d/%m/%Y'),
         cita_fecha_max_dias=CITA_FECHA_MAX_DIAS,
+        dias_habiles_js=dias_habiles_js(),
+        hint_dias_habiles=texto_hint_dias_habiles(),
     )
 
 # ============================================================================
@@ -4171,6 +4325,62 @@ def admin_appointments():
     conn.close()
     
     return render_template('admin_appointments.html', appointments=appointments)
+
+@app.route('/admin/horario-citas', methods=['GET', 'POST'])
+@login_required
+def admin_horario_citas():
+    """Configurar días de la semana y rangos de hora disponibles para citas."""
+    _ensure_appointment_weekly_schedule()
+
+    if request.method == 'POST':
+        conn = get_db_connection()
+        try:
+            for day in range(7):
+                enabled = 1 if request.form.get(f'enabled_{day}') == '1' else 0
+                start = (request.form.get(f'start_{day}') or '09:00').strip()[:5]
+                end = (request.form.get(f'end_{day}') or '17:00').strip()[:5]
+                try:
+                    slot = int(request.form.get(f'slot_{day}') or 30)
+                except ValueError:
+                    slot = 30
+                slot = max(5, min(120, slot))
+                # Validar formato HH:MM
+                from datetime import datetime as dt
+                try:
+                    dt.strptime(start, '%H:%M')
+                    dt.strptime(end, '%H:%M')
+                except ValueError:
+                    flash(f'Horario inválido en {DIAS_SEMANA_ES[day]}. Usa formato HH:MM.', 'warning')
+                    conn.close()
+                    return redirect(url_for('admin_horario_citas'))
+                if enabled and end < start:
+                    flash(f'En {DIAS_SEMANA_ES[day]}, la hora fin debe ser ≥ hora inicio.', 'warning')
+                    conn.close()
+                    return redirect(url_for('admin_horario_citas'))
+                conn.execute('''
+                    INSERT INTO appointment_weekly_schedule
+                        (day_of_week, enabled, start_time, end_time, slot_minutes)
+                    VALUES (%s, %s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE
+                        enabled = VALUES(enabled),
+                        start_time = VALUES(start_time),
+                        end_time = VALUES(end_time),
+                        slot_minutes = VALUES(slot_minutes)
+                ''', (day, enabled, start, end, slot))
+            conn.commit()
+            flash('Horario de citas guardado. El formulario público ya lo usará.', 'success')
+        except Exception as e:
+            print(f"❌ Error guardando horario semanal: {e}")
+            flash('No se pudo guardar el horario. Intenta de nuevo.', 'danger')
+        finally:
+            conn.close()
+        return redirect(url_for('admin_horario_citas'))
+
+    return render_template(
+        'admin_horario_citas.html',
+        schedule=obtener_horario_semanal_citas(),
+        hint=texto_hint_dias_habiles(),
+    )
 
 @app.route('/admin/recordatorios-anuales', methods=['GET', 'POST'])
 @login_required

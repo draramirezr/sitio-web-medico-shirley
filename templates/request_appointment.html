@@ -307,7 +307,7 @@
                                     <i class="fas fa-calendar-alt icon-right"></i>
                                 </div>
                                 <small class="text-muted d-block mt-1" id="appointment_date_hint">
-                                    Solo martes y jueves. Máximo hasta el {{ fecha_max_cita_es }} ({{ cita_fecha_max_dias }} días desde hoy).
+                                    {{ hint_dias_habiles }} Máximo hasta el {{ fecha_max_cita_es }} ({{ cita_fecha_max_dias }} días desde hoy).
                                 </small>
                             </div>
 
@@ -386,6 +386,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const FECHA_MAX_CITA = "{{ fecha_max_cita }}";
     const FECHA_MAX_CITA_ES = "{{ fecha_max_cita_es }}";
     const CITA_FECHA_MAX_DIAS = {{ cita_fecha_max_dias|default(30) }};
+    const DIAS_HABILES_JS = {{ dias_habiles_js|tojson }};
+    const HINT_DIAS_HABILES = {{ hint_dias_habiles|tojson }};
 
     function parseLocalIsoDate(iso) {
         if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return null;
@@ -423,8 +425,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!minCitaDate || !maxCitaDate) return false;
         const d = dateOnlyLocal(date);
         if (d.getTime() < minCitaDate.getTime() || d.getTime() > maxCitaDate.getTime()) return false;
-        const dow = d.getDay();
-        return dow === 2 || dow === 4;
+        const enabled = Array.isArray(DIAS_HABILES_JS) ? DIAS_HABILES_JS : [];
+        if (!enabled.length) return false;
+        return enabled.indexOf(d.getDay()) !== -1;
     }
 
     function validarFechaCitaSeleccionada(iso) {
@@ -450,7 +453,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const firstNameHidden = document.getElementById('first_name');
     const lastNameHidden = document.getElementById('last_name');
     
-    // Inicializar Flatpickr: martes/jueves, hoy .. hoy+30 días (zona RD)
+    // Inicializar Flatpickr: días del horario admin, hoy .. hoy+N días (zona RD)
     const datePicker = flatpickr(appointmentDateInput, {
         locale: "es",
         dateFormat: "Y-m-d",
@@ -478,7 +481,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const selectedDate = selectedDates[0];
                 if (!isDateSelectable(selectedDate)) {
                     instance.clear();
-                    alert('La fecha debe ser martes o jueves, entre hoy y ' + (FECHA_MAX_CITA_ES || maxCitaDateIso()) + ' (máximo ' + CITA_FECHA_MAX_DIAS + ' días).');
+                    alert((HINT_DIAS_HABILES || 'Día no disponible.') + ' Elija una fecha entre hoy y ' + (FECHA_MAX_CITA_ES || maxCitaDateIso()) + ' (máximo ' + CITA_FECHA_MAX_DIAS + ' días).');
                     appointmentTime.disabled = true;
                     appointmentTime.innerHTML = '<option value="">Seleccionar hora</option>';
                     scheduleInfo.textContent = '';
@@ -639,26 +642,23 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Cargar horarios disponibles desde el servidor (solo muestra horarios libres)
     function loadAvailableTimeSlots(fecha, dayOfWeek) {
-        let scheduleText;
-        
-        if (dayOfWeek === 2) { // Martes
-            scheduleText = 'Martes: 1:00 PM - 6:00 PM';
-        } else if (dayOfWeek === 4) { // Jueves
-            scheduleText = 'Jueves: 8:00 AM - 1:00 PM';
-        }
-        
-        scheduleInfo.textContent = scheduleText;
+        scheduleInfo.textContent = 'Cargando horario…';
         scheduleInfo.style.color = '';
         
-        // Llamada AJAX para obtener solo horarios disponibles
         fetch(`/api/horarios-disponibles?fecha=${fecha}`)
             .then(response => response.json())
             .then(data => {
                 appointmentTime.innerHTML = '<option value="">Seleccionar hora</option>';
+                if (data.dia && data.rango) {
+                    scheduleInfo.textContent = data.dia + ': ' + data.rango;
+                } else if (data.dia) {
+                    scheduleInfo.textContent = data.dia + ': sin horario configurado';
+                } else {
+                    scheduleInfo.textContent = HINT_DIAS_HABILES || '';
+                }
                 
                 if (data.horarios && data.horarios.length > 0) {
                     data.horarios.forEach(horario => {
-                        // Convertir formato 24h a 12h con AM/PM para mostrar
                         const [hour, min] = horario.split(':');
                         const hourNum = parseInt(hour);
                         const period = hourNum < 12 ? 'AM' : 'PM';
@@ -680,7 +680,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error al cargar horarios:', error);
                 appointmentTime.innerHTML = '<option value="">Error al cargar horarios</option>';
                 appointmentTime.disabled = true;
-                scheduleInfo.textContent = scheduleText;
+                scheduleInfo.textContent = HINT_DIAS_HABILES || '';
             });
     }
 });
@@ -700,7 +700,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (tipo === 'consulta' || tipo === 'estetico') {
                 if (typeof window.validarFechaCitaAppt === 'function' && !window.validarFechaCitaAppt(fechaIso)) {
-                    alert('Seleccione una fecha válida: martes o jueves, entre hoy y ' + (window.fechaMaxCitaEsAppt || '') + ' (máximo ' + (window.citaFechaMaxDiasAppt || 30) + ' días).');
+                    alert('Seleccione una fecha válida según el horario publicado, entre hoy y ' + (window.fechaMaxCitaEsAppt || '') + ' (máximo ' + (window.citaFechaMaxDiasAppt || 30) + ' días).');
                     return;
                 }
             }
