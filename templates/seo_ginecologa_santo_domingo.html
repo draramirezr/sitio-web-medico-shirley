@@ -1,13 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}Médica Ginecóloga en Santo Domingo | Dra. Shirley Ramírez{% endblock %}
+{% block title %}Ginecóloga en Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
 
-{% block description %}Médica ginecóloga y obstetra en Santo Domingo (Zona Oriental / Santo Domingo Este). Consulta ginecológica, control prenatal, planificación familiar y ginecología estética. WhatsApp: 829-740-5073.{% endblock %}
+{% block description %}Ginecóloga y obstetra en Santo Domingo Este. Chequeo ginecológico, control prenatal y atención cercana. Agenda tu cita por WhatsApp 829-740-5073.{% endblock %}
 
-{% block og_title %}Médica Ginecóloga en Santo Domingo | Dra. Shirley Ramírez{% endblock %}
-{% block og_description %}Médico ginecólogo / médica ginecóloga en Santo Domingo Este. Agenda tu cita por WhatsApp: 829-740-5073.{% endblock %}
-{% block schema_page_name %}Médica ginecóloga en Santo Domingo | Dra. Shirley Ramírez{% endblock %}
-{% block schema_page_description %}Médica ginecóloga y obstetra en Santo Domingo Este (Zona Oriental).{% endblock %}
+{% block og_title %}Ginecóloga en Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
+{% block og_description %}Buscas ginecóloga u obstetra en Santo Domingo Este? Dra. Shirley Ramírez. Agenda por WhatsApp: 829-740-5073.{% endblock %}
+{% block twitter_title %}Ginecóloga en Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
+{% block twitter_description %}Ginecóloga y obstetra en Santo Domingo Este. Agenda tu cita por WhatsApp.{% endblock %}
+{% block schema_page_name %}Ginecóloga en Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
+{% block schema_page_description %}Ginecóloga y obstetra en Santo Domingo Este (Zona Oriental). Chequeo ginecológico, control prenatal y consulta de confianza.{% endblock %}
 
 {% block extra_meta %}
 <link rel="alternate" hreflang="es-DO" href="https://www.draramirez.com/ginecologa-santo-domingo">
@@ -22,7 +24,7 @@
       <div class="mb-4 text-center">
         <img
           src="{{ url_for('static', filename='images/dra-shirley-share.jpg') }}?v=10"
-          alt="Dra. Shirley Ramírez, médica ginecóloga y obstetra en Santo Domingo"
+          alt="Dra. Shirley Ramírez, ginecóloga y obstetra en Santo Domingo Este"
           width="1200"
           height="630"
           class="img-fluid rounded"
@@ -38,11 +40,11 @@
         <a href="{{ url_for('seo_jinekolojis_santo_domingo') }}" class="text-decoration-none" style="color: var(--title-color);">Kreyòl</a>
       </p>
 
-      <h1 class="display-5 fw-bold mb-3" style="color: var(--title-color);">Médica ginecóloga en Santo Domingo</h1>
+      <h1 class="display-5 fw-bold mb-3" style="color: var(--title-color);">Ginecóloga en Santo Domingo Este</h1>
       <p class="lead text-muted mb-4">
-        Soy la <strong>Dra. Shirley Ramírez</strong>, <strong>médica ginecóloga y obstetra</strong>. Atiendo pacientes en la
-        <strong>Zona Oriental (Santo Domingo Este)</strong> y recibo consultas de <strong>Santo Domingo</strong> y zonas cercanas.
-        Si buscas un <strong>médico ginecólogo</strong> de confianza, aquí puedes agendar tu evaluación.
+        Soy la <strong>Dra. Shirley Ramírez</strong>, <strong>ginecóloga y obstetra</strong> en
+        <strong>Santo Domingo Este (Zona Oriental)</strong>. Atiendo pacientes de Santo Domingo y zonas cercanas
+        que buscan una consulta clara, cercana y profesional.
       </p>
 
       <div class="row g-3 mb-4">
@@ -78,6 +80,14 @@
         <li><strong>Planificación familiar</strong> y orientación anticonceptiva.</li>
         <li><strong>Ginecología estética</strong> (evaluación y orientación según el caso).</li>
       </ul>
+
+      <h2 class="h4 fw-bold mt-4" style="color: var(--title-color);">Si buscas ginecólogo u obstetra en Santo Domingo</h2>
+      <p class="text-muted" style="line-height: 1.8;">
+        Muchas pacientes buscan los <strong>mejores ginecólogos en Santo Domingo</strong> por recomendaciones,
+        cercanía y confianza. Aquí encuentras atención personalizada, explicación clara de cada paso y facilidad
+        para agendar. Si necesitas una <strong>ginecóloga obstetra</strong> en Santo Domingo Este, puedes escribirme
+        hoy y te oriento según tu motivo de consulta.
+      </p>
 
       <h2 class="h4 fw-bold mt-4" style="color: var(--title-color);">Preguntas frecuentes</h2>
       <div class="accordion" id="faqSeoSd">
@@ -117,6 +127,18 @@
             </div>
           </div>
         </div>
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="q4">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a4" aria-expanded="false" aria-controls="a4">
+              ¿Eres ginecóloga y obstetra?
+            </button>
+          </h3>
+          <div id="a4" class="accordion-collapse collapse" aria-labelledby="q4" data-bs-parent="#faqSeoSd">
+            <div class="accordion-body text-muted">
+              Sí. Atiendo ginecología general y obstetricia (control prenatal y seguimiento de embarazo), según cada caso.
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="text-center mt-5">
@@ -128,4 +150,3 @@
   </div>
 </div>
 {% endblock %}
-
