@@ -37,7 +37,6 @@ requests==2.31.0
 # Excel export
 openpyxl==3.1.2
 # DGII e-CF (certificado + firma XML + pruebas)
+# Firma con cryptography+lxml (sin signxml/pyOpenSSL: conflicto OpenSSL.verify)
 cryptography==42.0.8
-pyOpenSSL==23.3.0
 lxml==5.2.2
-signxml==3.2.2

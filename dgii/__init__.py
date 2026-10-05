@@ -1,6 +1,5 @@
-"""DGII e-CF helpers — Phase A/B."""
+"""DGII e-CF helpers — Phase A/B.
 
-# Keep package import lightweight (avoid pulling signxml on every route).
-from .config import get_ambiente, get_urls
-
-__all__ = ["get_ambiente", "get_urls"]
+Intentionally empty: importing dgii.config / dgii.cert_store must not
+pull signing or HTTP test dependencies.
+"""

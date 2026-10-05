@@ -5274,7 +5274,7 @@ def facturacion_dgii_certificado():
     cfg = _dgii_get_config(conn) or {}
 
     if request.method == 'POST':
-        # Lazy: signing deps (signxml) only needed when running tests
+        # Lazy: signing / HTTP tests only on upload or retest
         from dgii.tests_runner import run_dgii_pruebas
         accion = (request.form.get('accion') or 'upload').strip()
         rnc_emisor = sanitize_input(request.form.get('rnc_emisor') or '', 20)
