@@ -48,6 +48,10 @@ def cert_dir() -> str:
     path = (os.getenv("DGII_CERT_DIR") or "").strip()
     if path:
         return path
+    # Railway volume: reuse mount (e.g. rifa-volume) under /dgii_certs
+    volume = (os.getenv("RAILWAY_VOLUME_MOUNT_PATH") or "").strip()
+    if volume:
+        return os.path.join(volume, "dgii_certs")
     # Default: private folder next to app (never commit contents)
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     return os.path.join(root, "private", "dgii_certs")
