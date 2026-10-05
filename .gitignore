@@ -144,3 +144,9 @@ email_templates.py
 security_middleware.py
 deploy_final.sh
 env_config.txt
+
+# DGII certificates (never commit real certs)
+private/dgii_certs/*
+!private/dgii_certs/.gitignore
+*.p12
+*.pfx

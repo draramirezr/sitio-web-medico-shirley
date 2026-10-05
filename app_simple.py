@@ -1321,6 +1321,28 @@ def _ensure_facturacion_schema() -> None:
             except Exception:
                 pass
             print("✅ Migración aplicada: ars.ncf_id_default")
+
+        try:
+            conn.execute('''
+                CREATE TABLE IF NOT EXISTS dgii_config (
+                    id INT PRIMARY KEY,
+                    ambiente VARCHAR(20) NOT NULL DEFAULT 'PRUEBAS',
+                    rnc_emisor VARCHAR(20) NULL,
+                    cert_path TEXT NULL,
+                    cert_fingerprint VARCHAR(128) NULL,
+                    cert_not_after VARCHAR(40) NULL,
+                    passphrase_encrypted TEXT NULL,
+                    last_test_at TIMESTAMP NULL,
+                    last_test_json LONGTEXT NULL,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                )
+            ''')
+            try:
+                conn.commit()
+            except Exception:
+                pass
+        except Exception as e:
+            print(f"⚠️ No se pudo preparar dgii_config: {e}")
         finally:
             conn.close()
     except Exception as e:
@@ -5165,6 +5187,169 @@ def reply_to_message(message_id):
 def facturacion_menu():
     """Menú principal de facturación"""
     return render_template('facturacion/menu.html')
+
+
+def _dgii_get_config(conn):
+    row = conn.execute('SELECT * FROM dgii_config WHERE id = 1').fetchone()
+    return dict(row) if row else None
+
+
+def _dgii_save_config(conn, fields: dict):
+    existing = conn.execute('SELECT id FROM dgii_config WHERE id = 1').fetchone()
+    cols = [
+        'ambiente', 'rnc_emisor', 'cert_path', 'cert_fingerprint', 'cert_not_after',
+        'passphrase_encrypted', 'last_test_at', 'last_test_json',
+    ]
+    values = [fields.get(c) for c in cols]
+    if existing:
+        sets = ', '.join(f'{c} = %s' for c in cols)
+        conn.execute(f'UPDATE dgii_config SET {sets} WHERE id = 1', values)
+    else:
+        placeholders = ', '.join(['%s'] * (len(cols) + 1))
+        conn.execute(
+            f"INSERT INTO dgii_config (id, {', '.join(cols)}) VALUES ({placeholders})",
+            [1] + values,
+        )
+    try:
+        conn.commit()
+    except Exception:
+        pass
+
+
+@app.route('/facturacion/dgii/certificado', methods=['GET', 'POST'])
+@login_required
+def facturacion_dgii_certificado():
+    """Cargar certificado PKCS#12 y correr batería automática de pruebas DGII (Fase A)."""
+    _ensure_facturacion_schema()
+    from dgii.config import get_ambiente, get_urls
+    from dgii.cert_store import (
+        encrypt_passphrase,
+        decrypt_passphrase,
+        inspect_pkcs12,
+        save_pkcs12_file,
+        format_not_after,
+    )
+    from dgii.tests_runner import run_dgii_pruebas
+
+    if current_user.perfil not in ('Administrador', 'Nivel 2'):
+        flash('No tienes permiso para configurar factura electrónica DGII.', 'warning')
+        return redirect(url_for('facturacion_menu'))
+
+    ambiente = get_ambiente()
+    test_result = None
+    conn = get_db_connection()
+    cfg = _dgii_get_config(conn) or {}
+
+    if request.method == 'POST':
+        accion = (request.form.get('accion') or 'upload').strip()
+        rnc_emisor = sanitize_input(request.form.get('rnc_emisor') or '', 20)
+        ambiente_form = (request.form.get('ambiente') or ambiente).strip().upper()
+        if ambiente_form not in ('PRUEBAS', 'CERTIFICACION', 'PRODUCCION'):
+            ambiente_form = 'PRUEBAS'
+        # Fase A: forzar PRUEBAS salvo que ya exista cert y admin pida re-probar
+        if accion == 'upload':
+            ambiente_form = 'PRUEBAS'
+
+        try:
+            if accion == 'upload':
+                f = request.files.get('cert_file')
+                passphrase = request.form.get('passphrase') or ''
+                if not f or not f.filename:
+                    flash('Selecciona el archivo .p12 o .pfx del certificado DGII.', 'warning')
+                    conn.close()
+                    return redirect(url_for('facturacion_dgii_certificado'))
+                if not passphrase:
+                    flash('Indica la contraseña del certificado.', 'warning')
+                    conn.close()
+                    return redirect(url_for('facturacion_dgii_certificado'))
+
+                p12_bytes = f.read()
+                if not p12_bytes or len(p12_bytes) < 64:
+                    flash('El archivo del certificado parece vacío o inválido.', 'danger')
+                    conn.close()
+                    return redirect(url_for('facturacion_dgii_certificado'))
+
+                info = inspect_pkcs12(p12_bytes, passphrase)
+                cert_path = save_pkcs12_file(p12_bytes, f.filename)
+                enc = encrypt_passphrase(passphrase)
+
+                # Run battery immediately
+                test_result = run_dgii_pruebas(
+                    p12_bytes=p12_bytes,
+                    passphrase=passphrase,
+                    ambiente=ambiente_form,
+                )
+                _dgii_save_config(conn, {
+                    'ambiente': ambiente_form,
+                    'rnc_emisor': rnc_emisor or cfg.get('rnc_emisor'),
+                    'cert_path': cert_path,
+                    'cert_fingerprint': info.fingerprint_sha256,
+                    'cert_not_after': format_not_after(info.not_after),
+                    'passphrase_encrypted': enc,
+                    'last_test_at': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
+                    'last_test_json': json.dumps(test_result, ensure_ascii=False),
+                })
+                if test_result.get('ok'):
+                    flash('Certificado cargado. Todas las pruebas DGII pasaron.', 'success')
+                else:
+                    flash('Certificado guardado, pero alguna prueba DGII falló. Revisa el detalle abajo.', 'warning')
+
+            elif accion == 'retest':
+                if not cfg.get('cert_path') or not cfg.get('passphrase_encrypted'):
+                    flash('Primero carga un certificado.', 'warning')
+                    conn.close()
+                    return redirect(url_for('facturacion_dgii_certificado'))
+                passphrase = decrypt_passphrase(cfg['passphrase_encrypted'])
+                test_result = run_dgii_pruebas(
+                    cert_path=cfg['cert_path'],
+                    passphrase=passphrase,
+                    ambiente=cfg.get('ambiente') or ambiente_form,
+                )
+                _dgii_save_config(conn, {
+                    'ambiente': cfg.get('ambiente') or ambiente_form,
+                    'rnc_emisor': rnc_emisor or cfg.get('rnc_emisor'),
+                    'cert_path': cfg.get('cert_path'),
+                    'cert_fingerprint': cfg.get('cert_fingerprint'),
+                    'cert_not_after': cfg.get('cert_not_after'),
+                    'passphrase_encrypted': cfg.get('passphrase_encrypted'),
+                    'last_test_at': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
+                    'last_test_json': json.dumps(test_result, ensure_ascii=False),
+                })
+                if test_result.get('ok'):
+                    flash('Pruebas DGII ejecutadas: OK.', 'success')
+                else:
+                    flash('Pruebas DGII con errores. Revisa el detalle.', 'warning')
+            else:
+                flash('Acción no reconocida.', 'warning')
+        except Exception as e:
+            print(f"❌ DGII certificado: {e}")
+            flash(f'Error al procesar el certificado: {e}', 'danger')
+        finally:
+            try:
+                conn.close()
+            except Exception:
+                pass
+        return redirect(url_for('facturacion_dgii_certificado'))
+
+    # GET
+    if not test_result and cfg.get('last_test_json'):
+        try:
+            test_result = json.loads(cfg['last_test_json'])
+        except Exception:
+            test_result = None
+
+    has_cert = bool(cfg.get('cert_path') and cfg.get('cert_fingerprint'))
+    urls = get_urls(cfg.get('ambiente') or ambiente)
+    conn.close()
+    return render_template(
+        'facturacion/dgii_certificado.html',
+        cfg=cfg,
+        has_cert=has_cert,
+        ambiente=cfg.get('ambiente') or ambiente,
+        urls=urls,
+        test_result=test_result,
+    )
+
 
 # ========== MAESTRA DE ARS ==========
 @app.route('/facturacion/ars')
