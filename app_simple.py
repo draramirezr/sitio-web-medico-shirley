@@ -5263,7 +5263,6 @@ def facturacion_dgii_certificado():
         save_pkcs12_file,
         format_not_after,
     )
-    from dgii.tests_runner import run_dgii_pruebas
 
     if current_user.perfil not in ('Administrador', 'Nivel 2'):
         flash('No tienes permiso para configurar factura electrónica DGII.', 'warning')
@@ -5275,6 +5274,8 @@ def facturacion_dgii_certificado():
     cfg = _dgii_get_config(conn) or {}
 
     if request.method == 'POST':
+        # Lazy: signing deps (signxml) only needed when running tests
+        from dgii.tests_runner import run_dgii_pruebas
         accion = (request.form.get('accion') or 'upload').strip()
         rnc_emisor = sanitize_input(request.form.get('rnc_emisor') or '', 20)
         razon_social = sanitize_input(request.form.get('razon_social_emisor') or '', 200)
