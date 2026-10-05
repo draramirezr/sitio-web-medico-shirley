@@ -1328,6 +1328,9 @@ def _ensure_facturacion_schema() -> None:
                     id INT PRIMARY KEY,
                     ambiente VARCHAR(20) NOT NULL DEFAULT 'PRUEBAS',
                     rnc_emisor VARCHAR(20) NULL,
+                    razon_social_emisor VARCHAR(200) NULL,
+                    direccion_emisor VARCHAR(255) NULL,
+                    fecha_vencimiento_secuencia VARCHAR(20) NULL,
                     cert_path TEXT NULL,
                     cert_fingerprint VARCHAR(128) NULL,
                     cert_not_after VARCHAR(40) NULL,
@@ -1337,12 +1340,41 @@ def _ensure_facturacion_schema() -> None:
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
                 )
             ''')
+            # Columnas nuevas si la tabla ya existía (Fase A)
+            for col_sql in (
+                "ALTER TABLE dgii_config ADD COLUMN razon_social_emisor VARCHAR(200) NULL",
+                "ALTER TABLE dgii_config ADD COLUMN direccion_emisor VARCHAR(255) NULL",
+                "ALTER TABLE dgii_config ADD COLUMN fecha_vencimiento_secuencia VARCHAR(20) NULL",
+            ):
+                try:
+                    conn.execute(col_sql)
+                except Exception:
+                    pass
+            conn.execute('''
+                CREATE TABLE IF NOT EXISTS ecf_envios (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    factura_id INT NULL,
+                    tipoe_cf INT NULL,
+                    encf VARCHAR(20) NULL,
+                    track_id VARCHAR(100) NULL,
+                    codigo_seguridad VARCHAR(20) NULL,
+                    ambiente VARCHAR(20) NULL,
+                    estado VARCHAR(80) NULL,
+                    error_text TEXT NULL,
+                    respuesta_json LONGTEXT NULL,
+                    xml_firmado LONGTEXT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    INDEX idx_ecf_factura (factura_id),
+                    INDEX idx_ecf_track (track_id)
+                )
+            ''')
             try:
                 conn.commit()
             except Exception:
                 pass
         except Exception as e:
-            print(f"⚠️ No se pudo preparar dgii_config: {e}")
+            print(f"⚠️ No se pudo preparar dgii_config/ecf_envios: {e}")
         finally:
             conn.close()
     except Exception as e:
@@ -5197,7 +5229,9 @@ def _dgii_get_config(conn):
 def _dgii_save_config(conn, fields: dict):
     existing = conn.execute('SELECT id FROM dgii_config WHERE id = 1').fetchone()
     cols = [
-        'ambiente', 'rnc_emisor', 'cert_path', 'cert_fingerprint', 'cert_not_after',
+        'ambiente', 'rnc_emisor', 'razon_social_emisor', 'direccion_emisor',
+        'fecha_vencimiento_secuencia',
+        'cert_path', 'cert_fingerprint', 'cert_not_after',
         'passphrase_encrypted', 'last_test_at', 'last_test_json',
     ]
     values = [fields.get(c) for c in cols]
@@ -5243,12 +5277,16 @@ def facturacion_dgii_certificado():
     if request.method == 'POST':
         accion = (request.form.get('accion') or 'upload').strip()
         rnc_emisor = sanitize_input(request.form.get('rnc_emisor') or '', 20)
+        razon_social = sanitize_input(request.form.get('razon_social_emisor') or '', 200)
+        direccion = sanitize_input(request.form.get('direccion_emisor') or '', 255)
         ambiente_form = (request.form.get('ambiente') or ambiente).strip().upper()
         if ambiente_form not in ('PRUEBAS', 'CERTIFICACION', 'PRODUCCION'):
             ambiente_form = 'PRUEBAS'
-        # Fase A: forzar PRUEBAS salvo que ya exista cert y admin pida re-probar
+        # Fase A/B: default PRUEBAS on upload; allow CERTIFICACION/PRODUCCION only on retest if set
         if accion == 'upload':
-            ambiente_form = 'PRUEBAS'
+            ambiente_form = (request.form.get('ambiente') or 'PRUEBAS').strip().upper()
+            if ambiente_form not in ('PRUEBAS', 'CERTIFICACION', 'PRODUCCION'):
+                ambiente_form = 'PRUEBAS'
 
         try:
             if accion == 'upload':
@@ -5282,6 +5320,9 @@ def facturacion_dgii_certificado():
                 _dgii_save_config(conn, {
                     'ambiente': ambiente_form,
                     'rnc_emisor': rnc_emisor or cfg.get('rnc_emisor'),
+                    'razon_social_emisor': razon_social or cfg.get('razon_social_emisor'),
+                    'direccion_emisor': direccion or cfg.get('direccion_emisor'),
+                    'fecha_vencimiento_secuencia': cfg.get('fecha_vencimiento_secuencia') or '31-12-2026',
                     'cert_path': cert_path,
                     'cert_fingerprint': info.fingerprint_sha256,
                     'cert_not_after': format_not_after(info.not_after),
@@ -5308,6 +5349,9 @@ def facturacion_dgii_certificado():
                 _dgii_save_config(conn, {
                     'ambiente': cfg.get('ambiente') or ambiente_form,
                     'rnc_emisor': rnc_emisor or cfg.get('rnc_emisor'),
+                    'razon_social_emisor': razon_social or cfg.get('razon_social_emisor'),
+                    'direccion_emisor': direccion or cfg.get('direccion_emisor'),
+                    'fecha_vencimiento_secuencia': cfg.get('fecha_vencimiento_secuencia') or '31-12-2026',
                     'cert_path': cfg.get('cert_path'),
                     'cert_fingerprint': cfg.get('cert_fingerprint'),
                     'cert_not_after': cfg.get('cert_not_after'),
@@ -5349,6 +5393,50 @@ def facturacion_dgii_certificado():
         urls=urls,
         test_result=test_result,
     )
+
+
+@app.route('/facturacion/dgii/ecf/<int:factura_id>/consultar', methods=['POST'])
+@login_required
+def facturacion_dgii_consultar_ecf(factura_id):
+    """Reconsultar estado DGII por TrackId de una factura."""
+    _ensure_facturacion_schema()
+    from dgii.cert_store import decrypt_passphrase, read_pkcs12_file
+    from dgii.client import autenticar, consultar_estado_trackid
+
+    if current_user.perfil not in ('Administrador', 'Nivel 2', 'Registro de Facturas'):
+        flash('Sin permiso.', 'warning')
+        return redirect(url_for('facturacion_historico'))
+
+    conn = get_db_connection()
+    try:
+        envio = conn.execute(
+            'SELECT * FROM ecf_envios WHERE factura_id = %s ORDER BY id DESC LIMIT 1',
+            (factura_id,),
+        ).fetchone()
+        cfg = _dgii_get_config(conn) or {}
+        if not envio or not envio.get('track_id'):
+            flash('No hay TrackId DGII para esta factura.', 'warning')
+            return redirect(url_for('facturacion_ver_factura', factura_id=factura_id))
+        if not cfg.get('cert_path') or not cfg.get('passphrase_encrypted'):
+            flash('Falta certificado DGII.', 'warning')
+            return redirect(url_for('facturacion_ver_factura', factura_id=factura_id))
+
+        p12 = read_pkcs12_file(cfg['cert_path'])
+        passphrase = decrypt_passphrase(cfg['passphrase_encrypted'])
+        token = autenticar(cfg.get('ambiente'), p12, passphrase)
+        data = consultar_estado_trackid(envio['track_id'], token, cfg.get('ambiente'))
+        estado = data.get('estado') or data.get('Estado') or data.get('status') or 'DESCONOCIDO'
+        conn.execute(
+            'UPDATE ecf_envios SET estado = %s, respuesta_json = %s WHERE id = %s',
+            (estado, json.dumps(data, ensure_ascii=False, default=str), envio['id']),
+        )
+        conn.commit()
+        flash(f'Estado DGII actualizado: {estado}', 'success')
+    except Exception as e:
+        flash(f'No se pudo consultar DGII: {e}', 'danger')
+    finally:
+        conn.close()
+    return redirect(url_for('facturacion_ver_factura', factura_id=factura_id))
 
 
 # ========== MAESTRA DE ARS ==========
@@ -8341,6 +8429,65 @@ def facturacion_generar_final():
         ''', [factura_id, medico_id] + ids_list)
         
         conn.commit()
+
+        # ===== DGII e-CF (Fase B): emitir si hay certificado =====
+        try:
+            from dgii.emitter import dgii_emitir_habilitado, emitir_ecf_para_factura
+            if dgii_emitir_habilitado():
+                _ensure_facturacion_schema()
+                dgii_cfg = _dgii_get_config(conn) or {}
+                if dgii_cfg.get('cert_path') and dgii_cfg.get('passphrase_encrypted'):
+                    ars_row = conn.execute('SELECT * FROM ars WHERE id = %s', (ars_id,)).fetchone()
+                    ncf_row = dict(ncf) if not isinstance(ncf, dict) else ncf
+                    items_ecf = []
+                    for p in pacientes:
+                        pd = dict(p) if not isinstance(p, dict) else p
+                        items_ecf.append({
+                            'nombre': pd.get('nombre_paciente') or pd.get('servicio') or 'Servicio medico',
+                            'monto': pd.get('monto') or 0,
+                        })
+                    ecf_result = emitir_ecf_para_factura(
+                        cfg=dgii_cfg,
+                        factura_id=factura_id,
+                        ncf_row=ncf_row,
+                        ncf_completo=ncf_completo,
+                        fecha_factura=fecha_factura,
+                        ars_row=dict(ars_row) if ars_row else {},
+                        items=items_ecf,
+                        monto_total=total,
+                    )
+                    try:
+                        conn.execute('''
+                            INSERT INTO ecf_envios
+                                (factura_id, tipoe_cf, encf, track_id, codigo_seguridad, ambiente,
+                                 estado, error_text, respuesta_json, xml_firmado)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        ''', (
+                            factura_id,
+                            ecf_result.get('tipoe_cf'),
+                            ecf_result.get('encf'),
+                            ecf_result.get('track_id'),
+                            ecf_result.get('codigo_seguridad'),
+                            ecf_result.get('ambiente'),
+                            ecf_result.get('estado') or ('ERROR' if not ecf_result.get('ok') else 'ENVIADO'),
+                            ecf_result.get('error'),
+                            json.dumps(ecf_result.get('respuesta') or {}, ensure_ascii=False, default=str),
+                            ecf_result.get('xml_signed'),
+                        ))
+                        conn.commit()
+                    except Exception as e_save:
+                        print(f"⚠️ No se pudo guardar ecf_envios: {e_save}")
+                    if ecf_result.get('ok'):
+                        flash(
+                            f"e-CF enviado a DGII · eNCF {ecf_result.get('encf')} · "
+                            f"TrackId {ecf_result.get('track_id')} · Estado: {ecf_result.get('estado')}",
+                            'success',
+                        )
+                    elif not ecf_result.get('skipped'):
+                        flash(f"Factura guardada, pero e-CF DGII falló: {ecf_result.get('error')}", 'warning')
+        except Exception as e_dgii:
+            print(f"⚠️ Emisión e-CF DGII: {e_dgii}")
+            flash(f'Factura guardada. e-CF no enviado: {e_dgii}', 'warning')
         
         # Generar PDF si ReportLab está disponible
         if REPORTLAB_AVAILABLE:
@@ -9993,6 +10140,16 @@ def facturacion_ver_factura(factura_id):
             'nombre': 'Centro Oriental de Ginecología y Obstetricia',
             'direccion': 'Zona Oriental, República Dominicana'
         }
+
+    ecf_envio = None
+    try:
+        _ensure_facturacion_schema()
+        ecf_envio = conn.execute(
+            'SELECT * FROM ecf_envios WHERE factura_id = %s ORDER BY id DESC LIMIT 1',
+            (factura_id,),
+        ).fetchone()
+    except Exception:
+        ecf_envio = None
     
     conn.close()
     
@@ -10007,7 +10164,8 @@ def facturacion_ver_factura(factura_id):
                          subtotal=subtotal,
                          itbis=itbis,
                          total=total_final,
-                         centro_medico=centro_medico)
+                         centro_medico=centro_medico,
+                         ecf_envio=ecf_envio)
 
 @app.route('/facturacion/enviar-email/<int:factura_id>', methods=['POST'])
 @login_required

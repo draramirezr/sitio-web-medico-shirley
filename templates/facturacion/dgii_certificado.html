@@ -150,10 +150,31 @@
             <input type="hidden" name="accion" value="upload">
             <input type="hidden" name="ambiente" value="PRUEBAS">
             <div class="mb-3">
-                <label class="form-label fw-semibold">RNC emisor (opcional por ahora)</label>
+                <label class="form-label fw-semibold">RNC emisor</label>
                 <input type="text" class="form-control" name="rnc_emisor"
                        value="{{ cfg.rnc_emisor or '' }}" maxlength="20"
-                       placeholder="Ej. 1XXXXXXXX">
+                       placeholder="Ej. 1XXXXXXXX" {% if not has_cert %}required{% endif %}>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Razón social emisor</label>
+                <input type="text" class="form-control" name="razon_social_emisor"
+                       value="{{ cfg.razon_social_emisor or '' }}" maxlength="200"
+                       placeholder="Nombre / razón social como en DGII">
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Dirección emisor</label>
+                <input type="text" class="form-control" name="direccion_emisor"
+                       value="{{ cfg.direccion_emisor or '' }}" maxlength="255"
+                       placeholder="Dirección fiscal">
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Ambiente</label>
+                <select class="form-select" name="ambiente">
+                    <option value="PRUEBAS" {% if ambiente == 'PRUEBAS' %}selected{% endif %}>PRUEBAS (TesteCF)</option>
+                    <option value="CERTIFICACION" {% if ambiente == 'CERTIFICACION' %}selected{% endif %}>CERTIFICACION</option>
+                    <option value="PRODUCCION" {% if ambiente == 'PRODUCCION' %}selected{% endif %}>PRODUCCION</option>
+                </select>
+                <div class="form-text">Usa PRODUCCION solo cuando DGII te autorice.</div>
             </div>
             <div class="mb-3">
                 <label class="form-label fw-semibold">Archivo del certificado</label>
@@ -171,6 +192,9 @@
         <form method="POST" class="mt-3">
             <input type="hidden" name="accion" value="retest">
             <input type="hidden" name="rnc_emisor" value="{{ cfg.rnc_emisor or '' }}">
+            <input type="hidden" name="razon_social_emisor" value="{{ cfg.razon_social_emisor or '' }}">
+            <input type="hidden" name="direccion_emisor" value="{{ cfg.direccion_emisor or '' }}">
+            <input type="hidden" name="ambiente" value="{{ ambiente }}">
             <button type="submit" class="btn btn-outline-secondary btn-sm">
                 <i class="fas fa-vial me-1"></i> Volver a ejecutar pruebas
             </button>

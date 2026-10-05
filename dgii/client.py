@@ -98,7 +98,6 @@ def ping_recepcion(token: Optional[str] = None, ambiente: Optional[str] = None) 
     for url in (urls["recepcion_help"], urls["recepcion"]):
         try:
             resp = requests.get(url, headers=headers, timeout=DEFAULT_TIMEOUT, allow_redirects=True)
-            # 200/401/403/404 con TLS OK = canal vivo (401/403 implica auth, no caída de red)
             if resp.status_code < 500:
                 return True, f"Recepción alcanzable ({url}) HTTP {resp.status_code}"
             last_err = f"HTTP {resp.status_code} en {url}"
@@ -106,3 +105,94 @@ def ping_recepcion(token: Optional[str] = None, ambiente: Optional[str] = None) 
             last_err = str(e)
             continue
     return False, f"No se pudo alcanzar el servicio de recepción DGII: {last_err}"
+
+
+def autenticar(ambiente: Optional[str], p12_bytes: bytes, passphrase: str) -> str:
+    """Obtiene token JWT: semilla → firma → validarSemilla."""
+    from .xml_sign import sign_semilla_xml
+
+    semilla = obtener_semilla(ambiente)
+    firmada = sign_semilla_xml(semilla, p12_bytes, passphrase)
+    data = validar_semilla(firmada, ambiente)
+    token = data.get("token")
+    if not token:
+        raise DgiiClientError("Autenticación DGII sin token")
+    return token
+
+
+def enviar_ecf(
+    signed_xml: bytes,
+    filename: str,
+    token: str,
+    ambiente: Optional[str] = None,
+) -> Dict[str, Any]:
+    """POST recepción e-CF. Retorna dict con trackId."""
+    urls = get_urls(ambiente)
+    files = {"xml": (filename, signed_xml, "application/xml")}
+    headers = {
+        "Accept": "application/json, text/plain, */*",
+        "Authorization": f"Bearer {token}",
+    }
+    try:
+        resp = requests.post(
+            urls["recepcion_api"],
+            files=files,
+            headers=headers,
+            timeout=DEFAULT_TIMEOUT,
+        )
+    except requests.RequestException as e:
+        raise DgiiClientError(f"No se pudo enviar e-CF a DGII: {e}") from e
+
+    if resp.status_code not in (200, 201, 202):
+        raise DgiiClientError(
+            f"Recepción e-CF HTTP {resp.status_code}",
+            status_code=resp.status_code,
+            body=(resp.text or "")[:1000],
+        )
+
+    data: Dict[str, Any] = {}
+    try:
+        data = resp.json() if resp.content else {}
+    except ValueError:
+        text = (resp.text or "").strip()
+        data = {"trackId": text, "raw": True}
+
+    track = None
+    if isinstance(data, dict):
+        track = data.get("trackId") or data.get("TrackId") or data.get("trackid")
+    if not track:
+        raise DgiiClientError(
+            "DGII no devolvió TrackId",
+            status_code=resp.status_code,
+            body=(resp.text or "")[:1000],
+        )
+    data["trackId"] = track
+    return data
+
+
+def consultar_estado_trackid(track_id: str, token: str, ambiente: Optional[str] = None) -> Dict[str, Any]:
+    urls = get_urls(ambiente)
+    headers = {
+        "Accept": "application/json",
+        "Authorization": f"Bearer {token}",
+    }
+    try:
+        resp = requests.get(
+            urls["consulta_trackid"],
+            params={"trackid": track_id},
+            headers=headers,
+            timeout=DEFAULT_TIMEOUT,
+        )
+    except requests.RequestException as e:
+        raise DgiiClientError(f"No se pudo consultar estado e-CF: {e}") from e
+
+    if resp.status_code != 200:
+        raise DgiiClientError(
+            f"Consulta estado HTTP {resp.status_code}",
+            status_code=resp.status_code,
+            body=(resp.text or "")[:800],
+        )
+    try:
+        return resp.json() if resp.content else {}
+    except ValueError:
+        return {"estado": (resp.text or "").strip(), "raw": True}

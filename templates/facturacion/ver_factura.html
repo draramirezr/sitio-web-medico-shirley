@@ -562,6 +562,30 @@
         </button>
     </div>
 
+    {% if ecf_envio %}
+    <div class="no-print alert alert-light border mb-3" style="max-width: 920px; margin: 0 auto 1rem;">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+            <div>
+                <strong style="color:#6B5C62;"><i class="fas fa-certificate me-1"></i> e-CF DGII</strong>
+                <div class="small text-muted mt-1">
+                    eNCF: {{ ecf_envio.encf or '—' }} ·
+                    TrackId: {{ ecf_envio.track_id or '—' }} ·
+                    Estado: <strong>{{ ecf_envio.estado or '—' }}</strong>
+                    {% if ecf_envio.ambiente %} · {{ ecf_envio.ambiente }}{% endif %}
+                </div>
+                {% if ecf_envio.error_text %}
+                <div class="small text-danger mt-1">{{ ecf_envio.error_text }}</div>
+                {% endif %}
+            </div>
+            {% if ecf_envio.track_id %}
+            <form method="POST" action="{{ url_for('facturacion_dgii_consultar_ecf', factura_id=factura['id']) }}">
+                <button type="submit" class="btn btn-sm btn-outline-secondary">Actualizar estado DGII</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Contenedor de la Factura -->
     <div class="factura-container">
         <!-- Header Compacto -->

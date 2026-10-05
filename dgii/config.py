@@ -40,6 +40,7 @@ def get_urls(ambiente: str | None = None) -> Dict[str, str]:
         "recepcion_api": f"{base}/recepcion/api/facturaselectronicas",
         "recepcion_help": f"{base}/recepcion/help/index.html",
         "consulta_trackid": f"{base}/consultaresultado/api/consultas/estado",
+        "consultaresultado": f"{base}/consultaresultado",
     }
 
 
