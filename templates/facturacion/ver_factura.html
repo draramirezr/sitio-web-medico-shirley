@@ -562,6 +562,13 @@
         </button>
     </div>
 
+    {% if not factura['activo'] %}
+    <div class="no-print alert alert-warning border mb-3" style="max-width: 920px; margin: 0 auto 1rem;">
+        <strong>Factura anulada / cancelada.</strong>
+        Este registro se conserva en el histórico; no es una factura vigente.
+    </div>
+    {% endif %}
+
     {% if ecf_envio %}
     <div class="no-print alert alert-light border mb-3" style="max-width: 920px; margin: 0 auto 1rem;">
         <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">

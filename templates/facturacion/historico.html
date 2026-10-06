@@ -165,6 +165,24 @@
         opacity: 0.6;
         pointer-events: none;
     }
+
+    .badge-anulada {
+        display: inline-block;
+        background: #fdecea;
+        color: #c0392b;
+        border: 1px solid #f5c6cb;
+        padding: 0.2rem 0.55rem;
+        border-radius: 8px;
+        font-size: 0.72rem;
+        font-weight: 800;
+        margin-left: 0.35rem;
+        vertical-align: middle;
+    }
+
+    tr.factura-anulada {
+        opacity: 0.72;
+        background: #fafafa;
+    }
     
     .badge-ncf {
         background: linear-gradient(135deg, rgba(206, 176, 183, 0.2) 0%, rgba(242, 226, 230, 0.3) 100%);
@@ -325,8 +343,12 @@
                 </thead>
                 <tbody>
                 {% for factura in facturas %}
-                <tr>
-                    <td><strong>{{ factura['id'] }}</strong></td>
+                {% set es_anulada = not factura['activo'] %}
+                <tr class="{% if es_anulada %}factura-anulada{% endif %}">
+                    <td>
+                        <strong>{{ factura['id'] }}</strong>
+                        {% if es_anulada %}<span class="badge-anulada">ANULADA</span>{% endif %}
+                    </td>
                     <td>{{ factura['fecha_factura']|fecha_es }}</td>
                     <td>
                         <span class="badge-ncf">
@@ -342,15 +364,12 @@
                     <td><small>{{ factura['medico_nombre'] }}</small></td>
                     <td class="text-center"><strong style="color: #B89BA3;"> {{ factura['total']|formato_moneda }}</strong></td>
                     <td class="text-center">
-                        <!-- Botón Ver Factura -->
                         <a href="{{ url_for('facturacion_ver_factura', factura_id=factura['id']) }}" 
                            class="btn-ver-factura"
                            title="Ver factura">
                             <i class="fas fa-eye"></i>
                         </a>
-                        
-                        <!-- Botón Editar (solo si tiene menos de 30 días) -->
-                        <!-- La validación de fecha se hace en JavaScript al final del archivo -->
+                        {% if not es_anulada %}
                         <a href="{{ url_for('facturacion_editar_factura', factura_id=factura['id']) }}" 
                            class="btn-editar-factura"
                            id="btnEditar{{ factura['id'] }}"
@@ -359,18 +378,19 @@
                             <i class="fas fa-edit"></i>
                         </a>
                         <form method="POST"
-                              action="{{ url_for('facturacion_eliminar_factura', factura_id=factura['id']) }}"
-                              class="d-inline form-eliminar-factura"
+                              action="{{ url_for('facturacion_anular_factura', factura_id=factura['id']) }}"
+                              class="d-inline form-anular-factura"
                               data-fecha="{{ factura['fecha_factura'] }}"
                               data-id="{{ factura['id'] }}"
                               data-ncf="{{ factura['ncf_numero'] if factura['ncf_numero'] else factura['ncf'] }}">
                             <button type="submit"
                                     class="btn-eliminar-factura"
-                                    id="btnEliminar{{ factura['id'] }}"
-                                    title="Eliminar factura (máx. 30 días)">
-                                <i class="fas fa-trash"></i>
+                                    id="btnAnular{{ factura['id'] }}"
+                                    title="Anular / cancelar factura (máx. 30 días)">
+                                <i class="fas fa-ban"></i>
                             </button>
                         </form>
+                        {% endif %}
                     </td>
                 </tr>
                 {% else %}
@@ -389,16 +409,21 @@
 
     <!-- Resumen -->
     {% if facturas %}
+    {% set facturas_activas = facturas | selectattr('activo') | list %}
     <div class="filtros-card mt-4">
         <div class="row">
-            <div class="col-md-6 text-center">
-                <h6 style="color: #999; margin-bottom: 0.5rem;">Total de Facturas</h6>
-                <h3 style="color: #ACACAD; font-weight: 800;">{{ facturas|length }}</h3>
+            <div class="col-md-4 text-center">
+                <h6 style="color: #999; margin-bottom: 0.5rem;">Facturas vigentes</h6>
+                <h3 style="color: #ACACAD; font-weight: 800;">{{ facturas_activas|length }}</h3>
             </div>
-            <div class="col-md-6 text-center">
-                <h6 style="color: #999; margin-bottom: 0.5rem;">Monto Total</h6>
+            <div class="col-md-4 text-center">
+                <h6 style="color: #999; margin-bottom: 0.5rem;">Anuladas</h6>
+                <h3 style="color: #c0392b; font-weight: 800;">{{ (facturas|length) - (facturas_activas|length) }}</h3>
+            </div>
+            <div class="col-md-4 text-center">
+                <h6 style="color: #999; margin-bottom: 0.5rem;">Monto vigentes</h6>
                 <h3 style="color: #B89BA3; font-weight: 800;">
- {{ (facturas|sum(attribute='total'))|formato_moneda }}
+ {{ (facturas_activas|sum(attribute='total'))|formato_moneda }}
                 </h3>
             </div>
         </div>
@@ -466,7 +491,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    document.querySelectorAll('.form-eliminar-factura').forEach(form => {
+    document.querySelectorAll('.form-anular-factura').forEach(form => {
         const btn = form.querySelector('.btn-eliminar-factura');
         const diffDays = diasDesde(form.getAttribute('data-fecha'));
         const id = form.getAttribute('data-id');
@@ -474,21 +499,21 @@ document.addEventListener('DOMContentLoaded', function() {
         if (diffDays > 30) {
             btn.classList.add('disabled');
             btn.disabled = true;
-            btn.title = `No eliminable (${diffDays} días desde creación)`;
+            btn.title = `No se puede anular (${diffDays} días desde creación)`;
         } else {
             const diasRestantes = 30 - diffDays;
-            btn.title = `Eliminar factura (${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} restante${diasRestantes !== 1 ? 's' : ''})`;
+            btn.title = `Anular factura (${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} restante${diasRestantes !== 1 ? 's' : ''})`;
         }
         form.addEventListener('submit', function(e) {
             if (diffDays > 30) {
                 e.preventDefault();
-                alert(`⚠️ No se puede eliminar: han pasado ${diffDays} días (límite 30).`);
+                alert(`⚠️ No se puede anular: han pasado ${diffDays} días (límite 30).`);
                 return false;
             }
             const ok = confirm(
-                `¿Eliminar la factura #${id}${ncf ? ' (' + ncf + ')' : ''}?\n\n` +
-                `Los pacientes volverán a pendientes.\n` +
-                `Esta acción no se puede deshacer.`
+                `¿Anular / cancelar la factura #${id}${ncf ? ' (' + ncf + ')' : ''}?\n\n` +
+                `La factura quedará marcada como ANULADA (no se borra).\n` +
+                `Los pacientes volverán a pendientes.`
             );
             if (!ok) {
                 e.preventDefault();

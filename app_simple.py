@@ -9267,7 +9267,7 @@ def facturacion_historico():
             FROM facturas f
             JOIN ars a ON f.ars_id = a.id
             JOIN medicos m ON f.medico_id = m.id
-            WHERE f.activo = 1
+            WHERE 1=1
         '''
         
         params = []
@@ -9324,14 +9324,14 @@ def facturacion_historico():
         return redirect(url_for('facturacion_menu'))
 
 
-@app.route('/facturacion/eliminar-factura/<int:factura_id>', methods=['POST'])
+@app.route('/facturacion/anular-factura/<int:factura_id>', methods=['POST'])
 @login_required
-def facturacion_eliminar_factura(factura_id):
-    """Eliminar (anular) factura solo si tiene 30 días o menos desde fecha_factura."""
-    from datetime import datetime, timedelta
+def facturacion_anular_factura(factura_id):
+    """Anular/cancelar factura (no borrar) solo si tiene 30 días o menos."""
+    from datetime import datetime
 
     if current_user.perfil not in ('Administrador', 'Nivel 2', 'Registro de Facturas'):
-        flash('No tienes permiso para eliminar facturas.', 'warning')
+        flash('No tienes permiso para anular facturas.', 'warning')
         return redirect(url_for('facturacion_historico'))
 
     conn = get_db_connection()
@@ -9341,7 +9341,7 @@ def facturacion_eliminar_factura(factura_id):
             (factura_id,),
         ).fetchone()
         if not factura:
-            flash('Factura no encontrada o ya eliminada.', 'error')
+            flash('Factura no encontrada o ya está anulada.', 'error')
             return redirect(url_for('facturacion_historico'))
 
         fecha_raw = factura.get('fecha_factura')
@@ -9357,13 +9357,13 @@ def facturacion_eliminar_factura(factura_id):
         dias = (datetime.now().date() - fecha_factura.date()).days
         if dias > 30:
             flash(
-                f'No se puede eliminar la factura #{factura_id}: han pasado {dias} días. '
+                f'No se puede anular la factura #{factura_id}: han pasado {dias} días. '
                 f'El límite es 30 días.',
                 'error',
             )
             return redirect(url_for('facturacion_historico'))
 
-        # Liberar líneas: vuelven a pendientes para poder facturarlas otra vez
+        # Los servicios vuelven a pendientes para poder facturarlos de nuevo
         conn.execute(
             '''
             UPDATE facturas_detalle
@@ -9373,8 +9373,8 @@ def facturacion_eliminar_factura(factura_id):
             (factura_id,),
         )
         observacion = (
-            f"Factura eliminada/anulada por {getattr(current_user, 'nombre', current_user.id)} "
-            f"(dentro de 30 días; {dias} día(s) desde emisión)."
+            f"Factura ANULADA/CANCELADA por {getattr(current_user, 'nombre', current_user.id)} "
+            f"(dentro de 30 días; {dias} día(s) desde emisión). Registro conservado."
         )
         conn.execute(
             '''
@@ -9387,7 +9387,8 @@ def facturacion_eliminar_factura(factura_id):
         )
         conn.commit()
         flash(
-            f'Factura #{factura_id} eliminada. Los pacientes quedaron pendientes otra vez.',
+            f'Factura #{factura_id} anulada. Queda en el histórico como cancelada; '
+            f'los pacientes volvieron a pendientes.',
             'success',
         )
     except Exception as e:
@@ -9395,11 +9396,18 @@ def facturacion_eliminar_factura(factura_id):
             conn.rollback()
         except Exception:
             pass
-        print(f"❌ Eliminar factura #{factura_id}: {e}")
-        flash(f'Error al eliminar factura: {e}', 'danger')
+        print(f"❌ Anular factura #{factura_id}: {e}")
+        flash(f'Error al anular factura: {e}', 'danger')
     finally:
         conn.close()
     return redirect(url_for('facturacion_historico'))
+
+
+# Compatibilidad: URL antigua de "eliminar" → anular
+@app.route('/facturacion/eliminar-factura/<int:factura_id>', methods=['POST'])
+@login_required
+def facturacion_eliminar_factura(factura_id):
+    return facturacion_anular_factura(factura_id)
 
 
 @app.route('/facturacion/editar-factura/<int:factura_id>', methods=['GET', 'POST'])
@@ -10253,7 +10261,7 @@ def facturacion_dashboard_detalle_mes():
 @app.route('/facturacion/ver-factura/<int:factura_id>')
 @login_required
 def facturacion_ver_factura(factura_id):
-    """Ver factura completa generada"""
+    """Ver factura completa generada (incluye anuladas)."""
     conn = get_db_connection()
     
     # Obtener datos de la factura (incluyendo email del médico)
@@ -10267,7 +10275,7 @@ def facturacion_ver_factura(factura_id):
         JOIN ars a ON f.ars_id = a.id
         JOIN medicos m ON f.medico_id = m.id
         LEFT JOIN ncf n ON f.ncf_id = n.id
-        WHERE f.id = %s AND f.activo = 1
+        WHERE f.id = %s
     ''', (factura_id,)).fetchone()
     
     if not factura:
