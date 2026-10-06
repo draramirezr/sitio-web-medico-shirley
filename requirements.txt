@@ -40,3 +40,6 @@ openpyxl==3.1.2
 # Firma con cryptography+lxml (sin signxml/pyOpenSSL: conflicto OpenSSL.verify)
 cryptography==42.0.8
 lxml==5.2.2
+# PKCS#12 legacy (RC2-40) usado por certificados DGII/Windows
+asn1crypto==1.5.1
+pycryptodome==3.20.0

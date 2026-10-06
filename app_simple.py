@@ -5260,6 +5260,7 @@ def facturacion_dgii_certificado():
         encrypt_passphrase,
         decrypt_passphrase,
         inspect_pkcs12,
+        modernize_pkcs12_bytes,
         save_pkcs12_file,
         format_not_after,
     )
@@ -5309,6 +5310,10 @@ def facturacion_dgii_certificado():
                     return redirect(url_for('facturacion_dgii_certificado'))
 
                 info = inspect_pkcs12(p12_bytes, passphrase)
+                try:
+                    p12_bytes = modernize_pkcs12_bytes(p12_bytes, passphrase)
+                except Exception as e_mod:
+                    print(f"⚠️ DGII: no se pudo modernizar PKCS#12 (se guarda original): {e_mod}")
                 cert_path = save_pkcs12_file(p12_bytes, f.filename)
                 enc = encrypt_passphrase(passphrase)
 
