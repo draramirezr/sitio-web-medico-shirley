@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from typing import Optional, Tuple
 
 from cryptography.fernet import Fernet, InvalidToken
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.serialization import BestAvailableEncryption, pkcs12
 from cryptography.hazmat.primitives.serialization.pkcs12 import serialize_key_and_certificates
 from cryptography import x509
@@ -109,7 +110,7 @@ def modernize_pkcs12_bytes(p12_bytes: bytes, passphrase: str) -> bytes:
 
 def inspect_pkcs12(p12_bytes: bytes, passphrase: str) -> CertInfo:
     _key, cert, _extra = load_pkcs12(p12_bytes, passphrase)
-    fp = cert.fingerprint(hashlib.sha256()).hex().upper()
+    fp = cert.fingerprint(hashes.SHA256()).hex().upper()
     fingerprint = ":".join(fp[i : i + 2] for i in range(0, len(fp), 2))
     not_after = cert.not_valid_after_utc if hasattr(cert, "not_valid_after_utc") else cert.not_valid_after.replace(tzinfo=timezone.utc)
     subject = cert.subject.rfc4514_string()
