@@ -10,9 +10,7 @@ from datetime import datetime, timezone
 from typing import Optional, Tuple
 
 from cryptography.fernet import Fernet, InvalidToken
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.serialization import BestAvailableEncryption, pkcs12
-from cryptography.hazmat.primitives.serialization.pkcs12 import serialize_key_and_certificates
+from cryptography.hazmat.primitives.serialization import Encoding, pkcs12
 from cryptography import x509
 
 from .config import cert_dir
@@ -50,13 +48,19 @@ def ensure_cert_dir() -> str:
     return path
 
 
+def _cert_fingerprint_sha256(cert: x509.Certificate) -> str:
+    """SHA-256 fingerprint without cryptography HashAlgorithm API differences."""
+    der = cert.public_bytes(Encoding.DER)
+    fp = hashlib.sha256(der).hexdigest().upper()
+    return ":".join(fp[i : i + 2] for i in range(0, len(fp), 2))
+
+
 def load_pkcs12(p12_bytes: bytes, passphrase: str) -> Tuple[object, x509.Certificate, list]:
     """
     Load PKCS#12. Tries cryptography first; falls back to legacy RC2-40/3DES
     (common in DGII certs) which OpenSSL 3 often rejects as 'invalid password'.
     """
     raw = passphrase if passphrase is not None else ""
-    # Keep exact password first; also try strip (copy/paste spaces)
     candidates = [raw]
     stripped = raw.strip()
     if stripped != raw:
@@ -65,7 +69,8 @@ def load_pkcs12(p12_bytes: bytes, passphrase: str) -> Tuple[object, x509.Certifi
     last_err: Optional[Exception] = None
     for pwd_str in candidates:
         password = pwd_str.encode("utf-8") if pwd_str else None
-        for pwd in ((password, b"") if password is None else (password,)):
+        try_passwords = [password] if password is not None else [None, b""]
+        for pwd in try_passwords:
             try:
                 key, cert, additional = pkcs12.load_key_and_certificates(p12_bytes, pwd)
                 if key is not None and cert is not None:
@@ -73,7 +78,6 @@ def load_pkcs12(p12_bytes: bytes, passphrase: str) -> Tuple[object, x509.Certifi
             except Exception as e:
                 last_err = e
 
-        # Legacy RC2-40 / 3DES path (DGII / Windows export)
         try:
             from .pkcs12_legacy import load_pkcs12_legacy
 
@@ -90,15 +94,13 @@ def load_pkcs12(p12_bytes: bytes, passphrase: str) -> Tuple[object, x509.Certifi
 
 
 def modernize_pkcs12_bytes(p12_bytes: bytes, passphrase: str) -> bytes:
-    """Re-save as modern AES PKCS#12 after a successful load."""
+    """Re-save as modern AES PKCS#12 after a successful load (optional)."""
+    from cryptography.hazmat.primitives.serialization import BestAvailableEncryption, NoEncryption
+    from cryptography.hazmat.primitives.serialization.pkcs12 import serialize_key_and_certificates
+
     key, cert, additional = load_pkcs12(p12_bytes, passphrase)
     pwd = (passphrase or "").encode("utf-8")
-    if pwd:
-        enc = BestAvailableEncryption(pwd)
-    else:
-        from cryptography.hazmat.primitives.serialization import NoEncryption
-
-        enc = NoEncryption()
+    enc = BestAvailableEncryption(pwd) if pwd else NoEncryption()
     return serialize_key_and_certificates(
         name=b"emisor",
         key=key,
@@ -110,16 +112,16 @@ def modernize_pkcs12_bytes(p12_bytes: bytes, passphrase: str) -> bytes:
 
 def inspect_pkcs12(p12_bytes: bytes, passphrase: str) -> CertInfo:
     _key, cert, _extra = load_pkcs12(p12_bytes, passphrase)
-    fp = cert.fingerprint(hashes.SHA256()).hex().upper()
-    fingerprint = ":".join(fp[i : i + 2] for i in range(0, len(fp), 2))
-    not_after = cert.not_valid_after_utc if hasattr(cert, "not_valid_after_utc") else cert.not_valid_after.replace(tzinfo=timezone.utc)
-    subject = cert.subject.rfc4514_string()
-    issuer = cert.issuer.rfc4514_string()
+    not_after = (
+        cert.not_valid_after_utc
+        if hasattr(cert, "not_valid_after_utc")
+        else cert.not_valid_after.replace(tzinfo=timezone.utc)
+    )
     return CertInfo(
-        fingerprint_sha256=fingerprint,
+        fingerprint_sha256=_cert_fingerprint_sha256(cert),
         not_after=not_after,
-        subject=subject,
-        issuer=issuer,
+        subject=cert.subject.rfc4514_string(),
+        issuer=cert.issuer.rfc4514_string(),
     )
 
 

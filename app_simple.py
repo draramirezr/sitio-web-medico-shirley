@@ -5309,20 +5309,45 @@ def facturacion_dgii_certificado():
                     conn.close()
                     return redirect(url_for('facturacion_dgii_certificado'))
 
-                info = inspect_pkcs12(p12_bytes, passphrase)
+                # Step-by-step so failures show which stage broke
                 try:
-                    p12_bytes = modernize_pkcs12_bytes(p12_bytes, passphrase)
-                except Exception as e_mod:
-                    print(f"⚠️ DGII: no se pudo modernizar PKCS#12 (se guarda original): {e_mod}")
-                cert_path = save_pkcs12_file(p12_bytes, f.filename)
-                enc = encrypt_passphrase(passphrase)
+                    info = inspect_pkcs12(p12_bytes, passphrase)
+                except Exception as e_insp:
+                    raise ValueError(f"Al leer el certificado: {e_insp}") from e_insp
 
-                # Run battery immediately
-                test_result = run_dgii_pruebas(
-                    p12_bytes=p12_bytes,
-                    passphrase=passphrase,
-                    ambiente=ambiente_form,
-                )
+                # Keep original .p12 (legacy RC2). Modernize is optional / best-effort.
+                try:
+                    modern = modernize_pkcs12_bytes(p12_bytes, passphrase)
+                    # Verify modernized file still loads before replacing
+                    inspect_pkcs12(modern, passphrase)
+                    p12_bytes = modern
+                except Exception as e_mod:
+                    print(f"⚠️ DGII: se guarda PKCS#12 original (modernizar omitido): {e_mod}")
+
+                try:
+                    cert_path = save_pkcs12_file(p12_bytes, f.filename)
+                except Exception as e_save:
+                    raise ValueError(f"Al guardar el certificado en disco: {e_save}") from e_save
+
+                try:
+                    enc = encrypt_passphrase(passphrase)
+                except Exception as e_enc:
+                    raise ValueError(f"Al cifrar la contraseña: {e_enc}") from e_enc
+
+                try:
+                    test_result = run_dgii_pruebas(
+                        p12_bytes=p12_bytes,
+                        passphrase=passphrase,
+                        ambiente=ambiente_form,
+                    )
+                except Exception as e_test:
+                    # Cert already saved; surface test crash without losing config
+                    test_result = {
+                        "ok": False,
+                        "ambiente": ambiente_form,
+                        "steps": [{"name": "Batería de pruebas", "ok": False, "detail": str(e_test)}],
+                    }
+                    print(f"⚠️ DGII pruebas: {e_test}")
                 _dgii_save_config(conn, {
                     'ambiente': ambiente_form,
                     'rnc_emisor': rnc_emisor or cfg.get('rnc_emisor'),
