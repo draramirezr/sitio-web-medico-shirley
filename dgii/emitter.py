@@ -14,6 +14,7 @@ from .ecf_builder import (
     extract_codigo_seguridad,
     extract_motivos_respuesta,
     map_tipoe_cf,
+    resolve_fecha_vencimiento_secuencia,
     secuencia_from_ncf_completo,
 )
 from .ecf_sign import sign_ecf_xml
@@ -80,7 +81,14 @@ def emitir_ecf_para_factura(
     else:
         line_items = [{"nombre": "Servicios medicos", "cantidad": 1, "precio": monto_total, "monto": monto_total}]
 
-    venc = (cfg.get("fecha_vencimiento_secuencia") or os.getenv("DGII_FECHA_VENCIMIENTO_SEC") or "31-12-2026").strip()
+    try:
+        venc = resolve_fecha_vencimiento_secuencia(
+            cfg_value=cfg.get("fecha_vencimiento_secuencia"),
+            ncf_fecha_fin=ncf_row.get("fecha_fin"),
+            env_value=os.getenv("DGII_FECHA_VENCIMIENTO_SEC"),
+        )
+    except ValueError as e:
+        return {"ok": False, "error": str(e), "tipoe_cf": tipoe, "encf": encf, "ambiente": ambiente}
 
     try:
         p12 = read_pkcs12_file(cfg["cert_path"])

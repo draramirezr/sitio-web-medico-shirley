@@ -5274,9 +5274,27 @@ def facturacion_dgii_certificado():
     conn = get_db_connection()
     cfg = _dgii_get_config(conn) or {}
 
+    # Suggest vencimiento from active fiscal NCF if DGII config empty
+    sugerencia_fecha_venc = ''
+    try:
+        from dgii.ecf_builder import normalize_fecha_vencimiento_secuencia
+        ncf_sug = conn.execute(
+            """
+            SELECT fecha_fin FROM ncf
+            WHERE activo = 1 AND fecha_fin IS NOT NULL
+              AND (prefijo LIKE 'B01%%' OR prefijo LIKE 'E31%%' OR UPPER(tipo) LIKE '%%FISCAL%%')
+            ORDER BY id DESC LIMIT 1
+            """
+        ).fetchone()
+        if ncf_sug and ncf_sug.get('fecha_fin'):
+            sugerencia_fecha_venc = normalize_fecha_vencimiento_secuencia(ncf_sug['fecha_fin']) or ''
+    except Exception:
+        sugerencia_fecha_venc = ''
+
     if request.method == 'POST':
         # Lazy: signing / HTTP tests only on upload or retest
         from dgii.tests_runner import run_dgii_pruebas
+        from dgii.ecf_builder import normalize_fecha_vencimiento_secuencia
         accion = (request.form.get('accion') or 'upload').strip()
         rnc_emisor = sanitize_input(request.form.get('rnc_emisor') or '', 20)
         razon_social = sanitize_input(request.form.get('razon_social_emisor') or '', 200)
@@ -5284,7 +5302,19 @@ def facturacion_dgii_certificado():
         ambiente_form = (request.form.get('ambiente') or ambiente).strip().upper()
         if ambiente_form not in ('PRUEBAS', 'CERTIFICACION', 'PRODUCCION'):
             ambiente_form = 'PRUEBAS'
-        # Fase A/B: default PRUEBAS on upload; allow CERTIFICACION/PRODUCCION only on retest if set
+        fecha_venc_raw = (request.form.get('fecha_vencimiento_secuencia') or '').strip()
+        fecha_venc = normalize_fecha_vencimiento_secuencia(fecha_venc_raw) or ''
+        if fecha_venc_raw and not fecha_venc:
+            flash('Fecha de vencimiento inválida. Use dd-mm-yyyy (ej. 31-12-2026).', 'warning')
+            conn.close()
+            return redirect(url_for('facturacion_dgii_certificado'))
+        # Keep previous / suggestion if form omitted it
+        if not fecha_venc:
+            fecha_venc = (
+                normalize_fecha_vencimiento_secuencia(cfg.get('fecha_vencimiento_secuencia'))
+                or sugerencia_fecha_venc
+                or ''
+            )
         if accion == 'upload':
             ambiente_form = (request.form.get('ambiente') or 'PRUEBAS').strip().upper()
             if ambiente_form not in ('PRUEBAS', 'CERTIFICACION', 'PRODUCCION'):
@@ -5353,7 +5383,7 @@ def facturacion_dgii_certificado():
                     'rnc_emisor': rnc_emisor or cfg.get('rnc_emisor'),
                     'razon_social_emisor': razon_social or cfg.get('razon_social_emisor'),
                     'direccion_emisor': direccion or cfg.get('direccion_emisor'),
-                    'fecha_vencimiento_secuencia': cfg.get('fecha_vencimiento_secuencia') or '31-12-2026',
+                    'fecha_vencimiento_secuencia': fecha_venc or None,
                     'cert_path': cert_path,
                     'cert_fingerprint': info.fingerprint_sha256,
                     'cert_not_after': format_not_after(info.not_after),
@@ -5361,10 +5391,32 @@ def facturacion_dgii_certificado():
                     'last_test_at': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
                     'last_test_json': json.dumps(test_result, ensure_ascii=False),
                 })
-                if test_result.get('ok'):
+                if not fecha_venc:
+                    flash('Certificado guardado, pero falta la fecha de vencimiento de secuencia e-CF (evita error 145).', 'warning')
+                elif test_result.get('ok'):
                     flash('Certificado cargado. Todas las pruebas DGII pasaron.', 'success')
                 else:
                     flash('Certificado guardado, pero alguna prueba DGII falló. Revisa el detalle abajo.', 'warning')
+
+            elif accion == 'guardar_datos':
+                if not fecha_venc:
+                    flash('Indica la fecha de vencimiento de secuencia e-CF (dd-mm-yyyy) exactamente como en DGII.', 'warning')
+                    conn.close()
+                    return redirect(url_for('facturacion_dgii_certificado'))
+                _dgii_save_config(conn, {
+                    'ambiente': ambiente_form,
+                    'rnc_emisor': rnc_emisor or cfg.get('rnc_emisor'),
+                    'razon_social_emisor': razon_social or cfg.get('razon_social_emisor'),
+                    'direccion_emisor': direccion or cfg.get('direccion_emisor'),
+                    'fecha_vencimiento_secuencia': fecha_venc,
+                    'cert_path': cfg.get('cert_path'),
+                    'cert_fingerprint': cfg.get('cert_fingerprint'),
+                    'cert_not_after': cfg.get('cert_not_after'),
+                    'passphrase_encrypted': cfg.get('passphrase_encrypted'),
+                    'last_test_at': cfg.get('last_test_at'),
+                    'last_test_json': cfg.get('last_test_json'),
+                })
+                flash(f'Datos e-CF guardados. Vencimiento secuencia: {fecha_venc}', 'success')
 
             elif accion == 'retest':
                 if not cfg.get('cert_path') or not cfg.get('passphrase_encrypted'):
@@ -5382,7 +5434,7 @@ def facturacion_dgii_certificado():
                     'rnc_emisor': rnc_emisor or cfg.get('rnc_emisor'),
                     'razon_social_emisor': razon_social or cfg.get('razon_social_emisor'),
                     'direccion_emisor': direccion or cfg.get('direccion_emisor'),
-                    'fecha_vencimiento_secuencia': cfg.get('fecha_vencimiento_secuencia') or '31-12-2026',
+                    'fecha_vencimiento_secuencia': fecha_venc or cfg.get('fecha_vencimiento_secuencia'),
                     'cert_path': cfg.get('cert_path'),
                     'cert_fingerprint': cfg.get('cert_fingerprint'),
                     'cert_not_after': cfg.get('cert_not_after'),
@@ -5423,6 +5475,7 @@ def facturacion_dgii_certificado():
         ambiente=cfg.get('ambiente') or ambiente,
         urls=urls,
         test_result=test_result,
+        sugerencia_fecha_venc=sugerencia_fecha_venc,
     )
 
 

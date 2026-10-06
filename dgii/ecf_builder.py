@@ -48,6 +48,54 @@ def _fecha_dd_mm_yyyy(value) -> str:
     return d.strftime("%d-%m-%Y")
 
 
+def normalize_fecha_vencimiento_secuencia(value) -> Optional[str]:
+    """
+    Normalize any common date input to DGII FechaVencimientoSecuencia: dd-MM-yyyy.
+    Returns None if empty/invalid (never invents a default).
+    """
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value.date().strftime("%d-%m-%Y")
+    if isinstance(value, date):
+        return value.strftime("%d-%m-%Y")
+    s = str(value).strip()
+    if not s:
+        return None
+    candidates = [s, s[:10]]
+    for cand in candidates:
+        for fmt in ("%d-%m-%Y", "%d/%m/%Y", "%Y-%m-%d", "%Y/%m/%d"):
+            try:
+                return datetime.strptime(cand, fmt).strftime("%d-%m-%Y")
+            except ValueError:
+                continue
+    return None
+
+
+def resolve_fecha_vencimiento_secuencia(
+    *,
+    cfg_value=None,
+    ncf_fecha_fin=None,
+    env_value: Optional[str] = None,
+) -> str:
+    """
+    Source of truth for e-CF FechaVencimientoSecuencia:
+      1) dgii_config (autorización e-CF)
+      2) fecha_fin del NCF usado en la factura
+      3) env DGII_FECHA_VENCIMIENTO_SEC
+    Raises ValueError if none is usable — never silently invents a date (error 145).
+    """
+    for raw in (cfg_value, ncf_fecha_fin, env_value):
+        normalized = normalize_fecha_vencimiento_secuencia(raw)
+        if normalized:
+            return normalized
+    raise ValueError(
+        "Falta Fecha de vencimiento de secuencia e-CF. "
+        "Configúrala en Facturación → Certificado DGII con la fecha EXACTA "
+        "autorizada por DGII (Oficina Virtual), formato dd-mm-yyyy."
+    )
+
+
 def fecha_hora_firma_now() -> str:
     """DGII FechaHoraFirma: dd-MM-yyyy HH:mm:ss (hora local aproximada)."""
     return datetime.now().strftime("%d-%m-%Y %H:%M:%S")
@@ -97,13 +145,16 @@ def build_ecf_xml(
     comprador: Dict[str, str],
     items: List[Dict[str, Any]],
     monto_total,
-    fecha_vencimiento_secuencia: str = "31-12-2026",
+    fecha_vencimiento_secuencia: str,
     fecha_hora_firma: Optional[str] = None,
 ) -> bytes:
     """
     Construye XML ECF para servicios exentos (IndicadorFacturacion=4).
-    Incluye campos que DGII suele exigir en recepción (formas de pago, FechaHoraFirma).
+    fecha_vencimiento_secuencia must already be dd-MM-yyyy from resolve_fecha_vencimiento_secuencia.
     """
+    venc = normalize_fecha_vencimiento_secuencia(fecha_vencimiento_secuencia)
+    if not venc:
+        raise ValueError("FechaVencimientoSecuencia inválida (use dd-mm-yyyy autorizada por DGII).")
     total = _money(monto_total)
     root = Element("ECF")
     encabezado = SubElement(root, "Encabezado")
@@ -113,7 +164,7 @@ def build_ecf_xml(
     SubElement(id_doc, "TipoeCF").text = str(int(tipoe_cf))
     SubElement(id_doc, "eNCF").text = encf
     if tipoe_cf != 32:
-        SubElement(id_doc, "FechaVencimientoSecuencia").text = fecha_vencimiento_secuencia
+        SubElement(id_doc, "FechaVencimientoSecuencia").text = venc
     # 0 = envío normal inmediato (1=diferido/contingencia)
     SubElement(id_doc, "IndicadorEnvioDiferido").text = "0"
     if tipoe_cf == 32:
