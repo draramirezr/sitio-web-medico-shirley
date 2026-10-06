@@ -9323,6 +9323,85 @@ def facturacion_historico():
         flash(f'Error al cargar el histórico de facturas: {str(e)}', 'error')
         return redirect(url_for('facturacion_menu'))
 
+
+@app.route('/facturacion/eliminar-factura/<int:factura_id>', methods=['POST'])
+@login_required
+def facturacion_eliminar_factura(factura_id):
+    """Eliminar (anular) factura solo si tiene 30 días o menos desde fecha_factura."""
+    from datetime import datetime, timedelta
+
+    if current_user.perfil not in ('Administrador', 'Nivel 2', 'Registro de Facturas'):
+        flash('No tienes permiso para eliminar facturas.', 'warning')
+        return redirect(url_for('facturacion_historico'))
+
+    conn = get_db_connection()
+    try:
+        factura = conn.execute(
+            'SELECT * FROM facturas WHERE id = %s AND activo = 1',
+            (factura_id,),
+        ).fetchone()
+        if not factura:
+            flash('Factura no encontrada o ya eliminada.', 'error')
+            return redirect(url_for('facturacion_historico'))
+
+        fecha_raw = factura.get('fecha_factura')
+        try:
+            if hasattr(fecha_raw, 'strftime'):
+                fecha_factura = datetime(fecha_raw.year, fecha_raw.month, fecha_raw.day)
+            else:
+                fecha_factura = datetime.strptime(str(fecha_raw)[:10], '%Y-%m-%d')
+        except Exception:
+            flash('No se pudo validar la fecha de la factura.', 'error')
+            return redirect(url_for('facturacion_historico'))
+
+        dias = (datetime.now().date() - fecha_factura.date()).days
+        if dias > 30:
+            flash(
+                f'No se puede eliminar la factura #{factura_id}: han pasado {dias} días. '
+                f'El límite es 30 días.',
+                'error',
+            )
+            return redirect(url_for('facturacion_historico'))
+
+        # Liberar líneas: vuelven a pendientes para poder facturarlas otra vez
+        conn.execute(
+            '''
+            UPDATE facturas_detalle
+            SET factura_id = NULL, estado = 'pendiente'
+            WHERE factura_id = %s
+            ''',
+            (factura_id,),
+        )
+        observacion = (
+            f"Factura eliminada/anulada por {getattr(current_user, 'nombre', current_user.id)} "
+            f"(dentro de 30 días; {dias} día(s) desde emisión)."
+        )
+        conn.execute(
+            '''
+            UPDATE facturas
+            SET activo = 0,
+                observaciones = CONCAT(COALESCE(observaciones, ''), '\n[', NOW(), '] ', %s)
+            WHERE id = %s
+            ''',
+            (observacion, factura_id),
+        )
+        conn.commit()
+        flash(
+            f'Factura #{factura_id} eliminada. Los pacientes quedaron pendientes otra vez.',
+            'success',
+        )
+    except Exception as e:
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+        print(f"❌ Eliminar factura #{factura_id}: {e}")
+        flash(f'Error al eliminar factura: {e}', 'danger')
+    finally:
+        conn.close()
+    return redirect(url_for('facturacion_historico'))
+
+
 @app.route('/facturacion/editar-factura/<int:factura_id>', methods=['GET', 'POST'])
 @login_required
 def facturacion_editar_factura(factura_id):

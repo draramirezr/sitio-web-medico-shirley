@@ -136,6 +136,35 @@
         opacity: 0.6;
         pointer-events: none;
     }
+
+    .btn-eliminar-factura {
+        background: white;
+        border: 2px solid #c0392b;
+        color: #c0392b;
+        padding: 0.5rem 1.2rem;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-block;
+        font-size: 0.9rem;
+        margin: 0.2rem;
+        cursor: pointer;
+    }
+
+    .btn-eliminar-factura:hover {
+        background: #c0392b;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-eliminar-factura.disabled {
+        background: #cccccc;
+        border-color: #cccccc;
+        color: white;
+        cursor: not-allowed;
+        opacity: 0.6;
+        pointer-events: none;
+    }
     
     .badge-ncf {
         background: linear-gradient(135deg, rgba(206, 176, 183, 0.2) 0%, rgba(242, 226, 230, 0.3) 100%);
@@ -329,6 +358,19 @@
                            title="Editar factura">
                             <i class="fas fa-edit"></i>
                         </a>
+                        <form method="POST"
+                              action="{{ url_for('facturacion_eliminar_factura', factura_id=factura['id']) }}"
+                              class="d-inline form-eliminar-factura"
+                              data-fecha="{{ factura['fecha_factura'] }}"
+                              data-id="{{ factura['id'] }}"
+                              data-ncf="{{ factura['ncf_numero'] if factura['ncf_numero'] else factura['ncf'] }}">
+                            <button type="submit"
+                                    class="btn-eliminar-factura"
+                                    id="btnEliminar{{ factura['id'] }}"
+                                    title="Eliminar factura (máx. 30 días)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
                     </td>
                 </tr>
                 {% else %}
@@ -398,33 +440,61 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Validar si cada factura es editable (menos de 30 días)
 document.addEventListener('DOMContentLoaded', function() {
-    const botonesEditar = document.querySelectorAll('[id^="btnEditar"]');
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
-    
-    botonesEditar.forEach(btn => {
-        const fechaFacturaStr = btn.getAttribute('data-fecha');
-        const fechaFactura = new Date(fechaFacturaStr + 'T00:00:00');
-        
-        // Calcular diferencia en días
+
+    function diasDesde(fechaStr) {
+        const fechaFactura = new Date(String(fechaStr).slice(0, 10) + 'T00:00:00');
         const diffTime = hoy - fechaFactura;
-        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-        
+        return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    }
+
+    document.querySelectorAll('[id^="btnEditar"]').forEach(btn => {
+        const diffDays = diasDesde(btn.getAttribute('data-fecha'));
         if (diffDays > 30) {
-            // Deshabilitar botón si pasaron más de 30 días
             btn.classList.add('disabled');
             btn.style.pointerEvents = 'none';
             btn.title = `No editable (${diffDays} días desde creación)`;
             btn.onclick = function(e) {
                 e.preventDefault();
-                alert(`⚠️ Esta factura no se puede editar porque han transcurrido ${diffDays} días desde su creación.\n\nEl límite para editar es de 30 días.`);
+                alert(`⚠️ Esta factura no se puede editar porque han transcurrido ${diffDays} días.\n\nEl límite es 30 días.`);
                 return false;
             };
         } else {
-            // Mostrar días restantes en el tooltip
             const diasRestantes = 30 - diffDays;
             btn.title = `Editar factura (${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} restante${diasRestantes !== 1 ? 's' : ''})`;
         }
+    });
+
+    document.querySelectorAll('.form-eliminar-factura').forEach(form => {
+        const btn = form.querySelector('.btn-eliminar-factura');
+        const diffDays = diasDesde(form.getAttribute('data-fecha'));
+        const id = form.getAttribute('data-id');
+        const ncf = form.getAttribute('data-ncf') || '';
+        if (diffDays > 30) {
+            btn.classList.add('disabled');
+            btn.disabled = true;
+            btn.title = `No eliminable (${diffDays} días desde creación)`;
+        } else {
+            const diasRestantes = 30 - diffDays;
+            btn.title = `Eliminar factura (${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} restante${diasRestantes !== 1 ? 's' : ''})`;
+        }
+        form.addEventListener('submit', function(e) {
+            if (diffDays > 30) {
+                e.preventDefault();
+                alert(`⚠️ No se puede eliminar: han pasado ${diffDays} días (límite 30).`);
+                return false;
+            }
+            const ok = confirm(
+                `¿Eliminar la factura #${id}${ncf ? ' (' + ncf + ')' : ''}?\n\n` +
+                `Los pacientes volverán a pendientes.\n` +
+                `Esta acción no se puede deshacer.`
+            );
+            if (!ok) {
+                e.preventDefault();
+                return false;
+            }
+        });
     });
 });
 </script>
