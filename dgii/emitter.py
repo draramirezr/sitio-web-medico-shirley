@@ -12,6 +12,7 @@ from .ecf_builder import (
     build_ecf_xml,
     build_encf,
     extract_codigo_seguridad,
+    extract_motivos_respuesta,
     map_tipoe_cf,
     secuencia_from_ncf_completo,
 )
@@ -113,8 +114,13 @@ def emitir_ecf_para_factura(
         except DgiiClientError:
             pass
 
+        motivos = extract_motivos_respuesta(estado_detalle)
+        error_text = "; ".join(motivos) if motivos else None
+        # Recibido por DGII = ok de transporte; Rechazado sigue siendo respuesta válida
+        accepted = str(estado).lower() not in ("rechazado", "rejected", "error")
+
         return {
-            "ok": True,
+            "ok": accepted,
             "factura_id": factura_id,
             "tipoe_cf": tipoe,
             "encf": encf,
@@ -123,6 +129,7 @@ def emitir_ecf_para_factura(
             "estado": estado,
             "ambiente": ambiente,
             "respuesta": estado_detalle,
+            "error": error_text,
             "xml_signed": xml_signed.decode("utf-8", errors="replace"),
         }
     except Exception as e:

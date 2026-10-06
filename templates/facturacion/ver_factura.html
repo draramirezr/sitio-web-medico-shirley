@@ -576,6 +576,13 @@
                 {% if ecf_envio.error_text %}
                 <div class="small text-danger mt-1">{{ ecf_envio.error_text }}</div>
                 {% endif %}
+                {% if ecf_motivos %}
+                <ul class="small text-danger mt-2 mb-0 ps-3">
+                    {% for m in ecf_motivos %}
+                    <li>{{ m }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
             </div>
             {% if ecf_envio.track_id %}
             <form method="POST" action="{{ url_for('facturacion_dgii_consultar_ecf', factura_id=factura['id']) }}">

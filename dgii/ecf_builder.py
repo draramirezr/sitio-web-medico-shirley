@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from decimal import Decimal, ROUND_HALF_UP
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 from xml.etree.ElementTree import Element, SubElement, tostring
 
 from lxml import etree
@@ -25,7 +25,6 @@ _PREFIX_TO_TIPO = {
 
 def _money(value) -> str:
     d = Decimal(str(value or 0)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-    # DGII examples often use one decimal when .0 — keep 2 decimals for safety
     return f"{d:.2f}"
 
 
@@ -47,6 +46,11 @@ def _fecha_dd_mm_yyyy(value) -> str:
         else:
             d = date.today()
     return d.strftime("%d-%m-%Y")
+
+
+def fecha_hora_firma_now() -> str:
+    """DGII FechaHoraFirma: dd-MM-yyyy HH:mm:ss (hora local aproximada)."""
+    return datetime.now().strftime("%d-%m-%Y %H:%M:%S")
 
 
 def map_tipoe_cf(ncf_prefijo: str, ncf_tipo: str = "") -> int:
@@ -94,13 +98,13 @@ def build_ecf_xml(
     items: List[Dict[str, Any]],
     monto_total,
     fecha_vencimiento_secuencia: str = "31-12-2026",
+    fecha_hora_firma: Optional[str] = None,
 ) -> bytes:
     """
-    Construye XML ECF mínimo válido para servicios exentos (IndicadorFacturacion=4).
-    emisor: rnc, razon_social, direccion
-    comprador: rnc, razon_social
-    items: nombre, cantidad, precio, monto
+    Construye XML ECF para servicios exentos (IndicadorFacturacion=4).
+    Incluye campos que DGII suele exigir en recepción (formas de pago, FechaHoraFirma).
     """
+    total = _money(monto_total)
     root = Element("ECF")
     encabezado = SubElement(root, "Encabezado")
     SubElement(encabezado, "Version").text = "1.0"
@@ -110,16 +114,29 @@ def build_ecf_xml(
     SubElement(id_doc, "eNCF").text = encf
     if tipoe_cf != 32:
         SubElement(id_doc, "FechaVencimientoSecuencia").text = fecha_vencimiento_secuencia
-    SubElement(id_doc, "IndicadorEnvioDiferido").text = "1"
+    # 0 = envío normal inmediato (1=diferido/contingencia)
+    SubElement(id_doc, "IndicadorEnvioDiferido").text = "0"
     if tipoe_cf == 32:
         SubElement(id_doc, "IndicadorMontoGravado").text = "0"
     SubElement(id_doc, "TipoIngresos").text = "01"
-    SubElement(id_doc, "TipoPago").text = "1"
+    SubElement(id_doc, "TipoPago").text = "1"  # Contado
+
+    # Obligatorio/condicional frecuente con TipoPago=1
+    tabla_fp = SubElement(id_doc, "TablaFormasPago")
+    forma = SubElement(tabla_fp, "FormaDePago")
+    SubElement(forma, "FormaPago").text = "1"  # Efectivo / transferencia genérica
+    SubElement(forma, "MontoPago").text = total
 
     em = SubElement(encabezado, "Emisor")
     SubElement(em, "RNCEmisor").text = str(emisor.get("rnc") or "").strip()
     SubElement(em, "RazonSocialEmisor").text = (emisor.get("razon_social") or "").strip()[:150]
     SubElement(em, "DireccionEmisor").text = (emisor.get("direccion") or "Santo Domingo Este").strip()[:100]
+    municipio = (emisor.get("municipio") or "010101").strip()  # código genérico si no hay
+    provincia = (emisor.get("provincia") or "010000").strip()
+    if emisor.get("municipio"):
+        SubElement(em, "Municipio").text = municipio
+    if emisor.get("provincia"):
+        SubElement(em, "Provincia").text = provincia
     SubElement(em, "FechaEmision").text = _fecha_dd_mm_yyyy(fecha_emision)
 
     comp = SubElement(encabezado, "Comprador")
@@ -127,26 +144,28 @@ def build_ecf_xml(
     SubElement(comp, "RazonSocialComprador").text = (comprador.get("razon_social") or "").strip()[:150]
 
     totales = SubElement(encabezado, "Totales")
-    # Servicios médicos actuales: ITBIS 0 → exento
-    SubElement(totales, "MontoExento").text = _money(monto_total)
-    SubElement(totales, "MontoTotal").text = _money(monto_total)
+    SubElement(totales, "MontoExento").text = total
+    SubElement(totales, "MontoTotal").text = total
 
     detalles = SubElement(root, "DetallesItems")
     for idx, it in enumerate(items, start=1):
         item = SubElement(detalles, "Item")
         SubElement(item, "NumeroLinea").text = str(idx)
         SubElement(item, "IndicadorFacturacion").text = "4"  # Exento
-        nombre = (it.get("nombre") or "Servicio médico").strip()[:80]
+        nombre = (it.get("nombre") or "Servicio medico").strip()[:80]
         SubElement(item, "NombreItem").text = nombre
         SubElement(item, "IndicadorBienoServicio").text = "2"  # Servicio
         cant = it.get("cantidad", 1)
         precio = it.get("precio", it.get("monto", 0))
         monto = it.get("monto", precio)
         SubElement(item, "CantidadItem").text = _money(cant)
+        SubElement(item, "UnidadMedida").text = str(it.get("unidad_medida") or "43")
         SubElement(item, "PrecioUnitarioItem").text = _money(precio)
         SubElement(item, "MontoItem").text = _money(monto)
 
-    # Pretty / consistent XML via lxml
+    # Debe existir ANTES de la firma digital
+    SubElement(root, "FechaHoraFirma").text = fecha_hora_firma or fecha_hora_firma_now()
+
     rough = tostring(root, encoding="utf-8")
     parsed = etree.fromstring(rough)
     return etree.tostring(parsed, encoding="utf-8", xml_declaration=True)
@@ -162,3 +181,35 @@ def extract_codigo_seguridad(signed_xml: bytes) -> str:
     if not nodes or not (nodes[0].text or "").strip():
         return "000000"
     return (nodes[0].text or "").strip().replace("\n", "").replace(" ", "")[:6]
+
+
+def extract_motivos_respuesta(respuesta: Any) -> List[str]:
+    """Normalize DGII consulta/recepción payload into human-readable rejection reasons."""
+    if not respuesta:
+        return []
+    if isinstance(respuesta, str):
+        return [respuesta] if respuesta.strip() else []
+    if not isinstance(respuesta, dict):
+        return [str(respuesta)]
+
+    out: List[str] = []
+    for key in ("mensajes", "Mensajes", "motivos", "Motivos", "errores", "Errores"):
+        msgs = respuesta.get(key)
+        if isinstance(msgs, list):
+            for m in msgs:
+                if isinstance(m, dict):
+                    val = m.get("valor") or m.get("Valor") or m.get("mensaje") or m.get("descripcion") or m.get("Detalle")
+                    cod = m.get("codigo") or m.get("Codigo") or ""
+                    if val:
+                        out.append(f"{cod}: {val}".strip(": "))
+                    else:
+                        out.append(str(m))
+                else:
+                    out.append(str(m))
+        elif isinstance(msgs, str) and msgs.strip():
+            out.append(msgs)
+    for key in ("mensaje", "Mensaje", "detalle", "Detalle", "error", "Error"):
+        val = respuesta.get(key)
+        if val and str(val) not in out:
+            out.append(str(val))
+    return out

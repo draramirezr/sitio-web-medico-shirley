@@ -5433,6 +5433,7 @@ def facturacion_dgii_consultar_ecf(factura_id):
     _ensure_facturacion_schema()
     from dgii.cert_store import decrypt_passphrase, read_pkcs12_file
     from dgii.client import autenticar, consultar_estado_trackid
+    from dgii.ecf_builder import extract_motivos_respuesta
 
     if current_user.perfil not in ('Administrador', 'Nivel 2', 'Registro de Facturas'):
         flash('Sin permiso.', 'warning')
@@ -5457,12 +5458,17 @@ def facturacion_dgii_consultar_ecf(factura_id):
         token = autenticar(cfg.get('ambiente'), p12, passphrase)
         data = consultar_estado_trackid(envio['track_id'], token, cfg.get('ambiente'))
         estado = data.get('estado') or data.get('Estado') or data.get('status') or 'DESCONOCIDO'
+        motivos = extract_motivos_respuesta(data)
+        error_text = "; ".join(motivos) if motivos else envio.get('error_text')
         conn.execute(
-            'UPDATE ecf_envios SET estado = %s, respuesta_json = %s WHERE id = %s',
-            (estado, json.dumps(data, ensure_ascii=False, default=str), envio['id']),
+            'UPDATE ecf_envios SET estado = %s, respuesta_json = %s, error_text = %s WHERE id = %s',
+            (estado, json.dumps(data, ensure_ascii=False, default=str), error_text, envio['id']),
         )
         conn.commit()
-        flash(f'Estado DGII actualizado: {estado}', 'success')
+        if motivos:
+            flash(f'Estado DGII: {estado} · {"; ".join(motivos[:3])}', 'warning' if 'rechaz' in str(estado).lower() else 'success')
+        else:
+            flash(f'Estado DGII actualizado: {estado}', 'success')
     except Exception as e:
         flash(f'No se pudo consultar DGII: {e}', 'danger')
     finally:
@@ -10173,14 +10179,28 @@ def facturacion_ver_factura(factura_id):
         }
 
     ecf_envio = None
+    ecf_motivos = []
     try:
         _ensure_facturacion_schema()
         ecf_envio = conn.execute(
             'SELECT * FROM ecf_envios WHERE factura_id = %s ORDER BY id DESC LIMIT 1',
             (factura_id,),
         ).fetchone()
+        if ecf_envio:
+            from dgii.ecf_builder import extract_motivos_respuesta
+            raw = ecf_envio.get('respuesta_json')
+            parsed = None
+            if raw:
+                try:
+                    parsed = json.loads(raw) if isinstance(raw, str) else raw
+                except Exception:
+                    parsed = None
+            ecf_motivos = extract_motivos_respuesta(parsed)
+            if not ecf_motivos and ecf_envio.get('error_text'):
+                ecf_motivos = [ecf_envio['error_text']]
     except Exception:
         ecf_envio = None
+        ecf_motivos = []
     
     conn.close()
     
@@ -10196,7 +10216,8 @@ def facturacion_ver_factura(factura_id):
                          itbis=itbis,
                          total=total_final,
                          centro_medico=centro_medico,
-                         ecf_envio=ecf_envio)
+                         ecf_envio=ecf_envio,
+                         ecf_motivos=ecf_motivos)
 
 @app.route('/facturacion/enviar-email/<int:factura_id>', methods=['POST'])
 @login_required
