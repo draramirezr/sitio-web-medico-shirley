@@ -1,13 +1,8 @@
 """XMLDSig enveloped signing compatible with DGII (TesteCF / e-CF).
 
-DGII's official Java sample uses:
-  - CanonicalizationMethod: Inclusive C14N 1.0
-  - Reference transforms: only enveloped-signature
-  - DigestMethod: SHA-256
-  - SignatureMethod: RSA-SHA256
-
-Pretty-printed whitespace in the seed XML must be removed before signing;
-otherwise DGII returns HTTP 400 \"Firma del certificado invalida\".
+DGII XSD order under ECF requires FechaHoraFirma before Signature.
+DGII's official Java sample uses Inclusive C14N 1.0 and enveloped-only
+reference transforms. Pretty-print whitespace must be stripped.
 """
 
 from __future__ import annotations
@@ -37,7 +32,6 @@ def sign_enveloped(root: etree._Element, key: Any, cert: x509.Certificate) -> by
 
 
 def _strip_whitespace_nodes(elem: etree._Element) -> None:
-    """Drop indentation/whitespace-only text nodes (breaks DGII digest)."""
     for el in elem.iter():
         if el.text is not None and not el.text.strip():
             el.text = None
@@ -49,8 +43,35 @@ def _c14n_inclusive(node: etree._Element) -> bytes:
     return etree.tostring(node, method="c14n", exclusive=False, with_comments=False)
 
 
+def _append_signature_in_xsd_order(doc: etree._Element, signature: etree._Element) -> None:
+    """
+    DGII ECF schema sequence ends with:
+      ... Paginacion?, InformacionReferencia?, FechaHoraFirma, Signature
+    Signature must be the last child; FechaHoraFirma must already exist.
+    """
+    fhf = None
+    for child in list(doc):
+        if etree.QName(child).localname == "FechaHoraFirma":
+            fhf = child
+            break
+    if fhf is None:
+        fhf = etree.Element("FechaHoraFirma")
+        from datetime import datetime
+
+        fhf.text = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+        doc.append(fhf)
+    # Remove any existing Signature first
+    for child in list(doc):
+        q = etree.QName(child)
+        if q.localname == "Signature" and (q.namespace == DS_NS or q.namespace is None):
+            doc.remove(child)
+    # Ensure FechaHoraFirma is last content node before Signature
+    doc.remove(fhf)
+    doc.append(fhf)
+    doc.append(signature)
+
+
 def _sign_enveloped_dgii(root: etree._Element, key: Any, cert: x509.Certificate) -> bytes:
-    # Re-parse to a clean tree and remove pretty-print whitespace from DGII seed
     doc = etree.fromstring(etree.tostring(root))
     _strip_whitespace_nodes(doc)
 
@@ -67,24 +88,21 @@ def _sign_enveloped_dgii(root: etree._Element, key: Any, cert: x509.Certificate)
         f"{{{DS_NS}}}SignatureMethod",
         Algorithm=RSA_SHA256,
     )
-    # URI="" → whole document; only enveloped transform (matches DGII Java sample)
     reference = etree.SubElement(signed_info, f"{{{DS_NS}}}Reference", URI="")
     transforms = etree.SubElement(reference, f"{{{DS_NS}}}Transforms")
     etree.SubElement(transforms, f"{{{DS_NS}}}Transform", Algorithm=ENVELOPED)
     etree.SubElement(reference, f"{{{DS_NS}}}DigestMethod", Algorithm=SHA256)
 
-    # Digest of document without Signature, Inclusive C14N (default after enveloped)
+    # Digest document without Signature (FechaHoraFirma already present)
     digest = hashlib.sha256(_c14n_inclusive(doc)).digest()
     etree.SubElement(reference, f"{{{DS_NS}}}DigestValue").text = base64.b64encode(digest).decode("ascii")
 
-    # Attach Signature (without SignatureValue yet) so SignedInfo has correct ns context
-    doc.append(signature)
+    _append_signature_in_xsd_order(doc, signature)
     si_c14n = _c14n_inclusive(signed_info)
     signature_bytes = key.sign(si_c14n, padding.PKCS1v15(), hashes.SHA256())
 
     sig_value = etree.Element(f"{{{DS_NS}}}SignatureValue")
     sig_value.text = base64.b64encode(signature_bytes).decode("ascii")
-    # Insert SignatureValue after SignedInfo
     signed_info.addnext(sig_value)
 
     key_info = etree.SubElement(signature, f"{{{DS_NS}}}KeyInfo")
@@ -92,5 +110,4 @@ def _sign_enveloped_dgii(root: etree._Element, key: Any, cert: x509.Certificate)
     der = cert.public_bytes(serialization.Encoding.DER)
     etree.SubElement(x509_data, f"{{{DS_NS}}}X509Certificate").text = base64.b64encode(der).decode("ascii")
 
-    # Compact UTF-8 XML (no pretty print / no BOM)
     return etree.tostring(doc, encoding="utf-8", xml_declaration=True)
