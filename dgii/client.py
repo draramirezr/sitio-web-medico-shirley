@@ -13,9 +13,14 @@ DEFAULT_TIMEOUT = 45
 
 class DgiiClientError(Exception):
     def __init__(self, message: str, status_code: Optional[int] = None, body: str = ""):
-        super().__init__(message)
         self.status_code = status_code
-        self.body = body
+        self.body = body or ""
+        detail = message
+        if self.body:
+            snippet = self.body.replace("\n", " ").strip()
+            if snippet and snippet not in detail:
+                detail = f"{message} · {snippet[:240]}"
+        super().__init__(detail)
 
 
 def obtener_semilla(ambiente: Optional[str] = None) -> bytes:

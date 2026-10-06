@@ -1,15 +1,16 @@
 """XMLDSig enveloped signing compatible with DGII (TesteCF / e-CF).
 
-DGII XSD order under ECF requires FechaHoraFirma before Signature.
-DGII's official Java sample uses Inclusive C14N 1.0 and enveloped-only
-reference transforms. Pretty-print whitespace must be stripped.
+- Semilla auth XML: Signature as last child only (no FechaHoraFirma).
+- e-CF XML: FechaHoraFirma must precede Signature (DGII XSD).
+Inclusive C14N 1.0 + enveloped-only reference (DGII Java sample).
 """
 
 from __future__ import annotations
 
 import base64
 import hashlib
-from typing import Any
+from datetime import datetime
+from typing import Any, Optional
 
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
@@ -43,37 +44,44 @@ def _c14n_inclusive(node: etree._Element) -> bytes:
     return etree.tostring(node, method="c14n", exclusive=False, with_comments=False)
 
 
-def _append_signature_in_xsd_order(doc: etree._Element, signature: etree._Element) -> None:
-    """
-    DGII ECF schema sequence ends with:
-      ... Paginacion?, InformacionReferencia?, FechaHoraFirma, Signature
-    Signature must be the last child; FechaHoraFirma must already exist.
-    """
-    fhf = None
+def _local(tag: Any) -> str:
+    if tag is None:
+        return ""
+    try:
+        return etree.QName(tag).localname
+    except Exception:
+        return str(tag).split("}")[-1]
+
+
+def _is_ecf_document(doc: etree._Element) -> bool:
+    return _local(doc.tag) == "ECF"
+
+
+def _prepare_ecf_before_digest(doc: etree._Element) -> None:
+    """Move/create FechaHoraFirma as last child before signing ECF."""
+    fhf: Optional[etree._Element] = None
     for child in list(doc):
-        if etree.QName(child).localname == "FechaHoraFirma":
+        if _local(child.tag) == "FechaHoraFirma":
             fhf = child
             break
+        if _local(child.tag) == "Signature":
+            doc.remove(child)
     if fhf is None:
         fhf = etree.Element("FechaHoraFirma")
-        from datetime import datetime
-
         fhf.text = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
         doc.append(fhf)
-    # Remove any existing Signature first
-    for child in list(doc):
-        q = etree.QName(child)
-        if q.localname == "Signature" and (q.namespace == DS_NS or q.namespace is None):
-            doc.remove(child)
-    # Ensure FechaHoraFirma is last content node before Signature
-    doc.remove(fhf)
-    doc.append(fhf)
-    doc.append(signature)
+    else:
+        doc.remove(fhf)
+        doc.append(fhf)
 
 
 def _sign_enveloped_dgii(root: etree._Element, key: Any, cert: x509.Certificate) -> bytes:
     doc = etree.fromstring(etree.tostring(root))
     _strip_whitespace_nodes(doc)
+
+    # ECF only: finalize FechaHoraFirma position BEFORE digest
+    if _is_ecf_document(doc):
+        _prepare_ecf_before_digest(doc)
 
     nsmap = {"ds": DS_NS}
     signature = etree.Element(f"{{{DS_NS}}}Signature", nsmap=nsmap)
@@ -93,11 +101,12 @@ def _sign_enveloped_dgii(root: etree._Element, key: Any, cert: x509.Certificate)
     etree.SubElement(transforms, f"{{{DS_NS}}}Transform", Algorithm=ENVELOPED)
     etree.SubElement(reference, f"{{{DS_NS}}}DigestMethod", Algorithm=SHA256)
 
-    # Digest document without Signature (FechaHoraFirma already present)
     digest = hashlib.sha256(_c14n_inclusive(doc)).digest()
     etree.SubElement(reference, f"{{{DS_NS}}}DigestValue").text = base64.b64encode(digest).decode("ascii")
 
-    _append_signature_in_xsd_order(doc, signature)
+    # Append Signature as final child (after FechaHoraFirma on ECF; alone on Semilla)
+    doc.append(signature)
+
     si_c14n = _c14n_inclusive(signed_info)
     signature_bytes = key.sign(si_c14n, padding.PKCS1v15(), hashes.SHA256())
 
