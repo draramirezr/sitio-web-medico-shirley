@@ -5340,18 +5340,18 @@ def facturacion_dgii_certificado():
         if ambiente_form not in ('PRUEBAS', 'CERTIFICACION', 'PRODUCCION'):
             ambiente_form = 'PRUEBAS'
         fecha_venc_raw = (request.form.get('fecha_vencimiento_secuencia') or '').strip()
+        dia_v = (request.form.get('venc_dia') or '').strip()
+        mes_v = (request.form.get('venc_mes') or '').strip()
+        anio_v = (request.form.get('venc_anio') or '').strip()
+        if dia_v and mes_v and anio_v:
+            fecha_venc_raw = f"{dia_v.zfill(2)}-{mes_v.zfill(2)}-{anio_v}"
         fecha_venc = normalize_fecha_vencimiento_secuencia(fecha_venc_raw) or ''
         if fecha_venc_raw and not fecha_venc:
-            flash('Fecha de vencimiento inválida. Use dd-mm-yyyy (ej. 31-12-2026).', 'warning')
+            flash('Fecha de vencimiento inválida. Día, mes y año (ejemplo: 13 / 12 / 2027).', 'warning')
             conn.close()
             return redirect(url_for('facturacion_dgii_certificado'))
-        # Keep previous / suggestion if form omitted it
         if not fecha_venc:
-            fecha_venc = (
-                normalize_fecha_vencimiento_secuencia(cfg.get('fecha_vencimiento_secuencia'))
-                or sugerencia_fecha_venc
-                or ''
-            )
+            fecha_venc = normalize_fecha_vencimiento_secuencia(cfg.get('fecha_vencimiento_secuencia')) or ''
         if accion == 'upload':
             ambiente_form = (request.form.get('ambiente') or 'PRUEBAS').strip().upper()
             if ambiente_form not in ('PRUEBAS', 'CERTIFICACION', 'PRODUCCION'):
@@ -5453,7 +5453,7 @@ def facturacion_dgii_certificado():
                     'last_test_at': cfg.get('last_test_at'),
                     'last_test_json': cfg.get('last_test_json'),
                 })
-                flash(f'Datos e-CF guardados. Vencimiento secuencia: {fecha_venc}', 'success')
+                flash(f'Datos e-CF guardados. Vencimiento secuencia: {fecha_venc} (día-mes-año).', 'success')
 
             elif accion == 'retest':
                 if not cfg.get('cert_path') or not cfg.get('passphrase_encrypted'):
@@ -5504,6 +5504,20 @@ def facturacion_dgii_certificado():
 
     has_cert = bool(cfg.get('cert_path') and cfg.get('cert_fingerprint'))
     urls = get_urls(cfg.get('ambiente') or ambiente)
+    venc_guardada = (cfg.get('fecha_vencimiento_secuencia') or '').strip()
+    venc_dia, venc_mes, venc_anio = '', '', ''
+    if venc_guardada and len(venc_guardada) >= 10:
+        parts = venc_guardada.replace('/', '-').split('-')
+        if len(parts) == 3:
+            venc_dia, venc_mes, venc_anio = parts[0], parts[1], parts[2]
+    meses_es = {
+        '01': 'enero', '02': 'febrero', '03': 'marzo', '04': 'abril',
+        '05': 'mayo', '06': 'junio', '07': 'julio', '08': 'agosto',
+        '09': 'septiembre', '10': 'octubre', '11': 'noviembre', '12': 'diciembre',
+    }
+    venc_legible = ''
+    if venc_dia and venc_mes and venc_anio:
+        venc_legible = f"{int(venc_dia)} de {meses_es.get(venc_mes.zfill(2), venc_mes)} de {venc_anio}"
     conn.close()
     return render_template(
         'facturacion/dgii_certificado.html',
@@ -5513,6 +5527,10 @@ def facturacion_dgii_certificado():
         urls=urls,
         test_result=test_result,
         sugerencia_fecha_venc=sugerencia_fecha_venc,
+        venc_dia=venc_dia,
+        venc_mes=venc_mes,
+        venc_anio=venc_anio,
+        venc_legible=venc_legible,
     )
 
 

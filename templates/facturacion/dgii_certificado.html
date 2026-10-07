@@ -120,7 +120,10 @@
             </div>
             <div class="dgii-meta-box">
                 <div class="label">Venc. secuencia e-CF</div>
-                <div class="value">{{ cfg.fecha_vencimiento_secuencia or sugerencia_fecha_venc or 'PENDIENTE' }}</div>
+                <div class="value">{{ cfg.fecha_vencimiento_secuencia or 'PENDIENTE' }}</div>
+                {% if venc_legible %}
+                <div class="small text-muted mt-1">{{ venc_legible }}</div>
+                {% endif %}
             </div>
             <div class="dgii-meta-box">
                 <div class="label">Vencimiento cert.</div>
@@ -172,14 +175,17 @@
             </div>
             <div class="mb-3">
                 <label class="form-label fw-semibold">Fecha vencimiento secuencia e-CF</label>
-                <input type="text" class="form-control" name="fecha_vencimiento_secuencia"
-                       value="{{ cfg.fecha_vencimiento_secuencia or sugerencia_fecha_venc or '' }}"
-                       maxlength="10" placeholder="dd-mm-yyyy" required
-                       pattern="\d{2}-\d{2}-\d{4}">
-                <div class="form-text">
-                    Fecha de la autorización <strong>e-CF</strong> (no la del NCF B01 de papel).
-                    Ejemplo: <code>13-12-2027</code>. Error 145 si no coincide con DGII.
+                <div class="d-flex gap-2 align-items-center">
+                    <input type="text" class="form-control" name="venc_dia" inputmode="numeric" maxlength="2"
+                           placeholder="Día" value="{{ venc_dia }}" style="max-width:5rem;" required>
+                    <span>/</span>
+                    <input type="text" class="form-control" name="venc_mes" inputmode="numeric" maxlength="2"
+                           placeholder="Mes" value="{{ venc_mes }}" style="max-width:5rem;" required>
+                    <span>/</span>
+                    <input type="text" class="form-control" name="venc_anio" inputmode="numeric" maxlength="4"
+                           placeholder="Año" value="{{ venc_anio }}" style="max-width:7rem;" required>
                 </div>
+                <div class="form-text">Día / Mes / Año. Ejemplo: <strong>13 / 12 / 2027</strong> (13 de diciembre).</div>
             </div>
             <div class="mb-3">
                 <label class="form-label fw-semibold">Ambiente</label>
@@ -222,11 +228,21 @@
             </div>
             <div class="mb-3">
                 <label class="form-label fw-semibold">Fecha vencimiento secuencia e-CF</label>
-                <input type="text" class="form-control" name="fecha_vencimiento_secuencia"
-                       value="{{ cfg.fecha_vencimiento_secuencia or sugerencia_fecha_venc or '' }}"
-                       maxlength="10" placeholder="dd-mm-yyyy" required
-                       pattern="\d{2}-\d{2}-\d{4}">
-                <div class="form-text">Copia la fecha de vencimiento de la secuencia e-CF autorizada por DGII.</div>
+                <div class="d-flex gap-2 align-items-center">
+                    <input type="text" class="form-control" name="venc_dia" inputmode="numeric" maxlength="2"
+                           placeholder="Día" value="{{ venc_dia }}" style="max-width:5rem;" required>
+                    <span>/</span>
+                    <input type="text" class="form-control" name="venc_mes" inputmode="numeric" maxlength="2"
+                           placeholder="Mes" value="{{ venc_mes }}" style="max-width:5rem;" required>
+                    <span>/</span>
+                    <input type="text" class="form-control" name="venc_anio" inputmode="numeric" maxlength="4"
+                           placeholder="Año" value="{{ venc_anio }}" style="max-width:7rem;" required>
+                </div>
+                <div class="form-text">
+                    Hoy está guardado: <strong>{{ cfg.fecha_vencimiento_secuencia or 'nada' }}</strong>
+                    {% if venc_legible %}({{ venc_legible }}){% endif %}.
+                    Debe ser <strong>13 / 12 / 2027</strong> si esa es la autorización.
+                </div>
             </div>
             <div class="mb-3">
                 <label class="form-label fw-semibold">Ambiente</label>
