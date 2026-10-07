@@ -15,7 +15,7 @@ _PREFIX_TO_TIPO = {
     "B01": 31,  # Crédito fiscal
     "B02": 32,  # Consumo
     "B14": 45,  # Gubernamental
-    "B15": 44,  # Régimen especial
+    "B15": 45,  # En este consultorio B15 se usa como gubernamental
     "E31": 31,
     "E32": 32,
     "E45": 45,
@@ -101,17 +101,18 @@ def fecha_hora_firma_now() -> str:
 
 
 def map_tipoe_cf(ncf_prefijo: str, ncf_tipo: str = "") -> int:
-    p = (ncf_prefijo or "").strip().upper()
-    for key, tipo in _PREFIX_TO_TIPO.items():
-        if p.startswith(key):
-            return tipo
     t = (ncf_tipo or "").upper()
+    # El tipo del mantenimiento manda: aquí GUBERNAMENTAL es B15, no régimen especial.
     if "GUBERNAMENTAL" in t:
         return 45
     if "CONSUMO" in t:
         return 32
     if "FISCAL" in t:
         return 31
+    p = (ncf_prefijo or "").strip().upper()
+    for key, tipo in _PREFIX_TO_TIPO.items():
+        if p.startswith(key):
+            return tipo
     return 31
 
 

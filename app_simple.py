@@ -1303,6 +1303,104 @@ def check_password_temporal():
 _FACTURACION_SCHEMA_READY = False
 
 
+def _alinear_ncf_ecf_con_ars(conn) -> None:
+    """
+    Crea/activa solo los dos e-CF que usa el consultorio (E31 crédito fiscal, E45 gubernamental)
+    copiando secuencia del NCF B01/B15, y reasigna las ARS que ya tenían NCF.
+    """
+    def _one(sql, params=None):
+        return conn.execute(sql, params or ()).fetchone()
+
+    def _upsert_ecf(*, prefijo, tipo, fuente_prefijos, fuente_tipo_like):
+        placeholders = ','.join(['%s'] * len(fuente_prefijos))
+        fuente = _one(
+            f'''SELECT * FROM ncf
+                WHERE activo = 1 AND UPPER(prefijo) IN ({placeholders})
+                ORDER BY id LIMIT 1''',
+            tuple(p.upper() for p in fuente_prefijos),
+        )
+        if not fuente:
+            fuente = _one(
+                'SELECT * FROM ncf WHERE UPPER(tipo) LIKE %s ORDER BY activo DESC, id LIMIT 1',
+                (fuente_tipo_like,),
+            )
+        existing = _one(
+            'SELECT * FROM ncf WHERE UPPER(prefijo) = %s ORDER BY activo DESC, id LIMIT 1',
+            (prefijo,),
+        )
+        ultimo = int(existing['ultimo_numero'] or 0) if existing else 0
+        if fuente:
+            ultimo = max(ultimo, int(fuente['ultimo_numero'] or 0))
+        fecha_fin = None
+        if existing and existing.get('fecha_fin'):
+            fecha_fin = existing['fecha_fin']
+        elif fuente and fuente.get('fecha_fin'):
+            fecha_fin = fuente['fecha_fin']
+        if existing:
+            conn.execute(
+                '''UPDATE ncf SET tipo = %s, prefijo = %s, tamaño = 10,
+                          ultimo_numero = %s, fecha_fin = %s, activo = 1
+                   WHERE id = %s''',
+                (tipo, prefijo, ultimo, fecha_fin, existing['id']),
+            )
+            return existing['id']
+        conn.execute(
+            '''INSERT INTO ncf (tipo, prefijo, tamaño, ultimo_numero, fecha_fin, activo)
+               VALUES (%s, %s, 10, %s, %s, 1)''',
+            (tipo, prefijo, ultimo, fecha_fin),
+        )
+        return conn.lastrowid
+
+    fiscal_id = _upsert_ecf(
+        prefijo='E31',
+        tipo='CREDITO FISCAL',
+        fuente_prefijos=('B01', 'E31'),
+        fuente_tipo_like='%FISCAL%',
+    )
+    gov_id = _upsert_ecf(
+        prefijo='E45',
+        tipo='GUBERNAMENTAL',
+        fuente_prefijos=('B15', 'B14', 'E45'),
+        fuente_tipo_like='%GUBERNAMENTAL%',
+    )
+    if not fiscal_id or not gov_id:
+        return
+
+    # Papel B01/B15 ya copiado a e-CF: dejar solo los dos electrónicos activos.
+    conn.execute(
+        '''UPDATE ncf SET activo = 0
+           WHERE activo = 1 AND id NOT IN (%s, %s)
+             AND UPPER(prefijo) IN ('B01', 'B14', 'B15')''',
+        (fiscal_id, gov_id),
+    )
+
+    ars_rows = conn.execute(
+        'SELECT id, nombre_ars, ncf_id_default FROM ars WHERE activo = 1 AND ncf_id_default IS NOT NULL'
+    ).fetchall()
+    if not ars_rows:
+        return
+    ncf_by_id = {}
+    for row in conn.execute('SELECT id, tipo, prefijo FROM ncf').fetchall():
+        ncf_by_id[row['id']] = row
+    for ars in ars_rows:
+        nombre = (ars.get('nombre_ars') or '').upper()
+        actual = ncf_by_id.get(ars.get('ncf_id_default')) or {}
+        tipo = (actual.get('tipo') or '').upper()
+        pref = (actual.get('prefijo') or '').upper()
+        usar_gov = (
+            'SENASA' in nombre
+            or 'GUBERNAMENTAL' in tipo
+            or pref in ('B15', 'B14', 'E45')
+        )
+        nuevo = gov_id if usar_gov else fiscal_id
+        if nuevo and nuevo != ars.get('ncf_id_default'):
+            conn.execute(
+                'UPDATE ars SET ncf_id_default = %s WHERE id = %s',
+                (nuevo, ars['id']),
+            )
+    print(f"✅ NCF e-CF alineados: E31 id={fiscal_id}, E45 id={gov_id}; ARS relacionadas actualizadas")
+
+
 def _ensure_facturacion_schema() -> None:
     global _FACTURACION_SCHEMA_READY
     if _FACTURACION_SCHEMA_READY:
@@ -1373,6 +1471,11 @@ def _ensure_facturacion_schema() -> None:
                 conn.commit()
             except Exception:
                 pass
+            try:
+                _alinear_ncf_ecf_con_ars(conn)
+                conn.commit()
+            except Exception as e_ncf:
+                print(f"⚠️ No se pudieron alinear NCF e-CF / ARS: {e_ncf}")
         except Exception as e:
             print(f"⚠️ No se pudo preparar dgii_config/ecf_envios: {e}")
         finally:
@@ -8821,12 +8924,7 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None,
                 from dgii.qr import qr_png_bytes
                 qr_img = ImageReader(BytesIO(qr_png_bytes(ecf_timbre["url"], scale=4)))
                 qr_size = 78
-                canvas.drawImage(qr_img, 40, 28, width=qr_size, height=qr_size, mask='auto')
-                canvas.setFillColor(colors.black)
-                canvas.setFont('Helvetica', 7)
-                canvas.drawString(40, 18, f"Código seguridad: {ecf_timbre['codigo_seguridad']}")
-                canvas.setFont('Helvetica-Bold', 7)
-                canvas.drawString(40, 8, f"e-CF {ecf_timbre['encf']}")
+                canvas.drawImage(qr_img, 40, 18, width=qr_size, height=qr_size, mask='auto')
             except Exception as e_draw:
                 print(f"⚠️ No se pudo dibujar QR e-CF: {e_draw}")
             firma_x_start = 340

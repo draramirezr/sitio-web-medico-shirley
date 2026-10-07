@@ -355,13 +355,7 @@
     .ecf-qr-ri img {
         width: 110px;
         height: 110px;
-        border: 1px solid #ddd;
         background: #fff;
-    }
-    .ecf-qr-label {
-        font-weight: 700;
-        color: #6B5C62;
-        margin-bottom: 0.2rem;
     }
     
     .total-row {
@@ -730,11 +724,6 @@
         {% if ecf_timbre %}
         <div class="ecf-qr-ri">
             <img src="{{ url_for('facturacion_ecf_qr', factura_id=factura['id']) }}" alt="QR e-CF DGII" width="110" height="110">
-            <div>
-                <div class="ecf-qr-label">Representación impresa e-CF</div>
-                <div>Código de seguridad: <strong>{{ ecf_timbre.codigo_seguridad }}</strong></div>
-                <div>e-NCF: <strong>{{ ecf_timbre.encf }}</strong></div>
-            </div>
         </div>
         {% endif %}
 
