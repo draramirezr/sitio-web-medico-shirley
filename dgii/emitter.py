@@ -36,6 +36,7 @@ def emitir_ecf_para_factura(
     ars_row: Dict[str, Any],
     items: List[Dict[str, Any]],
     monto_total,
+    fecha_vencimiento_secuencia: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     cfg: fila dgii_config (cert_path, passphrase_encrypted, ambiente, rnc_emisor, ...)
@@ -83,7 +84,7 @@ def emitir_ecf_para_factura(
 
     try:
         venc = resolve_fecha_vencimiento_secuencia(
-            cfg_value=cfg.get("fecha_vencimiento_secuencia"),
+            cfg_value=fecha_vencimiento_secuencia or cfg.get("fecha_vencimiento_secuencia"),
             env_value=os.getenv("DGII_FECHA_VENCIMIENTO_SEC"),
         )
     except ValueError as e:
