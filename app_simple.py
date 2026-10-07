@@ -5250,6 +5250,43 @@ def _dgii_save_config(conn, fields: dict):
         pass
 
 
+def _next_unused_ncf(conn, ncf_row):
+    """
+    Next NCF that is not already on any invoice (even anulada)
+    and whose mapped eNCF was not already sent to DGII.
+    """
+    from dgii.ecf_builder import build_encf, map_tipoe_cf
+
+    prefijo = (ncf_row.get('prefijo') or '').strip()
+    tam = int(ncf_row.get('tamaño') or ncf_row.get('tamano') or 11)
+    candidato = int(ncf_row.get('ultimo_numero') or 0) + 1
+    tipoe = map_tipoe_cf(prefijo, ncf_row.get('tipo') or '')
+
+    for _ in range(5000):
+        completo = f"{prefijo}{str(candidato).zfill(tam)}"
+        used_factura = conn.execute(
+            '''
+            SELECT id FROM facturas
+            WHERE ncf_numero = %s OR ncf = %s
+            LIMIT 1
+            ''',
+            (completo, completo),
+        ).fetchone()
+        encf = build_encf(tipoe, candidato)
+        used_ecf = None
+        try:
+            used_ecf = conn.execute(
+                'SELECT id FROM ecf_envios WHERE encf = %s LIMIT 1',
+                (encf,),
+            ).fetchone()
+        except Exception:
+            used_ecf = None
+        if not used_factura and not used_ecf:
+            return candidato, completo, encf
+        candidato += 1
+    raise ValueError('No hay secuencia NCF/e-CF libre. Revisa el último número en Maestra NCF.')
+
+
 @app.route('/facturacion/dgii/certificado', methods=['GET', 'POST'])
 @login_required
 def facturacion_dgii_certificado():
@@ -8492,10 +8529,10 @@ def facturacion_generar_final():
         # Calcular total
         total = sum(p['monto'] for p in pacientes)
         
-        # Obtener y actualizar NCF
+        # Obtener y actualizar NCF (nunca reutilizar números ya usados localmente o enviados a DGII)
         ncf = conn.execute('SELECT * FROM ncf WHERE id = %s', (ncf_id,)).fetchone()
-        proximo_numero = ncf['ultimo_numero'] + 1
-        ncf_completo = f"{ncf['prefijo']}{str(proximo_numero).zfill(ncf['tamaño'])}"
+        ncf_row_alloc = dict(ncf) if not isinstance(ncf, dict) else ncf
+        proximo_numero, ncf_completo, _encf_previsto = _next_unused_ncf(conn, ncf_row_alloc)
         
         # Crear factura
         cursor = conn.cursor()
