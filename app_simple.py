@@ -5226,23 +5226,29 @@ def _dgii_get_config(conn):
     return dict(row) if row else None
 
 
-# Fechas que este sistema llegó a guardar por error (default viejo / día 31 vs 13).
-_DGII_VENC_DEFAULTS_INVALIDOS = frozenset({"31-12-2026", "31-12-2027", "31/12/2026", "31/12/2027"})
-# Autorización e-CF que indicó el emisor (día-mes-año).
-_DGII_VENC_AUTORIZADA = "13-12-2027"
+# Fechas que DGII TesteCF rechazó (145). En pre-certificación usan 31-12-2028.
+_DGII_VENC_DEFAULTS_INVALIDOS = frozenset({
+    "31-12-2026", "31-12-2027", "31/12/2026", "31/12/2027",
+    "13-12-2026", "13-12-2027", "13-12-2028",
+    "13/12/2026", "13/12/2027", "13/12/2028",
+})
+# Secuencia TesteCF (Comunidad de Ayuda DGII): 31/12/2028.
+_DGII_VENC_AUTORIZADA = "31-12-2028"
 
 
 def _dgii_fecha_vencimiento_efectiva(conn, cfg=None):
     """
-    Fecha que se envía a DGII. Corrige y persiste 31-12-2026/2027
-    (defaults incorrectos) a 13-12-2027.
+    Fecha que se envía a DGII. En PRUEBAS corrige fechas 145 a 31-12-2028.
     """
     from dgii.ecf_builder import normalize_fecha_vencimiento_secuencia
 
     cfg = cfg or _dgii_get_config(conn) or {}
     raw = (cfg.get("fecha_vencimiento_secuencia") or os.getenv("DGII_FECHA_VENCIMIENTO_SEC") or "").strip()
     norm = normalize_fecha_vencimiento_secuencia(raw) or ""
-    if (not norm) or (norm in _DGII_VENC_DEFAULTS_INVALIDOS) or (raw in _DGII_VENC_DEFAULTS_INVALIDOS):
+    ambiente = (cfg.get("ambiente") or os.getenv("DGII_AMBIENTE") or "PRUEBAS").strip().upper()
+    if ambiente == "PRUEBAS" and (
+        (not norm) or (norm in _DGII_VENC_DEFAULTS_INVALIDOS) or (raw in _DGII_VENC_DEFAULTS_INVALIDOS)
+    ):
         norm = _DGII_VENC_AUTORIZADA
         if cfg.get("cert_path") or cfg.get("id"):
             try:

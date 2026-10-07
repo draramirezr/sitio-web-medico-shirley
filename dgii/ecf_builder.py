@@ -91,7 +91,7 @@ def resolve_fecha_vencimiento_secuencia(
     raise ValueError(
         "Falta Fecha de vencimiento de secuencia e-CF. "
         "En Facturación → Certificado DGII guarda la fecha EXACTA que te dio DGII "
-        "(dd-mm-yyyy), por ejemplo 13-12-2027. No uses la fecha del NCF B01."
+        "(dd-mm-yyyy). En TesteCF use 31-12-2028. No uses la fecha del NCF B01."
     )
 
 
@@ -164,8 +164,8 @@ def build_ecf_xml(
     SubElement(id_doc, "eNCF").text = encf
     if tipoe_cf != 32:
         SubElement(id_doc, "FechaVencimientoSecuencia").text = venc
-    # 0 = envío normal inmediato (1=diferido/contingencia)
-    SubElement(id_doc, "IndicadorEnvioDiferido").text = "0"
+    # TesteCF error 164: solo permite 1 (AUTORIZADO).
+    SubElement(id_doc, "IndicadorEnvioDiferido").text = "1"
     if tipoe_cf == 32:
         SubElement(id_doc, "IndicadorMontoGravado").text = "0"
     SubElement(id_doc, "TipoIngresos").text = "01"
