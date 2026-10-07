@@ -79,20 +79,19 @@ def resolve_fecha_vencimiento_secuencia(
     env_value: Optional[str] = None,
 ) -> str:
     """
-    Source of truth for e-CF FechaVencimientoSecuencia:
-      1) dgii_config (autorización e-CF)
-      2) fecha_fin del NCF usado en la factura
-      3) env DGII_FECHA_VENCIMIENTO_SEC
-    Raises ValueError if none is usable — never silently invents a date (error 145).
+    Source of truth: ONLY the e-CF authorization date in dgii_config
+    (or DGII_FECHA_VENCIMIENTO_SEC). Never use traditional NCF fecha_fin —
+    that date is often different and causes DGII error 145.
     """
-    for raw in (cfg_value, ncf_fecha_fin, env_value):
+    del ncf_fecha_fin  # kept in signature for callers; must not be used
+    for raw in (cfg_value, env_value):
         normalized = normalize_fecha_vencimiento_secuencia(raw)
         if normalized:
             return normalized
     raise ValueError(
         "Falta Fecha de vencimiento de secuencia e-CF. "
-        "Configúrala en Facturación → Certificado DGII con la fecha EXACTA "
-        "autorizada por DGII (Oficina Virtual), formato dd-mm-yyyy."
+        "En Facturación → Certificado DGII guarda la fecha EXACTA que te dio DGII "
+        "(dd-mm-yyyy), por ejemplo 13-12-2027. No uses la fecha del NCF B01."
     )
 
 

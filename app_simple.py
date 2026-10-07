@@ -8605,9 +8605,11 @@ def facturacion_generar_final():
                     except Exception as e_save:
                         print(f"⚠️ No se pudo guardar ecf_envios: {e_save}")
                     if ecf_result.get('ok'):
+                        venc_msg = ecf_result.get('fecha_vencimiento_secuencia') or ''
                         flash(
                             f"e-CF enviado a DGII · eNCF {ecf_result.get('encf')} · "
-                            f"TrackId {ecf_result.get('track_id')} · Estado: {ecf_result.get('estado')}",
+                            f"TrackId {ecf_result.get('track_id')} · Estado: {ecf_result.get('estado')}"
+                            + (f" · Venc. secuencia: {venc_msg}" if venc_msg else ""),
                             'success',
                         )
                     elif not ecf_result.get('skipped'):

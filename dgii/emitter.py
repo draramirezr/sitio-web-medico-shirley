@@ -84,7 +84,6 @@ def emitir_ecf_para_factura(
     try:
         venc = resolve_fecha_vencimiento_secuencia(
             cfg_value=cfg.get("fecha_vencimiento_secuencia"),
-            ncf_fecha_fin=ncf_row.get("fecha_fin"),
             env_value=os.getenv("DGII_FECHA_VENCIMIENTO_SEC"),
         )
     except ValueError as e:
@@ -124,7 +123,8 @@ def emitir_ecf_para_factura(
 
         motivos = extract_motivos_respuesta(estado_detalle)
         error_text = "; ".join(motivos) if motivos else None
-        # Recibido por DGII = ok de transporte; Rechazado sigue siendo respuesta válida
+        if error_text:
+            error_text = f"{error_text} (FechaVencimientoSecuencia enviada: {venc})"
         accepted = str(estado).lower() not in ("rechazado", "rejected", "error")
 
         return {
@@ -136,6 +136,7 @@ def emitir_ecf_para_factura(
             "codigo_seguridad": codigo,
             "estado": estado,
             "ambiente": ambiente,
+            "fecha_vencimiento_secuencia": venc,
             "respuesta": estado_detalle,
             "error": error_text,
             "xml_signed": xml_signed.decode("utf-8", errors="replace"),
