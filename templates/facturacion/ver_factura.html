@@ -344,6 +344,25 @@
         border-top: 2px solid #CEB0B7;
         padding-top: 1rem;
     }
+
+    .ecf-qr-ri {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        margin: 1.25rem 0 0.5rem;
+        page-break-inside: avoid;
+    }
+    .ecf-qr-ri img {
+        width: 110px;
+        height: 110px;
+        border: 1px solid #ddd;
+        background: #fff;
+    }
+    .ecf-qr-label {
+        font-weight: 700;
+        color: #6B5C62;
+        margin-bottom: 0.2rem;
+    }
     
     .total-row {
         display: flex;
@@ -640,6 +659,9 @@
                 {% if factura['ncf_tipo'] %}
                 <p><strong>Tipo:</strong> {{ factura['ncf_tipo'] }}</p>
                 {% endif %}
+                {% if ecf_timbre and ecf_timbre.encf %}
+                <p><strong>e-NCF:</strong> {{ ecf_timbre.encf }}</p>
+                {% endif %}
                 {% if factura['ncf_fecha_fin'] %}
                 <p><strong>Válido hasta:</strong> {{ factura['ncf_fecha_fin']|fecha_es }}</p>
                 {% endif %}
@@ -704,6 +726,17 @@
             <div class="firma-linea"></div>
             <div class="firma-nombre">Dra. Shirley Ramírez</div>
         </div>
+
+        {% if ecf_timbre %}
+        <div class="ecf-qr-ri">
+            <img src="{{ url_for('facturacion_ecf_qr', factura_id=factura['id']) }}" alt="QR e-CF DGII" width="110" height="110">
+            <div>
+                <div class="ecf-qr-label">Representación impresa e-CF</div>
+                <div>Código de seguridad: <strong>{{ ecf_timbre.codigo_seguridad }}</strong></div>
+                <div>e-NCF: <strong>{{ ecf_timbre.encf }}</strong></div>
+            </div>
+        </div>
+        {% endif %}
 
         <!-- Footer -->
         <div class="footer-factura">

@@ -233,6 +233,27 @@ def extract_codigo_seguridad(signed_xml: bytes) -> str:
     return (nodes[0].text or "").strip().replace("\n", "").replace(" ", "")[:6]
 
 
+def _xml_local_text(root, name: str) -> str:
+    nodes = root.xpath(f"//*[local-name()='{name}']")
+    if not nodes or nodes[0].text is None:
+        return ""
+    return str(nodes[0].text).strip()
+
+
+def extract_timbre_fields(signed_xml: bytes) -> Dict[str, str]:
+    """Campos del timbre electrónico (QR) a partir del XML firmado."""
+    root = etree.fromstring(signed_xml)
+    return {
+        "rnc_emisor": _xml_local_text(root, "RNCEmisor"),
+        "rnc_comprador": _xml_local_text(root, "RNCComprador"),
+        "encf": _xml_local_text(root, "eNCF"),
+        "fecha_emision": _xml_local_text(root, "FechaEmision"),
+        "monto_total": _xml_local_text(root, "MontoTotal"),
+        "fecha_firma": _xml_local_text(root, "FechaHoraFirma"),
+        "codigo_seguridad": extract_codigo_seguridad(signed_xml),
+    }
+
+
 def extract_motivos_respuesta(respuesta: Any) -> List[str]:
     """Normalize DGII consulta/recepción payload into human-readable rejection reasons."""
     if not respuesta:

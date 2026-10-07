@@ -5260,6 +5260,21 @@ def _dgii_fecha_vencimiento_efectiva(conn, cfg=None):
     return norm
 
 
+def _ecf_timbre_for_factura(conn, factura_id):
+    try:
+        envio = conn.execute(
+            'SELECT * FROM ecf_envios WHERE factura_id = %s ORDER BY id DESC LIMIT 1',
+            (factura_id,),
+        ).fetchone()
+        if not envio:
+            return None
+        from dgii.qr import timbre_from_envio
+        return timbre_from_envio(dict(envio))
+    except Exception as e:
+        print(f"⚠️ Timbre e-CF factura {factura_id}: {e}")
+        return None
+
+
 def _dgii_save_config(conn, fields: dict):
     existing = conn.execute('SELECT id FROM dgii_config WHERE id = 1').fetchone()
     cols = [
@@ -8752,8 +8767,19 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None,
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
     from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
     
+    ecf_timbre = None
+    try:
+        conn_qr = get_db_connection()
+        try:
+            ecf_timbre = _ecf_timbre_for_factura(conn_qr, factura_id)
+        finally:
+            conn_qr.close()
+    except Exception as e_qr:
+        print(f"⚠️ No se pudo cargar QR e-CF: {e_qr}")
+
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=30, leftMargin=30, topMargin=25, bottomMargin=70)
+    bottom = 145 if ecf_timbre else 70
+    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=30, leftMargin=30, topMargin=25, bottomMargin=bottom)
     elements = []
     styles = getSampleStyleSheet()
     
@@ -8787,17 +8813,31 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None,
         
         canvas.saveState()
         
-        # Línea de firma a la izquierda (arriba del footer)
-        firma_y = 110  # Posición desde el fondo para la firma
-        firma_x_start = 60  # Margen izquierdo
-        firma_ancho = 200  # Ancho de la línea de firma
+        # QR DGII a la izquierda (RI e-CF); firma a la derecha
+        firma_y = 110
+        if ecf_timbre:
+            try:
+                from reportlab.lib.utils import ImageReader
+                from dgii.qr import qr_png_bytes
+                qr_img = ImageReader(BytesIO(qr_png_bytes(ecf_timbre["url"], scale=4)))
+                qr_size = 78
+                canvas.drawImage(qr_img, 40, 28, width=qr_size, height=qr_size, mask='auto')
+                canvas.setFillColor(colors.black)
+                canvas.setFont('Helvetica', 7)
+                canvas.drawString(40, 18, f"Código seguridad: {ecf_timbre['codigo_seguridad']}")
+                canvas.setFont('Helvetica-Bold', 7)
+                canvas.drawString(40, 8, f"e-CF {ecf_timbre['encf']}")
+            except Exception as e_draw:
+                print(f"⚠️ No se pudo dibujar QR e-CF: {e_draw}")
+            firma_x_start = 340
+        else:
+            firma_x_start = 60
+        firma_ancho = 200
         
-        # Dibujar línea para firma
         canvas.setStrokeColor(colors.black)
         canvas.setLineWidth(0.5)
         canvas.line(firma_x_start, firma_y, firma_x_start + firma_ancho, firma_y)
         
-        # Nombre de la doctora debajo de la línea
         canvas.setFont('Helvetica', 9)
         canvas.setFillColor(colors.black)
         canvas.drawString(firma_x_start, firma_y - 15, "Dra. Shirley Ramírez")
@@ -8872,6 +8912,8 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None,
         col1_text = f"<font size='10'>Fecha: {formato_fecha_pdf(fecha)}<br/>Cliente: {ars_nombre}{regimen_line}<br/>RNC: {ars_rnc}</font>"
         
         col2_text = f"<b>NCF</b><br/><font size='11' color='#CEB0B7'><b>{ncf}</b></font><br/><font size='10'>Tipo: {ncf_tipo}"
+        if ecf_timbre and ecf_timbre.get('encf'):
+            col2_text += f"<br/>e-NCF: {ecf_timbre['encf']}"
         if ncf_fecha_fin:
             col2_text += f"<br/>Válido hasta: {formato_fecha_pdf(ncf_fecha_fin)}"
         col2_text += "</font>"
@@ -10443,6 +10485,9 @@ def facturacion_ver_factura(factura_id):
     itbis = 0
     total_final = subtotal
     
+    from dgii.qr import timbre_from_envio
+    ecf_timbre = timbre_from_envio(dict(ecf_envio) if ecf_envio else None)
+
     return render_template('facturacion/ver_factura.html',
                          factura=factura,
                          pacientes=pacientes,
@@ -10451,7 +10496,8 @@ def facturacion_ver_factura(factura_id):
                          total=total_final,
                          centro_medico=centro_medico,
                          ecf_envio=ecf_envio,
-                         ecf_motivos=ecf_motivos)
+                         ecf_motivos=ecf_motivos,
+                         ecf_timbre=ecf_timbre)
 
 @app.route('/facturacion/enviar-email/<int:factura_id>', methods=['POST'])
 @login_required
@@ -10613,6 +10659,23 @@ def facturacion_descargar_pdf(factura_id):
             conn.close()
         flash(f'Error al descargar el PDF: {str(e)}', 'error')
         return redirect(url_for('facturacion_ver_factura', factura_id=factura_id))
+
+
+@app.route('/facturacion/ecf-qr/<int:factura_id>.png')
+@login_required
+def facturacion_ecf_qr(factura_id):
+    """PNG del QR de consulta timbre DGII (RI e-CF)."""
+    conn = get_db_connection()
+    try:
+        timbre = _ecf_timbre_for_factura(conn, factura_id)
+    finally:
+        conn.close()
+    if not timbre:
+        return ('', 404)
+    from dgii.qr import qr_png_bytes
+    png = qr_png_bytes(timbre['url'], scale=5)
+    return send_file(BytesIO(png), mimetype='image/png')
+
 
 @app.route('/facturacion/descargar-excel/<int:factura_id>')
 @login_required
