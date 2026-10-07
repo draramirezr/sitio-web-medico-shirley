@@ -8861,12 +8861,12 @@ def facturacion_generar_final():
         return redirect(url_for('facturacion_generar'))
 
 def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None, centro_medico=None):
-    """Generar PDF de la factura con formato actualizado"""
+    """Generar PDF de la factura con el mismo formato de la vista previa."""
     from io import BytesIO
     from reportlab.lib.pagesizes import letter
     from reportlab.lib import colors
     from reportlab.lib.units import inch
-    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image, Flowable
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
     from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
     
@@ -8946,7 +8946,7 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None,
         if footer_data:
             # Línea 1: Nombre del médico (negrita)
             canvas.setFont('Helvetica-Bold', 8)
-            canvas.setFillColor(colors.grey)
+            canvas.setFillColor(colors.HexColor('#CEB0B7'))
             canvas.drawCentredString(letter[0]/2, footer_y + 20, footer_data.get('medico_nombre', ''))
             
             # Línea 2: Especialidad, Cédula y Exequátur
@@ -8967,16 +8967,52 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None,
     # Función helper para formatear moneda
     def formato_moneda(valor):
         return "{:,.2f}".format(float(valor))
+
+    class _InfoCard(Flowable):
+        def __init__(self, html, width):
+            Flowable.__init__(self)
+            self.card_width = width
+            self.inner = Paragraph(html, styles['Normal'])
+            self.pad = 8
+            self._ih = 0
+
+        def wrap(self, aw, ah):
+            _w, h = self.inner.wrap(self.card_width - 2 * self.pad, ah)
+            self._ih = h
+            self.width = self.card_width
+            self.height = max(h + 2 * self.pad, 92)
+            return self.width, self.height
+
+        def draw(self):
+            c = self.canv
+            c.setStrokeColor(colors.HexColor('#CEB0B7'))
+            c.setFillColor(colors.HexColor('#F8F0F2'))
+            c.setLineWidth(1.5)
+            c.roundRect(0, 0, self.width, self.height, 8, fill=1, stroke=1)
+            self.inner.drawOn(c, self.pad, self.height - self.pad - self._ih)
+
+    ncf_tipo = ncf_data.get('tipo', 'CRÉDITO FISCAL') if ncf_data else 'CRÉDITO FISCAL'
+    tipo_up = (ncf_tipo or '').upper()
+    if 'GUBERNAMENTAL' in tipo_up:
+        tipo_header = 'GUBERNAMENTAL'
+    elif 'FISCAL' in tipo_up:
+        tipo_header = 'CRÉDITO FISCAL'
+    else:
+        tipo_header = ncf_tipo or 'NCF'
     
     # Header compacto: Logo a la izquierda, FACTURA en el centro
     logo_path = os.path.join('static', 'logos', 'logo-dra-shirley.png')
     if os.path.exists(logo_path):
         header_data = [[
             Image(logo_path, width=1*inch, height=1*inch),
-            Paragraph("<para align='center'><b><font size='20' color='black'>FACTURA</font></b><br/><font size='8' color='black'>CRÉDITO FISCAL</font></para>", styles['Normal']),
+            Paragraph(
+                f"<para align='center'><b><font size='20' color='#CEB0B7'>FACTURA</font></b>"
+                f"<br/><font size='8' color='#ACACAD'>{tipo_header}</font></para>",
+                styles['Normal'],
+            ),
             ''
         ]]
-        header_table = Table(header_data, colWidths=[1.2*inch, 5.6*inch, 0.5*inch])
+        header_table = Table(header_data, colWidths=[1.2*inch, 5.7*inch, 1.2*inch])
         header_table.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('ALIGN', (0, 0), (0, 0), 'LEFT'),
@@ -9002,44 +9038,53 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None,
         codigo_ars = pacientes[0].get('codigo_ars', 'N/A')
         medico_cedula = pacientes[0].get('medico_cedula', '')
         medico_exequatur = pacientes[0].get('medico_exequatur', '')
-        ncf_tipo = ncf_data.get('tipo', 'CRÉDITO FISCAL') if ncf_data else 'CRÉDITO FISCAL'
         ncf_fecha_fin = ncf_data.get('fecha_fin', '') if ncf_data else ''
         
-        # Construir las 3 columnas (sin etiquetas de título, letras más grandes)
-        regimen_line = "<br/><b>REGIMEN CONTRIBUTIVO</b>" if es_senasa else ""
-        col1_text = f"<font size='10'>Fecha: {formato_fecha_pdf(fecha)}<br/>Cliente: {ars_nombre}{regimen_line}<br/>RNC: {ars_rnc}</font>"
-        
-        col2_text = f"<b>NCF</b><br/><font size='11' color='#CEB0B7'><b>{ncf}</b></font><br/><font size='10'>Tipo: {ncf_tipo}"
-        if ecf_timbre and ecf_timbre.get('encf'):
-            col2_text += f"<br/>e-NCF: {ecf_timbre['encf']}"
+        regimen_line = "<br/><font size='9' color='#666666'><b>REGIMEN CONTRIBUTIVO</b></font>" if es_senasa else ""
+        col1_text = (
+            f"<font color='#B89BA3' size='8'><b>INFORMACIÓN DE FACTURA</b></font><br/>"
+            f"<font size='9'><b>Fecha:</b> {formato_fecha_pdf(fecha)}<br/>"
+            f"<b>Cliente (ARS):</b> {ars_nombre}{regimen_line}<br/>"
+            f"<b>RNC:</b> {ars_rnc}</font>"
+        )
+        ncf_mostrar = ncf
+        col2_text = (
+            f"<font color='#B89BA3' size='8'><b>NCF</b></font><br/>"
+            f"<font size='11' color='#CEB0B7'><b>{ncf_mostrar}</b></font><br/>"
+            f"<font size='9'><b>Tipo:</b> {ncf_tipo}"
+        )
         if ncf_fecha_fin:
-            col2_text += f"<br/>Válido hasta: {formato_fecha_pdf(ncf_fecha_fin)}"
+            col2_text += f"<br/><b>Válido hasta:</b> {formato_fecha_pdf(ncf_fecha_fin)}"
         col2_text += "</font>"
-        
-        col3_text = f"<font size='10'><b>{medico_nombre}</b><br/>{medico_especialidad}<br/>Código: {codigo_ars}"
+        col3_text = (
+            f"<font color='#B89BA3' size='8'><b>INFORMACIÓN DEL MÉDICO</b></font><br/>"
+            f"<font size='9'><b>Médico:</b> {medico_nombre}<br/>"
+            f"<font color='#666666'>{medico_especialidad}</font><br/>"
+            f"<b>Cédula:</b> {medico_cedula or '—'}"
+        )
         if medico_exequatur:
-            col3_text += f"<br/>Exequátur: {medico_exequatur}"
-        if medico_cedula:
-            col3_text += f"<br/>Cédula: {medico_cedula}"
+            col3_text += f"<br/><b>Exequátur:</b> {medico_exequatur}"
         col3_text += "</font>"
-        
-        info_data = [[
-            Paragraph(col1_text, styles['Normal']),
-            Paragraph(col2_text, styles['Normal']),
-            Paragraph(col3_text, styles['Normal'])
-        ]]
-        
-        info_table = Table(info_data, colWidths=[2.4*inch, 2.3*inch, 2.6*inch])
+
+        ancho_tabla = 8.1 * inch
+        gap_cards = 0.12 * inch
+        ancho_card = (ancho_tabla - 2 * gap_cards) / 3.0
+        info_table = Table(
+            [[
+                _InfoCard(col1_text, ancho_card),
+                '',
+                _InfoCard(col2_text, ancho_card),
+                '',
+                _InfoCard(col3_text, ancho_card),
+            ]],
+            colWidths=[ancho_card, gap_cards, ancho_card, gap_cards, ancho_card],
+        )
         info_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, -1), colors.white),
-            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('FONTSIZE', (0, 0), (-1, -1), 10),
-            ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#CEB0B7')),
-            ('LEFTPADDING', (0, 0), (-1, -1), 8),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 8),
-            ('TOPPADDING', (0, 0), (-1, -1), 8),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+            ('LEFTPADDING', (0, 0), (-1, -1), 0),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+            ('TOPPADDING', (0, 0), (-1, -1), 0),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
         ]))
         elements.append(info_table)
         elements.append(Spacer(1, 0.2*inch))
@@ -9069,19 +9114,6 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None,
                 formato_moneda(p['monto'])
             ])
         
-        # Solo agregar totales en la última página
-        if pagina == total_paginas - 1:
-            subtotal = total
-            total_final = subtotal
-            
-            data.append(['', '', '', '', '', 'SUB-TOTAL:', formato_moneda(subtotal)])
-            data.append(['', '', '', '', '', 'ITBIS:', '*E'])
-            data.append(['', '', '', '', '', 'TOTAL:', formato_moneda(total_final)])
-            
-            num_filas_datos = len(data) - 4  # Todas las filas excepto encabezado y 3 filas de totales
-        else:
-            num_filas_datos = len(data) - 1  # Todas las filas excepto encabezado
-        
         table = Table(data, colWidths=[0.5*inch, 2*inch, 1.3*inch, 0.8*inch, 1*inch, 1.5*inch, 1*inch])
         
         # Estilos base de la tabla
@@ -9104,22 +9136,37 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None,
             ('ALIGN', (6, 1), (6, -1), 'RIGHT'),   # V/UNITARIO a la derecha
         ]
         
-        # Agregar grid solo para las filas de datos
-        if pagina == total_paginas - 1:
-            # Última página: grid para datos (sin incluir totales)
-            table_style.append(('GRID', (0, 0), (-1, num_filas_datos), 0.5, colors.grey))
-            # Estilos especiales para filas de totales
-            table_style.extend([
-                ('BACKGROUND', (0, -3), (-1, -1), colors.white),
-                ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, -1), (-1, -1), 10),
-            ])
-        else:
-            # Páginas intermedias: grid para todas las filas
-            table_style.append(('GRID', (0, 0), (-1, -1), 0.5, colors.grey))
+        table_style.append(('GRID', (0, 0), (-1, -1), 0.5, colors.grey))
         
         table.setStyle(TableStyle(table_style))
         elements.append(table)
+
+        if pagina == total_paginas - 1:
+            elements.append(Spacer(1, 0.25 * inch))
+            tot_style = ParagraphStyle(
+                'TotLabel', parent=styles['Normal'], alignment=TA_RIGHT, fontSize=10, textColor=colors.HexColor('#666666')
+            )
+            tot_val = ParagraphStyle(
+                'TotVal', parent=styles['Normal'], alignment=TA_RIGHT, fontSize=10, textColor=colors.HexColor('#666666')
+            )
+            tot_big = ParagraphStyle(
+                'TotBig', parent=styles['Normal'], alignment=TA_RIGHT, fontSize=14,
+                textColor=colors.HexColor('#CEB0B7'), fontName='Helvetica-Bold'
+            )
+            tot_data = [
+                [Paragraph('<b>SUB-TOTAL:</b>', tot_style), Paragraph(formato_moneda(total), tot_val)],
+                [Paragraph('<b>ITBIS:</b>', tot_style), Paragraph('*E', tot_val)],
+                [Paragraph('<b>TOTAL:</b>', tot_big), Paragraph(f'<b>{formato_moneda(total)}</b>', tot_big)],
+            ]
+            tot_table = Table(tot_data, colWidths=[6.1 * inch, 2.0 * inch])
+            tot_table.setStyle(TableStyle([
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('TOPPADDING', (0, 0), (-1, -1), 4),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+                ('LINEABOVE', (0, 2), (-1, 2), 1.5, colors.HexColor('#CEB0B7')),
+                ('TOPPADDING', (0, 2), (-1, 2), 10),
+            ]))
+            elements.append(tot_table)
         
         # Agregar página nueva si no es la última página
         if pagina < total_paginas - 1:
