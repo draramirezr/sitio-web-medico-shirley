@@ -147,6 +147,7 @@ def build_ecf_xml(
     monto_total,
     fecha_vencimiento_secuencia: str,
     fecha_hora_firma: Optional[str] = None,
+    ambiente: Optional[str] = None,
 ) -> bytes:
     """
     Construye XML ECF para servicios exentos (IndicadorFacturacion=4).
@@ -165,8 +166,10 @@ def build_ecf_xml(
     SubElement(id_doc, "eNCF").text = encf
     if tipoe_cf != 32:
         SubElement(id_doc, "FechaVencimientoSecuencia").text = venc
-    # TesteCF error 164: solo permite 1 (AUTORIZADO).
-    SubElement(id_doc, "IndicadorEnvioDiferido").text = "1"
+    amb = (ambiente or "").strip().upper()
+    # TesteCF exige 1. En producción solo va si DGII autorizó envío diferido.
+    if amb in ("", "PRUEBAS", "TESTECF"):
+        SubElement(id_doc, "IndicadorEnvioDiferido").text = "1"
     if tipoe_cf == 32:
         SubElement(id_doc, "IndicadorMontoGravado").text = "0"
     SubElement(id_doc, "TipoIngresos").text = "01"

@@ -102,6 +102,7 @@ def emitir_ecf_para_factura(
             items=line_items,
             monto_total=monto_total,
             fecha_vencimiento_secuencia=venc,
+            ambiente=ambiente,
         )
         xml_signed = sign_ecf_xml(xml_unsigned, p12, passphrase)
         codigo = extract_codigo_seguridad(xml_signed)

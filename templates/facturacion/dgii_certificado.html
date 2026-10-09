@@ -194,7 +194,9 @@
                     <option value="CERTIFICACION" {% if ambiente == 'CERTIFICACION' %}selected{% endif %}>CERTIFICACION</option>
                     <option value="PRODUCCION" {% if ambiente == 'PRODUCCION' %}selected{% endif %}>PRODUCCION</option>
                 </select>
-                <div class="form-text">Usa PRODUCCION solo cuando DGII te autorice.</div>
+                <div class="form-text">
+                    PRODUCCIÓN = eCF real (validez fiscal). Antes de elegirla: autorización DGII + fecha de secuencia de producción.
+                </div>
             </div>
             <div class="mb-3">
                 <label class="form-label fw-semibold">Archivo del certificado</label>
@@ -241,16 +243,20 @@
                 <div class="form-text">
                     Hoy está guardado: <strong>{{ cfg.fecha_vencimiento_secuencia or 'nada' }}</strong>
                     {% if venc_legible %}({{ venc_legible }}){% endif %}.
-                    En PRUEBAS (TesteCF) use <strong>31 / 12 / 2028</strong>.
+                    En PRUEBAS use <strong>31 / 12 / 2028</strong>.
+                    En PRODUCCIÓN use la fecha exacta de su autorización e-CF en Oficina Virtual (no la de pruebas).
                 </div>
             </div>
             <div class="mb-3">
                 <label class="form-label fw-semibold">Ambiente</label>
-                <select class="form-select" name="ambiente">
+                <select class="form-select" name="ambiente" id="ambiente_ecf">
                     <option value="PRUEBAS" {% if ambiente == 'PRUEBAS' %}selected{% endif %}>PRUEBAS (TesteCF)</option>
                     <option value="CERTIFICACION" {% if ambiente == 'CERTIFICACION' %}selected{% endif %}>CERTIFICACION</option>
                     <option value="PRODUCCION" {% if ambiente == 'PRODUCCION' %}selected{% endif %}>PRODUCCION</option>
                 </select>
+                <div class="form-text text-danger" id="aviso_prod" style="{% if ambiente != 'PRODUCCION' %}display:none;{% endif %}">
+                    PRODUCCIÓN tiene validez fiscal. Confirme en Oficina Virtual: autorización e-CF activa, fecha de vencimiento real y secuencias E31/E45 autorizadas.
+                </div>
             </div>
             <button type="submit" class="btn btn-dgii">
                 <i class="fas fa-save me-1"></i> Guardar datos e-CF
@@ -301,8 +307,18 @@
     {% endif %}
 
     <p class="small text-muted mt-2 mb-4">
-        Endpoints de pruebas:
+        Endpoint actual ({{ ambiente }}):
         <code>{{ urls.autenticacion }}</code>
     </p>
 </div>
+<script>
+(function () {
+    var sel = document.getElementById('ambiente_ecf');
+    var aviso = document.getElementById('aviso_prod');
+    if (!sel || !aviso) return;
+    sel.addEventListener('change', function () {
+        aviso.style.display = sel.value === 'PRODUCCION' ? '' : 'none';
+    });
+})();
+</script>
 {% endblock %}
