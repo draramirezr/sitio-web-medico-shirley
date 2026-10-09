@@ -124,10 +124,12 @@ def emitir_ecf_para_factura(
             pass
 
         motivos = extract_motivos_respuesta(estado_detalle)
-        error_text = "; ".join(motivos) if motivos else None
-        if error_text:
-            error_text = f"{error_text} (FechaVencimientoSecuencia enviada: {venc})"
         accepted = str(estado).lower() not in ("rechazado", "rejected", "error")
+        error_text = None
+        if not accepted and motivos:
+            error_text = f"{'; '.join(motivos)} (FechaVencimientoSecuencia enviada: {venc})"
+        elif not accepted:
+            error_text = f"Rechazado por DGII (FechaVencimientoSecuencia enviada: {venc})"
 
         return {
             "ok": accepted,

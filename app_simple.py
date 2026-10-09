@@ -5719,14 +5719,15 @@ def facturacion_dgii_consultar_ecf(factura_id):
         data = consultar_estado_trackid(envio['track_id'], token, cfg.get('ambiente'))
         estado = data.get('estado') or data.get('Estado') or data.get('status') or 'DESCONOCIDO'
         motivos = extract_motivos_respuesta(data)
-        error_text = "; ".join(motivos) if motivos else envio.get('error_text')
+        aceptado = str(estado).lower() not in ('rechazado', 'rejected', 'error')
+        error_text = "; ".join(motivos) if (not aceptado and motivos) else None
         conn.execute(
             'UPDATE ecf_envios SET estado = %s, respuesta_json = %s, error_text = %s WHERE id = %s',
             (estado, json.dumps(data, ensure_ascii=False, default=str), error_text, envio['id']),
         )
         conn.commit()
-        if motivos:
-            flash(f'Estado DGII: {estado} · {"; ".join(motivos[:3])}', 'warning' if 'rechaz' in str(estado).lower() else 'success')
+        if not aceptado and motivos:
+            flash(f'Estado DGII: {estado} · {"; ".join(motivos[:3])}', 'warning')
         else:
             flash(f'Estado DGII actualizado: {estado}', 'success')
     except Exception as e:
@@ -10617,7 +10618,11 @@ def facturacion_ver_factura(factura_id):
                 except Exception:
                     parsed = None
             ecf_motivos = extract_motivos_respuesta(parsed)
-            if not ecf_motivos and ecf_envio.get('error_text'):
+            est = (ecf_envio.get('estado') or '').lower()
+            es_error = any(x in est for x in ('rechaz', 'error', 'rejected'))
+            if not es_error:
+                ecf_motivos = []
+            elif not ecf_motivos and ecf_envio.get('error_text'):
                 ecf_motivos = [ecf_envio['error_text']]
     except Exception:
         ecf_envio = None

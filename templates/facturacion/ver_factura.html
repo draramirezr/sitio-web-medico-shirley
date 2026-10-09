@@ -595,10 +595,12 @@
                     Estado: <strong>{{ ecf_envio.estado or '—' }}</strong>
                     {% if ecf_envio.ambiente %} · {{ ecf_envio.ambiente }}{% endif %}
                 </div>
-                {% if ecf_envio.error_text %}
+                {% set _est = (ecf_envio.estado or '')|lower %}
+                {% set _hay_error = ecf_envio.error_text and ('rechaz' in _est or 'error' in _est or 'rejected' in _est) %}
+                {% if _hay_error %}
                 <div class="small text-danger mt-1">{{ ecf_envio.error_text }}</div>
                 {% endif %}
-                {% if ecf_motivos %}
+                {% if ecf_motivos and _hay_error %}
                 <ul class="small text-danger mt-2 mb-0 ps-3">
                     {% for m in ecf_motivos %}
                     <li>{{ m }}</li>

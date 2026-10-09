@@ -258,33 +258,71 @@ def extract_timbre_fields(signed_xml: bytes) -> Dict[str, str]:
     }
 
 
+def _motivo_es_error(m: Any) -> Optional[str]:
+    """Devuelve texto de error real; ignora codigo 0 / valor vacío (éxito DGII)."""
+    if m is None:
+        return None
+    if isinstance(m, str):
+        s = m.strip()
+        if not s or s in ("{}", "[]", "None"):
+            return None
+        if s.startswith("{") and ("'codigo': 0" in s or '"codigo": 0' in s) and ("'valor': ''" in s or '"valor": ""' in s or "'valor': None" in s):
+            return None
+        return s
+    if not isinstance(m, dict):
+        s = str(m).strip()
+        return s or None
+    val = (
+        m.get("valor")
+        or m.get("Valor")
+        or m.get("mensaje")
+        or m.get("Mensaje")
+        or m.get("descripcion")
+        or m.get("Detalle")
+        or ""
+    )
+    cod = m.get("codigo") if m.get("codigo") is not None else m.get("Codigo")
+    try:
+        cod_n = int(cod) if cod is not None and str(cod).strip() != "" else None
+    except (TypeError, ValueError):
+        cod_n = None
+    # codigo 0 + sin texto = OK, no es error
+    if (cod_n == 0 or cod in (0, "0", None, "")) and not str(val).strip():
+        return None
+    if not str(val).strip() and (cod_n is None or cod_n == 0):
+        return None
+    if str(val).strip():
+        return f"{cod}: {val}".strip(": ") if cod not in (None, "", 0, "0") else str(val).strip()
+    if cod_n and cod_n != 0:
+        return f"{cod}"
+    return None
+
+
 def extract_motivos_respuesta(respuesta: Any) -> List[str]:
-    """Normalize DGII consulta/recepción payload into human-readable rejection reasons."""
+    """Normalize DGII consulta/recepción payload into real rejection reasons only."""
     if not respuesta:
         return []
     if isinstance(respuesta, str):
-        return [respuesta] if respuesta.strip() else []
+        t = _motivo_es_error(respuesta)
+        return [t] if t else []
     if not isinstance(respuesta, dict):
-        return [str(respuesta)]
+        t = _motivo_es_error(respuesta)
+        return [t] if t else []
 
     out: List[str] = []
     for key in ("mensajes", "Mensajes", "motivos", "Motivos", "errores", "Errores"):
         msgs = respuesta.get(key)
         if isinstance(msgs, list):
             for m in msgs:
-                if isinstance(m, dict):
-                    val = m.get("valor") or m.get("Valor") or m.get("mensaje") or m.get("descripcion") or m.get("Detalle")
-                    cod = m.get("codigo") or m.get("Codigo") or ""
-                    if val:
-                        out.append(f"{cod}: {val}".strip(": "))
-                    else:
-                        out.append(str(m))
-                else:
-                    out.append(str(m))
-        elif isinstance(msgs, str) and msgs.strip():
-            out.append(msgs)
+                t = _motivo_es_error(m)
+                if t and t not in out:
+                    out.append(t)
+        elif isinstance(msgs, str):
+            t = _motivo_es_error(msgs)
+            if t and t not in out:
+                out.append(t)
     for key in ("mensaje", "Mensaje", "detalle", "Detalle", "error", "Error"):
-        val = respuesta.get(key)
-        if val and str(val) not in out:
-            out.append(str(val))
+        t = _motivo_es_error(respuesta.get(key))
+        if t and t not in out:
+            out.append(t)
     return out
