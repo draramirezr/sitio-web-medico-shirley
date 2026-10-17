@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
 {% block html_lang %}ht{% endblock %}
-{% block title %}Jinekològ Santo Domingo Este | Dra. Shirley Ramírez (Kreyòl){% endblock %}
-{% block description %}Doktè fanm / jinekològ nan Santo Domingo Este (Zòn Oriental). Konsiltasyon, chèkè, swen gwosès ak planin familyal. Nou aksepte kat kredi. Pran randevou sou WhatsApp: 829-740-5073.{% endblock %}
-{% block og_title %}Jinekològ Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
-{% block og_description %}Doktè fanm nan Santo Domingo Este. Konsiltasyon, chèkè, swen gwosès. Nou aksepte kat kredi. Pran randevou sou WhatsApp.{% endblock %}
-{% block twitter_title %}Jinekològ Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
-{% block twitter_description %}Doktè fanm nan Santo Domingo Este (Zòn Oriental). Nou aksepte kat kredi. Pran randevou sou WhatsApp.{% endblock %}
+{% block title %}Jinekològ Santo Domingo Este | WhatsApp 829-740-5073{% endblock %}
+{% block description %}Doktè fanm an kreyòl nan Santo Domingo Este. Chèkè, swen gwosès, planin familyal. Nou aksepte kat kredi. Pran randevou kounye a: 829-740-5073.{% endblock %}
+{% block og_title %}Jinekològ Santo Domingo Este | WhatsApp 829-740-5073{% endblock %}
+{% block og_description %}Doktè fanm an kreyòl. Nou aksepte kat kredi. Pran randevou sou WhatsApp: 829-740-5073.{% endblock %}
+{% block twitter_title %}Jinekològ Santo Domingo Este | WhatsApp 829-740-5073{% endblock %}
+{% block twitter_description %}Doktè fanm an kreyòl nan Zòn Oriental. Kat kredi aksepte. WhatsApp 829-740-5073.{% endblock %}
 {% block schema_page_name %}Jinekològ Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
-{% block schema_page_description %}Doktè fanm / jinekològ nan Santo Domingo Este, Zòn Oriental. Paj an kreyòl ayisyen. Nou aksepte kat kredi.{% endblock %}
+{% block schema_page_description %}Doktè fanm an kreyòl nan Santo Domingo Este. Nou aksepte kat kredi. WhatsApp 829-740-5073.{% endblock %}
 {% block extra_meta %}
 <link rel="alternate" hreflang="ht" href="https://www.draramirez.com/jinekolojis-santo-domingo">
 <link rel="alternate" hreflang="es-DO" href="https://www.draramirez.com/ginecologa-santo-domingo">
@@ -17,6 +17,30 @@
       href="{{ url_for('static', filename='images/dra-shirley-hero-bg.webp') }}?v=8"
       fetchpriority="high"
       type="image/webp">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Èske nou aksepte pèyman ak kat kredi?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Wi. Nou aksepte kat kredi. Ou ka mande detay sou WhatsApp anvan randevou a: 829-740-5073."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Kijan pou m pran randevou ak jinekològ la?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Voye mesaj sou WhatsApp nan 829-740-5073. Di ki tip konsiltasyon ou bezwen epi n ap fikse jou ak lè a."
+      }
+    }
+  ]
+}
+</script>
 {% endblock %}
 
 {% block content %}

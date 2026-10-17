@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}Ginecóloga en Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
+{% block title %}Ginecóloga en Santo Domingo Este | Agenda por WhatsApp{% endblock %}
 
-{% block description %}Ginecóloga y obstetra en Santo Domingo Este. Chequeo ginecológico, control prenatal y atención cercana. Agenda tu cita por WhatsApp 829-740-5073.{% endblock %}
+{% block description %}Dra. Shirley Ramírez, ginecóloga y obstetra en Santo Domingo Este. Chequeo, control prenatal y consulta cercana. Agenda hoy: WhatsApp 829-740-5073.{% endblock %}
 
-{% block og_title %}Ginecóloga en Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
-{% block og_description %}Buscas ginecóloga u obstetra en Santo Domingo Este? Dra. Shirley Ramírez. Agenda por WhatsApp: 829-740-5073.{% endblock %}
-{% block twitter_title %}Ginecóloga en Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
-{% block twitter_description %}Ginecóloga y obstetra en Santo Domingo Este. Agenda tu cita por WhatsApp.{% endblock %}
+{% block og_title %}Ginecóloga en Santo Domingo Este | Agenda por WhatsApp{% endblock %}
+{% block og_description %}Dra. Shirley Ramírez. Consulta clara y cercana en Santo Domingo Este. Agenda por WhatsApp: 829-740-5073.{% endblock %}
+{% block twitter_title %}Ginecóloga en Santo Domingo Este | Agenda por WhatsApp{% endblock %}
+{% block twitter_description %}Dra. Shirley Ramírez. Chequeo y control prenatal en Santo Domingo Este. WhatsApp 829-740-5073.{% endblock %}
 {% block schema_page_name %}Ginecóloga en Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
-{% block schema_page_description %}Ginecóloga y obstetra en Santo Domingo Este (Zona Oriental). Chequeo ginecológico, control prenatal y consulta de confianza.{% endblock %}
+{% block schema_page_description %}Ginecóloga y obstetra en Santo Domingo Este. Agenda por WhatsApp 829-740-5073.{% endblock %}
 
 {% block extra_meta %}
 <link rel="alternate" hreflang="es-DO" href="https://www.draramirez.com/ginecologa-santo-domingo">
@@ -19,6 +19,38 @@
       href="{{ url_for('static', filename='images/dra-shirley-hero-bg.webp') }}?v=8"
       fetchpriority="high"
       type="image/webp">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "¿Atiendes pacientes de Santo Domingo aunque estés en Santo Domingo Este?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sí. Recibo pacientes de Santo Domingo y zonas cercanas. La ubicación está en la Zona Oriental (Santo Domingo Este)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Cómo agendo una cita con la ginecóloga?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Puedes agendar por WhatsApp al 829-740-5073 o usar el formulario de Solicitar cita en draramirez.com."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Eres ginecóloga y obstetra?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sí. Atiendo ginecología general y obstetricia, incluyendo control prenatal y seguimiento de embarazo."
+      }
+    }
+  ]
+}
+</script>
 {% endblock %}
 
 {% block content %}
