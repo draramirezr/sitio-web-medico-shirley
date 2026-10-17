@@ -15,138 +15,542 @@
 <link rel="alternate" hreflang="es-DO" href="https://www.draramirez.com/ginecologa-santo-domingo">
 <link rel="alternate" hreflang="ht" href="https://www.draramirez.com/jinekolojis-santo-domingo">
 <link rel="alternate" hreflang="x-default" href="https://www.draramirez.com/">
+<link rel="preload" as="image"
+      href="{{ url_for('static', filename='images/dra-shirley-hero-bg.webp') }}?v=8"
+      fetchpriority="high"
+      type="image/webp">
 {% endblock %}
 
 {% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-10">
-      <div class="mb-4 text-center">
-        <img
-          src="{{ url_for('static', filename='images/dra-shirley-share.jpg') }}?v=10"
-          alt="Dra. Shirley Ramírez, ginecóloga y obstetra en Santo Domingo Este"
-          width="1200"
-          height="630"
-          class="img-fluid rounded"
-          style="max-width:100%;height:auto;border-radius:16px;"
-          loading="eager"
-          decoding="async"
-        >
-      </div>
+<style>
+  .seo-sd-page {
+    --seo-ink: #3a2830;
+    --seo-muted: #6b5c62;
+    --seo-rose: #CEB0B7;
+    --seo-rose-deep: #6B3A4B;
+    --seo-cream: #faf6f7;
+  }
 
-      <p class="small text-muted mb-2">
-        <span style="color: var(--title-color); font-weight: 600;">Español</span>
+  .seo-sd-hero {
+    position: relative;
+    min-height: 88vh;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+    background: #6B3A4B;
+  }
+  .seo-sd-hero-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 18%;
+    z-index: 0;
+  }
+  .seo-sd-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(105deg, rgba(58, 40, 48, 0.88) 0%, rgba(107, 58, 75, 0.62) 45%, rgba(107, 58, 75, 0.22) 100%),
+      linear-gradient(180deg, rgba(58, 40, 48, 0.12) 0%, rgba(58, 40, 48, 0.55) 100%);
+  }
+  .seo-sd-hero-inner {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    padding: 7.5rem 0 4.5rem;
+  }
+  .seo-sd-lang {
+    color: rgba(255,255,255,0.72);
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+    margin-bottom: 1.1rem;
+  }
+  .seo-sd-lang a {
+    color: rgba(255,255,255,0.92);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255,255,255,0.35);
+  }
+  .seo-sd-lang a:hover { border-bottom-color: #fff; }
+  .seo-sd-brand {
+    font-family: "Playfair Display", serif;
+    font-weight: 700;
+    font-size: clamp(2.6rem, 5.5vw, 4.1rem);
+    line-height: 1.05;
+    color: #fff;
+    margin: 0 0 0.65rem;
+    max-width: 14ch;
+    opacity: 0;
+    transform: translateY(18px);
+    animation: seoSdIn 0.9s ease forwards 0.15s;
+  }
+  .seo-sd-headline {
+    font-family: "Be Vietnam Pro", system-ui, sans-serif;
+    font-weight: 600;
+    font-size: clamp(1.05rem, 2vw, 1.35rem);
+    color: rgba(255,255,255,0.92);
+    margin: 0 0 0.85rem;
+    letter-spacing: 0.01em;
+    opacity: 0;
+    transform: translateY(18px);
+    animation: seoSdIn 0.9s ease forwards 0.32s;
+  }
+  .seo-sd-lead {
+    color: rgba(255,255,255,0.82);
+    font-size: 1.05rem;
+    line-height: 1.65;
+    max-width: 34rem;
+    margin: 0 0 1.75rem;
+    opacity: 0;
+    transform: translateY(18px);
+    animation: seoSdIn 0.9s ease forwards 0.48s;
+  }
+  .seo-sd-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    opacity: 0;
+    transform: translateY(18px);
+    animation: seoSdIn 0.9s ease forwards 0.62s;
+  }
+  .seo-sd-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.9rem 1.35rem;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+  }
+  .seo-sd-btn:hover { transform: translateY(-2px); }
+  .seo-sd-btn--solid {
+    background: #fff;
+    color: var(--seo-rose-deep);
+  }
+  .seo-sd-btn--ghost {
+    background: transparent;
+    color: #fff;
+    border: 1.5px solid rgba(255,255,255,0.55);
+  }
+  .seo-sd-btn--ghost:hover {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+  }
+
+  @keyframes seoSdIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .seo-sd-section {
+    padding: 4.5rem 0;
+  }
+  .seo-sd-section--soft {
+    background:
+      radial-gradient(ellipse at top right, rgba(206,176,183,0.22), transparent 55%),
+      linear-gradient(180deg, #fff 0%, var(--seo-cream) 100%);
+  }
+  .seo-sd-kicker {
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--seo-rose-deep);
+    margin-bottom: 0.75rem;
+  }
+  .seo-sd-h2 {
+    font-family: "Playfair Display", serif;
+    font-weight: 700;
+    font-size: clamp(1.75rem, 3vw, 2.35rem);
+    color: var(--seo-ink);
+    margin: 0 0 0.85rem;
+    line-height: 1.15;
+  }
+  .seo-sd-copy {
+    color: var(--seo-muted);
+    font-size: 1.05rem;
+    line-height: 1.75;
+    max-width: 40rem;
+    margin: 0;
+  }
+
+  .seo-sd-trust {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 3rem;
+    align-items: center;
+  }
+  .seo-sd-trust-photo {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: 50% 20%;
+    border-radius: 0;
+  }
+  .seo-sd-trust-list {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0 0;
+  }
+  .seo-sd-trust-list li {
+    position: relative;
+    padding: 0.85rem 0 0.85rem 1.5rem;
+    border-top: 1px solid rgba(206,176,183,0.45);
+    color: var(--seo-ink);
+    font-weight: 600;
+    line-height: 1.45;
+  }
+  .seo-sd-trust-list li:last-child { border-bottom: 1px solid rgba(206,176,183,0.45); }
+  .seo-sd-trust-list li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 1.25rem;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--seo-rose);
+  }
+  .seo-sd-trust-list span {
+    display: block;
+    margin-top: 0.2rem;
+    color: var(--seo-muted);
+    font-weight: 400;
+    font-size: 0.95rem;
+  }
+
+  .seo-sd-services {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem 2.5rem;
+    margin-top: 2rem;
+  }
+  .seo-sd-service h3 {
+    font-family: "Playfair Display", serif;
+    font-size: 1.35rem;
+    color: var(--seo-ink);
+    margin: 0 0 0.4rem;
+  }
+  .seo-sd-service p {
+    color: var(--seo-muted);
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .seo-sd-place {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+    align-items: end;
+  }
+  .seo-sd-place-line {
+    width: 3rem;
+    height: 2px;
+    background: var(--seo-rose);
+    margin: 1.1rem 0;
+  }
+  .seo-sd-place a {
+    color: var(--seo-rose-deep);
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .seo-sd-place a:hover { text-decoration: underline; }
+
+  .seo-sd-faq .accordion-item {
+    border: none;
+    border-bottom: 1px solid rgba(206,176,183,0.5);
+    background: transparent;
+  }
+  .seo-sd-faq .accordion-button {
+    background: transparent;
+    box-shadow: none !important;
+    color: var(--seo-ink);
+    font-weight: 700;
+    font-size: 1.05rem;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .seo-sd-faq .accordion-button:not(.collapsed) {
+    background: transparent;
+    color: var(--seo-rose-deep);
+  }
+  .seo-sd-faq .accordion-body {
+    padding-left: 0;
+    color: var(--seo-muted);
+    line-height: 1.7;
+  }
+
+  .seo-sd-close {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #6B3A4B 0%, #8d5566 55%, #CEB0B7 140%);
+    color: #fff;
+    text-align: center;
+    padding: 4.5rem 1.25rem;
+  }
+  .seo-sd-close h2 {
+    font-family: "Playfair Display", serif;
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    margin: 0 0 0.75rem;
+  }
+  .seo-sd-close p {
+    max-width: 32rem;
+    margin: 0 auto 1.5rem;
+    color: rgba(255,255,255,0.85);
+    line-height: 1.65;
+  }
+  .seo-sd-close .seo-sd-btn--solid { color: #6B3A4B; }
+
+  .seo-sd-reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .seo-sd-reveal.is-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 900px) {
+    .seo-sd-hero { min-height: 78vh; align-items: center; }
+    .seo-sd-hero-inner { padding: 6.5rem 0 3.5rem; }
+    .seo-sd-trust,
+    .seo-sd-place,
+    .seo-sd-services { grid-template-columns: 1fr; gap: 1.5rem; }
+    .seo-sd-trust-photo { max-height: 420px; }
+  }
+</style>
+
+<section class="seo-sd-hero seo-sd-page">
+  <img
+    class="seo-sd-hero-bg"
+    src="{{ url_for('static', filename='images/dra-shirley-hero-bg.webp') }}?v=8"
+    alt="Dra. Shirley Ramírez, ginecóloga y obstetra en Santo Domingo Este"
+    width="1200"
+    height="1800"
+    fetchpriority="high"
+    decoding="async"
+  >
+  <div class="seo-sd-hero-inner">
+    <div class="container">
+      <p class="seo-sd-lang">
+        <strong>Español</strong>
         <span aria-hidden="true"> · </span>
-        <a href="{{ url_for('seo_jinekolojis_santo_domingo') }}" class="text-decoration-none" style="color: var(--title-color);">Kreyòl</a>
+        <a href="{{ url_for('seo_jinekolojis_santo_domingo') }}">Kreyòl</a>
       </p>
-
-      <h1 class="display-5 fw-bold mb-3" style="color: var(--title-color);">Ginecóloga en Santo Domingo Este</h1>
-      <p class="lead text-muted mb-4">
-        Soy la <strong>Dra. Shirley Ramírez</strong>, <strong>ginecóloga y obstetra</strong> en
-        <strong>Santo Domingo Este (Zona Oriental)</strong>. Atiendo pacientes de Santo Domingo y zonas cercanas
-        que buscan una consulta clara, cercana y profesional.
+      <p class="seo-sd-brand">Dra. Shirley Ramírez</p>
+      <h1 class="seo-sd-headline">Ginecóloga y obstetra en Santo Domingo Este</h1>
+      <p class="seo-sd-lead">
+        Consulta clara, cercana y profesional para pacientes de Santo Domingo y la Zona Oriental.
       </p>
-
-      <div class="row g-3 mb-4">
-        <div class="col-md-6">
-          <div class="p-3 h-100" style="background: rgba(206, 176, 183, 0.10); border-radius: 12px; border-left: 4px solid var(--primary-color);">
-            <h2 class="h5 fw-bold mb-2" style="color: var(--title-color);">Agenda rápida</h2>
-            <p class="text-muted mb-3">Escríbeme por WhatsApp y coordinamos tu cita.</p>
-            <a class="btn btn-primary" href="https://wa.me/18297405073?text=Hola,%20quiero%20agendar%20una%20cita%20de%20ginecolog%C3%ADa" target="_blank" rel="noopener noreferrer">
-              <i class="fab fa-whatsapp me-2"></i>WhatsApp 829-740-5073
-            </a>
-            <a class="btn btn-outline-primary ms-2" href="{{ url_for('request_appointment') }}">
-              <i class="fas fa-calendar-plus me-2"></i>Solicitar cita
-            </a>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="p-3 h-100" style="background: rgba(206, 176, 183, 0.10); border-radius: 12px; border-left: 4px solid var(--primary-color);">
-            <h2 class="h5 fw-bold mb-2" style="color: var(--title-color);">Ubicación</h2>
-            <p class="text-muted mb-2">
-              <strong>Santo Domingo Este (Zona Oriental)</strong>. Dirección: <strong>{{ site_address }}</strong>.
-            </p>
-            <a class="text-decoration-none" href="{{ site_maps_url }}" target="_blank" rel="noopener noreferrer">
-              <i class="fas fa-map-marker-alt me-2"></i>Ver en Google Maps
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <h2 class="h4 fw-bold mt-4" style="color: var(--title-color);">Servicios principales</h2>
-      <ul class="text-muted" style="line-height: 1.9;">
-        <li><strong>Consulta ginecológica</strong> y chequeo anual.</li>
-        <li><strong>Control prenatal</strong> y seguimiento de embarazo.</li>
-        <li><strong>Planificación familiar</strong> y orientación anticonceptiva.</li>
-        <li><strong>Ginecología estética</strong> (evaluación y orientación según el caso).</li>
-      </ul>
-
-      <h2 class="h4 fw-bold mt-4" style="color: var(--title-color);">Si buscas ginecólogo u obstetra en Santo Domingo</h2>
-      <p class="text-muted" style="line-height: 1.8;">
-        Muchas pacientes buscan los <strong>mejores ginecólogos en Santo Domingo</strong> por recomendaciones,
-        cercanía y confianza. Aquí encuentras atención personalizada, explicación clara de cada paso y facilidad
-        para agendar. Si necesitas una <strong>ginecóloga obstetra</strong> en Santo Domingo Este, puedes escribirme
-        hoy y te oriento según tu motivo de consulta.
-      </p>
-
-      <h2 class="h4 fw-bold mt-4" style="color: var(--title-color);">Preguntas frecuentes</h2>
-      <div class="accordion" id="faqSeoSd">
-        <div class="accordion-item">
-          <h3 class="accordion-header" id="q1">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#a1" aria-expanded="true" aria-controls="a1">
-              ¿Atiendes pacientes de Santo Domingo aunque estés en Santo Domingo Este?
-            </button>
-          </h3>
-          <div id="a1" class="accordion-collapse collapse show" aria-labelledby="q1" data-bs-parent="#faqSeoSd">
-            <div class="accordion-body text-muted">
-              Sí. Recibo pacientes de Santo Domingo y zonas cercanas. La ubicación está en la Zona Oriental (Santo Domingo Este).
-            </div>
-          </div>
-        </div>
-        <div class="accordion-item">
-          <h3 class="accordion-header" id="q2">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a2" aria-expanded="false" aria-controls="a2">
-              ¿Cómo agendo una cita?
-            </button>
-          </h3>
-          <div id="a2" class="accordion-collapse collapse" aria-labelledby="q2" data-bs-parent="#faqSeoSd">
-            <div class="accordion-body text-muted">
-              Puedes agendar por WhatsApp al <strong>829-740-5073</strong> o usar el formulario de “Solicitar cita”.
-            </div>
-          </div>
-        </div>
-        <div class="accordion-item">
-          <h3 class="accordion-header" id="q3">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a3" aria-expanded="false" aria-controls="a3">
-              ¿Qué debo llevar a la consulta?
-            </button>
-          </h3>
-          <div id="a3" class="accordion-collapse collapse" aria-labelledby="q3" data-bs-parent="#faqSeoSd">
-            <div class="accordion-body text-muted">
-              Si tienes estudios previos, resultados de laboratorios o historial médico, tráelos para una evaluación más completa.
-            </div>
-          </div>
-        </div>
-        <div class="accordion-item">
-          <h3 class="accordion-header" id="q4">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a4" aria-expanded="false" aria-controls="a4">
-              ¿Eres ginecóloga y obstetra?
-            </button>
-          </h3>
-          <div id="a4" class="accordion-collapse collapse" aria-labelledby="q4" data-bs-parent="#faqSeoSd">
-            <div class="accordion-body text-muted">
-              Sí. Atiendo ginecología general y obstetricia (control prenatal y seguimiento de embarazo), según cada caso.
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="text-center mt-5">
-        <a class="btn btn-primary btn-lg" href="https://wa.me/18297405073?text=Hola,%20quiero%20agendar%20una%20cita%20de%20ginecolog%C3%ADa" target="_blank" rel="noopener noreferrer">
-          <i class="fab fa-whatsapp me-2"></i>Agendar por WhatsApp
+      <div class="seo-sd-ctas">
+        <a class="seo-sd-btn seo-sd-btn--solid" href="{{ url_for('request_appointment') }}">
+          <i class="fas fa-calendar-plus" aria-hidden="true"></i> Solicitar cita
+        </a>
+        <a class="seo-sd-btn seo-sd-btn--ghost"
+           href="https://wa.me/18297405073?text=Hola,%20quiero%20agendar%20una%20cita%20de%20ginecolog%C3%ADa"
+           target="_blank" rel="noopener noreferrer">
+          <i class="fab fa-whatsapp" aria-hidden="true"></i> WhatsApp 829-740-5073
         </a>
       </div>
     </div>
   </div>
-</div>
+</section>
+
+<section class="seo-sd-section seo-sd-page seo-sd-section--soft">
+  <div class="container">
+    <div class="seo-sd-trust seo-sd-reveal">
+      <div>
+        <div class="seo-sd-kicker">Atención de confianza</div>
+        <h2 class="seo-sd-h2">Una consulta donde te escuchan y te explican</h2>
+        <p class="seo-sd-copy">
+          Soy la <strong>Dra. Shirley Ramírez</strong>, <strong>ginecóloga y obstetra</strong> en
+          <strong>Santo Domingo Este</strong>. Atiendo con calma, respeto y lenguaje claro:
+          para que salgas entendiendo tu plan de cuidado.
+        </p>
+        <ul class="seo-sd-trust-list">
+          <li>
+            Enfoque humano y profesional
+            <span>Sin prisa, con espacio para tus preguntas.</span>
+          </li>
+          <li>
+            Ginecología y obstetricia
+            <span>Chequeo anual, control prenatal y seguimiento de embarazo.</span>
+          </li>
+          <li>
+            Agenda simple
+            <span>Solicita cita en línea o escribe por WhatsApp.</span>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <img
+          class="seo-sd-trust-photo"
+          src="{{ url_for('static', filename='images/Sobremi1.png') }}"
+          alt="Dra. Shirley Ramírez en consulta ginecológica"
+          width="720"
+          height="900"
+          loading="lazy"
+          decoding="async"
+        >
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="seo-sd-section seo-sd-page">
+  <div class="container seo-sd-reveal">
+    <div class="seo-sd-kicker">Servicios principales</div>
+    <h2 class="seo-sd-h2">Cuidado integral para la mujer</h2>
+    <p class="seo-sd-copy">
+      Si buscas <strong>ginecóloga en Santo Domingo</strong> o una
+      <strong>ginecóloga obstetra</strong> cerca de la Zona Oriental, aquí encuentras
+      atención personalizada y pasos claros.
+    </p>
+    <div class="seo-sd-services">
+      <article class="seo-sd-service">
+        <h3>Consulta ginecológica</h3>
+        <p>Chequeo anual, evaluación y orientación según tu motivo de consulta.</p>
+      </article>
+      <article class="seo-sd-service">
+        <h3>Control prenatal</h3>
+        <p>Seguimiento de embarazo con acompañamiento cercano y ordenado.</p>
+      </article>
+      <article class="seo-sd-service">
+        <h3>Planificación familiar</h3>
+        <p>Orientación anticonceptiva adaptada a tu etapa y preferencias.</p>
+      </article>
+      <article class="seo-sd-service">
+        <h3>Ginecología estética</h3>
+        <p>Evaluación respetuosa y orientación según cada caso.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="seo-sd-section seo-sd-page seo-sd-section--soft">
+  <div class="container">
+    <div class="seo-sd-place seo-sd-reveal">
+      <div>
+        <div class="seo-sd-kicker">Ubicación</div>
+        <h2 class="seo-sd-h2">Consultorio en Santo Domingo Este</h2>
+        <div class="seo-sd-place-line" aria-hidden="true"></div>
+        <p class="seo-sd-copy">
+          <strong>{{ site_address }}</strong>.
+          Recibo pacientes de Santo Domingo y zonas cercanas.
+        </p>
+      </div>
+      <div>
+        <p class="seo-sd-copy mb-3">
+          Fácil de ubicar en la Zona Oriental. Coordina tu visita y te oriento con el horario.
+        </p>
+        <a href="{{ site_maps_url }}" target="_blank" rel="noopener noreferrer">
+          <i class="fas fa-map-marker-alt me-2" aria-hidden="true"></i>Ver en Google Maps
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="seo-sd-section seo-sd-page">
+  <div class="container seo-sd-reveal" style="max-width: 760px;">
+    <div class="seo-sd-kicker">Preguntas frecuentes</div>
+    <h2 class="seo-sd-h2">Lo que más preguntan antes de agendar</h2>
+    <div class="accordion seo-sd-faq mt-4" id="faqSeoSd">
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="q1">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#a1" aria-expanded="true" aria-controls="a1">
+            ¿Atiendes pacientes de Santo Domingo aunque estés en Santo Domingo Este?
+          </button>
+        </h3>
+        <div id="a1" class="accordion-collapse collapse show" aria-labelledby="q1" data-bs-parent="#faqSeoSd">
+          <div class="accordion-body">
+            Sí. Recibo pacientes de Santo Domingo y zonas cercanas. La ubicación está en la Zona Oriental (Santo Domingo Este).
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="q2">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a2" aria-expanded="false" aria-controls="a2">
+            ¿Cómo agendo una cita?
+          </button>
+        </h3>
+        <div id="a2" class="accordion-collapse collapse" aria-labelledby="q2" data-bs-parent="#faqSeoSd">
+          <div class="accordion-body">
+            Puedes agendar por WhatsApp al <strong>829-740-5073</strong> o usar el formulario de “Solicitar cita”.
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="q3">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a3" aria-expanded="false" aria-controls="a3">
+            ¿Qué debo llevar a la consulta?
+          </button>
+        </h3>
+        <div id="a3" class="accordion-collapse collapse" aria-labelledby="q3" data-bs-parent="#faqSeoSd">
+          <div class="accordion-body">
+            Si tienes estudios previos, resultados de laboratorios o historial médico, tráelos para una evaluación más completa.
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="q4">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a4" aria-expanded="false" aria-controls="a4">
+            ¿Eres ginecóloga y obstetra?
+          </button>
+        </h3>
+        <div id="a4" class="accordion-collapse collapse" aria-labelledby="q4" data-bs-parent="#faqSeoSd">
+          <div class="accordion-body">
+            Sí. Atiendo ginecología general y obstetricia (control prenatal y seguimiento de embarazo), según cada caso.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="seo-sd-close seo-sd-page">
+  <div class="container seo-sd-reveal">
+    <h2>Agenda tu consulta hoy</h2>
+    <p>
+      Si buscas una ginecóloga en Santo Domingo Este con atención cercana y profesional,
+      escríbeme y coordinamos tu cita.
+    </p>
+    <div class="seo-sd-ctas" style="justify-content:center;">
+      <a class="seo-sd-btn seo-sd-btn--solid"
+         href="https://wa.me/18297405073?text=Hola,%20quiero%20agendar%20una%20cita%20de%20ginecolog%C3%ADa"
+         target="_blank" rel="noopener noreferrer">
+        <i class="fab fa-whatsapp" aria-hidden="true"></i> Agendar por WhatsApp
+      </a>
+      <a class="seo-sd-btn seo-sd-btn--ghost" href="{{ url_for('request_appointment') }}">
+        Solicitar cita en línea
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  var nodes = document.querySelectorAll('.seo-sd-reveal');
+  if (!nodes.length) return;
+  if (!('IntersectionObserver' in window)) {
+    nodes.forEach(function (n) { n.classList.add('is-in'); });
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) {
+        e.target.classList.add('is-in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.16, rootMargin: '0px 0px -40px 0px' });
+  nodes.forEach(function (n) { io.observe(n); });
+})();
+</script>
 {% endblock %}
