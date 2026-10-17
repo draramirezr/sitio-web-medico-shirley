@@ -13,249 +13,566 @@
 <link rel="alternate" hreflang="ht" href="https://www.draramirez.com/jinekolojis-santo-domingo">
 <link rel="alternate" hreflang="es-DO" href="https://www.draramirez.com/ginecologa-santo-domingo">
 <link rel="alternate" hreflang="x-default" href="https://www.draramirez.com/">
+<link rel="preload" as="image"
+      href="{{ url_for('static', filename='images/dra-shirley-hero-bg.webp') }}?v=8"
+      fetchpriority="high"
+      type="image/webp">
 {% endblock %}
 
 {% block content %}
 <style>
   .seo-ht-page {
-    font-family: var(--font-body, 'Be Vietnam Pro', sans-serif);
-    color: var(--text-dark, #282828);
+    --seo-ink: #3a2830;
+    --seo-muted: #6b5c62;
+    --seo-rose: #CEB0B7;
+    --seo-rose-deep: #6B3A4B;
+    --seo-cream: #faf6f7;
   }
-  .seo-ht-page h1,
-  .seo-ht-page h2.h4,
-  .seo-ht-page .seo-ht-heading {
-    font-family: "Playfair Display", serif !important;
-    color: #8B5A6B !important;
-  }
-  .seo-ht-page h2.h5,
-  .seo-ht-page h3.h5 {
-    font-family: var(--font-titles, 'Montserrat', sans-serif) !important;
-    color: #8B5A6B !important;
-  }
-  .seo-ht-faq.accordion {
-    --bs-accordion-btn-bg: #fff;
-    --bs-accordion-active-bg: rgba(206, 176, 183, 0.14);
-    --bs-accordion-active-color: #8B5A6B;
-    --bs-accordion-btn-color: #4A4A4A;
-    --bs-accordion-border-color: rgba(206, 176, 183, 0.45);
-    --bs-accordion-btn-focus-border-color: rgba(206, 176, 183, 0.65);
-    --bs-accordion-btn-focus-box-shadow: 0 0 0 0.2rem rgba(206, 176, 183, 0.25);
-    --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%238B5A6B'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
-    --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%238B5A6B'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
-  }
-  .seo-ht-faq .accordion-item {
-    border: 1px solid rgba(206, 176, 183, 0.45);
-    border-radius: 12px !important;
+
+  .seo-ht-hero {
+    position: relative;
+    min-height: 88vh;
+    display: flex;
+    align-items: flex-end;
     overflow: hidden;
-    margin-bottom: 0.75rem;
-    background: #fff;
+    background: #6B3A4B;
   }
-  .seo-ht-faq .accordion-item:not(:first-of-type) {
-    border-top: 1px solid rgba(206, 176, 183, 0.45);
+  .seo-ht-hero-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 18%;
+    z-index: 0;
+  }
+  .seo-ht-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(105deg, rgba(58, 40, 48, 0.88) 0%, rgba(107, 58, 75, 0.62) 45%, rgba(107, 58, 75, 0.22) 100%),
+      linear-gradient(180deg, rgba(58, 40, 48, 0.12) 0%, rgba(58, 40, 48, 0.55) 100%);
+  }
+  .seo-ht-hero-inner {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    padding: 7.5rem 0 4.5rem;
+  }
+  .seo-ht-lang {
+    color: rgba(255,255,255,0.72);
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+    margin-bottom: 1.1rem;
+  }
+  .seo-ht-lang a {
+    color: rgba(255,255,255,0.92);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255,255,255,0.35);
+  }
+  .seo-ht-lang a:hover { border-bottom-color: #fff; }
+  .seo-ht-brand {
+    font-family: "Playfair Display", serif;
+    font-weight: 700;
+    font-size: clamp(2.6rem, 5.5vw, 4.1rem);
+    line-height: 1.05;
+    color: #fff;
+    margin: 0 0 0.65rem;
+    max-width: 14ch;
+    opacity: 0;
+    transform: translateY(18px);
+    animation: seoHtIn 0.9s ease forwards 0.15s;
+  }
+  .seo-ht-headline {
+    font-family: "Be Vietnam Pro", system-ui, sans-serif;
+    font-weight: 600;
+    font-size: clamp(1.05rem, 2vw, 1.35rem);
+    color: rgba(255,255,255,0.92);
+    margin: 0 0 0.85rem;
+    opacity: 0;
+    transform: translateY(18px);
+    animation: seoHtIn 0.9s ease forwards 0.32s;
+  }
+  .seo-ht-lead {
+    color: rgba(255,255,255,0.82);
+    font-size: 1.05rem;
+    line-height: 1.65;
+    max-width: 36rem;
+    margin: 0 0 1.75rem;
+    opacity: 0;
+    transform: translateY(18px);
+    animation: seoHtIn 0.9s ease forwards 0.48s;
+  }
+  .seo-ht-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    opacity: 0;
+    transform: translateY(18px);
+    animation: seoHtIn 0.9s ease forwards 0.62s;
+  }
+  .seo-ht-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.9rem 1.35rem;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+  }
+  .seo-ht-btn:hover { transform: translateY(-2px); }
+  .seo-ht-btn--solid {
+    background: #fff;
+    color: var(--seo-rose-deep);
+  }
+  .seo-ht-btn--ghost {
+    background: transparent;
+    color: #fff;
+    border: 1.5px solid rgba(255,255,255,0.55);
+  }
+  .seo-ht-btn--ghost:hover {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+  }
+
+  @keyframes seoHtIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .seo-ht-section { padding: 4.5rem 0; }
+  .seo-ht-section--soft {
+    background:
+      radial-gradient(ellipse at top right, rgba(206,176,183,0.22), transparent 55%),
+      linear-gradient(180deg, #fff 0%, var(--seo-cream) 100%);
+  }
+  .seo-ht-kicker {
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--seo-rose-deep);
+    margin-bottom: 0.75rem;
+  }
+  .seo-ht-h2 {
+    font-family: "Playfair Display", serif;
+    font-weight: 700;
+    font-size: clamp(1.75rem, 3vw, 2.35rem);
+    color: var(--seo-ink);
+    margin: 0 0 0.85rem;
+    line-height: 1.15;
+  }
+  .seo-ht-copy {
+    color: var(--seo-muted);
+    font-size: 1.05rem;
+    line-height: 1.75;
+    max-width: 40rem;
+    margin: 0;
+  }
+
+  .seo-ht-trust {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 3rem;
+    align-items: center;
+  }
+  .seo-ht-trust-photo {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: 50% 20%;
+  }
+  .seo-ht-trust-list {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0 0;
+  }
+  .seo-ht-trust-list li {
+    position: relative;
+    padding: 0.85rem 0 0.85rem 1.5rem;
+    border-top: 1px solid rgba(206,176,183,0.45);
+    color: var(--seo-ink);
+    font-weight: 600;
+    line-height: 1.45;
+  }
+  .seo-ht-trust-list li:last-child { border-bottom: 1px solid rgba(206,176,183,0.45); }
+  .seo-ht-trust-list li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 1.25rem;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--seo-rose);
+  }
+  .seo-ht-trust-list span {
+    display: block;
+    margin-top: 0.2rem;
+    color: var(--seo-muted);
+    font-weight: 400;
+    font-size: 0.95rem;
+  }
+
+  .seo-ht-pay {
+    margin-top: 1.75rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid rgba(206,176,183,0.45);
+    color: var(--seo-ink);
+    font-weight: 600;
+    line-height: 1.5;
+  }
+  .seo-ht-pay span {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--seo-muted);
+    font-weight: 400;
+    font-size: 0.95rem;
+  }
+
+  .seo-ht-services {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem 2.5rem;
+    margin-top: 2rem;
+  }
+  .seo-ht-service h3 {
+    font-family: "Playfair Display", serif;
+    font-size: 1.35rem;
+    color: var(--seo-ink);
+    margin: 0 0 0.4rem;
+  }
+  .seo-ht-service p {
+    color: var(--seo-muted);
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .seo-ht-place {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+    align-items: end;
+  }
+  .seo-ht-place-line {
+    width: 3rem;
+    height: 2px;
+    background: var(--seo-rose);
+    margin: 1.1rem 0;
+  }
+  .seo-ht-place a {
+    color: var(--seo-rose-deep);
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .seo-ht-place a:hover { text-decoration: underline; }
+
+  .seo-ht-faq .accordion-item {
+    border: none;
+    border-bottom: 1px solid rgba(206,176,183,0.5);
+    background: transparent;
   }
   .seo-ht-faq .accordion-button {
-    font-family: var(--font-body, 'Be Vietnam Pro', sans-serif) !important;
-    font-weight: 600;
-    font-size: 1rem;
-    color: #4A4A4A;
+    background: transparent;
     box-shadow: none !important;
+    color: var(--seo-ink);
+    font-weight: 700;
+    font-size: 1.05rem;
+    padding-left: 0;
+    padding-right: 0;
   }
   .seo-ht-faq .accordion-button:not(.collapsed) {
-    color: #8B5A6B;
-    background: rgba(206, 176, 183, 0.14);
+    background: transparent;
+    color: var(--seo-rose-deep);
   }
   .seo-ht-faq .accordion-body {
-    font-family: var(--font-body, 'Be Vietnam Pro', sans-serif) !important;
-    color: #6B6B6B;
-    line-height: 1.75;
+    padding-left: 0;
+    color: var(--seo-muted);
+    line-height: 1.7;
+  }
+
+  .seo-ht-close {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #6B3A4B 0%, #8d5566 55%, #CEB0B7 140%);
+    color: #fff;
+    text-align: center;
+    padding: 4.5rem 1.25rem;
+  }
+  .seo-ht-close h2 {
+    font-family: "Playfair Display", serif;
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    margin: 0 0 0.75rem;
+  }
+  .seo-ht-close p {
+    max-width: 32rem;
+    margin: 0 auto 1.5rem;
+    color: rgba(255,255,255,0.85);
+    line-height: 1.65;
+  }
+  .seo-ht-close .seo-ht-btn--solid { color: #6B3A4B; }
+
+  .seo-ht-reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .seo-ht-reveal.is-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 900px) {
+    .seo-ht-hero { min-height: 78vh; align-items: center; }
+    .seo-ht-hero-inner { padding: 6.5rem 0 3.5rem; }
+    .seo-ht-trust,
+    .seo-ht-place,
+    .seo-ht-services { grid-template-columns: 1fr; gap: 1.5rem; }
+    .seo-ht-trust-photo { max-height: 420px; }
   }
 </style>
-<div class="container py-5 seo-ht-page">
-  <div class="row justify-content-center">
-    <div class="col-lg-10">
-      <div class="mb-4 text-center">
-        <img
-          src="{{ url_for('static', filename='images/dra-shirley-share.jpg') }}?v=10"
-          alt="Dra. Shirley Ramírez, doktè fanm / jinekològ nan Santo Domingo Este"
-          width="1200"
-          height="630"
-          class="img-fluid rounded"
-          style="max-width:100%;height:auto;border-radius:16px;"
-          loading="eager"
-          decoding="async"
-        >
-      </div>
 
-      <p class="small text-muted mb-2">
-        <span style="color: #8B5A6B; font-weight: 600;">Lang:</span>
-        <a href="{{ url_for('index') }}" class="text-decoration-none" style="color: #8B5A6B;">Español</a>
+<section class="seo-ht-hero seo-ht-page">
+  <img
+    class="seo-ht-hero-bg"
+    src="{{ url_for('static', filename='images/dra-shirley-hero-bg.webp') }}?v=8"
+    alt="Dra. Shirley Ramírez, doktè fanm / jinekològ nan Santo Domingo Este"
+    width="1200"
+    height="1800"
+    fetchpriority="high"
+    decoding="async"
+  >
+  <div class="seo-ht-hero-inner">
+    <div class="container">
+      <p class="seo-ht-lang">
+        <a href="{{ url_for('seo_ginecologa_santo_domingo') }}">Español</a>
         <span aria-hidden="true"> · </span>
-        <span style="color: #8B5A6B; font-weight: 700;">Kreyòl</span>
+        <strong>Kreyòl</strong>
       </p>
-
-      <h1 class="display-5 fw-bold mb-3 seo-ht-heading">Jinekològ nan Santo Domingo Este</h1>
-      <p class="lead text-muted mb-3">
-        Bonjou. Mwen se <strong>Dra. Shirley Ramírez</strong>, <strong>doktè fanm</strong>
-        (jinekològ ak obstetrik) nan <strong>Santo Domingo Este (Zòn Oriental)</strong>.
+      <p class="seo-ht-brand">Dra. Shirley Ramírez</p>
+      <h1 class="seo-ht-headline">Jinekològ nan Santo Domingo Este</h1>
+      <p class="seo-ht-lead">
+        Doktè fanm nan Zòn Oriental. Konsiltasyon klè, respektè, an kreyòl oswa panyòl.
       </p>
-      <p class="text-muted mb-4" style="line-height: 1.85;">
-        N ap resevwa pasyan ki pale <strong>kreyòl</strong> ak <strong>panyòl</strong>.
-        Ou ka ekri nou nan lang ou pi alèz. Nou ofri konsiltasyon, chèkè, swen gwosès ak planin familyal
-        ak yon atansyon respektè ak klè.
-      </p>
-
-      <div class="row g-3 mb-4">
-        <div class="col-md-6">
-          <div class="p-3 h-100" style="background: rgba(206, 176, 183, 0.10); border-radius: 12px; border-left: 4px solid #CEB0B7;">
-            <h2 class="h5 fw-bold mb-2">Pran randevou</h2>
-            <p class="text-muted mb-3">
-              Voye mesaj sou WhatsApp. N ap ede w chwazi kalite konsiltasyon an epi fikse jou a.
-            </p>
-            <a class="btn btn-primary"
-               href="https://wa.me/18297405073?text=Bonjou%20Dokt%C3%A8%2C%20mwen%20ta%20renmen%20pran%20yon%20randevou%20(jinekol%C3%B2g)."
-               target="_blank"
-               rel="noopener noreferrer"
-               data-gtm-event="whatsapp_click"
-               data-gtm-location="seo_kreyol">
-              <i class="fab fa-whatsapp me-2"></i>WhatsApp 829-740-5073
-            </a>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="p-3 h-100" style="background: rgba(206, 176, 183, 0.10); border-radius: 12px; border-left: 4px solid #CEB0B7;">
-            <h2 class="h5 fw-bold mb-2">Adrès</h2>
-            <p class="text-muted mb-2">
-              <strong>Santo Domingo Este (Zòn Oriental)</strong>.<br>
-              Adrès: <strong>{{ site_address }}</strong>.
-            </p>
-            <a class="text-decoration-none" href="{{ site_maps_url }}" target="_blank" rel="noopener noreferrer" style="color: #8B5A6B;">
-              <i class="fas fa-map-marker-alt me-2"></i>Wè nan Google Maps
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <div class="p-3 mb-4" style="background: rgba(206, 176, 183, 0.10); border-radius: 12px; border: 1px solid rgba(206, 176, 183, 0.35);">
-        <h2 class="h5 fw-bold mb-2">
-          <i class="fas fa-credit-card me-2" aria-hidden="true"></i>Pèyman
-        </h2>
-        <p class="text-muted mb-0">
-          <strong>Wi, nou aksepte kat kredi</strong> (tout tip kat kredi).
-          Ou ka mande detay sou WhatsApp anvan randevou a.
-        </p>
-      </div>
-
-      <h2 class="h4 fw-bold mt-4 seo-ht-heading">Sèvis prensipal</h2>
-      <div class="row g-3">
-        <div class="col-md-6">
-          <div class="p-3 h-100" style="border: 1px solid rgba(206, 176, 183, 0.35); border-radius: 12px;">
-            <h3 class="h5 fw-bold mb-2">Konsiltasyon / chèkè</h3>
-            <p class="text-muted mb-0">
-              Egzamen ak oryantasyon pou sante fanm. Prevansyon ak swen regilye.
-            </p>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="p-3 h-100" style="border: 1px solid rgba(206, 176, 183, 0.35); border-radius: 12px;">
-            <h3 class="h5 fw-bold mb-2">Swen gwosès</h3>
-            <p class="text-muted mb-0">
-              Kontwòl prenatal (swen pandan w ansent) ak swivi gwosès.
-            </p>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="p-3 h-100" style="border: 1px solid rgba(206, 176, 183, 0.35); border-radius: 12px;">
-            <h3 class="h5 fw-bold mb-2">Planin familyal</h3>
-            <p class="text-muted mb-0">
-              Konsèy sou metòd kontrasepsyon selon sitiyasyon w.
-            </p>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="p-3 h-100" style="border: 1px solid rgba(206, 176, 183, 0.35); border-radius: 12px;">
-            <h3 class="h5 fw-bold mb-2">Sante fanm</h3>
-            <p class="text-muted mb-0">
-              Atansyon respektè pou diferan etap nan lavi w.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <h2 class="h4 fw-bold mt-5 seo-ht-heading">Kesyon yo poze souvan</h2>
-      <div class="accordion seo-ht-faq" id="faqSeoHt">
-        <div class="accordion-item">
-          <h3 class="accordion-header" id="qht1">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#aht1" aria-expanded="true" aria-controls="aht1">
-              Èske nou aksepte pèyman ak kat kredi?
-            </button>
-          </h3>
-          <div id="aht1" class="accordion-collapse collapse show" aria-labelledby="qht1" data-bs-parent="#faqSeoHt">
-            <div class="accordion-body">
-              <strong>Wi.</strong> Nou aksepte <strong>kat kredi</strong> (tout tip kat kredi).
-              Si ou gen yon kesyon sou pèyman an, ekri nou sou WhatsApp anvan randevou a.
-            </div>
-          </div>
-        </div>
-        <div class="accordion-item">
-          <h3 class="accordion-header" id="qht2">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#aht2" aria-expanded="false" aria-controls="aht2">
-              Kijan pou m pran randevou?
-            </button>
-          </h3>
-          <div id="aht2" class="accordion-collapse collapse" aria-labelledby="qht2" data-bs-parent="#faqSeoHt">
-            <div class="accordion-body">
-              Voye mesaj sou WhatsApp nan <strong>829-740-5073</strong>.
-              Di nou ki tip konsiltasyon ou bezwen epi n ap fikse jou ak lè a.
-            </div>
-          </div>
-        </div>
-        <div class="accordion-item">
-          <h3 class="accordion-header" id="qht3">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#aht3" aria-expanded="false" aria-controls="aht3">
-              Ki kote klinik la ye?
-            </button>
-          </h3>
-          <div id="aht3" class="accordion-collapse collapse" aria-labelledby="qht3" data-bs-parent="#faqSeoHt">
-            <div class="accordion-body">
-              Nan <strong>Santo Domingo Este (Zòn Oriental)</strong>: {{ site_address }}.
-              Ou ka wè li sou Google Maps.
-            </div>
-          </div>
-        </div>
-        <div class="accordion-item">
-          <h3 class="accordion-header" id="qht4">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#aht4" aria-expanded="false" aria-controls="aht4">
-              Èske nou travay ak asirans (ARS)?
-            </button>
-          </h3>
-          <div id="aht4" class="accordion-collapse collapse" aria-labelledby="qht4" data-bs-parent="#faqSeoHt">
-            <div class="accordion-body">
-              Nou travay ak plizyè asirans medikal (ARS).
-              Ekri nou sou WhatsApp ak non asirans ou a pou n konfime.
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="text-center mt-5">
-        <a class="btn btn-primary btn-lg"
+      <div class="seo-ht-ctas">
+        <a class="seo-ht-btn seo-ht-btn--solid"
            href="https://wa.me/18297405073?text=Bonjou%20Dokt%C3%A8%2C%20mwen%20ta%20renmen%20pran%20yon%20randevou%20(jinekol%C3%B2g)."
            target="_blank"
            rel="noopener noreferrer"
            data-gtm-event="whatsapp_click"
-           data-gtm-location="seo_kreyol_cta">
-          <i class="fab fa-whatsapp me-2"></i>Pran randevou sou WhatsApp
+           data-gtm-location="seo_kreyol">
+          <i class="fab fa-whatsapp" aria-hidden="true"></i> WhatsApp 829-740-5073
         </a>
-        <p class="text-muted small mt-3 mb-0">
-          WhatsApp · Nou aksepte kat kredi
-        </p>
+        <a class="seo-ht-btn seo-ht-btn--ghost" href="{{ url_for('request_appointment') }}">
+          <i class="fas fa-calendar-plus" aria-hidden="true"></i> Pran randevou
+        </a>
       </div>
-
-      <p class="text-muted small text-center mt-4 mb-0">
-        Paj an kreyòl ·
-        <a href="{{ url_for('index') }}" style="color: #8B5A6B;">Español (paj prensipal)</a>
-      </p>
     </div>
   </div>
-</div>
+</section>
+
+<section class="seo-ht-section seo-ht-page seo-ht-section--soft">
+  <div class="container">
+    <div class="seo-ht-trust seo-ht-reveal">
+      <div>
+        <div class="seo-ht-kicker">Akeyi an kreyòl</div>
+        <h2 class="seo-ht-h2">Yon konsiltasyon kote yo tande w</h2>
+        <p class="seo-ht-copy">
+          Bonjou. Mwen se <strong>Dra. Shirley Ramírez</strong>, <strong>doktè fanm</strong>
+          (jinekològ ak obstetrik) nan <strong>Santo Domingo Este (Zòn Oriental)</strong>.
+          N ap resevwa pasyan ki pale <strong>kreyòl</strong> ak <strong>panyòl</strong>.
+        </p>
+        <ul class="seo-ht-trust-list">
+          <li>
+            Lang ou pi alèz
+            <span>Ou ka ekri nou an kreyòl oswa an panyòl.</span>
+          </li>
+          <li>
+            Atansyon klè ak respektè
+            <span>Nou eksplike chak etap san prese.</span>
+          </li>
+          <li>
+            Randevou fasil
+            <span>WhatsApp oswa fòm sou entènèt.</span>
+          </li>
+        </ul>
+        <div class="seo-ht-pay">
+          Nou aksepte kat kredi
+          <span>Tout tip kat kredi. Ou ka mande detay sou WhatsApp anvan randevou a.</span>
+        </div>
+      </div>
+      <div>
+        <img
+          class="seo-ht-trust-photo"
+          src="{{ url_for('static', filename='images/Sobremi1.png') }}"
+          alt="Dra. Shirley Ramírez, doktè fanm nan Santo Domingo Este"
+          width="720"
+          height="900"
+          loading="lazy"
+          decoding="async"
+        >
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="seo-ht-section seo-ht-page">
+  <div class="container seo-ht-reveal">
+    <div class="seo-ht-kicker">Sèvis prensipal</div>
+    <h2 class="seo-ht-h2">Swen pou sante fanm</h2>
+    <p class="seo-ht-copy">
+      Konsiltasyon, chèkè, swen gwosès ak planin familyal ak yon atansyon respektè.
+    </p>
+    <div class="seo-ht-services">
+      <article class="seo-ht-service">
+        <h3>Konsiltasyon / chèkè</h3>
+        <p>Egzamen ak oryantasyon pou sante fanm. Prevansyon ak swen regilye.</p>
+      </article>
+      <article class="seo-ht-service">
+        <h3>Swen gwosès</h3>
+        <p>Kontwòl prenatal (swen pandan w ansent) ak swivi gwosès.</p>
+      </article>
+      <article class="seo-ht-service">
+        <h3>Planin familyal</h3>
+        <p>Konsèy sou metòd kontrasepsyon selon sitiyasyon w.</p>
+      </article>
+      <article class="seo-ht-service">
+        <h3>Sante fanm</h3>
+        <p>Atansyon respektè pou diferan etap nan lavi w.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="seo-ht-section seo-ht-page seo-ht-section--soft">
+  <div class="container">
+    <div class="seo-ht-place seo-ht-reveal">
+      <div>
+        <div class="seo-ht-kicker">Adrès</div>
+        <h2 class="seo-ht-h2">Klinik nan Santo Domingo Este</h2>
+        <div class="seo-ht-place-line" aria-hidden="true"></div>
+        <p class="seo-ht-copy">
+          <strong>Santo Domingo Este (Zòn Oriental)</strong>.<br>
+          Adrès: <strong>{{ site_address }}</strong>.
+        </p>
+      </div>
+      <div>
+        <p class="seo-ht-copy mb-3">
+          Fasil pou jwenn nan Zòn Oriental. N ap oryante w sou jou ak lè a.
+        </p>
+        <a href="{{ site_maps_url }}" target="_blank" rel="noopener noreferrer">
+          <i class="fas fa-map-marker-alt me-2" aria-hidden="true"></i>Wè nan Google Maps
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="seo-ht-section seo-ht-page">
+  <div class="container seo-ht-reveal" style="max-width: 760px;">
+    <div class="seo-ht-kicker">Kesyon yo poze souvan</div>
+    <h2 class="seo-ht-h2">Sa anpil moun mande anvan yo pran randevou</h2>
+    <div class="accordion seo-ht-faq mt-4" id="faqSeoHt">
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="qht1">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#aht1" aria-expanded="true" aria-controls="aht1">
+            Èske nou aksepte pèyman ak kat kredi?
+          </button>
+        </h3>
+        <div id="aht1" class="accordion-collapse collapse show" aria-labelledby="qht1" data-bs-parent="#faqSeoHt">
+          <div class="accordion-body">
+            <strong>Wi.</strong> Nou aksepte <strong>kat kredi</strong> (tout tip kat kredi).
+            Si ou gen yon kesyon sou pèyman an, ekri nou sou WhatsApp anvan randevou a.
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="qht2">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#aht2" aria-expanded="false" aria-controls="aht2">
+            Kijan pou m pran randevou?
+          </button>
+        </h3>
+        <div id="aht2" class="accordion-collapse collapse" aria-labelledby="qht2" data-bs-parent="#faqSeoHt">
+          <div class="accordion-body">
+            Voye mesaj sou WhatsApp nan <strong>829-740-5073</strong>.
+            Di nou ki tip konsiltasyon ou bezwen epi n ap fikse jou ak lè a.
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="qht3">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#aht3" aria-expanded="false" aria-controls="aht3">
+            Ki kote klinik la ye?
+          </button>
+        </h3>
+        <div id="aht3" class="accordion-collapse collapse" aria-labelledby="qht3" data-bs-parent="#faqSeoHt">
+          <div class="accordion-body">
+            Nan <strong>Santo Domingo Este (Zòn Oriental)</strong>: {{ site_address }}.
+            Ou ka wè li sou Google Maps.
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="qht4">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#aht4" aria-expanded="false" aria-controls="aht4">
+            Èske nou travay ak asirans (ARS)?
+          </button>
+        </h3>
+        <div id="aht4" class="accordion-collapse collapse" aria-labelledby="qht4" data-bs-parent="#faqSeoHt">
+          <div class="accordion-body">
+            Nou travay ak plizyè asirans medikal (ARS).
+            Ekri nou sou WhatsApp ak non asirans ou a pou n konfime.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="seo-ht-close seo-ht-page">
+  <div class="container seo-ht-reveal">
+    <h2>Pran randevou jodi a</h2>
+    <p>
+      Si w ap chèche yon doktè fanm nan Santo Domingo Este, ekri nou.
+      Nou aksepte kat kredi.
+    </p>
+    <div class="seo-ht-ctas" style="justify-content:center;">
+      <a class="seo-ht-btn seo-ht-btn--solid"
+         href="https://wa.me/18297405073?text=Bonjou%20Dokt%C3%A8%2C%20mwen%20ta%20renmen%20pran%20yon%20randevou%20(jinekol%C3%B2g)."
+         target="_blank"
+         rel="noopener noreferrer"
+         data-gtm-event="whatsapp_click"
+         data-gtm-location="seo_kreyol_cta">
+        <i class="fab fa-whatsapp" aria-hidden="true"></i> Pran randevou sou WhatsApp
+      </a>
+      <a class="seo-ht-btn seo-ht-btn--ghost" href="{{ url_for('seo_ginecologa_santo_domingo') }}">
+        Español
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  var nodes = document.querySelectorAll('.seo-ht-reveal');
+  if (!nodes.length) return;
+  if (!('IntersectionObserver' in window)) {
+    nodes.forEach(function (n) { n.classList.add('is-in'); });
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) {
+        e.target.classList.add('is-in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.16, rootMargin: '0px 0px -40px 0px' });
+  nodes.forEach(function (n) { io.observe(n); });
+})();
+</script>
 {% endblock %}
