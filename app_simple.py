@@ -11224,6 +11224,7 @@ Allow: /static/
 Allow: /images/
 Allow: /css/
 Allow: /js/
+Allow: /llms.txt
 
 # Bloquear acceso a secciones privadas
 Disallow: /admin/
@@ -11245,6 +11246,25 @@ Sitemap: {base_url}/sitemap.xml
 """
     response = make_response(content)
     response.headers["Content-Type"] = "text/plain"
+    response.headers['Cache-Control'] = 'public, max-age=3600'
+    return response
+
+
+@app.route('/llms.txt')
+def llms_txt():
+    """Resumen del consultorio para crawlers / asistentes de IA."""
+    path = os.path.join(app.root_path, 'static', 'llms.txt')
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            content = f.read()
+    except OSError:
+        content = (
+            "# Dra. Shirley Ramírez\n"
+            f"# {_canonical_base_url()}\n"
+            "Ginecóloga y obstetra en Santo Domingo Este. WhatsApp: +1 829-740-5073\n"
+        )
+    response = make_response(content)
+    response.headers['Content-Type'] = 'text/plain; charset=utf-8'
     response.headers['Cache-Control'] = 'public, max-age=3600'
     return response
 
