@@ -9,108 +9,440 @@
 {% block schema_page_name %}Médico ginecólogo Zona Oriental | Dra. Shirley Ramírez{% endblock %}
 {% block schema_page_description %}Médica ginecóloga y obstetra en Zona Oriental, Santo Domingo Este.{% endblock %}
 
+{% block extra_meta %}
+<link rel="preload" as="image"
+      href="{{ url_for('static', filename='images/dra-shirley-hero-bg.webp') }}?v=8"
+      fetchpriority="high"
+      type="image/webp">
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-10">
-      <div class="mb-4 text-center">
-        <img
-          src="{{ url_for('static', filename='images/dra-shirley-share.jpg') }}?v=10"
-          alt="Dra. Shirley Ramírez, médica ginecóloga y obstetra en Zona Oriental, Santo Domingo Este"
-          width="1200"
-          height="630"
-          class="img-fluid rounded"
-          style="max-width:100%;height:auto;border-radius:16px;"
-          loading="eager"
-          decoding="async"
-        >
-      </div>
+<style>
+  .seo-zo-page {
+    --seo-ink: #3a2830;
+    --seo-muted: #6b5c62;
+    --seo-rose: #CEB0B7;
+    --seo-rose-deep: #6B3A4B;
+    --seo-cream: #faf6f7;
+  }
 
-      <h1 class="display-5 fw-bold mb-3" style="color: var(--title-color);">Médico ginecólogo en Zona Oriental</h1>
-      <p class="lead text-muted mb-4">
-        Si buscas un <strong>médico ginecólogo</strong>, <strong>ginecólogo zona oriental</strong> o
-        <strong>médica ginecóloga en Santo Domingo Este</strong>, soy la
-        <strong>Dra. Shirley Ramírez</strong>, <strong>Ginecóloga y Obstetra</strong>.
+  .seo-zo-hero {
+    position: relative;
+    min-height: 88vh;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+    background: #6B3A4B;
+  }
+  .seo-zo-hero-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 18%;
+    z-index: 0;
+  }
+  .seo-zo-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(105deg, rgba(58, 40, 48, 0.88) 0%, rgba(107, 58, 75, 0.62) 45%, rgba(107, 58, 75, 0.22) 100%),
+      linear-gradient(180deg, rgba(58, 40, 48, 0.12) 0%, rgba(58, 40, 48, 0.55) 100%);
+  }
+  .seo-zo-hero-inner {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    padding: 7.5rem 0 4.5rem;
+  }
+  .seo-zo-brand {
+    font-family: "Playfair Display", serif;
+    font-weight: 700;
+    font-size: clamp(2.6rem, 5.5vw, 4.1rem);
+    line-height: 1.05;
+    color: #fff;
+    margin: 0 0 0.65rem;
+    max-width: 14ch;
+    opacity: 0;
+    transform: translateY(18px);
+    animation: seoZoIn 0.9s ease forwards 0.15s;
+  }
+  .seo-zo-headline {
+    font-family: "Be Vietnam Pro", system-ui, sans-serif;
+    font-weight: 600;
+    font-size: clamp(1.05rem, 2vw, 1.35rem);
+    color: rgba(255,255,255,0.92);
+    margin: 0 0 0.85rem;
+    opacity: 0;
+    transform: translateY(18px);
+    animation: seoZoIn 0.9s ease forwards 0.32s;
+  }
+  .seo-zo-lead {
+    color: rgba(255,255,255,0.82);
+    font-size: 1.05rem;
+    line-height: 1.65;
+    max-width: 34rem;
+    margin: 0 0 1.75rem;
+    opacity: 0;
+    transform: translateY(18px);
+    animation: seoZoIn 0.9s ease forwards 0.48s;
+  }
+  .seo-zo-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    opacity: 0;
+    transform: translateY(18px);
+    animation: seoZoIn 0.9s ease forwards 0.62s;
+  }
+  .seo-zo-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.9rem 1.35rem;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+  }
+  .seo-zo-btn:hover { transform: translateY(-2px); }
+  .seo-zo-btn--solid {
+    background: #fff;
+    color: var(--seo-rose-deep);
+  }
+  .seo-zo-btn--ghost {
+    background: transparent;
+    color: #fff;
+    border: 1.5px solid rgba(255,255,255,0.55);
+  }
+  .seo-zo-btn--ghost:hover {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+  }
+
+  @keyframes seoZoIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .seo-zo-section { padding: 4.5rem 0; }
+  .seo-zo-section--soft {
+    background:
+      radial-gradient(ellipse at top right, rgba(206,176,183,0.22), transparent 55%),
+      linear-gradient(180deg, #fff 0%, var(--seo-cream) 100%);
+  }
+  .seo-zo-kicker {
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--seo-rose-deep);
+    margin-bottom: 0.75rem;
+  }
+  .seo-zo-h2 {
+    font-family: "Playfair Display", serif;
+    font-weight: 700;
+    font-size: clamp(1.75rem, 3vw, 2.35rem);
+    color: var(--seo-ink);
+    margin: 0 0 0.85rem;
+    line-height: 1.15;
+  }
+  .seo-zo-copy {
+    color: var(--seo-muted);
+    font-size: 1.05rem;
+    line-height: 1.75;
+    max-width: 40rem;
+    margin: 0;
+  }
+
+  .seo-zo-trust {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 3rem;
+    align-items: center;
+  }
+  .seo-zo-trust-photo {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: 50% 20%;
+  }
+  .seo-zo-trust-list {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0 0;
+  }
+  .seo-zo-trust-list li {
+    position: relative;
+    padding: 0.85rem 0 0.85rem 1.5rem;
+    border-top: 1px solid rgba(206,176,183,0.45);
+    color: var(--seo-ink);
+    font-weight: 600;
+    line-height: 1.45;
+  }
+  .seo-zo-trust-list li:last-child { border-bottom: 1px solid rgba(206,176,183,0.45); }
+  .seo-zo-trust-list li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 1.25rem;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--seo-rose);
+  }
+  .seo-zo-trust-list span {
+    display: block;
+    margin-top: 0.2rem;
+    color: var(--seo-muted);
+    font-weight: 400;
+    font-size: 0.95rem;
+  }
+
+  .seo-zo-services {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem 2.5rem;
+    margin-top: 2rem;
+  }
+  .seo-zo-service h3 {
+    font-family: "Playfair Display", serif;
+    font-size: 1.35rem;
+    color: var(--seo-ink);
+    margin: 0 0 0.4rem;
+  }
+  .seo-zo-service p {
+    color: var(--seo-muted);
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .seo-zo-place {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+    align-items: end;
+  }
+  .seo-zo-place-line {
+    width: 3rem;
+    height: 2px;
+    background: var(--seo-rose);
+    margin: 1.1rem 0;
+  }
+  .seo-zo-place a {
+    color: var(--seo-rose-deep);
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .seo-zo-place a:hover { text-decoration: underline; }
+
+  .seo-zo-close {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #6B3A4B 0%, #8d5566 55%, #CEB0B7 140%);
+    color: #fff;
+    text-align: center;
+    padding: 4.5rem 1.25rem;
+  }
+  .seo-zo-close h2 {
+    font-family: "Playfair Display", serif;
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    margin: 0 0 0.75rem;
+  }
+  .seo-zo-close p {
+    max-width: 32rem;
+    margin: 0 auto 1.5rem;
+    color: rgba(255,255,255,0.85);
+    line-height: 1.65;
+  }
+  .seo-zo-close .seo-zo-btn--solid { color: #6B3A4B; }
+
+  .seo-zo-reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .seo-zo-reveal.is-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 900px) {
+    .seo-zo-hero { min-height: 78vh; align-items: center; }
+    .seo-zo-hero-inner { padding: 6.5rem 0 3.5rem; }
+    .seo-zo-trust,
+    .seo-zo-place,
+    .seo-zo-services { grid-template-columns: 1fr; gap: 1.5rem; }
+    .seo-zo-trust-photo { max-height: 420px; }
+  }
+</style>
+
+<section class="seo-zo-hero seo-zo-page">
+  <img
+    class="seo-zo-hero-bg"
+    src="{{ url_for('static', filename='images/dra-shirley-hero-bg.webp') }}?v=8"
+    alt="Dra. Shirley Ramírez, médica ginecóloga y obstetra en Zona Oriental, Santo Domingo Este"
+    width="1200"
+    height="1800"
+    fetchpriority="high"
+    decoding="async"
+  >
+  <div class="seo-zo-hero-inner">
+    <div class="container">
+      <p class="seo-zo-brand">Dra. Shirley Ramírez</p>
+      <h1 class="seo-zo-headline">Médica ginecóloga en Zona Oriental</h1>
+      <p class="seo-zo-lead">
+        Consulta ginecológica y obstétrica en Santo Domingo Este, con atención clara y cercana.
       </p>
-
-      <div class="row g-3 mb-4">
-        <div class="col-md-6">
-          <div class="p-3 h-100" style="background: rgba(206, 176, 183, 0.10); border-radius: 12px; border-left: 4px solid var(--primary-color);">
-            <h2 class="h5 fw-bold mb-2" style="color: var(--title-color);">Agendar cita</h2>
-            <p class="text-muted mb-3">
-              Puedes agendar en línea o escribir por WhatsApp. Te ayudamos a elegir el tipo de consulta.
-            </p>
-            <a class="btn btn-primary" href="{{ url_for('request_appointment') }}">
-              <i class="fas fa-calendar-plus me-2"></i>Solicitar cita
-            </a>
-            <a class="btn btn-outline-primary ms-2" href="https://wa.me/18297405073?text=Hola,%20quiero%20agendar%20una%20cita%20de%20ginecolog%C3%ADa%20en%20Zona%20Oriental" target="_blank" rel="noopener noreferrer">
-              <i class="fab fa-whatsapp me-2"></i>WhatsApp
-            </a>
-          </div>
-        </div>
-
-        <div class="col-md-6">
-          <div class="p-3 h-100" style="background: rgba(206, 176, 183, 0.10); border-radius: 12px; border-left: 4px solid var(--primary-color);">
-            <h2 class="h5 fw-bold mb-2" style="color: var(--title-color);">Ubicación</h2>
-            <p class="text-muted mb-2">
-              <strong>{{ site_address }}</strong>.
-            </p>
-            <a class="text-decoration-none" href="{{ site_maps_url }}" target="_blank" rel="noopener noreferrer">
-              <i class="fas fa-map-marker-alt me-2"></i>Ver en Google Maps
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <h2 class="h4 fw-bold mt-4" style="color: var(--title-color);">Servicios más solicitados</h2>
-      <div class="row g-3">
-        <div class="col-md-6">
-          <div class="p-3 h-100" style="border: 1px solid rgba(206, 176, 183, 0.35); border-radius: 12px;">
-            <h3 class="h5 fw-bold mb-2" style="color: var(--title-color);">Chequeo ginecológico</h3>
-            <p class="text-muted mb-0">
-              Orientación y evaluación en consulta para cuidado preventivo y salud femenina.
-            </p>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="p-3 h-100" style="border: 1px solid rgba(206, 176, 183, 0.35); border-radius: 12px;">
-            <h3 class="h5 fw-bold mb-2" style="color: var(--title-color);">Control de embarazo</h3>
-            <p class="text-muted mb-0">
-              Control prenatal y seguimiento de embarazo con un enfoque humano y claro.
-            </p>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="p-3 h-100" style="border: 1px solid rgba(206, 176, 183, 0.35); border-radius: 12px;">
-            <h3 class="h5 fw-bold mb-2" style="color: var(--title-color);">Anticonceptivos</h3>
-            <p class="text-muted mb-0">
-              Consejería para elegir el método más adecuado según tu caso.
-            </p>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="p-3 h-100" style="border: 1px solid rgba(206, 176, 183, 0.35); border-radius: 12px;">
-            <h3 class="h5 fw-bold mb-2" style="color: var(--title-color);">Salud femenina</h3>
-            <p class="text-muted mb-0">
-              Atención integral para distintas etapas de la vida.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <h2 class="h4 fw-bold mt-5" style="color: var(--title-color);">“Cerca de mí” (búsquedas locales)</h2>
-      <p class="text-muted" style="line-height: 1.85;">
-        Si estás buscando <strong>médico ginecólogo cerca de mí</strong>, <strong>ginecólogo cerca de mi</strong> o
-        <strong>médica ginecóloga</strong> en <strong>Santo Domingo Este</strong>,
-        la Zona Oriental es una ubicación accesible para pacientes de sectores cercanos. La mejor forma de orientarte correctamente es con una consulta.
-      </p>
-
-      <div class="text-center mt-5">
-        <a class="btn btn-primary btn-lg" href="{{ url_for('request_appointment') }}">
-          <i class="fas fa-calendar-plus me-2"></i>Agendar mi cita
+      <div class="seo-zo-ctas">
+        <a class="seo-zo-btn seo-zo-btn--solid" href="{{ url_for('request_appointment') }}">
+          <i class="fas fa-calendar-plus" aria-hidden="true"></i> Solicitar cita
+        </a>
+        <a class="seo-zo-btn seo-zo-btn--ghost"
+           href="https://wa.me/18297405073?text=Hola,%20quiero%20agendar%20una%20cita%20de%20ginecolog%C3%ADa%20en%20Zona%20Oriental"
+           target="_blank" rel="noopener noreferrer">
+          <i class="fab fa-whatsapp" aria-hidden="true"></i> WhatsApp 829-740-5073
         </a>
       </div>
     </div>
   </div>
-</div>
+</section>
+
+<section class="seo-zo-section seo-zo-page seo-zo-section--soft">
+  <div class="container">
+    <div class="seo-zo-trust seo-zo-reveal">
+      <div>
+        <div class="seo-zo-kicker">Zona Oriental</div>
+        <h2 class="seo-zo-h2">Si buscas ginecólogo cerca de ti</h2>
+        <p class="seo-zo-copy">
+          Soy la <strong>Dra. Shirley Ramírez</strong>, <strong>ginecóloga y obstetra</strong>.
+          Si buscas un <strong>médico ginecólogo</strong>, <strong>ginecólogo Zona Oriental</strong>
+          o <strong>médica ginecóloga en Santo Domingo Este</strong>, aquí encuentras
+          una consulta calmada, clara y profesional.
+        </p>
+        <ul class="seo-zo-trust-list">
+          <li>
+            Ubicación accesible
+            <span>Consultorio en Santo Domingo Este, Zona Oriental.</span>
+          </li>
+          <li>
+            Atención femenina integral
+            <span>Chequeo, control prenatal y orientación anticonceptiva.</span>
+          </li>
+          <li>
+            Agenda sin fricción
+            <span>Cita en línea o por WhatsApp, según te resulte más fácil.</span>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <img
+          class="seo-zo-trust-photo"
+          src="{{ url_for('static', filename='images/Sobremi2.png') }}"
+          alt="Dra. Shirley Ramírez, ginecóloga en Zona Oriental"
+          width="720"
+          height="900"
+          loading="lazy"
+          decoding="async"
+        >
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="seo-zo-section seo-zo-page">
+  <div class="container seo-zo-reveal">
+    <div class="seo-zo-kicker">Servicios más solicitados</div>
+    <h2 class="seo-zo-h2">Cuidado ginecológico y obstétrico</h2>
+    <p class="seo-zo-copy">
+      Si llegaste buscando <strong>médico ginecólogo cerca de mí</strong> o
+      <strong>médica ginecóloga</strong> en la Zona Oriental, te oriento según tu motivo de consulta.
+    </p>
+    <div class="seo-zo-services">
+      <article class="seo-zo-service">
+        <h3>Chequeo ginecológico</h3>
+        <p>Evaluación preventiva y orientación clara para tu salud femenina.</p>
+      </article>
+      <article class="seo-zo-service">
+        <h3>Control de embarazo</h3>
+        <p>Control prenatal y seguimiento con un enfoque humano y ordenado.</p>
+      </article>
+      <article class="seo-zo-service">
+        <h3>Anticonceptivos</h3>
+        <p>Consejería para elegir el método más adecuado según tu caso.</p>
+      </article>
+      <article class="seo-zo-service">
+        <h3>Salud femenina</h3>
+        <p>Atención integral para distintas etapas de la vida.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="seo-zo-section seo-zo-page seo-zo-section--soft">
+  <div class="container">
+    <div class="seo-zo-place seo-zo-reveal">
+      <div>
+        <div class="seo-zo-kicker">Ubicación</div>
+        <h2 class="seo-zo-h2">Consultorio en Santo Domingo Este</h2>
+        <div class="seo-zo-place-line" aria-hidden="true"></div>
+        <p class="seo-zo-copy">
+          <strong>{{ site_address }}</strong>.
+          Accesible para pacientes de sectores cercanos de la Zona Oriental.
+        </p>
+      </div>
+      <div>
+        <p class="seo-zo-copy mb-3">
+          La mejor orientación empieza con una consulta. Te ayudo a elegir el tipo de atención.
+        </p>
+        <a href="{{ site_maps_url }}" target="_blank" rel="noopener noreferrer">
+          <i class="fas fa-map-marker-alt me-2" aria-hidden="true"></i>Ver en Google Maps
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="seo-zo-close seo-zo-page">
+  <div class="container seo-zo-reveal">
+    <h2>Agenda tu cita en Zona Oriental</h2>
+    <p>
+      Si buscas una médica ginecóloga cerca de ti, escríbeme y coordinamos tu consulta.
+    </p>
+    <div class="seo-zo-ctas" style="justify-content:center;">
+      <a class="seo-zo-btn seo-zo-btn--solid" href="{{ url_for('request_appointment') }}">
+        <i class="fas fa-calendar-plus" aria-hidden="true"></i> Agendar mi cita
+      </a>
+      <a class="seo-zo-btn seo-zo-btn--ghost"
+         href="https://wa.me/18297405073?text=Hola,%20quiero%20agendar%20una%20cita%20de%20ginecolog%C3%ADa%20en%20Zona%20Oriental"
+         target="_blank" rel="noopener noreferrer">
+        <i class="fab fa-whatsapp" aria-hidden="true"></i> WhatsApp
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  var nodes = document.querySelectorAll('.seo-zo-reveal');
+  if (!nodes.length) return;
+  if (!('IntersectionObserver' in window)) {
+    nodes.forEach(function (n) { n.classList.add('is-in'); });
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) {
+        e.target.classList.add('is-in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.16, rootMargin: '0px 0px -40px 0px' });
+  nodes.forEach(function (n) { io.observe(n); });
+})();
+</script>
 {% endblock %}
