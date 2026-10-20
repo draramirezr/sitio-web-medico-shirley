@@ -383,10 +383,11 @@
                               data-fecha="{{ factura['fecha_factura'] }}"
                               data-id="{{ factura['id'] }}"
                               data-ncf="{{ factura['ncf_numero'] if factura['ncf_numero'] else factura['ncf'] }}">
+                            <input type="hidden" name="justificacion" value="">
                             <button type="submit"
                                     class="btn-eliminar-factura"
                                     id="btnAnular{{ factura['id'] }}"
-                                    title="Anular / cancelar factura (máx. 30 días)">
+                                    title="Anular / cancelar factura">
                                 <i class="fas fa-ban"></i>
                             </button>
                         </form>
@@ -491,38 +492,115 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    let formAnularPendiente = null;
+
     document.querySelectorAll('.form-anular-factura').forEach(form => {
         const btn = form.querySelector('.btn-eliminar-factura');
         const diffDays = diasDesde(form.getAttribute('data-fecha'));
         const id = form.getAttribute('data-id');
         const ncf = form.getAttribute('data-ncf') || '';
-        if (diffDays > 30) {
+        if (diffDays >= 60) {
             btn.classList.add('disabled');
             btn.disabled = true;
-            btn.title = `No se puede anular (${diffDays} días desde creación)`;
+            btn.title = `No se puede anular (${diffDays} días; límite 59)`;
+        } else if (diffDays > 30) {
+            btn.title = `Anular con justificación (${diffDays} días; ventana 31-59)`;
         } else {
             const diasRestantes = 30 - diffDays;
-            btn.title = `Anular factura (${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} restante${diasRestantes !== 1 ? 's' : ''})`;
+            btn.title = `Anular factura (${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} dentro del plazo normal)`;
         }
         form.addEventListener('submit', function(e) {
+            if (form.getAttribute('data-confirmed') === '1') {
+                return true;
+            }
+            e.preventDefault();
+            if (diffDays >= 60) {
+                alert(`⚠️ No se puede anular: han pasado ${diffDays} días.\n\nSolo se permite hasta 59 días, y entre 31 y 59 hace falta justificación.`);
+                return false;
+            }
+            const etiqueta = `#${id}${ncf ? ' (' + ncf + ')' : ''}`;
             if (diffDays > 30) {
-                e.preventDefault();
-                alert(`⚠️ No se puede anular: han pasado ${diffDays} días (límite 30).`);
+                const seguro = confirm(
+                    `Esta factura ${etiqueta} tiene ${diffDays} días (más de 30).\n\n` +
+                    `Solo se puede anular hasta antes de 60 días y debes dejar una justificación.\n\n` +
+                    `¿Estás seguro de continuar?`
+                );
+                if (!seguro) return false;
+                formAnularPendiente = form;
+                const info = document.getElementById('anularExcepcionInfo');
+                const texto = document.getElementById('anularJustificacion');
+                const error = document.getElementById('anularJustificacionError');
+                if (info) {
+                    info.textContent = `Factura ${etiqueta} · ${diffDays} días desde la emisión.`;
+                }
+                if (texto) texto.value = '';
+                if (error) error.style.display = 'none';
+                const modalEl = document.getElementById('modalAnularExcepcion');
+                if (window.bootstrap && modalEl) {
+                    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                }
                 return false;
             }
             const ok = confirm(
-                `¿Anular / cancelar la factura #${id}${ncf ? ' (' + ncf + ')' : ''}?\n\n` +
+                `¿Anular / cancelar la factura ${etiqueta}?\n\n` +
                 `La factura quedará marcada como ANULADA (no se borra).\n` +
                 `Los pacientes volverán a pendientes.`
             );
-            if (!ok) {
-                e.preventDefault();
-                return false;
-            }
+            if (!ok) return false;
+            form.setAttribute('data-confirmed', '1');
+            form.submit();
         });
     });
+
+    const btnConfirmarExcepcion = document.getElementById('btnConfirmarAnularExcepcion');
+    if (btnConfirmarExcepcion) {
+        btnConfirmarExcepcion.addEventListener('click', function() {
+            if (!formAnularPendiente) return;
+            const texto = document.getElementById('anularJustificacion');
+            const error = document.getElementById('anularJustificacionError');
+            const justificacion = (texto && texto.value ? texto.value : '').trim().replace(/\s+/g, ' ');
+            if (justificacion.length < 10) {
+                if (error) error.style.display = 'block';
+                if (texto) texto.focus();
+                return;
+            }
+            const input = formAnularPendiente.querySelector('input[name="justificacion"]');
+            if (input) input.value = justificacion.slice(0, 500);
+            formAnularPendiente.setAttribute('data-confirmed', '1');
+            const modalEl = document.getElementById('modalAnularExcepcion');
+            if (window.bootstrap && modalEl) {
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+            }
+            formAnularPendiente.submit();
+        });
+    }
 });
 </script>
+
+<div class="modal fade" id="modalAnularExcepcion" tabindex="-1" aria-labelledby="modalAnularExcepcionLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAnularExcepcionLabel">Anular factura fuera de 30 días</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p id="anularExcepcionInfo" class="mb-2"></p>
+                <p class="text-muted small">Esta factura tiene más de 30 días y menos de 60. Para anularla escribe por qué. Si lo dejas vacío, no se cancela.</p>
+                <label class="form-label" for="anularJustificacion">Justificación</label>
+                <textarea class="form-control" id="anularJustificacion" rows="4" maxlength="500" placeholder="Explica el motivo de la anulación"></textarea>
+                <div id="anularJustificacionError" class="text-danger small mt-2" style="display:none;">
+                    Escribe una justificación de al menos 10 caracteres.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">No anular</button>
+                <button type="button" class="btn" id="btnConfirmarAnularExcepcion" style="background:#c0392b;color:#fff;">Anular con justificación</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}
 

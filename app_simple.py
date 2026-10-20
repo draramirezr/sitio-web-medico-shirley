@@ -9798,7 +9798,7 @@ def facturacion_historico():
 @app.route('/facturacion/anular-factura/<int:factura_id>', methods=['POST'])
 @login_required
 def facturacion_anular_factura(factura_id):
-    """Anular/cancelar factura (no borrar) solo si tiene 30 días o menos."""
+    """Anular factura: hasta 30 días normal; de 31 a 59 días solo con justificación."""
     from datetime import datetime
 
     if current_user.perfil not in ('Administrador', 'Nivel 2', 'Registro de Facturas'):
@@ -9826,10 +9826,22 @@ def facturacion_anular_factura(factura_id):
             return redirect(url_for('facturacion_historico'))
 
         dias = (datetime.now().date() - fecha_factura.date()).days
-        if dias > 30:
+        justificacion = (request.form.get('justificacion') or '').strip()
+        justificacion = re.sub(r'\s+', ' ', justificacion)[:500]
+
+        if dias >= 60:
             flash(
                 f'No se puede anular la factura #{factura_id}: han pasado {dias} días. '
-                f'El límite es 30 días.',
+                f'El límite excepcional es menor a 60 días.',
+                'error',
+            )
+            return redirect(url_for('facturacion_historico'))
+
+        fuera_de_plazo = dias > 30
+        if fuera_de_plazo and len(justificacion) < 10:
+            flash(
+                f'La factura #{factura_id} tiene {dias} días. '
+                f'Para anularla entre 31 y 59 días debes escribir una justificación (mínimo 10 caracteres).',
                 'error',
             )
             return redirect(url_for('facturacion_historico'))
@@ -9843,10 +9855,18 @@ def facturacion_anular_factura(factura_id):
             ''',
             (factura_id,),
         )
-        observacion = (
-            f"Factura ANULADA/CANCELADA por {getattr(current_user, 'nombre', current_user.id)} "
-            f"(dentro de 30 días; {dias} día(s) desde emisión). Registro conservado."
-        )
+        quien = getattr(current_user, 'nombre', current_user.id)
+        if fuera_de_plazo:
+            observacion = (
+                f"Factura ANULADA/CANCELADA por {quien} "
+                f"(excepción {dias} día(s), ventana 31-59). "
+                f"Justificación: {justificacion}. Registro conservado."
+            )
+        else:
+            observacion = (
+                f"Factura ANULADA/CANCELADA por {quien} "
+                f"(dentro de 30 días; {dias} día(s) desde emisión). Registro conservado."
+            )
         conn.execute(
             '''
             UPDATE facturas
