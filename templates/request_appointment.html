@@ -224,7 +224,7 @@
                                     <span>Nombre Completo</span>
                                     <span class="required-asterisk">*</span>
                                 </label>
-                                <input type="text" class="form-control" id="full_name" name="full_name" placeholder="Tu nombre completo" autocomplete="name" inputmode="text" pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+" title="Solo letras, sin números" required>
+                                <input type="text" class="form-control" id="full_name" name="full_name" placeholder="Tu nombre completo" autocomplete="name" inputmode="text" pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+" title="Solo letras, sin números" value="{{ form_data.get('full_name', '') }}" required>
                                 <!-- Mantener compatibilidad con backend -->
                                 <input type="hidden" name="first_name" id="first_name">
                                 <input type="hidden" name="last_name" id="last_name">
@@ -236,7 +236,7 @@
                                     <span>Teléfono</span>
                                     <span class="required-asterisk">*</span>
                                 </label>
-                                <input type="tel" class="form-control" id="phone" name="phone" placeholder="(809) 000-0000" autocomplete="tel" inputmode="numeric" pattern="[0-9+\-\s()]+" title="Solo números" required>
+                                <input type="tel" class="form-control" id="phone" name="phone" placeholder="(809) 000-0000" autocomplete="tel" inputmode="numeric" pattern="[0-9+\-\s()]+" title="Solo números" value="{{ form_data.get('phone', '') }}" required>
                             </div>
 
                             <div class="col-md-6">
@@ -245,7 +245,7 @@
                                     <span>Email</span>
                                     <span class="required-asterisk">*</span>
                                 </label>
-                                <input type="email" class="form-control" id="email" name="email" placeholder="tu@email.com" autocomplete="email" required>
+                                <input type="email" class="form-control" id="email" name="email" placeholder="tu@email.com" autocomplete="email" value="{{ form_data.get('email', '') }}" required>
                             </div>
 
                             <div class="col-md-6">
@@ -254,21 +254,22 @@
                                     <span>Servicio</span>
                                     <span class="required-asterisk">*</span>
                                 </label>
+                                {% set selected_service = form_data.get('service_detail', '') %}
                                 <select class="form-select" name="service_detail" id="service_detail" required>
                                     <option value="">Seleccionar servicio</option>
-                                    <option value="Consulta ginecológica general">Consulta ginecológica general</option>
-                                    <option value="Control prenatal">Control prenatal</option>
-                                    <option value="Papanicolaou">Papanicolaou</option>
-                                    <option value="Colposcopía">Colposcopía</option>
-                                    <option value="Ultrasonido pélvico/transvaginal">Ultrasonido pélvico/transvaginal</option>
-                                    <option value="Ultrasonido obstétrico">Ultrasonido obstétrico</option>
-                                    <option value="Planificación familiar">Planificación familiar</option>
-                                    <option value="Tratamiento estético ginecológico">Tratamiento estético ginecológico</option>
-                                    <option value="Otro">Otro</option>
-                                    <option value="Consulta de emergencia">Consulta de emergencia</option>
+                                    <option value="Consulta ginecológica general" {% if selected_service == 'Consulta ginecológica general' %}selected{% endif %}>Consulta ginecológica general</option>
+                                    <option value="Control prenatal" {% if selected_service == 'Control prenatal' %}selected{% endif %}>Control prenatal</option>
+                                    <option value="Papanicolaou" {% if selected_service == 'Papanicolaou' %}selected{% endif %}>Papanicolaou</option>
+                                    <option value="Colposcopía" {% if selected_service == 'Colposcopía' %}selected{% endif %}>Colposcopía</option>
+                                    <option value="Ultrasonido pélvico/transvaginal" {% if selected_service == 'Ultrasonido pélvico/transvaginal' %}selected{% endif %}>Ultrasonido pélvico/transvaginal</option>
+                                    <option value="Ultrasonido obstétrico" {% if selected_service == 'Ultrasonido obstétrico' %}selected{% endif %}>Ultrasonido obstétrico</option>
+                                    <option value="Planificación familiar" {% if selected_service == 'Planificación familiar' %}selected{% endif %}>Planificación familiar</option>
+                                    <option value="Tratamiento estético ginecológico" {% if selected_service == 'Tratamiento estético ginecológico' %}selected{% endif %}>Tratamiento estético ginecológico</option>
+                                    <option value="Otro" {% if selected_service == 'Otro' %}selected{% endif %}>Otro</option>
+                                    <option value="Consulta de emergencia" {% if selected_service == 'Consulta de emergencia' %}selected{% endif %}>Consulta de emergencia</option>
                                 </select>
                                 <!-- Campo real para backend (NO tocar lógica) -->
-                                <input type="hidden" name="appointment_type" id="appointment_type" value="">
+                                <input type="hidden" name="appointment_type" id="appointment_type" value="{{ form_data.get('appointment_type', '') }}">
                             </div>
 
                             <div class="col-md-6">
@@ -277,22 +278,23 @@
                                     <span>Seguro Médico</span>
                                     <span class="required-asterisk">*</span>
                                 </label>
+                                {% set selected_insurance = form_data.get('medical_insurance', '') %}
                                 <select class="form-select" id="medical_insurance" name="medical_insurance" required>
                                     <option value="">Seleccionar seguro</option>
-                                    <option value="Sin seguro (particular)">Sin seguro (particular)</option>
-                                    <option value="APS">APS</option>
-                                    <option value="Asemap">Asemap</option>
-                                    <option value="Futuro">Futuro</option>
-                                    <option value="Humano ARS">Humano ARS</option>
-                                    <option value="Mapfre">Mapfre</option>
-                                    <option value="Monumental">Monumental</option>
-                                    <option value="Primera">Primera</option>
-                                    <option value="Renacer">Renacer</option>
-                                    <option value="Reservas">Reservas</option>
-                                    <option value="Semma">Semma</option>
-                                    <option value="Senasa">Senasa</option>
-                                    <option value="Universal">Universal</option>
-                                    <option value="Otro">Otro</option>
+                                    <option value="Sin seguro (particular)" {% if selected_insurance == 'Sin seguro (particular)' %}selected{% endif %}>Sin seguro (particular)</option>
+                                    <option value="APS" {% if selected_insurance == 'APS' %}selected{% endif %}>APS</option>
+                                    <option value="Asemap" {% if selected_insurance == 'Asemap' %}selected{% endif %}>Asemap</option>
+                                    <option value="Futuro" {% if selected_insurance == 'Futuro' %}selected{% endif %}>Futuro</option>
+                                    <option value="Humano ARS" {% if selected_insurance == 'Humano ARS' %}selected{% endif %}>Humano ARS</option>
+                                    <option value="Mapfre" {% if selected_insurance == 'Mapfre' %}selected{% endif %}>Mapfre</option>
+                                    <option value="Monumental" {% if selected_insurance == 'Monumental' %}selected{% endif %}>Monumental</option>
+                                    <option value="Primera" {% if selected_insurance == 'Primera' %}selected{% endif %}>Primera</option>
+                                    <option value="Renacer" {% if selected_insurance == 'Renacer' %}selected{% endif %}>Renacer</option>
+                                    <option value="Reservas" {% if selected_insurance == 'Reservas' %}selected{% endif %}>Reservas</option>
+                                    <option value="Semma" {% if selected_insurance == 'Semma' %}selected{% endif %}>Semma</option>
+                                    <option value="Senasa" {% if selected_insurance == 'Senasa' %}selected{% endif %}>Senasa</option>
+                                    <option value="Universal" {% if selected_insurance == 'Universal' %}selected{% endif %}>Universal</option>
+                                    <option value="Otro" {% if selected_insurance == 'Otro' %}selected{% endif %}>Otro</option>
                                 </select>
                             </div>
 
@@ -303,7 +305,7 @@
                                     <span class="required-asterisk">*</span>
                                 </label>
                                 <div class="input-icon-right">
-                                    <input type="text" class="form-control" name="appointment_date" id="appointment_date" placeholder="dd/mm/yyyy" required>
+                                    <input type="text" class="form-control" name="appointment_date" id="appointment_date" placeholder="dd/mm/yyyy" value="{{ form_data.get('appointment_date', '') }}" data-prefill-time="{{ form_data.get('appointment_time', '') }}" required>
                                     <i class="fas fa-calendar-alt icon-right"></i>
                                 </div>
                                 <small class="text-muted d-block mt-1" id="appointment_date_hint">
@@ -330,7 +332,7 @@
                                         <span>Fecha y hora (emergencia)</span>
                                         <span class="required-asterisk">*</span>
                                     </label>
-                                    <input type="datetime-local" class="form-control" name="emergency_datetime" id="emergency_datetime">
+                                    <input type="datetime-local" class="form-control" name="emergency_datetime" id="emergency_datetime" value="{{ form_data.get('emergency_datetime', '') }}">
                                     <small class="text-muted d-block mt-2">Emergencias: Lunes a Viernes, 8:00 AM – 6:00 PM.</small>
                                 </div>
                             </div>
@@ -340,12 +342,12 @@
                                     <i class="fas fa-comment"></i>
                                     <span>Notas Adicionales</span>
                                 </label>
-                                <textarea class="form-control" id="reason" name="reason" placeholder="¿Hay algo que debamos saber antes de tu cita?"></textarea>
+                                <textarea class="form-control" id="reason" name="reason" placeholder="¿Hay algo que debamos saber antes de tu cita?">{{ form_data.get('reason', '') }}</textarea>
                             </div>
 
                             <div class="col-12">
                                 <div class="form-check" style="padding: 14px 16px; background: #F8F4F5; border-radius: 10px; border: 1px solid #E8D5DA;">
-                                    <input class="form-check-input" type="checkbox" value="1" id="annual_reminder_opt_in" name="annual_reminder_opt_in">
+                                    <input class="form-check-input" type="checkbox" value="1" id="annual_reminder_opt_in" name="annual_reminder_opt_in" {% if form_data.get('annual_reminder_opt_in') %}checked{% endif %}>
                                     <label class="form-check-label" for="annual_reminder_opt_in" style="color: #4a3f44; font-size: 0.95rem; line-height: 1.45;">
                                         Deseo recibir un <strong>recordatorio anual por email</strong> para mi chequeo rutinario.
                                         <span class="d-block text-muted mt-1" style="font-size: 0.85rem; font-weight: 400;">
@@ -453,6 +455,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const firstNameHidden = document.getElementById('first_name');
     const lastNameHidden = document.getElementById('last_name');
     
+    const prefillDate = (appointmentDateInput && appointmentDateInput.value) ? appointmentDateInput.value : '';
+    const prefillTime = (appointmentDateInput && appointmentDateInput.getAttribute('data-prefill-time')) || '';
+
     // Inicializar Flatpickr: días del horario admin, hoy .. hoy+N días (zona RD)
     const datePicker = flatpickr(appointmentDateInput, {
         locale: "es",
@@ -463,6 +468,7 @@ document.addEventListener('DOMContentLoaded', function() {
         minDate: minCitaDate,
         maxDate: maxCitaDate,
         disableMobile: true,
+        defaultDate: prefillDate || null,
         disable: [
             function(date) {
                 return !isDateSelectable(date);
@@ -499,23 +505,35 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    if (prefillDate && /^\d{4}-\d{2}-\d{2}$/.test(prefillDate)) {
+        loadAvailableTimeSlots(prefillDate, null, prefillTime);
+    }
+
     function splitFullNameToHidden() {
-        if (!fullName || !firstNameHidden || !lastNameHidden) return;
+        if (!fullName || !firstNameHidden || !lastNameHidden) return false;
         const raw = (fullName.value || '').trim().replace(/\s+/g, ' ');
+        if (raw !== (fullName.value || '')) {
+            fullName.value = raw;
+        }
         if (!raw) {
             firstNameHidden.value = '';
             lastNameHidden.value = '';
-            return;
+            return false;
         }
-        const parts = raw.split(' ');
-        if (parts.length === 1) {
-            firstNameHidden.value = parts[0];
+        const parts = raw.split(' ').filter(Boolean);
+        if (parts.length < 2) {
+            firstNameHidden.value = parts[0] || '';
             lastNameHidden.value = '';
-            return;
+            return false;
         }
         firstNameHidden.value = parts[0];
         lastNameHidden.value = parts.slice(1).join(' ');
+        return true;
     }
+
+    window.hasValidFullName = function() {
+        return splitFullNameToHidden();
+    };
 
     if (fullName) {
         fullName.addEventListener('input', splitFullNameToHidden);
@@ -641,9 +659,10 @@ document.addEventListener('DOMContentLoaded', function() {
     window.mapServiceToAppointmentType = mapServiceToAppointmentType;
     
     // Cargar horarios disponibles desde el servidor (solo muestra horarios libres)
-    function loadAvailableTimeSlots(fecha, dayOfWeek) {
+    function loadAvailableTimeSlots(fecha, dayOfWeek, selectedTime) {
         scheduleInfo.textContent = 'Cargando horario…';
         scheduleInfo.style.color = '';
+        const keepTime = (selectedTime || '').slice(0, 5);
         
         fetch(`/api/horarios-disponibles?fecha=${fecha}`)
             .then(response => response.json())
@@ -668,6 +687,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         const option = document.createElement('option');
                         option.value = horario;
                         option.textContent = displayTime;
+                        if (keepTime && horario === keepTime) option.selected = true;
                         appointmentTime.appendChild(option);
                     });
                     appointmentTime.disabled = false;
@@ -691,25 +711,28 @@ document.addEventListener('DOMContentLoaded', function() {
     {% if RECAPTCHA_SITE_KEY %}
     const appointmentForm = document.getElementById('appointmentForm');
     if (appointmentForm) {
-        appointmentForm.addEventListener('submit', function(e) {
+        function onAppointmentSubmit(e) {
             e.preventDefault();
             const form = this;
             const submitBtn = document.getElementById('submit-btn');
             const tipo = (document.getElementById('appointment_type') || {}).value || '';
             const fechaIso = (document.getElementById('appointment_date') || {}).value || '';
 
+            if (typeof window.mapServiceToAppointmentType === 'function') {
+                window.mapServiceToAppointmentType();
+            }
+            if (typeof window.hasValidFullName === 'function' && !window.hasValidFullName()) {
+                alert('Por favor, ingresa tu nombre y apellido.');
+                const nameEl = document.getElementById('full_name');
+                if (nameEl) nameEl.focus();
+                return;
+            }
+
             if (tipo === 'consulta' || tipo === 'estetico') {
                 if (typeof window.validarFechaCitaAppt === 'function' && !window.validarFechaCitaAppt(fechaIso)) {
                     alert('Seleccione una fecha válida según el horario publicado, entre hoy y ' + (window.fechaMaxCitaEsAppt || '') + ' (máximo ' + (window.citaFechaMaxDiasAppt || 30) + ' días).');
                     return;
                 }
-            }
-
-            if (typeof splitFullNameToHidden === 'function') {
-                splitFullNameToHidden();
-            }
-            if (typeof mapServiceToAppointmentType === 'function') {
-                mapServiceToAppointmentType();
             }
 
             // Deshabilitar botón mientras se procesa
@@ -722,28 +745,32 @@ document.addEventListener('DOMContentLoaded', function() {
             grecaptcha.ready(function() {
                 grecaptcha.execute('{{ RECAPTCHA_SITE_KEY }}', {action: 'appointment_form'}).then(function(token) {
                     document.getElementById('recaptcha-token').value = token;
-                    
-                    // Enviar formulario con el token
-                    form.removeEventListener('submit', arguments.callee);
+                    form.removeEventListener('submit', onAppointmentSubmit);
                     form.submit();
                 }).catch(function(error) {
                     console.error('Error reCAPTCHA:', error);
                     alert('Error al verificar seguridad. Por favor, intenta de nuevo.');
                     if (submitBtn) {
                         submitBtn.disabled = false;
-                        submitBtn.innerHTML = '<i class="fas fa-calendar-check me-2"></i>Solicitar Mi Cita';
+                        submitBtn.innerHTML = '<i class="fas fa-calendar-check me-2"></i>Enviar Solicitud de Cita';
                     }
                 });
             });
-        });
+        }
+        appointmentForm.addEventListener('submit', onAppointmentSubmit);
     }
     {% else %}
     // Si no hay reCAPTCHA configurada, sincronizar campos antes de enviar
     const appointmentFormNoCaptcha = document.getElementById('appointmentForm');
     if (appointmentFormNoCaptcha) {
-        appointmentFormNoCaptcha.addEventListener('submit', function() {
-            if (window.splitFullNameToHidden) window.splitFullNameToHidden();
+        appointmentFormNoCaptcha.addEventListener('submit', function(e) {
             if (window.mapServiceToAppointmentType) window.mapServiceToAppointmentType();
+            if (window.hasValidFullName && !window.hasValidFullName()) {
+                e.preventDefault();
+                alert('Por favor, ingresa tu nombre y apellido.');
+                const nameEl = document.getElementById('full_name');
+                if (nameEl) nameEl.focus();
+            }
         });
     }
     {% endif %}

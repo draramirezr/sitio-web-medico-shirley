@@ -4053,10 +4053,52 @@ def horarios_disponibles():
         print(f"❌ Error horarios_disponibles({fecha}): {e}")
         return jsonify({'error': str(e)}), 500
 
+def _appointment_form_draft_from_request():
+    """Conservar lo que la paciente escribió si falla la validación."""
+    return {
+        'full_name': (request.form.get('full_name') or '').strip(),
+        'email': (request.form.get('email') or '').strip(),
+        'phone': (request.form.get('phone') or '').strip(),
+        'service_detail': (request.form.get('service_detail') or '').strip(),
+        'appointment_type': (request.form.get('appointment_type') or '').strip(),
+        'medical_insurance': (request.form.get('medical_insurance') or '').strip(),
+        'appointment_date': (request.form.get('appointment_date') or '').strip(),
+        'appointment_time': (request.form.get('appointment_time') or '').strip(),
+        'emergency_datetime': (request.form.get('emergency_datetime') or '').strip(),
+        'reason': (request.form.get('reason') or '').strip(),
+        'annual_reminder_opt_in': request.form.get('annual_reminder_opt_in') in ('1', 'on', 'true', 'yes'),
+    }
+
+
+def _render_request_appointment(form_data=None):
+    hoy_rd = obtener_fecha_rd()
+    max_cita = fecha_maxima_cita_rd(hoy_rd)
+    return render_template(
+        'request_appointment.html',
+        fecha_hoy_rd=hoy_rd.strftime('%Y-%m-%d'),
+        fecha_max_cita=max_cita.strftime('%Y-%m-%d'),
+        fecha_max_cita_es=max_cita.strftime('%d/%m/%Y'),
+        cita_fecha_max_dias=CITA_FECHA_MAX_DIAS,
+        dias_habiles_js=dias_habiles_js(),
+        hint_dias_habiles=texto_hint_dias_habiles(),
+        form_data=form_data or {},
+    )
+
+
+def _split_full_name(full_name):
+    """Divide nombre completo en nombre/apellido (soporta espacios unicode)."""
+    raw = re.sub(r'\s+', ' ', (full_name or '').strip())
+    parts = [p for p in raw.split(' ') if p]
+    if len(parts) < 2:
+        return None, None
+    return parts[0], ' '.join(parts[1:])
+
+
 @app.route('/solicitar-cita', methods=['GET', 'POST'])
 def request_appointment():
     """Solicitar cita"""
     if request.method == 'POST':
+        draft = _appointment_form_draft_from_request()
         try:
             # Rate limit solo para POST (envío de formularios)
             client_ip = request.remote_addr
@@ -4072,7 +4114,7 @@ def request_appointment():
                 # Verificar límite (3 envíos por 5 minutos)
                 if len(request_counts.get(f'{client_ip}_appointment', [])) >= 3:
                     flash('⚠️ Has enviado demasiadas solicitudes. Por favor espera 5 minutos.', 'warning')
-                    return redirect(url_for('request_appointment'))
+                    return _render_request_appointment(draft)
                 
                 # Agregar request actual
                 if f'{client_ip}_appointment' not in request_counts:
@@ -4090,14 +4132,16 @@ def request_appointment():
             appointment_type = sanitize_input(request.form.get('appointment_type', ''))
             medical_insurance = sanitize_input(request.form.get('medical_insurance', ''))
 
-            # Compatibilidad: si el frontend envía "Nombre Completo", dividirlo en nombre y apellido
-            if full_name and (not first_name or not last_name):
-                parts = [p for p in full_name.split(' ') if p.strip()]
-                if len(parts) < 2:
+            # Siempre derivar nombre/apellido desde "Nombre Completo" cuando viene
+            if full_name:
+                fn, ln = _split_full_name(full_name)
+                if not fn or not ln:
                     flash('Por favor, ingresa tu nombre y apellido.', 'danger')
-                    return redirect(url_for('request_appointment'))
-                first_name = parts[0]
-                last_name = ' '.join(parts[1:])
+                    return _render_request_appointment(draft)
+                first_name, last_name = fn, ln
+            elif not first_name or not last_name:
+                flash('Por favor, ingresa tu nombre y apellido.', 'danger')
+                return _render_request_appointment(draft)
             
             # Validar Google reCAPTCHA
             recaptcha_response = request.form.get('g-recaptcha-response')
@@ -4109,33 +4153,33 @@ def request_appointment():
             if RECAPTCHA_SITE_KEY and RECAPTCHA_SECRET_KEY:
                 if not verificar_recaptcha(recaptcha_response):
                     flash('⚠️ Por favor, completa la verificación de seguridad (reCAPTCHA).', 'warning')
-                    return redirect(url_for('request_appointment'))
+                    return _render_request_appointment(draft)
             else:
                 print("⚠️ reCAPTCHA no configurada, saltando validación")
             
             # Validaciones críticas
             if not all([first_name, last_name, phone, appointment_type, medical_insurance]):
                 flash('Por favor, completa todos los campos obligatorios.', 'danger')
-                return redirect(url_for('request_appointment'))
+                return _render_request_appointment(draft)
 
             if not email or not validate_email(email):
                 flash('Por favor, ingresa un email válido para recibir la confirmación de tu cita.', 'danger')
-                return redirect(url_for('request_appointment'))
+                return _render_request_appointment(draft)
             
             if len(first_name) > 50 or len(last_name) > 50:
                 flash('Los nombres no pueden exceder 50 caracteres.', 'danger')
-                return redirect(url_for('request_appointment'))
+                return _render_request_appointment(draft)
 
             nombre_completo_check = f'{first_name} {last_name}'.strip()
             if re.search(r'\d', nombre_completo_check):
                 flash('El nombre no puede contener números.', 'danger')
-                return redirect(url_for('request_appointment'))
+                return _render_request_appointment(draft)
             if re.search(r'[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]', phone or ''):
                 flash('El teléfono solo puede contener números.', 'danger')
-                return redirect(url_for('request_appointment'))
+                return _render_request_appointment(draft)
             if not validate_phone(phone):
                 flash('Por favor, ingresa un teléfono válido (mínimo 10 dígitos).', 'danger')
-                return redirect(url_for('request_appointment'))
+                return _render_request_appointment(draft)
             
             emergency_datetime = sanitize_input(request.form.get('emergency_datetime', ''))
             reason = sanitize_input(request.form.get('reason', ''))
@@ -4145,7 +4189,7 @@ def request_appointment():
             if appointment_type in ["consulta", "estetico"]:
                 if not appointment_date or not appointment_time:
                     flash('Por favor, selecciona una fecha y hora para tu cita.', 'danger')
-                    return redirect(url_for('request_appointment'))
+                    return _render_request_appointment(draft)
                 try:
                     from datetime import date
                     fecha_cita = date.fromisoformat(str(appointment_date)[:10])
@@ -4153,24 +4197,24 @@ def request_appointment():
                     max_cita = fecha_maxima_cita_rd(hoy_rd)
                     if fecha_cita < hoy_rd:
                         flash('La fecha preferida no puede ser anterior a hoy.', 'danger')
-                        return redirect(url_for('request_appointment'))
+                        return _render_request_appointment(draft)
                     if fecha_cita > max_cita:
                         flash(f'La fecha preferida no puede ser más de {CITA_FECHA_MAX_DIAS} días desde hoy.', 'danger')
-                        return redirect(url_for('request_appointment'))
+                        return _render_request_appointment(draft)
                     cfg_dia = horario_del_dia(fecha_cita.weekday())
                     if not cfg_dia or not cfg_dia.get('enabled'):
                         flash('Ese día no está disponible para citas. Elige otro día habilitado.', 'warning')
-                        return redirect(url_for('request_appointment'))
+                        return _render_request_appointment(draft)
                     slots_ok = generar_slots_horario(
                         cfg_dia['start_time'], cfg_dia['end_time'], cfg_dia.get('slot_minutes') or 30
                     )
                     hora_n = str(appointment_time or '')[:5]
                     if hora_n not in slots_ok:
                         flash('Esa hora no está dentro del horario disponible para ese día.', 'warning')
-                        return redirect(url_for('request_appointment'))
+                        return _render_request_appointment(draft)
                 except Exception:
                     flash('Por favor, selecciona una fecha válida para tu cita.', 'danger')
-                    return redirect(url_for('request_appointment'))
+                    return _render_request_appointment(draft)
             
             # Verificar disponibilidad de horario (solo para citas normales con fecha y hora)
             if appointment_type in ["consulta", "estetico"] and appointment_date and appointment_time:
@@ -4183,7 +4227,7 @@ def request_appointment():
                 if cita_existente:
                     conn.close()
                     flash('⚠️ Lo sentimos, ese horario ya está ocupado. Por favor selecciona otro horario.', 'warning')
-                    return redirect(url_for('request_appointment'))
+                    return _render_request_appointment(draft)
                 
                 conn.close()
             
@@ -4206,7 +4250,7 @@ def request_appointment():
                     if cita_existente and len(cita_existente) > 0:
                         conn.close()
                         flash('⚠️ Lo sentimos, ya hay una cita de emergencia cerca de ese horario. Por favor selecciona otro horario.', 'warning')
-                        return redirect(url_for('request_appointment'))
+                        return _render_request_appointment(draft)
                     
                     conn.close()
                 except:
@@ -4270,19 +4314,9 @@ def request_appointment():
             import traceback
             traceback.print_exc()
             flash('⚠️ Ocurrió un error al procesar tu solicitud. Por favor intenta nuevamente o contáctanos directamente.', 'danger')
-            return redirect(url_for('request_appointment'))
+            return _render_request_appointment(draft)
     
-    hoy_rd = obtener_fecha_rd()
-    max_cita = fecha_maxima_cita_rd(hoy_rd)
-    return render_template(
-        'request_appointment.html',
-        fecha_hoy_rd=hoy_rd.strftime('%Y-%m-%d'),
-        fecha_max_cita=max_cita.strftime('%Y-%m-%d'),
-        fecha_max_cita_es=max_cita.strftime('%d/%m/%Y'),
-        cita_fecha_max_dias=CITA_FECHA_MAX_DIAS,
-        dias_habiles_js=dias_habiles_js(),
-        hint_dias_habiles=texto_hint_dias_habiles(),
-    )
+    return _render_request_appointment()
 
 # ============================================================================
 # AUTENTICACIÓN Y GESTIÓN DE USUARIOS
