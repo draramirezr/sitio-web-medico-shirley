@@ -115,8 +115,50 @@
         </form>
         {% else %}
         <p class="text-muted mb-4">
-            No hay candidatas anuales ahora. Aparecerán con opt-in + cita <strong>completada</strong>.
+            No hay candidatas anuales ahora. Aparecerán con opt-in + cita <strong>completada</strong> + ~{{ min_days }} días.
         </p>
+        {% endif %}
+
+        <h3 class="h6 mt-4 mb-2" style="color:#6B5C62;">Quiénes marcaron el recordatorio anual</h3>
+        <p class="text-muted small mb-3">
+            Lista de opt-in (aunque aún no toque enviar). Total: <strong>{{ opt_in_list|length }}</strong>
+        </p>
+        {% if opt_in_list %}
+        <div class="table-responsive mb-4">
+            <table class="table table-sm align-middle">
+                <thead>
+                    <tr>
+                        <th>Paciente</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Última cita completada</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in opt_in_list %}
+                    <tr>
+                        <td>{{ p.first_name }} {{ p.last_name }}</td>
+                        <td>{{ p.email }}</td>
+                        <td>{{ p.phone or '—' }}</td>
+                        <td>
+                            {% if p.fecha_ultima %}
+                            {{ p.fecha_ultima.strftime('%d/%m/%Y') }}
+                            {% if p.dias_desde_ultima is not none %}
+                            <span class="text-muted">({{ p.dias_desde_ultima }} días)</span>
+                            {% endif %}
+                            {% else %}
+                            <span class="text-muted">Aún no</span>
+                            {% endif %}
+                        </td>
+                        <td><span class="small">{{ p.estado }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted mb-4">Nadie ha marcado aún el check de recordatorio anual.</p>
         {% endif %}
 
         <hr class="my-4">

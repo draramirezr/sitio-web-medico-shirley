@@ -3526,6 +3526,83 @@ def unsubscribe_annual_reminder(email):
         print(f"⚠️ Error en baja de recordatorio: {e}")
         return False
 
+
+def listar_opt_in_recordatorio_anual(hoy=None):
+    """Todos los que marcaron el check (aunque aún no toque enviar)."""
+    if not _ensure_followup_schema():
+        return []
+    hoy = hoy or obtener_fecha_rd()
+    conn = get_db_connection()
+    try:
+        prefs = conn.execute('''
+            SELECT email, first_name, last_name, phone, annual_opt_in,
+                   unsubscribed_at, last_annual_sent_at, annual_cycle_sent_count,
+                   updated_at, created_at
+            FROM patient_followup_prefs
+            WHERE annual_opt_in = 1
+              AND unsubscribed_at IS NULL
+              AND email IS NOT NULL AND email != ''
+            ORDER BY COALESCE(updated_at, created_at) DESC, id DESC
+        ''').fetchall() or []
+    except Exception:
+        prefs = conn.execute('''
+            SELECT email, first_name, last_name, phone, annual_opt_in,
+                   unsubscribed_at, last_annual_sent_at, annual_cycle_sent_count
+            FROM patient_followup_prefs
+            WHERE annual_opt_in = 1
+              AND unsubscribed_at IS NULL
+              AND email IS NOT NULL AND email != ''
+            ORDER BY id DESC
+        ''').fetchall() or []
+
+    out = []
+    for pref in prefs:
+        email = (pref.get('email') or '').strip().lower()
+        if not email:
+            continue
+        ultima = _ultima_cita_completada(conn, email)
+        fecha_ult = None
+        dias = None
+        if ultima:
+            fecha_raw = ultima.get('appointment_date') or ultima.get('emergency_datetime')
+            fecha_ult = _parse_appointment_date(fecha_raw)
+            if fecha_ult:
+                dias = (hoy - fecha_ult).days
+
+        tiene_futura = _tiene_cita_futura(conn, email, hoy)
+        cycle_count = int(pref.get('annual_cycle_sent_count') or 0)
+
+        if not fecha_ult:
+            estado = 'Esperando cita completada'
+        elif tiene_futura:
+            estado = 'Tiene cita pendiente/confirmada'
+        elif cycle_count >= ANNUAL_REMINDER_MAX_PER_CYCLE:
+            estado = 'Ciclo cerrado (espera nueva cita completada)'
+        elif cycle_count == 0 and dias is not None and dias < ANNUAL_REMINDER_MIN_DAYS:
+            faltan = ANNUAL_REMINDER_MIN_DAYS - dias
+            estado = f'Opt-in activo · faltan ~{faltan} días para 1.er aviso'
+        elif cycle_count == 1 and dias is not None and dias < ANNUAL_REMINDER_EXTRA_DAYS:
+            faltan = ANNUAL_REMINDER_EXTRA_DAYS - dias
+            estado = f'Ya recibió 1.er aviso · faltan ~{faltan} días para extra'
+        else:
+            estado = 'Elegible para envío ahora'
+
+        out.append({
+            'email': email,
+            'first_name': (ultima or {}).get('first_name') or pref.get('first_name') or '',
+            'last_name': (ultima or {}).get('last_name') or pref.get('last_name') or '',
+            'phone': (ultima or {}).get('phone') or pref.get('phone') or '',
+            'fecha_ultima': fecha_ult,
+            'dias_desde_ultima': dias,
+            'estado': estado,
+            'cycle_count': cycle_count,
+            'last_annual_sent_at': pref.get('last_annual_sent_at'),
+            'opt_in_at': pref.get('updated_at') or pref.get('created_at'),
+        })
+    conn.close()
+    return out
+
+
 def _ultima_cita_completada(conn, email):
     row = conn.execute('''
         SELECT id, first_name, last_name, phone, appointment_date, emergency_datetime
@@ -4702,10 +4779,13 @@ def admin_recordatorios_anuales():
     if resultado_24h is None:
         resultado_24h = procesar_recordatorios_cita_24h(dry_run=True)
 
+    opt_in_list = listar_opt_in_recordatorio_anual()
+
     return render_template(
         'admin_recordatorios_anuales.html',
         resultado=resultado,
         resultado_24h=resultado_24h,
+        opt_in_list=opt_in_list,
         min_days=ANNUAL_REMINDER_MIN_DAYS,
         extra_days=ANNUAL_REMINDER_EXTRA_DAYS,
         manana_rd=(obtener_fecha_rd() + timedelta(days=1)).strftime('%d/%m/%Y'),
