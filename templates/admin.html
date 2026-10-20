@@ -374,6 +374,11 @@
                                         <div>
                                             <h6 class="mb-0" style="color: var(--text-dark); font-weight: 700;">
                                                 {{ appointment['first_name'] }} {{ appointment['last_name'] }}
+                                                {% if appointment.get('is_new_patient') == True %}
+                                                <span class="badge ms-1" style="background:#2E7D32;color:#fff;font-size:0.65rem;padding:0.25rem 0.5rem;vertical-align:middle;">Nuevo</span>
+                                                {% elif appointment.get('is_new_patient') == False %}
+                                                <span class="badge ms-1" style="background:#546E7A;color:#fff;font-size:0.65rem;padding:0.25rem 0.5rem;vertical-align:middle;">Existente</span>
+                                                {% endif %}
                                             </h6>
                                             <small class="text-muted">
                                                 <i class="fas fa-phone me-1"></i>{{ appointment['phone'] }}
@@ -446,6 +451,11 @@
                                         <div>
                                             <h6 class="mb-0" style="color: var(--text-dark); font-weight: 700;">
                                                 {{ appointment['first_name'] }} {{ appointment['last_name'] }}
+                                                {% if appointment.get('is_new_patient') == True %}
+                                                <span class="badge ms-1" style="background:#2E7D32;color:#fff;font-size:0.65rem;padding:0.25rem 0.5rem;vertical-align:middle;">Nuevo</span>
+                                                {% elif appointment.get('is_new_patient') == False %}
+                                                <span class="badge ms-1" style="background:#546E7A;color:#fff;font-size:0.65rem;padding:0.25rem 0.5rem;vertical-align:middle;">Existente</span>
+                                                {% endif %}
                                             </h6>
                                             <small class="text-muted">
                                                 <i class="fas fa-phone me-1"></i>{{ appointment['phone'] }}
@@ -611,6 +621,11 @@
                             <div class="col-md-6 mb-2">
                                 <strong><i class="fas fa-user-circle me-2"></i>Nombre:</strong><br>
                                 {{ appointment['first_name'] }} {{ appointment['last_name'] }}
+                                {% if appointment.get('is_new_patient') == True %}
+                                <span class="badge ms-1" style="background:#2E7D32;color:#fff;">Nuevo</span>
+                                {% elif appointment.get('is_new_patient') == False %}
+                                <span class="badge ms-1" style="background:#546E7A;color:#fff;">Existente</span>
+                                {% endif %}
                             </div>
                             <div class="col-md-6 mb-2">
                                 <strong><i class="fas fa-envelope me-2"></i>Email:</strong><br>
@@ -714,6 +729,11 @@
                             <div class="col-md-6 mb-2">
                                 <strong><i class="fas fa-user-circle me-2"></i>Nombre:</strong><br>
                                 {{ appointment['first_name'] }} {{ appointment['last_name'] }}
+                                {% if appointment.get('is_new_patient') == True %}
+                                <span class="badge ms-1" style="background:#2E7D32;color:#fff;">Nuevo</span>
+                                {% elif appointment.get('is_new_patient') == False %}
+                                <span class="badge ms-1" style="background:#546E7A;color:#fff;">Existente</span>
+                                {% endif %}
                             </div>
                             <div class="col-md-6 mb-2">
                                 <strong><i class="fas fa-envelope me-2"></i>Email:</strong><br>

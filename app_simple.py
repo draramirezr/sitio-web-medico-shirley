@@ -125,7 +125,7 @@ except ImportError as e:
     def template_recuperacion(*args): return "Email template no disponible"
     def template_constancia_pdf(*args): return "Email template no disponible"
     def template_factura(*args): return "Email template no disponible"
-    def template_confirmacion_cita(*args): return "Email template no disponible"
+    def template_confirmacion_cita(*args, **kwargs): return "Email template no disponible"
     def template_nueva_contrasena(*args): return "Email template no disponible"
     def template_recordatorio_anual(*args): return "Email template no disponible"
     def template_recordatorio_cita_24h(*args): return "Email template no disponible"
@@ -3154,6 +3154,72 @@ def _formato_fecha_hora_cita(fecha, hora):
 
     return fecha_fmt, hora_fmt
 
+def _es_paciente_nuevo_por_email(email, exclude_appointment_id=None, conn=None):
+    """True si ese correo no tiene otras citas registradas (paciente nuevo)."""
+    email_n = (email or '').strip().lower()
+    if not email_n:
+        return None
+    own_conn = conn is None
+    if own_conn:
+        conn = get_db_connection()
+    try:
+        if exclude_appointment_id:
+            row = conn.execute(
+                '''SELECT COUNT(*) AS c FROM appointments
+                   WHERE LOWER(TRIM(email)) = %s AND id != %s''',
+                (email_n, exclude_appointment_id),
+            ).fetchone()
+        else:
+            row = conn.execute(
+                '''SELECT COUNT(*) AS c FROM appointments
+                   WHERE LOWER(TRIM(email)) = %s''',
+                (email_n,),
+            ).fetchone()
+        total = int((row.get('c') if isinstance(row, dict) else (row[0] if row else 0)) or 0)
+        return total == 0
+    finally:
+        if own_conn:
+            conn.close()
+
+
+def _anotar_tipo_paciente(appointments, conn):
+    """Agrega is_new_patient a cada cita (True=nuevo, False=existente, None=sin email).
+
+    Nuevo = ese correo solo aparece en esta cita (sin historial previo).
+    """
+    items = [dict(ap) for ap in (appointments or [])]
+    emails = sorted({
+        (it.get('email') or '').strip().lower()
+        for it in items
+        if (it.get('email') or '').strip()
+    })
+    counts = {}
+    if emails:
+        placeholders = ','.join(['%s'] * len(emails))
+        rows = conn.execute(
+            f'''SELECT LOWER(TRIM(email)) AS e, COUNT(*) AS c
+                FROM appointments
+                WHERE email IS NOT NULL AND TRIM(email) != ''
+                  AND LOWER(TRIM(email)) IN ({placeholders})
+                GROUP BY LOWER(TRIM(email))''',
+            tuple(emails),
+        ).fetchall() or []
+        for r in rows:
+            if isinstance(r, dict):
+                counts[(r.get('e') or '').strip().lower()] = int(r.get('c') or 0)
+            else:
+                counts[(r[0] or '').strip().lower()] = int(r[1] or 0)
+
+    for item in items:
+        email_n = (item.get('email') or '').strip().lower()
+        if not email_n:
+            item['is_new_patient'] = None
+        else:
+            # total==1 → solo esta cita → nuevo; total>1 → ya vino antes
+            item['is_new_patient'] = counts.get(email_n, 1) <= 1
+    return items
+
+
 def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora, tipo, estatus, motivo=None, appointment_id=None, force=False):
     """Enviar email de confirmación de cambio de estatus de cita al paciente (Resend/SendGrid).
 
@@ -3178,10 +3244,15 @@ def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora
 
         fecha_fmt, hora_fmt = _formato_fecha_hora_cita(fecha, hora)
         tipo_fmt = (tipo or 'consulta').strip()
+        es_nuevo = _es_paciente_nuevo_por_email(paciente_email, exclude_appointment_id=appointment_id)
 
         asuntos = {
             'pending': 'Recibimos tu solicitud de cita — Dra. Shirley Ramírez',
-            'confirmed': 'Tu cita está confirmada — Dra. Shirley Ramírez',
+            'confirmed': (
+                'Bienvenida · Tu cita está confirmada — Dra. Shirley Ramírez'
+                if es_nuevo else
+                'Tu cita está confirmada — Dra. Shirley Ramírez'
+            ),
             'cancelled': 'Tu cita fue cancelada — Dra. Shirley Ramírez',
             'completed': 'Gracias por tu visita — Dra. Shirley Ramírez',
         }
@@ -3189,6 +3260,7 @@ def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora
         html = template_confirmacion_cita(
             nombre, apellido, fecha_fmt, hora_fmt, tipo_fmt, estatus, motivo,
             review_url=GOOGLE_REVIEW_URL if estatus == 'completed' else None,
+            es_nuevo=bool(es_nuevo),
         )
         subject = asuntos.get(estatus, 'Actualización de tu cita — Dra. Shirley Ramírez')
 
@@ -4484,6 +4556,8 @@ def admin():
     # Datos recientes (citas pendientes y confirmadas)
     recent_appointments = conn.execute('SELECT * FROM appointments WHERE status = "pending" ORDER BY created_at DESC LIMIT 5').fetchall()
     confirmed_appointments = conn.execute('SELECT * FROM appointments WHERE status = "confirmed" ORDER BY appointment_date DESC, appointment_time DESC LIMIT 5').fetchall()
+    recent_appointments = _anotar_tipo_paciente(recent_appointments, conn)
+    confirmed_appointments = _anotar_tipo_paciente(confirmed_appointments, conn)
     
     conn.close()
     
@@ -4495,6 +4569,7 @@ def admin_appointments():
     """Gestión de citas"""
     conn = get_db_connection()
     appointments = conn.execute('SELECT * FROM appointments ORDER BY created_at DESC').fetchall()
+    appointments = _anotar_tipo_paciente(appointments, conn)
     conn.close()
     
     return render_template('admin_appointments.html', appointments=appointments)

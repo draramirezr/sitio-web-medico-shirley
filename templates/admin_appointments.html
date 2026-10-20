@@ -77,6 +77,26 @@
         border-radius: 20px;
         font-weight: 600;
     }
+
+    .badge-paciente-nuevo {
+        background: #2E7D32;
+        color: white;
+        padding: 0.3rem 0.65rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        vertical-align: middle;
+    }
+
+    .badge-paciente-existente {
+        background: #546E7A;
+        color: white;
+        padding: 0.3rem 0.65rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        vertical-align: middle;
+    }
     
     .whatsapp-btn {
         background: #128C7E;
@@ -257,6 +277,11 @@
                             <h5 class="mb-2">
                                 <i class="fas fa-user-circle me-2 text-primary"></i>
                                 {{ appointment['first_name'] }} {{ appointment['last_name'] }}
+                                {% if appointment.get('is_new_patient') == True %}
+                                <span class="badge-paciente-nuevo ms-1">Nuevo</span>
+                                {% elif appointment.get('is_new_patient') == False %}
+                                <span class="badge-paciente-existente ms-1">Existente</span>
+                                {% endif %}
                             </h5>
                             <div class="patient-info">
                                 <div class="mb-1">
@@ -308,10 +333,15 @@
                                 </div>
                                 {% endif %}
                             </div>
-                            <div class="mt-2">
+                            <div class="mt-2 d-flex flex-wrap gap-2 align-items-center">
                                 <span class="badge badge-{{ appointment['status'] }}">
                                     {{ appointment['status'].upper() }}
                                 </span>
+                                {% if appointment.get('is_new_patient') == True %}
+                                <span class="badge-paciente-nuevo">Paciente nuevo</span>
+                                {% elif appointment.get('is_new_patient') == False %}
+                                <span class="badge-paciente-existente">Paciente existente</span>
+                                {% endif %}
                             </div>
                         </div>
 
@@ -378,6 +408,11 @@
                             <div class="col-md-6 mb-3">
                                 <strong><i class="fas fa-user me-2"></i>Nombre:</strong><br>
                                 {{ appointment['first_name'] }} {{ appointment['last_name'] }}
+                                {% if appointment.get('is_new_patient') == True %}
+                                <span class="badge-paciente-nuevo ms-1">Nuevo</span>
+                                {% elif appointment.get('is_new_patient') == False %}
+                                <span class="badge-paciente-existente ms-1">Existente</span>
+                                {% endif %}
                             </div>
                             <div class="col-md-6 mb-3">
                                 <strong><i class="fas fa-phone me-2"></i>Teléfono:</strong><br>
