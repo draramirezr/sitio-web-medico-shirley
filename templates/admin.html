@@ -4,6 +4,7 @@
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
+{% from 'partials/admin_cita_reagendar.html' import cita_reagendar_controls %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/admin-responsive.css') }}">
 <style>
     /* Estilos personalizados para admin - Paleta Dra. Shirley */
@@ -686,6 +687,7 @@
                     {% endif %}
 
                     {{ cita_estado_controls(appointment) }}
+                    {{ cita_reagendar_controls(appointment) }}
                 </div>
                 <div class="modal-footer">
                     <a href="tel:{{ appointment['phone'] }}" class="btn btn-success">
@@ -794,6 +796,7 @@
                     {% endif %}
 
                     {{ cita_estado_controls(appointment) }}
+                    {{ cita_reagendar_controls(appointment) }}
                 </div>
                 <div class="modal-footer">
                     <a href="tel:{{ appointment['phone'] }}" class="btn btn-success">
@@ -1175,5 +1178,7 @@ document.querySelectorAll('.appointment-status-save-btn').forEach(button => {
     });
 });
 </script>
+
+{% include 'partials/admin_cita_reagendar_scripts.html' %}
 
 {% endblock %}

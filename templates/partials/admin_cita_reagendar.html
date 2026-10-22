@@ -1,0 +1,44 @@
+{% macro cita_reagendar_controls(appointment) %}
+{% if appointment['status'] in ('pending', 'confirmed') and appointment.get('appointment_type') != 'emergencia' and not appointment.get('emergency_datetime') %}
+<div class="p-3 mt-3 cita-reagendar-section" style="background: rgba(21, 101, 192, 0.06); border-radius: 10px; border-left: 4px solid #1565C0;"
+     data-appointment-id="{{ appointment['id'] }}"
+     data-fecha-actual="{{ appointment['appointment_date'] or '' }}"
+     data-hora-actual="{{ appointment['appointment_time'] or '' }}">
+    <h6 class="mb-2" style="color: #1565C0; font-weight: 700;">
+        <i class="fas fa-calendar-alt me-2"></i>Reprogramar cita
+    </h6>
+    <p class="small text-muted mb-3">Cambia la fecha u hora y se enviará un correo al paciente con la nueva cita.</p>
+    <div class="row g-2 align-items-end">
+        <div class="col-md-5">
+            <label class="form-label mb-1" for="reagendarFecha{{ appointment['id'] }}">Nueva fecha</label>
+            <input type="date" class="form-control reagendar-fecha-input" id="reagendarFecha{{ appointment['id'] }}"
+                   min="{{ fecha_hoy_rd }}" max="{{ fecha_max_cita }}"
+                   value="{{ appointment['appointment_date'] or '' }}">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label mb-1" for="reagendarHora{{ appointment['id'] }}">Nueva hora</label>
+            <select class="form-select reagendar-hora-select" id="reagendarHora{{ appointment['id'] }}">
+                <option value="">Seleccionar hora</option>
+                {% if appointment['appointment_time'] %}
+                <option value="{{ appointment['appointment_time'][:5] }}" selected>{{ appointment['appointment_time'][:5] }}</option>
+                {% endif %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button type="button" class="btn w-100 btn-reagendar-cita"
+                    data-appointment-id="{{ appointment['id'] }}"
+                    style="background: #1565C0; color: #fff; border: none;">
+                <i class="fas fa-save me-1"></i> Guardar
+            </button>
+        </div>
+    </div>
+    <div class="form-check mt-2">
+        <input class="form-check-input reagendar-notify-check" type="checkbox" id="reagendarNotify{{ appointment['id'] }}" checked>
+        <label class="form-check-label small" for="reagendarNotify{{ appointment['id'] }}">
+            Enviar correo de reprogramación al paciente
+        </label>
+    </div>
+    <div class="reagendar-feedback small mt-2" id="reagendarFeedback{{ appointment['id'] }}" aria-live="polite"></div>
+</div>
+{% endif %}
+{% endmacro %}

@@ -3220,7 +3220,11 @@ def _anotar_tipo_paciente(appointments, conn):
     return items
 
 
-def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora, tipo, estatus, motivo=None, appointment_id=None, force=False):
+def enviar_email_confirmacion_cita(
+    paciente_email, nombre, apellido, fecha, hora, tipo, estatus,
+    motivo=None, appointment_id=None, force=False,
+    fecha_anterior=None, hora_anterior=None,
+):
     """Enviar email de confirmación de cambio de estatus de cita al paciente (Resend/SendGrid).
 
     Anti-duplicados: no reenvía el mismo estatus para la misma cita en 24 h (salvo force=True).
@@ -3243,6 +3247,7 @@ def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora
             return True  # tratado como éxito: ya se notificó
 
         fecha_fmt, hora_fmt = _formato_fecha_hora_cita(fecha, hora)
+        fecha_ant_fmt, hora_ant_fmt = _formato_fecha_hora_cita(fecha_anterior, hora_anterior)
         tipo_fmt = (tipo or 'consulta').strip()
         es_nuevo = _es_paciente_nuevo_por_email(paciente_email, exclude_appointment_id=appointment_id)
 
@@ -3253,6 +3258,7 @@ def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora
                 if es_nuevo else
                 'Tu cita está confirmada — Dra. Shirley Ramírez'
             ),
+            'rescheduled': 'Tu cita fue reprogramada — Dra. Shirley Ramírez',
             'cancelled': 'Tu cita fue cancelada — Dra. Shirley Ramírez',
             'completed': 'Gracias por tu visita — Dra. Shirley Ramírez',
         }
@@ -3261,6 +3267,8 @@ def enviar_email_confirmacion_cita(paciente_email, nombre, apellido, fecha, hora
             nombre, apellido, fecha_fmt, hora_fmt, tipo_fmt, estatus, motivo,
             review_url=GOOGLE_REVIEW_URL if estatus == 'completed' else None,
             es_nuevo=bool(es_nuevo),
+            fecha_anterior=fecha_ant_fmt if fecha_anterior else None,
+            hora_anterior=hora_ant_fmt if hora_anterior else None,
         )
         subject = asuntos.get(estatus, 'Actualización de tu cita — Dra. Shirley Ramírez')
 
@@ -4103,11 +4111,23 @@ def horarios_disponibles():
                 return s[:5]
             return s
 
+        exclude_raw = request.args.get('exclude_appointment_id')
+        exclude_id = None
+        if exclude_raw and str(exclude_raw).strip().isdigit():
+            exclude_id = int(str(exclude_raw).strip())
+
         conn = get_db_connection()
-        citas_ocupadas = conn.execute(
-            'SELECT appointment_time FROM appointments WHERE appointment_date = %s AND status != %s',
-            (fecha, 'cancelled')
-        ).fetchall()
+        if exclude_id:
+            citas_ocupadas = conn.execute(
+                '''SELECT appointment_time FROM appointments
+                   WHERE appointment_date = %s AND status != %s AND id != %s''',
+                (fecha, 'cancelled', exclude_id),
+            ).fetchall()
+        else:
+            citas_ocupadas = conn.execute(
+                'SELECT appointment_time FROM appointments WHERE appointment_date = %s AND status != %s',
+                (fecha, 'cancelled'),
+            ).fetchall()
         conn.close()
         
         horarios_ocupados = set()
@@ -4671,8 +4691,17 @@ def admin():
     confirmed_appointments = _anotar_tipo_paciente(confirmed_appointments, conn)
     
     conn.close()
-    
-    return render_template('admin.html', stats=stats, recent_appointments=recent_appointments, confirmed_appointments=confirmed_appointments)
+
+    hoy_rd = obtener_fecha_rd()
+    max_cita = fecha_maxima_cita_rd(hoy_rd)
+    return render_template(
+        'admin.html',
+        stats=stats,
+        recent_appointments=recent_appointments,
+        confirmed_appointments=confirmed_appointments,
+        fecha_hoy_rd=hoy_rd.strftime('%Y-%m-%d'),
+        fecha_max_cita=max_cita.strftime('%Y-%m-%d'),
+    )
 
 @app.route('/admin/appointments')
 @login_required
@@ -4682,8 +4711,15 @@ def admin_appointments():
     appointments = conn.execute('SELECT * FROM appointments ORDER BY created_at DESC').fetchall()
     appointments = _anotar_tipo_paciente(appointments, conn)
     conn.close()
-    
-    return render_template('admin_appointments.html', appointments=appointments)
+
+    hoy_rd = obtener_fecha_rd()
+    max_cita = fecha_maxima_cita_rd(hoy_rd)
+    return render_template(
+        'admin_appointments.html',
+        appointments=appointments,
+        fecha_hoy_rd=hoy_rd.strftime('%Y-%m-%d'),
+        fecha_max_cita=max_cita.strftime('%Y-%m-%d'),
+    )
 
 @app.route('/admin/horario-citas', methods=['GET', 'POST'])
 @login_required
@@ -5073,6 +5109,165 @@ def guardar_tema_pagina():
         flash('Error al guardar la configuración', 'error')
     
     return redirect(url_for('admin_visor_pagina'))
+
+def _validar_fecha_hora_cita_admin(appointment_date, appointment_time, exclude_appointment_id=None):
+    """Validar fecha/hora al reprogramar desde el panel."""
+    from datetime import date, datetime, timedelta, time as time_cls
+
+    if not appointment_date or not appointment_time:
+        return False, 'Selecciona fecha y hora.'
+
+    def _norm_hora(val):
+        if val is None:
+            return None
+        if isinstance(val, timedelta):
+            total = int(val.total_seconds())
+            hh, rem = divmod(total, 3600)
+            return f'{hh:02d}:{(rem // 60):02d}'
+        if isinstance(val, time_cls):
+            return val.strftime('%H:%M')
+        s = str(val).strip()
+        return s[:5] if len(s) >= 5 and s[2] == ':' else s
+
+    try:
+        fecha_cita = date.fromisoformat(str(appointment_date)[:10])
+    except Exception:
+        return False, 'Fecha inválida.'
+
+    hora_n = _norm_hora(appointment_time)
+    if not hora_n:
+        return False, 'Hora inválida.'
+
+    hoy_rd = obtener_fecha_rd()
+    max_cita = fecha_maxima_cita_rd(hoy_rd)
+    if fecha_cita < hoy_rd:
+        return False, 'La fecha no puede ser anterior a hoy.'
+    if fecha_cita > max_cita:
+        return False, f'La fecha no puede ser más de {CITA_FECHA_MAX_DIAS} días desde hoy.'
+
+    cfg_dia = horario_del_dia(fecha_cita.weekday())
+    if not cfg_dia or not cfg_dia.get('enabled'):
+        return False, 'Ese día no está disponible para citas.'
+
+    slots_ok = generar_slots_horario(
+        cfg_dia['start_time'], cfg_dia['end_time'], cfg_dia.get('slot_minutes') or 30
+    )
+    if hora_n not in slots_ok:
+        return False, 'Esa hora no está en el horario disponible.'
+
+    fecha_s = fecha_cita.isoformat()
+    conn = get_db_connection()
+    try:
+        ocupadas = conn.execute(
+            '''SELECT id, appointment_time FROM appointments
+               WHERE appointment_date = %s AND status != %s''',
+            (fecha_s, 'cancelled'),
+        ).fetchall() or []
+    finally:
+        conn.close()
+
+    for row in ocupadas:
+        rid = row.get('id') if isinstance(row, dict) else row[0]
+        if exclude_appointment_id and int(rid) == int(exclude_appointment_id):
+            continue
+        raw = row.get('appointment_time') if isinstance(row, dict) else row[1]
+        if _norm_hora(raw) == hora_n:
+            return False, 'Ese horario ya está ocupado.'
+
+    hora_db = hora_n + ':00' if len(hora_n) == 5 else hora_n
+    return True, {'fecha': fecha_s, 'hora': hora_db, 'hora_display': hora_n}
+
+
+@app.route('/admin/appointments/<int:appointment_id>/reagendar', methods=['POST'])
+@login_required
+def reagendar_appointment(appointment_id):
+    """Cambiar fecha/hora de una cita y notificar al paciente por email."""
+    data = request.get_json(silent=True) or {}
+    new_date = (data.get('appointment_date') or request.form.get('appointment_date') or '').strip()
+    new_time = (data.get('appointment_time') or request.form.get('appointment_time') or '').strip()
+    notify_raw = data.get('notify', request.form.get('notify', True))
+    if isinstance(notify_raw, str):
+        notify = notify_raw.lower() in ('1', 'true', 'yes', 'on')
+    else:
+        notify = bool(notify_raw)
+
+    conn = get_db_connection()
+    try:
+        appointment = conn.execute(
+            'SELECT * FROM appointments WHERE id = %s',
+            (appointment_id,),
+        ).fetchone()
+        if not appointment:
+            return jsonify({'success': False, 'error': 'Cita no encontrada'}), 404
+
+        status = (appointment.get('status') or '').strip().lower()
+        if status not in ('pending', 'confirmed'):
+            return jsonify({'success': False, 'error': 'Solo se pueden reprogramar citas pendientes o confirmadas.'}), 400
+
+        if (appointment.get('appointment_type') or '').strip().lower() == 'emergencia' or appointment.get('emergency_datetime'):
+            return jsonify({'success': False, 'error': 'Las citas de emergencia no se reprograman desde aquí.'}), 400
+
+        ok, result = _validar_fecha_hora_cita_admin(new_date, new_time, exclude_appointment_id=appointment_id)
+        if not ok:
+            return jsonify({'success': False, 'error': result}), 400
+
+        fecha_nueva = result['fecha']
+        hora_nueva = result['hora']
+        fecha_ant = appointment.get('appointment_date')
+        hora_ant = appointment.get('appointment_time')
+
+        def _same_slot(f, h, f2, h2):
+            fs1 = str(f or '')[:10]
+            fs2 = str(f2 or '')[:10]
+            if fs1 != fs2:
+                return False
+            return str(h or '')[:5] == str(h2 or '')[:5]
+
+        if _same_slot(fecha_nueva, hora_nueva, fecha_ant, hora_ant):
+            return jsonify({'success': True, 'message': 'La fecha y hora son las mismas.', 'email_sent': False, 'unchanged': True})
+
+        conn.execute(
+            'UPDATE appointments SET appointment_date = %s, appointment_time = %s WHERE id = %s',
+            (fecha_nueva, hora_nueva, appointment_id),
+        )
+        conn.commit()
+
+        email_sent = False
+        email_paciente = (appointment.get('email') or '').strip().lower()
+        if notify and email_paciente:
+            email_sent = enviar_email_confirmacion_cita(
+                email_paciente,
+                appointment.get('first_name'),
+                appointment.get('last_name'),
+                fecha_nueva,
+                hora_nueva,
+                appointment.get('appointment_type'),
+                'rescheduled',
+                appointment.get('reason'),
+                appointment_id=appointment_id,
+                force=True,
+                fecha_anterior=fecha_ant,
+                hora_anterior=hora_ant,
+            )
+
+        return jsonify({
+            'success': True,
+            'message': 'Cita reprogramada.',
+            'appointment_date': fecha_nueva,
+            'appointment_time': result['hora_display'],
+            'email_sent': email_sent,
+            'email_missing': not bool(email_paciente),
+        })
+    except Exception as e:
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+        print(f'❌ Reagendar cita #{appointment_id}: {e}')
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        conn.close()
+
 
 @app.route('/admin/appointments/<int:appointment_id>/update', methods=['POST'])
 @login_required

@@ -357,7 +357,10 @@ def template_factura(factura_id, ncf, monto_total):
     
     return get_base_template("💰", f"Factura #{factura_id} - NCF: {ncf}", content)
 
-def template_confirmacion_cita(nombre, apellido, fecha, hora, tipo, estatus, motivo=None, review_url=None, es_nuevo=False):
+def template_confirmacion_cita(
+    nombre, apellido, fecha, hora, tipo, estatus, motivo=None, review_url=None,
+    es_nuevo=False, fecha_anterior=None, hora_anterior=None,
+):
     """Template para confirmación de cambio de estatus de cita al paciente"""
     maps_url = "https://www.google.com/maps/place/Dra.+Shirley+Ramirez/@18.4971899,-69.865084,17z/data=!4m6!3m5!1s0x8eaf89d14db5e76b:0x2a4aedf3ef3c083d!8m2!3d18.4971899!4d-69.865084!16s%2Fg%2F11jzcl6jxk"
     direccion = "Av. Sabana Larga 123, Santo Domingo Este 11901"
@@ -452,6 +455,27 @@ def template_confirmacion_cita(nombre, apellido, fecha, hora, tipo, estatus, mot
                 'Si deseas reagendar, escríbenos por WhatsApp o solicita una nueva cita en la web.'
             ),
             'accion': 'Estamos para ayudarte cuando lo necesites.',
+        },
+        'rescheduled': {
+            'color': '#1565C0',
+            'bg': '#E3F2FD',
+            'icon': '',
+            'titulo': 'Tu cita fue reprogramada',
+            'mensaje': (
+                (
+                    f'Actualizamos la fecha de tu cita. Antes era el <strong>{fecha_anterior or "—"}</strong> '
+                    f'a las <strong>{hora_anterior or "—"}</strong>.<br><br>'
+                    'Nueva cita: <strong>{fecha}</strong> a las <strong>{hora}</strong>.'
+                )
+                if fecha_anterior or hora_anterior else
+                (
+                    f'Hola <strong>{nombre_corto}</strong>, reprogramamos tu cita. '
+                    'Te esperamos el <strong>{fecha}</strong> a las <strong>{hora}</strong>.'
+                )
+            ),
+            'accion': (
+                'Si esta nueva fecha no te funciona, avísanos por WhatsApp lo antes posible.'
+            ),
         },
     }
 

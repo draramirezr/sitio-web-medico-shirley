@@ -1,0 +1,108 @@
+<script>
+(function() {
+    if (window.__reagendarCitaAdminInit) return;
+    window.__reagendarCitaAdminInit = true;
+
+    function loadHoras(section) {
+        const id = section.dataset.appointmentId;
+        const fechaInput = section.querySelector('.reagendar-fecha-input');
+        const horaSelect = section.querySelector('.reagendar-hora-select');
+        const fecha = (fechaInput.value || '').slice(0, 10);
+        if (!fecha) return;
+        horaSelect.disabled = true;
+        horaSelect.innerHTML = '<option value="">Cargando…</option>';
+        fetch('/api/horarios-disponibles?fecha=' + encodeURIComponent(fecha) + '&exclude_appointment_id=' + encodeURIComponent(id))
+            .then(r => r.json())
+            .then(data => {
+                const selected = (horaSelect.getAttribute('data-pending') || section.dataset.horaActual || '').slice(0, 5);
+                horaSelect.innerHTML = '<option value="">Seleccionar hora</option>';
+                (data.horarios || []).forEach(function(h) {
+                    const opt = document.createElement('option');
+                    opt.value = h;
+                    const parts = h.split(':');
+                    const hourNum = parseInt(parts[0], 10);
+                    const period = hourNum < 12 ? 'AM' : 'PM';
+                    const displayHour = hourNum > 12 ? hourNum - 12 : (hourNum === 0 ? 12 : hourNum);
+                    opt.textContent = displayHour + ':' + parts[1] + ' ' + period;
+                    if (h === selected) opt.selected = true;
+                    horaSelect.appendChild(opt);
+                });
+                horaSelect.disabled = !(data.horarios && data.horarios.length);
+                horaSelect.removeAttribute('data-pending');
+            })
+            .catch(function() {
+                horaSelect.innerHTML = '<option value="">Error al cargar</option>';
+                horaSelect.disabled = true;
+            });
+    }
+
+    function bindReagendarSections(root) {
+        (root || document).querySelectorAll('.cita-reagendar-section').forEach(function(section) {
+            if (section.dataset.bound === '1') return;
+            section.dataset.bound = '1';
+            const fechaInput = section.querySelector('.reagendar-fecha-input');
+            if (fechaInput) {
+                fechaInput.addEventListener('change', function() {
+                    section.querySelector('.reagendar-hora-select').setAttribute('data-pending', '');
+                    loadHoras(section);
+                });
+                if (fechaInput.value) loadHoras(section);
+            }
+        });
+    }
+
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.btn-reagendar-cita');
+        if (!btn) return;
+        const id = btn.getAttribute('data-appointment-id');
+        const section = btn.closest('.cita-reagendar-section');
+        if (!section) return;
+        const feedback = document.getElementById('reagendarFeedback' + id);
+        const fecha = section.querySelector('.reagendar-fecha-input').value;
+        const hora = section.querySelector('.reagendar-hora-select').value;
+        const notify = section.querySelector('.reagendar-notify-check').checked;
+        if (!fecha || !hora) {
+            feedback.className = 'reagendar-feedback small mt-2 text-danger';
+            feedback.textContent = 'Selecciona fecha y hora.';
+            return;
+        }
+        btn.disabled = true;
+        feedback.className = 'reagendar-feedback small mt-2 text-muted';
+        feedback.textContent = 'Guardando…';
+        fetch('/admin/appointments/' + id + '/reagendar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin',
+            body: JSON.stringify({ appointment_date: fecha, appointment_time: hora, notify: notify })
+        })
+        .then(function(r) { return r.json().then(function(j) { return { ok: r.ok, body: j }; }); })
+        .then(function(res) {
+            if (!res.ok || !res.body.success) {
+                feedback.className = 'reagendar-feedback small mt-2 text-danger';
+                feedback.textContent = (res.body && res.body.error) ? res.body.error : 'No se pudo reprogramar.';
+                return;
+            }
+            const data = res.body;
+            section.dataset.fechaActual = data.appointment_date || fecha;
+            section.dataset.horaActual = data.appointment_time || hora;
+            feedback.className = 'reagendar-feedback small mt-2 text-success';
+            let msg = data.message || 'Cita reprogramada.';
+            if (data.email_sent) msg += ' Correo enviado al paciente.';
+            else if (data.email_missing) msg += ' (Sin email en la ficha.)';
+            else if (data.unchanged) msg = 'Sin cambios.';
+            feedback.textContent = msg;
+            if (!data.unchanged) setTimeout(function() { location.reload(); }, 1400);
+        })
+        .catch(function() {
+            feedback.className = 'reagendar-feedback small mt-2 text-danger';
+            feedback.textContent = 'Error de conexión.';
+        })
+        .finally(function() { btn.disabled = false; });
+    });
+
+    bindReagendarSections(document);
+    document.addEventListener('shown.bs.modal', function(ev) {
+        bindReagendarSections(ev.target);
+    });
+})();
+</script>

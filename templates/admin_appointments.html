@@ -4,6 +4,7 @@
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
+{% from 'partials/admin_cita_reagendar.html' import cita_reagendar_controls %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/admin-responsive.css') }}">
 <style>
     /* Paleta de colores Dra. Shirley para Admin */
@@ -467,6 +468,7 @@
                                 {{ appointment['created_at']|fecha_es }}
                             </div>
                         </div>
+                        {{ cita_reagendar_controls(appointment) }}
                     </div>
                     <div class="modal-footer">
                         <a href="https://wa.me/{{ appointment['phone']|replace('(', '')|replace(')', '')|replace('-', '')|replace(' ', '') }}?text=Hola%20{{ appointment['first_name'] }},%20soy%20la%20Dra.%20Shirley%20Ram%C3%ADrez." 
@@ -577,5 +579,6 @@
     </div>
     {% endif %}
 </div>
+{% include 'partials/admin_cita_reagendar_scripts.html' %}
 {% endblock %}
 
