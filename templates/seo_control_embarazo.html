@@ -6,102 +6,246 @@
 {% block og_description %}Control de embarazo y seguimiento prenatal en Zona Oriental (SDE). WhatsApp 829-740-5073.{% endblock %}
 {% block twitter_title %}Control prenatal Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
 {% block twitter_description %}Seguimiento prenatal en Santo Domingo Este. WhatsApp 829-740-5073.{% endblock %}
+{% block schema_page_name %}Control prenatal Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
+{% block schema_page_description %}Control de embarazo y seguimiento prenatal en Santo Domingo Este, Zona Oriental.{% endblock %}
+
+{% block extra_meta %}
+<link rel="preload" as="image"
+      href="{{ url_for('static', filename='images/servicios-obstetricia-embarazo.webp') }}"
+      fetchpriority="high"
+      type="image/webp">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "¿Cómo agendo un control de embarazo?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Puedes agendar desde Solicitar cita en draramirez.com o por WhatsApp al 829-740-5073."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Qué debo llevar a mi primera consulta prenatal?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Si tienes estudios previos, resultados o historial médico, tráelos para una evaluación más completa."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Atiendes control prenatal en Santo Domingo Este?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sí. Consultorio en Zona Oriental (Santo Domingo Este). Recibo pacientes de Santo Domingo y zonas cercanas."
+      }
+    }
+  ]
+}
+</script>
+{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-10">
-      <div class="mb-4 text-center">
-        <img
-          src="{{ url_for('static', filename='images/dra-shirley-share.jpg') }}?v=10"
-          alt="Dra. Shirley Ramírez, médica ginecóloga y obstetra — control de embarazo en Santo Domingo Este"
-          width="1200"
-          height="630"
-          class="img-fluid rounded"
-          style="max-width:100%;height:auto;border-radius:16px;"
-          loading="eager"
-          decoding="async"
-        >
-      </div>
-      <h1 class="display-5 fw-bold mb-3" style="color: var(--title-color);">Control de Embarazo</h1>
-      <p class="lead text-muted mb-4">
-        El <strong>control de embarazo</strong> (control prenatal) es clave para acompañarte de forma segura y organizada.
-        Soy la <strong>Dra. Shirley Ramírez</strong>, <strong>médica ginecóloga y obstetra</strong> en Santo Domingo Este (Zona Oriental).
+{% include 'partials/seo_sd_landing_styles.html' %}
+
+<section class="seo-sd-hero seo-sd-page">
+  <img
+    class="seo-sd-hero-bg"
+    src="{{ url_for('static', filename='images/servicios-obstetricia-embarazo.webp') }}"
+    alt="Control de embarazo y prenatal con Dra. Shirley Ramírez en Santo Domingo Este"
+    width="1200"
+    height="800"
+    fetchpriority="high"
+    decoding="async"
+  >
+  <div class="seo-sd-hero-inner">
+    <div class="container">
+      <p class="seo-sd-lang">
+        <a href="{{ url_for('seo_ginecologa_santo_domingo') }}">← Ginecóloga en Santo Domingo</a>
       </p>
-
-      <div class="row g-3 mb-4">
-        <div class="col-md-6">
-          <div class="p-3 h-100" style="background: rgba(206, 176, 183, 0.10); border-radius: 12px; border-left: 4px solid var(--primary-color);">
-            <h2 class="h5 fw-bold mb-2" style="color: var(--title-color);">Agenda tu consulta</h2>
-            <p class="text-muted mb-3">
-              Agenda en línea y te orientamos con el proceso. Si prefieres, también puedes escribirnos por WhatsApp.
-            </p>
-            <a class="btn btn-primary" href="{{ url_for('request_appointment') }}">
-              <i class="fas fa-calendar-plus me-2"></i>Solicitar cita
-            </a>
-            <a class="btn btn-outline-primary ms-2" href="https://wa.me/18297405073?text=Hola,%20quiero%20agendar%20control%20prenatal%20(control%20de%20embarazo)" target="_blank" rel="noopener noreferrer">
-              <i class="fab fa-whatsapp me-2"></i>WhatsApp
-            </a>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="p-3 h-100" style="background: rgba(206, 176, 183, 0.10); border-radius: 12px; border-left: 4px solid var(--primary-color);">
-            <h2 class="h5 fw-bold mb-2" style="color: var(--title-color);">Ubicación</h2>
-            <p class="text-muted mb-2">
-              <strong>{{ site_address }}</strong>.
-            </p>
-            <a class="text-decoration-none" href="{{ site_maps_url }}" target="_blank" rel="noopener noreferrer">
-              <i class="fas fa-map-marker-alt me-2"></i>Ver en Google Maps
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <h2 class="h4 fw-bold mt-4" style="color: var(--title-color);">¿Qué incluye el control prenatal?</h2>
-      <p class="text-muted" style="line-height: 1.9;">
-        En consulta se evalúan antecedentes, se planifica el seguimiento y se aclaran dudas de forma clara y respetuosa.
-        La indicación exacta depende de cada paciente y de su etapa del embarazo.
+      <p class="seo-sd-brand">Dra. Shirley Ramírez</p>
+      <h1 class="seo-sd-headline">Control de embarazo y prenatal en Santo Domingo Este</h1>
+      <p class="seo-sd-lead">
+        Seguimiento ordenado y cercano durante tu embarazo. Obstetra en Zona Oriental — agenda en línea o por WhatsApp.
       </p>
-
-      <h2 class="h4 fw-bold mt-4" style="color: var(--title-color);">¿Buscas obstetra en Santo Domingo?</h2>
-      <p class="text-muted" style="line-height: 1.9;">
-        Atiendo pacientes de <strong>Santo Domingo</strong> y zonas cercanas, con consultorio en <strong>Santo Domingo Este</strong>.
-        Si vienes por una búsqueda de “<strong>cerca de mí</strong>”, podemos orientarte con la ubicación y la agenda.
-      </p>
-
-      <div class="accordion mt-4" id="faqSeoEmbarazo">
-        <div class="accordion-item">
-          <h3 class="accordion-header" id="e1">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#ea1" aria-expanded="true" aria-controls="ea1">
-              ¿Cómo agendo un control de embarazo?
-            </button>
-          </h3>
-          <div id="ea1" class="accordion-collapse collapse show" aria-labelledby="e1" data-bs-parent="#faqSeoEmbarazo">
-            <div class="accordion-body text-muted">
-              Puedes agendar desde “Solicitar cita” o por WhatsApp. Te ayudamos a elegir el tipo de consulta.
-            </div>
-          </div>
-        </div>
-        <div class="accordion-item">
-          <h3 class="accordion-header" id="e2">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#ea2" aria-expanded="false" aria-controls="ea2">
-              ¿Qué debo llevar a mi primera consulta?
-            </button>
-          </h3>
-          <div id="ea2" class="accordion-collapse collapse" aria-labelledby="e2" data-bs-parent="#faqSeoEmbarazo">
-            <div class="accordion-body text-muted">
-              Si tienes estudios previos, resultados o historial médico, tráelos para una evaluación más completa.
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="text-center mt-5">
-        <a class="btn btn-primary btn-lg" href="{{ url_for('request_appointment') }}">
-          <i class="fas fa-calendar-plus me-2"></i>Agendar control prenatal
+      <div class="seo-sd-ctas">
+        <a class="seo-sd-btn seo-sd-btn--solid" href="{{ url_for('request_appointment') }}">
+          <i class="fas fa-calendar-plus" aria-hidden="true"></i> Solicitar cita
+        </a>
+        <a class="seo-sd-btn seo-sd-btn--ghost"
+           href="https://wa.me/18297405073?text=Hola,%20quiero%20agendar%20control%20prenatal%20(control%20de%20embarazo)"
+           target="_blank" rel="noopener noreferrer">
+          <i class="fab fa-whatsapp" aria-hidden="true"></i> WhatsApp 829-740-5073
         </a>
       </div>
     </div>
   </div>
-</div>
+</section>
+
+<section class="seo-sd-section seo-sd-page seo-sd-section--soft">
+  <div class="container">
+    <div class="seo-sd-trust seo-sd-reveal">
+      <div>
+        <div class="seo-sd-kicker">Control prenatal</div>
+        <h2 class="seo-sd-h2">Acompañamiento claro en cada etapa</h2>
+        <p class="seo-sd-copy">
+          Soy la <strong>Dra. Shirley Ramírez</strong>, <strong>ginecóloga y obstetra</strong> en
+          <strong>Santo Domingo Este</strong>. El <strong>control de embarazo</strong> (control prenatal)
+          te ayuda a seguir tu gestación con calma y explicaciones que entiendas.
+        </p>
+        <ul class="seo-sd-trust-list">
+          <li>
+            Enfoque humano
+            <span>Espacio para preguntas y orientación sin prisa.</span>
+          </li>
+          <li>
+            Seguimiento prenatal
+            <span>Plan de control según tu semana y tu historial.</span>
+          </li>
+          <li>
+            Agenda sencilla
+            <span>Formulario web o WhatsApp 829-740-5073.</span>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <picture>
+          <source srcset="{{ url_for('static', filename='images/dra-shirley-sobre-mi.webp') }}?v=2" type="image/webp">
+          <img
+            class="seo-sd-trust-photo"
+            src="{{ url_for('static', filename='images/dra-shirley-sobre-mi.jpg') }}?v=2"
+            alt="Dra. Shirley Ramírez, obstetra — control prenatal Santo Domingo Este"
+            width="819"
+            height="1024"
+            loading="lazy"
+            decoding="async"
+          >
+        </picture>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="seo-sd-section seo-sd-page">
+  <div class="container seo-sd-reveal">
+    <div class="seo-sd-kicker">Qué incluye</div>
+    <h2 class="seo-sd-h2">Control prenatal en consulta</h2>
+    <p class="seo-sd-copy">
+      Si buscas <strong>obstetra en Santo Domingo</strong> o <strong>control de embarazo cerca de mí</strong>,
+      en consulta revisamos antecedentes, planificamos el seguimiento y aclaramos dudas. La indicación exacta
+      depende de tu etapa y de cada paciente.
+    </p>
+    <div class="seo-sd-services">
+      <article class="seo-sd-service">
+        <h3>Primera consulta</h3>
+        <p>Evaluación inicial, orientación y plan de seguimiento prenatal.</p>
+      </article>
+      <article class="seo-sd-service">
+        <h3>Controles periódicos</h3>
+        <p>Seguimiento de embarazo con explicación clara de cada paso.</p>
+      </article>
+      <article class="seo-sd-service">
+        <h3>Preparación</h3>
+        <p>Indicaciones sobre estudios o documentos según corresponda.</p>
+      </article>
+      <article class="seo-sd-service">
+        <h3>Coordinación</h3>
+        <p>Comunicación respetuosa contigo y tu acompañante si lo deseas.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="seo-sd-section seo-sd-page seo-sd-section--soft">
+  <div class="container">
+    <div class="seo-sd-place seo-sd-reveal">
+      <div>
+        <div class="seo-sd-kicker">Ubicación</div>
+        <h2 class="seo-sd-h2">Consultorio en Santo Domingo Este</h2>
+        <div class="seo-sd-place-line" aria-hidden="true"></div>
+        <p class="seo-sd-copy">
+          <strong>{{ site_address }}</strong>.
+          Atiendo pacientes de Santo Domingo y la Zona Oriental.
+        </p>
+      </div>
+      <div>
+        <p class="seo-sd-copy mb-3">
+          Te oriento con horarios y cómo llegar. También puedes ver la ubicación en Maps.
+        </p>
+        <a href="{{ site_maps_url }}" target="_blank" rel="noopener noreferrer">
+          <i class="fas fa-map-marker-alt me-2" aria-hidden="true"></i>Ver en Google Maps
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="seo-sd-section seo-sd-page">
+  <div class="container seo-sd-reveal" style="max-width: 760px;">
+    <div class="seo-sd-kicker">Preguntas frecuentes</div>
+    <h2 class="seo-sd-h2">Antes de agendar control prenatal</h2>
+    <div class="accordion seo-sd-faq mt-4" id="faqSeoEmbarazo">
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="e1">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#ea1" aria-expanded="true" aria-controls="ea1">
+            ¿Cómo agendo un control de embarazo?
+          </button>
+        </h3>
+        <div id="ea1" class="accordion-collapse collapse show" aria-labelledby="e1" data-bs-parent="#faqSeoEmbarazo">
+          <div class="accordion-body">
+            Puedes agendar desde <strong>Solicitar cita</strong> o por WhatsApp al <strong>829-740-5073</strong>. Te ayudamos a elegir el tipo de consulta.
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="e2">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#ea2" aria-expanded="false" aria-controls="ea2">
+            ¿Qué debo llevar a mi primera consulta?
+          </button>
+        </h3>
+        <div id="ea2" class="accordion-collapse collapse" aria-labelledby="e2" data-bs-parent="#faqSeoEmbarazo">
+          <div class="accordion-body">
+            Si tienes estudios previos, resultados o historial médico, tráelos. Si no, igual puedes asistir y te orientamos.
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="e3">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#ea3" aria-expanded="false" aria-controls="ea3">
+            ¿Atiendes pacientes de Santo Domingo aunque el consultorio esté en SDE?
+          </button>
+        </h3>
+        <div id="ea3" class="accordion-collapse collapse" aria-labelledby="e3" data-bs-parent="#faqSeoEmbarazo">
+          <div class="accordion-body">
+            Sí. Recibo pacientes de Santo Domingo y zonas cercanas en la Zona Oriental (Santo Domingo Este).
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="seo-sd-close seo-sd-page">
+  <div class="container seo-sd-reveal">
+    <h2>Agenda tu control prenatal</h2>
+    <p>
+      Si buscas obstetra en Santo Domingo Este con atención cercana, escríbeme y coordinamos tu consulta.
+    </p>
+    <div class="seo-sd-ctas" style="justify-content:center;">
+      <a class="seo-sd-btn seo-sd-btn--solid"
+         href="https://wa.me/18297405073?text=Hola,%20quiero%20agendar%20control%20prenatal%20(control%20de%20embarazo)"
+         target="_blank" rel="noopener noreferrer">
+        <i class="fab fa-whatsapp" aria-hidden="true"></i> WhatsApp
+      </a>
+      <a class="seo-sd-btn seo-sd-btn--ghost" href="{{ url_for('request_appointment') }}">
+        Solicitar cita en línea
+      </a>
+    </div>
+  </div>
+</section>
+
+{% include 'partials/seo_sd_reveal_script.html' %}
 {% endblock %}
