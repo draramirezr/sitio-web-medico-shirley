@@ -219,9 +219,10 @@
   .seo-sd-trust-photo {
     width: 100%;
     height: auto;
-    aspect-ratio: 4 / 5;
-    object-fit: cover;
-    object-position: 50% 20%;
+    aspect-ratio: 819 / 1024;
+    object-fit: contain;
+    object-position: center top;
+    background: #fff;
     border-radius: 0;
   }
   .seo-sd-trust-list {
@@ -421,15 +422,18 @@
         </ul>
       </div>
       <div>
-        <img
-          class="seo-sd-trust-photo"
-          src="{{ url_for('static', filename='images/Sobremi1.png') }}"
-          alt="Dra. Shirley Ramírez en consulta ginecológica"
-          width="720"
-          height="900"
-          loading="lazy"
-          decoding="async"
-        >
+        <picture>
+          <source srcset="{{ url_for('static', filename='images/dra-shirley-sobre-mi.webp') }}?v=2" type="image/webp">
+          <img
+            class="seo-sd-trust-photo"
+            src="{{ url_for('static', filename='images/dra-shirley-sobre-mi.jpg') }}?v=2"
+            alt="Dra. Shirley Ramírez, ginecóloga y obstetra"
+            width="819"
+            height="1024"
+            loading="lazy"
+            decoding="async"
+          >
+        </picture>
       </div>
     </div>
   </div>
