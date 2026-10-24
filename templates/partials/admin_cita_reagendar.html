@@ -2,8 +2,8 @@
 {% if appointment['status'] in ('pending', 'confirmed') and appointment.get('appointment_type') != 'emergencia' and not appointment.get('emergency_datetime') %}
 <div class="p-3 mt-3 cita-reagendar-section" style="background: rgba(21, 101, 192, 0.06); border-radius: 10px; border-left: 4px solid #1565C0;"
      data-appointment-id="{{ appointment['id'] }}"
-     data-fecha-actual="{{ appointment['appointment_date'] or '' }}"
-     data-hora-actual="{{ appointment['appointment_time'] or '' }}">
+     data-fecha-actual="{{ appointment['appointment_date']|fecha_iso }}"
+     data-hora-actual="{{ appointment['appointment_time']|hora_hhmm }}">
     <h6 class="mb-2" style="color: #1565C0; font-weight: 700;">
         <i class="fas fa-calendar-alt me-2"></i>Reprogramar cita
     </h6>
@@ -13,14 +13,15 @@
             <label class="form-label mb-1" for="reagendarFecha{{ appointment['id'] }}">Nueva fecha</label>
             <input type="date" class="form-control reagendar-fecha-input" id="reagendarFecha{{ appointment['id'] }}"
                    min="{{ fecha_hoy_rd }}" max="{{ fecha_max_cita }}"
-                   value="{{ appointment['appointment_date'] or '' }}">
+                   value="{{ appointment['appointment_date']|fecha_iso }}">
         </div>
         <div class="col-md-4">
             <label class="form-label mb-1" for="reagendarHora{{ appointment['id'] }}">Nueva hora</label>
             <select class="form-select reagendar-hora-select" id="reagendarHora{{ appointment['id'] }}">
                 <option value="">Seleccionar hora</option>
-                {% if appointment['appointment_time'] %}
-                <option value="{{ appointment['appointment_time'][:5] }}" selected>{{ appointment['appointment_time'][:5] }}</option>
+                {% set hora_actual = appointment['appointment_time']|hora_hhmm %}
+                {% if hora_actual %}
+                <option value="{{ hora_actual }}" selected>{{ hora_actual }}</option>
                 {% endif %}
             </select>
         </div>

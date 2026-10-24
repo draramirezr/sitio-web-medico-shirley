@@ -1209,6 +1209,45 @@ def fecha_es_filter(fecha):
     except:
         return str(fecha) if fecha else ''
 
+
+def _normalizar_hora_cita_hhmm(val):
+    """TIME/timedelta/str → HH:MM (MySQL suele devolver timedelta)."""
+    from datetime import timedelta, time as time_cls
+    if val is None:
+        return ''
+    if isinstance(val, timedelta):
+        total = int(val.total_seconds())
+        if total < 0:
+            return ''
+        hh, rem = divmod(total, 3600)
+        return f'{hh:02d}:{(rem // 60):02d}'
+    if isinstance(val, time_cls):
+        return val.strftime('%H:%M')
+    s = str(val).strip()
+    if len(s) >= 5 and s[2] == ':':
+        return s[:5]
+    return s
+
+
+def _normalizar_fecha_cita_iso(val):
+    """date/datetime/str → YYYY-MM-DD para inputs type=date."""
+    if not val:
+        return ''
+    if hasattr(val, 'strftime'):
+        return val.strftime('%Y-%m-%d')
+    s = str(val).strip()
+    return s[:10] if len(s) >= 10 else s
+
+
+@app.template_filter('hora_hhmm')
+def hora_hhmm_filter(val):
+    return _normalizar_hora_cita_hhmm(val)
+
+
+@app.template_filter('fecha_iso')
+def fecha_iso_filter(val):
+    return _normalizar_fecha_cita_iso(val)
+
 # Modelo de Usuario para Flask-Login
 class User(UserMixin):
     def __init__(self, id, nombre, email, perfil):
