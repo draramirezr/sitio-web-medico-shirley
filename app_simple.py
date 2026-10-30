@@ -2684,11 +2684,10 @@ def about():
 @app.route('/ginecologa-santo-domingo')
 def seo_ginecologa_santo_domingo():
     """Landing SEO para búsqueda amplia en Santo Domingo"""
-    hint_dias_habiles, physician_opening_hours_spec = preparar_horario_landing_seo()
+    _, physician_opening_hours_spec = preparar_horario_landing_seo()
     return render_template(
         'seo_ginecologa_santo_domingo.html',
         physician_opening_hours_spec=physician_opening_hours_spec,
-        hint_dias_habiles=hint_dias_habiles,
     )
 
 @app.route('/ginecologo-zona-oriental')
@@ -9362,7 +9361,7 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None,
         print(f"⚠️ No se pudo cargar QR e-CF: {e_qr}")
 
     buffer = BytesIO()
-    bottom = 145 if ecf_timbre else 70
+    bottom = 158 if ecf_timbre else 70
     doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=30, leftMargin=30, topMargin=25, bottomMargin=bottom)
     elements = []
     styles = getSampleStyleSheet()
@@ -9405,7 +9404,24 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None,
                 from dgii.qr import qr_png_bytes
                 qr_img = ImageReader(BytesIO(qr_png_bytes(ecf_timbre["url"], scale=4)))
                 qr_size = 78
-                canvas.drawImage(qr_img, 40, 18, width=qr_size, height=qr_size, mask='auto')
+                qr_x, qr_y = 40, 32
+                canvas.drawImage(qr_img, qr_x, qr_y, width=qr_size, height=qr_size, mask='auto')
+                canvas.setFont('Helvetica', 7)
+                canvas.setFillColor(colors.black)
+                line_y = qr_y - 10
+                if ecf_timbre.get('codigo_seguridad'):
+                    canvas.drawString(
+                        qr_x,
+                        line_y,
+                        f"Código de seguridad: {ecf_timbre['codigo_seguridad']}",
+                    )
+                    line_y -= 9
+                if ecf_timbre.get('fecha_firma'):
+                    canvas.drawString(
+                        qr_x,
+                        line_y,
+                        f"Firma digital: {ecf_timbre['fecha_firma']}",
+                    )
             except Exception as e_draw:
                 print(f"⚠️ No se pudo dibujar QR e-CF: {e_draw}")
             firma_x_start = 340

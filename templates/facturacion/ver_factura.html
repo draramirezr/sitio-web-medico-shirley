@@ -348,16 +348,28 @@
     }
 
     .ecf-qr-ri {
-        display: flex;
-        align-items: center;
-        gap: 0.85rem;
         margin: 1.25rem 0 0.5rem;
         page-break-inside: avoid;
+    }
+    .ecf-qr-ri-block {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.35rem;
     }
     .ecf-qr-ri img {
         width: 110px;
         height: 110px;
         background: #fff;
+    }
+    .ecf-qr-ri-meta {
+        font-size: 0.72rem;
+        line-height: 1.35;
+        color: #333;
+        max-width: 320px;
+    }
+    .ecf-qr-ri-meta p {
+        margin: 0.15rem 0;
     }
     
     .total-row {
@@ -727,7 +739,17 @@
 
         {% if ecf_timbre %}
         <div class="ecf-qr-ri">
-            <img src="{{ url_for('facturacion_ecf_qr', factura_id=factura['id']) }}" alt="QR e-CF DGII" width="110" height="110">
+            <div class="ecf-qr-ri-block">
+                <img src="{{ url_for('facturacion_ecf_qr', factura_id=factura['id']) }}" alt="QR e-CF DGII" width="110" height="110">
+                <div class="ecf-qr-ri-meta">
+                    {% if ecf_timbre.codigo_seguridad %}
+                    <p><strong>Código de seguridad:</strong> {{ ecf_timbre.codigo_seguridad }}</p>
+                    {% endif %}
+                    {% if ecf_timbre.fecha_firma %}
+                    <p><strong>Firma digital:</strong> {{ ecf_timbre.fecha_firma }}</p>
+                    {% endif %}
+                </div>
+            </div>
         </div>
         {% endif %}
 
