@@ -932,33 +932,35 @@ def obtener_horario_semanal_citas():
     """Lista de 7 filas del horario semanal (orden Lun→Dom)."""
     _ensure_appointment_weekly_schedule()
     conn = get_db_connection()
-    rows = conn.execute('''
-        SELECT day_of_week, enabled, start_time, end_time, slot_minutes
-        FROM appointment_weekly_schedule
-        ORDER BY day_of_week ASC
-    ''').fetchall()
-    conn.close()
-    by_day = {int(r['day_of_week']): r for r in (rows or [])}
-    result = []
-    for day in range(7):
-        r = by_day.get(day) or {
-            'day_of_week': day,
-            'enabled': 0,
-            'start_time': '09:00',
-            'end_time': '17:00',
-            'slot_minutes': 30,
-        }
-        result.append({
-            'day_of_week': day,
-            'nombre': DIAS_SEMANA_ES[day],
-            'enabled': bool(int(r.get('enabled') or 0)),
-            'start_time': (r.get('start_time') or '09:00')[:5],
-            'end_time': (r.get('end_time') or '17:00')[:5],
-            'slot_minutes': int(r.get('slot_minutes') or 30),
-            # JS Date.getDay(): Dom=0 … Sáb=6
-            'js_day': (day + 1) % 7,
-        })
-    return result
+    try:
+        rows = conn.execute('''
+            SELECT day_of_week, enabled, start_time, end_time, slot_minutes
+            FROM appointment_weekly_schedule
+            ORDER BY day_of_week ASC
+        ''').fetchall()
+        by_day = {int(r['day_of_week']): r for r in (rows or [])}
+        result = []
+        for day in range(7):
+            r = by_day.get(day) or {
+                'day_of_week': day,
+                'enabled': 0,
+                'start_time': '09:00',
+                'end_time': '17:00',
+                'slot_minutes': 30,
+            }
+            result.append({
+                'day_of_week': day,
+                'nombre': DIAS_SEMANA_ES[day],
+                'enabled': bool(int(r.get('enabled') or 0)),
+                'start_time': (r.get('start_time') or '09:00')[:5],
+                'end_time': (r.get('end_time') or '17:00')[:5],
+                'slot_minutes': int(r.get('slot_minutes') or 30),
+                # JS Date.getDay(): Dom=0 … Sáb=6
+                'js_day': (day + 1) % 7,
+            })
+        return result
+    finally:
+        conn.close()
 
 def generar_slots_horario(start_hm, end_hm, slot_minutes=30):
     """Genera HH:MM desde start hasta end inclusive, cada N minutos."""
@@ -1026,8 +1028,8 @@ def preparar_horario_landing_seo():
     """Una consulta a appointment_weekly_schedule: hint visible + spec JSON-LD para la landing SEO."""
     try:
         rows = obtener_horario_semanal_citas()
-    except Exception as e:
-        print(f"⚠️ preparar_horario_landing_seo: {e}")
+    except Exception:
+        app.logger.exception('preparar_horario_landing_seo: error al obtener horario semanal')
         return None, []
     return hint_texto_desde_horario_rows(rows), opening_hours_spec_desde_horario_rows(rows)
 
