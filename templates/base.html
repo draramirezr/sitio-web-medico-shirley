@@ -204,10 +204,8 @@
         "https://www.linkedin.com/in/shirley-ramirez-montero-a10964168/",
         "https://www.instagram.com/dra.ramirezr/",
         "{{ site_maps_url }}"
-      ],
-      {% if physician_opening_hours_spec is defined and physician_opening_hours_spec %}
-      "openingHoursSpecification": {{ physician_opening_hours_spec | tojson }},
-      {% endif %}
+      ]{%- if physician_opening_hours_spec is defined and physician_opening_hours_spec -%},
+      "openingHoursSpecification": {{ physician_opening_hours_spec | tojson }}{%- endif -%},
       "aggregateRating": {
         "@type": "AggregateRating",
         "ratingValue": "5.0",

@@ -991,9 +991,13 @@ def dias_habiles_js():
     """Días habilitados en índice JS (getDay)."""
     return [r['js_day'] for r in obtener_horario_semanal_citas() if r['enabled']]
 
-def texto_hint_dias_habiles():
-    """Texto corto para el formulario público."""
-    activos = [r for r in obtener_horario_semanal_citas() if r['enabled']]
+_SCHEMA_DAY_OF_WEEK = (
+    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday',
+)
+
+def hint_texto_desde_horario_rows(rows):
+    """Texto corto de días habilitados a partir de filas de obtener_horario_semanal_citas()."""
+    activos = [r for r in rows if r.get('enabled')]
     if not activos:
         return 'Por ahora no hay días disponibles para agendar en línea.'
     partes = []
@@ -1001,17 +1005,8 @@ def texto_hint_dias_habiles():
         partes.append(f"{r['nombre']} {r['start_time']}–{r['end_time']}")
     return 'Disponible: ' + '; '.join(partes) + '.'
 
-_SCHEMA_DAY_OF_WEEK = (
-    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday',
-)
-
-def construir_opening_hours_schema_spec():
-    """Lista OpeningHoursSpecification para JSON-LD (solo días habilitados en appointment_weekly_schedule)."""
-    try:
-        rows = obtener_horario_semanal_citas()
-    except Exception as e:
-        print(f"⚠️ construir_opening_hours_schema_spec: {e}")
-        return []
+def opening_hours_spec_desde_horario_rows(rows):
+    """OpeningHoursSpecification para JSON-LD (solo días habilitados)."""
     specs = []
     for r in rows:
         if not r.get('enabled'):
@@ -1026,6 +1021,35 @@ def construir_opening_hours_schema_spec():
             'closes': r['end_time'],
         })
     return specs
+
+def preparar_horario_landing_seo():
+    """Una consulta a appointment_weekly_schedule: hint visible + spec JSON-LD para la landing SEO."""
+    try:
+        rows = obtener_horario_semanal_citas()
+    except Exception as e:
+        print(f"⚠️ preparar_horario_landing_seo: {e}")
+        return None, []
+    return hint_texto_desde_horario_rows(rows), opening_hours_spec_desde_horario_rows(rows)
+
+def texto_hint_dias_habiles():
+    """Texto corto para el formulario público."""
+    try:
+        rows = obtener_horario_semanal_citas()
+    except Exception as e:
+        print(f"⚠️ texto_hint_dias_habiles: {e}")
+        return None
+    return hint_texto_desde_horario_rows(rows)
+
+def construir_opening_hours_schema_spec(rows=None):
+    """Lista OpeningHoursSpecification para JSON-LD (solo días habilitados en appointment_weekly_schedule)."""
+    if rows is not None:
+        return opening_hours_spec_desde_horario_rows(rows)
+    try:
+        rows = obtener_horario_semanal_citas()
+    except Exception as e:
+        print(f"⚠️ construir_opening_hours_schema_spec: {e}")
+        return []
+    return opening_hours_spec_desde_horario_rows(rows)
 
 def normalizar_estado_facturacion(estado_raw):
     """Normaliza el filtro de estado a 'pendiente' o 'facturado'."""
@@ -2658,10 +2682,11 @@ def about():
 @app.route('/ginecologa-santo-domingo')
 def seo_ginecologa_santo_domingo():
     """Landing SEO para búsqueda amplia en Santo Domingo"""
+    hint_dias_habiles, physician_opening_hours_spec = preparar_horario_landing_seo()
     return render_template(
         'seo_ginecologa_santo_domingo.html',
-        physician_opening_hours_spec=construir_opening_hours_schema_spec(),
-        hint_dias_habiles=texto_hint_dias_habiles(),
+        physician_opening_hours_spec=physician_opening_hours_spec,
+        hint_dias_habiles=hint_dias_habiles,
     )
 
 @app.route('/ginecologo-zona-oriental')
