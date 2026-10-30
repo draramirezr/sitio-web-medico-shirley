@@ -205,14 +205,9 @@
         "https://www.instagram.com/dra.ramirezr/",
         "{{ site_maps_url }}"
       ],
-      "openingHoursSpecification": [
-        {
-          "@type": "OpeningHoursSpecification",
-          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-          "opens": "09:00",
-          "closes": "18:00"
-        }
-      ],
+      {% if physician_opening_hours_spec is defined and physician_opening_hours_spec %}
+      "openingHoursSpecification": {{ physician_opening_hours_spec | tojson }},
+      {% endif %}
       "aggregateRating": {
         "@type": "AggregateRating",
         "ratingValue": "5.0",

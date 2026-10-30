@@ -1001,6 +1001,32 @@ def texto_hint_dias_habiles():
         partes.append(f"{r['nombre']} {r['start_time']}–{r['end_time']}")
     return 'Disponible: ' + '; '.join(partes) + '.'
 
+_SCHEMA_DAY_OF_WEEK = (
+    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday',
+)
+
+def construir_opening_hours_schema_spec():
+    """Lista OpeningHoursSpecification para JSON-LD (solo días habilitados en appointment_weekly_schedule)."""
+    try:
+        rows = obtener_horario_semanal_citas()
+    except Exception as e:
+        print(f"⚠️ construir_opening_hours_schema_spec: {e}")
+        return []
+    specs = []
+    for r in rows:
+        if not r.get('enabled'):
+            continue
+        dow = int(r['day_of_week'])
+        if dow < 0 or dow > 6:
+            continue
+        specs.append({
+            '@type': 'OpeningHoursSpecification',
+            'dayOfWeek': _SCHEMA_DAY_OF_WEEK[dow],
+            'opens': r['start_time'],
+            'closes': r['end_time'],
+        })
+    return specs
+
 def normalizar_estado_facturacion(estado_raw):
     """Normaliza el filtro de estado a 'pendiente' o 'facturado'."""
     estado = (estado_raw or 'pendiente').strip().lower()
@@ -2632,7 +2658,11 @@ def about():
 @app.route('/ginecologa-santo-domingo')
 def seo_ginecologa_santo_domingo():
     """Landing SEO para búsqueda amplia en Santo Domingo"""
-    return render_template('seo_ginecologa_santo_domingo.html')
+    return render_template(
+        'seo_ginecologa_santo_domingo.html',
+        physician_opening_hours_spec=construir_opening_hours_schema_spec(),
+        hint_dias_habiles=texto_hint_dias_habiles(),
+    )
 
 @app.route('/ginecologo-zona-oriental')
 def seo_ginecologo_zona_oriental():

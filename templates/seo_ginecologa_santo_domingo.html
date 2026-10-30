@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}Ginecóloga en Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
+{% block title %}Ginecóloga y obstetra en Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
 
-{% block description %}Consulta con la Dra. Shirley Ramírez, ginecóloga y obstetra en Santo Domingo Este (Zona Oriental). Chequeo, control prenatal y salud femenina. Solicita cita: WhatsApp 829-740-5073 o en línea.{% endblock %}
+{% block description %}Consulta ginecológica en Santo Domingo Este (Zona Oriental): chequeo, control prenatal y salud femenina. Solicita cita en línea o WhatsApp 829-740-5073.{% endblock %}
 
-{% block og_title %}Ginecóloga en Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
-{% block og_description %}Ginecóloga y obstetra en Santo Domingo Este (Zona Oriental). Chequeo, embarazo y consulta. WhatsApp 829-740-5073 o solicitar cita en línea.{% endblock %}
-{% block twitter_title %}Ginecóloga en Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
-{% block twitter_description %}Ginecóloga en Santo Domingo Este. Chequeo, embarazo y consulta en Zona Oriental. WhatsApp 829-740-5073.{% endblock %}
-{% block schema_page_name %}Ginecóloga en Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
-{% block schema_page_description %}Ginecóloga y obstetra en Santo Domingo Este (Zona Oriental). Chequeo, control prenatal y salud femenina.{% endblock %}
+{% block og_title %}Ginecóloga y obstetra en Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
+{% block og_description %}Consulta ginecológica en Santo Domingo Este (Zona Oriental): chequeo, control prenatal y salud femenina. Cita en línea o WhatsApp 829-740-5073.{% endblock %}
+{% block twitter_title %}Ginecóloga y obstetra en Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
+{% block twitter_description %}Chequeo, control prenatal y salud femenina en Santo Domingo Este (Zona Oriental). WhatsApp 829-740-5073 o cita en línea.{% endblock %}
+{% block schema_page_name %}Ginecóloga y obstetra en Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
+{% block schema_page_description %}Consulta ginecológica en Santo Domingo Este (Zona Oriental): chequeo, control prenatal y salud femenina. Solicita cita en línea o WhatsApp 829-740-5073.{% endblock %}
 
 {% block extra_meta %}
 <link rel="alternate" hreflang="es-DO" href="https://www.draramirez.com/ginecologa-santo-domingo">
@@ -37,7 +37,7 @@
       "name": "¿Cómo agendo una cita?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Puedes agendar por WhatsApp al 829-740-5073 o usar el formulario de Solicitar cita en draramirez.com."
+        "text": "Puedes agendar por WhatsApp al 829-740-5073 o usar el formulario de Solicitar cita en el sitio."
       }
     },
     {
@@ -61,7 +61,15 @@
       "name": "¿Puedo agendar si busco ginecólogo en Santo Domingo Este?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Sí. Si buscas ginecólogo o ginecóloga en Santo Domingo Este (Zona Oriental), puedes solicitar cita en línea o por WhatsApp al 829-740-5073."
+        "text": "Sí. Si buscas ginecólogo en Santo Domingo Este o ginecóloga en la Zona Oriental, puedes solicitar cita en línea o escribir por WhatsApp al 829-740-5073."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Atienden como ginecólogos en Santo Domingo Este?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sí. Puedes solicitar consulta con la Dra. Shirley Ramírez usando el formulario Solicitar cita en el sitio o por WhatsApp al 829-740-5073."
       }
     }
   ]
@@ -98,18 +106,19 @@
         <a href="{{ url_for('seo_jinekolojis_santo_domingo') }}">Kreyòl</a>
       </p>
       <p class="seo-sd-brand">Dra. Shirley Ramírez</p>
-      <h1 class="seo-sd-headline">Ginecóloga en Santo Domingo Este</h1>
+      <h1 class="seo-sd-headline">Ginecóloga y obstetra en Santo Domingo Este</h1>
       <p class="seo-sd-lead">
-        Ginecóloga y obstetra en la Zona Oriental. Consulta clara y cercana para pacientes de Santo Domingo y sectores cercanos.
+        Atención ginecológica y obstétrica en la Zona Oriental para pacientes de Santo Domingo Este y sectores cercanos.
+        Consulta clara, cercana y profesional.
       </p>
       <div class="seo-sd-ctas">
         <a class="seo-sd-btn seo-sd-btn--solid" href="{{ url_for('request_appointment') }}">
-          <i class="fas fa-calendar-plus" aria-hidden="true"></i> Solicitar cita
+          <i class="fas fa-calendar-plus" aria-hidden="true"></i> Solicitar cita en línea
         </a>
         <a class="seo-sd-btn seo-sd-btn--ghost"
            href="https://wa.me/18297405073?text=Hola,%20quiero%20agendar%20una%20cita%20de%20ginecolog%C3%ADa"
            target="_blank" rel="noopener noreferrer">
-          <i class="fab fa-whatsapp" aria-hidden="true"></i> WhatsApp 829-740-5073
+          <i class="fab fa-whatsapp" aria-hidden="true"></i> Escribir por WhatsApp
         </a>
       </div>
     </div>
@@ -181,27 +190,35 @@
     <div class="seo-sd-services">
       <article class="seo-sd-service">
         <h3>Consulta ginecológica</h3>
-        <p>Chequeo anual, evaluación y orientación según tu motivo de consulta.</p>
+        <p>
+          Evaluación clínica, revisión de síntomas y orientación sobre prevención y seguimiento.
+          Ideal para chequeo periódico o cuando buscas
+          <a href="{{ url_for('seo_chequeo_ginecologico') }}">chequeo ginecológico en Santo Domingo Este</a>.
+        </p>
       </article>
       <article class="seo-sd-service">
         <h3>Control prenatal</h3>
-        <p>Seguimiento de embarazo con acompañamiento cercano y ordenado.</p>
+        <p>
+          Seguimiento del embarazo con controles programados, explicación de estudios y coordinación del plan de cuidado.
+          Más información sobre
+          <a href="{{ url_for('seo_control_embarazo') }}">control prenatal en Santo Domingo Este</a>.
+        </p>
       </article>
       <article class="seo-sd-service">
         <h3>Planificación familiar</h3>
-        <p>Orientación anticonceptiva adaptada a tu etapa y preferencias.</p>
+        <p>
+          Conversación sobre métodos anticonceptivos, cambios de etapa y dudas frecuentes, para que elijas opciones
+          con información clara y acompañamiento profesional.
+        </p>
       </article>
       <article class="seo-sd-service">
         <h3>Ginecología estética</h3>
-        <p>Evaluación respetuosa y orientación según cada caso.</p>
+        <p>
+          Valoración en consultorio sobre inquietudes estéticas o funcionales íntimas, con enfoque respetuoso y
+          explicación de alternativas según tu caso (sin prometer resultados).
+        </p>
       </article>
     </div>
-    <p class="seo-sd-copy mt-4 mb-0">
-      También puedes ver:
-      <a href="{{ url_for('seo_chequeo_ginecologico') }}">chequeo ginecológico en Santo Domingo Este</a>
-      <span aria-hidden="true"> · </span>
-      <a href="{{ url_for('seo_control_embarazo') }}">control prenatal en Santo Domingo Este</a>.
-    </p>
   </div>
 </section>
 
@@ -219,6 +236,9 @@
         </p>
       </div>
       <div>
+        {% if hint_dias_habiles %}
+        <p class="seo-sd-copy mb-3"><strong>Horario para citas:</strong> {{ hint_dias_habiles }}</p>
+        {% endif %}
         <p class="seo-sd-copy mb-3">
           Puedes confirmar la ruta en Google Maps antes de tu visita. Si tienes dudas sobre horarios o tipo de consulta,
           escríbeme por WhatsApp.
@@ -256,7 +276,7 @@
         </h3>
         <div id="a2" class="accordion-collapse collapse" aria-labelledby="q2" data-bs-parent="#faqSeoSd">
           <div class="accordion-body">
-            Puedes agendar por WhatsApp al <strong>829-740-5073</strong> o usar el formulario de “Solicitar cita”.
+            Puedes agendar por WhatsApp al <strong>829-740-5073</strong> o usar el formulario de Solicitar cita en el sitio.
           </div>
         </div>
       </div>
@@ -297,6 +317,20 @@
           </div>
         </div>
       </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="q6">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a6" aria-expanded="false" aria-controls="a6">
+            ¿Atienden como ginecólogos en Santo Domingo Este?
+          </button>
+        </h3>
+        <div id="a6" class="accordion-collapse collapse" aria-labelledby="q6" data-bs-parent="#faqSeoSd">
+          <div class="accordion-body">
+            Sí. Puedes solicitar consulta con la Dra. Shirley Ramírez usando el formulario
+            <a href="{{ url_for('request_appointment') }}">Solicitar cita</a> en el sitio o por WhatsApp al
+            <strong>829-740-5073</strong>.
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -305,16 +339,16 @@
   <div class="container seo-sd-reveal">
     <h2>Agenda tu consulta ginecológica hoy</h2>
     <p>
-      ¿Lista para agendar? Escríbeme por WhatsApp o usa el formulario de solicitud de cita en línea.
+      Reserva tu cita en pocos minutos: formulario en línea o mensaje directo por WhatsApp al 829-740-5073.
     </p>
     <div class="seo-sd-ctas" style="justify-content:center;">
       <a class="seo-sd-btn seo-sd-btn--solid"
          href="https://wa.me/18297405073?text=Hola,%20quiero%20agendar%20una%20cita%20de%20ginecolog%C3%ADa"
          target="_blank" rel="noopener noreferrer">
-        <i class="fab fa-whatsapp" aria-hidden="true"></i> Agendar por WhatsApp
+        <i class="fab fa-whatsapp" aria-hidden="true"></i> Agendar por WhatsApp ahora
       </a>
       <a class="seo-sd-btn seo-sd-btn--ghost" href="{{ url_for('request_appointment') }}">
-        Solicitar cita en línea
+        <i class="fas fa-calendar-check" aria-hidden="true"></i> Solicitar cita en Santo Domingo Este
       </a>
     </div>
   </div>
