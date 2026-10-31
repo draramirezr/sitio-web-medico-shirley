@@ -206,13 +206,6 @@
         "{{ site_maps_url }}"
       ]{%- if physician_opening_hours_spec is defined and physician_opening_hours_spec -%},
       "openingHoursSpecification": {{ physician_opening_hours_spec | tojson }}{%- endif -%},
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "5.0",
-        "reviewCount": "2",
-        "bestRating": "5",
-        "worstRating": "1"
-      },
       "hasOfferCatalog": {
         "@type": "OfferCatalog",
         "name": "Servicios Médicos",
