@@ -2693,7 +2693,12 @@ def seo_ginecologa_santo_domingo():
 @app.route('/ginecologo-zona-oriental')
 def seo_ginecologo_zona_oriental():
     """Landing SEO para Zona Oriental (Santo Domingo Este)"""
-    return render_template('seo_ginecologo_zona_oriental.html')
+    _, physician_opening_hours_spec = preparar_horario_landing_seo()
+    return render_template(
+        'seo_ginecologo_zona_oriental.html',
+        physician_opening_hours_spec=physician_opening_hours_spec,
+        physician_area_served_extra=['Zona Oriental'],
+    )
 
 @app.route('/control-embarazo')
 def seo_control_embarazo():

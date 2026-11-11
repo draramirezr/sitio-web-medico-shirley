@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}Ginecóloga en Zona Oriental | Dra. Shirley Ramírez{% endblock %}
-{% block description %}Médica ginecóloga en Santo Domingo Este (Zona Oriental). Chequeo, embarazo, anticonceptivos. WhatsApp 829-740-5073 — Dra. Shirley Ramírez.{% endblock %}
-{% block og_title %}Ginecóloga en Zona Oriental | Dra. Shirley Ramírez{% endblock %}
-{% block og_description %}Ginecóloga en Santo Domingo Este (Zona Oriental). Chequeo, embarazo, anticonceptivos. WhatsApp 829-740-5073.{% endblock %}
-{% block twitter_title %}Ginecóloga en Zona Oriental | Dra. Shirley Ramírez{% endblock %}
-{% block twitter_description %}Consultorio en Zona Oriental (SDE). WhatsApp 829-740-5073 — Dra. Shirley Ramírez.{% endblock %}
-{% block schema_page_name %}Ginecóloga en Zona Oriental | Dra. Shirley Ramírez{% endblock %}
-{% block schema_page_description %}Médica ginecóloga en Santo Domingo Este (Zona Oriental). WhatsApp 829-740-5073.{% endblock %}
+{% block title %}Ginecóloga en Zona Oriental, Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
+{% block description %}Consulta ginecológica en Zona Oriental (Santo Domingo Este): chequeo, control prenatal y salud femenina. Solicita cita en línea o WhatsApp 829-740-5073.{% endblock %}
+{% block og_title %}Ginecóloga en Zona Oriental, Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
+{% block og_description %}Atención ginecológica en Zona Oriental (Santo Domingo Este): chequeo, embarazo y salud femenina. Cita en línea o WhatsApp 829-740-5073.{% endblock %}
+{% block twitter_title %}Ginecóloga en Zona Oriental, Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
+{% block twitter_description %}Servicios ginecológicos en Zona Oriental (Santo Domingo Este). WhatsApp 829-740-5073 o formulario de cita en línea.{% endblock %}
+{% block schema_page_name %}Ginecóloga en Zona Oriental, Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
+{% block schema_page_description %}Consulta ginecológica en Zona Oriental (Santo Domingo Este): chequeo, control prenatal y salud femenina. Solicita cita en línea o WhatsApp 829-740-5073.{% endblock %}
 
 {% block extra_meta %}
 <link rel="preload" as="image"
@@ -21,18 +21,50 @@
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "¿Hay ginecóloga cerca en Zona Oriental?",
+      "name": "¿Dónde queda el consultorio ginecológico en la Zona Oriental?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Sí. La Dra. Shirley Ramírez atiende en Santo Domingo Este (Zona Oriental). Puedes agendar por WhatsApp al 829-740-5073."
+        "text": "El consultorio de la Dra. Shirley Ramírez está en {{ site_address }}, en la Zona Oriental de Santo Domingo Este. Puedes confirmar la ruta en Google Maps desde el enlace del sitio."
       }
     },
     {
       "@type": "Question",
-      "name": "¿Qué servicios ofrece la ginecóloga en Zona Oriental?",
+      "name": "¿Qué servicios ginecológicos se ofrecen en Santo Domingo Este (Zona Oriental)?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Chequeo ginecológico, control de embarazo, anticonceptivos y atención integral de salud femenina."
+        "text": "Chequeo ginecológico, control de embarazo y orientación en anticonceptivos, además de consulta integral de salud femenina según cada caso."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Cómo puedo solicitar una cita en la Zona Oriental?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Puedes usar el formulario Solicitar cita del sitio o escribir por WhatsApp al 829-740-5073. Te indicaré el tipo de consulta que conviene según tu motivo."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Atiende consultas obstétricas y control de embarazo en la Zona Oriental?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sí. La Dra. Shirley Ramírez es ginecóloga y obstetra; ofrece control prenatal y seguimiento de embarazo en consultorio, según las necesidades de cada paciente."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Reciben pacientes de Santo Domingo y zonas cercanas a la Zona Oriental?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sí. El consultorio recibe pacientes de Santo Domingo Este, de Santo Domingo y de municipios cercanos que prefieren atención en la parte oriental de la capital."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Puedo agendar una consulta si busco una ginecóloga cerca de mí en Santo Domingo Este?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sí. Si te encuentras en Santo Domingo Este o en sectores próximos a la Zona Oriental, puedes coordinar tu cita en línea o por WhatsApp al 829-740-5073."
       }
     }
   ]
@@ -181,6 +213,12 @@
     max-width: 40rem;
     margin: 0;
   }
+  .seo-zo-page .seo-zo-copy a {
+    color: var(--seo-rose-deep);
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .seo-zo-page .seo-zo-copy a:hover { text-decoration: underline; }
 
   .seo-zo-trust {
     display: grid;
@@ -264,6 +302,30 @@
   }
   .seo-zo-place a:hover { text-decoration: underline; }
 
+  .seo-zo-faq .accordion-item {
+    border: none;
+    border-bottom: 1px solid rgba(206,176,183,0.5);
+    background: transparent;
+  }
+  .seo-zo-faq .accordion-button {
+    background: transparent;
+    box-shadow: none !important;
+    color: var(--seo-ink);
+    font-weight: 700;
+    font-size: 1.05rem;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .seo-zo-faq .accordion-button:not(.collapsed) {
+    background: transparent;
+    color: var(--seo-rose-deep);
+  }
+  .seo-zo-faq .accordion-body {
+    padding-left: 0;
+    color: var(--seo-muted);
+    line-height: 1.7;
+  }
+
   .seo-zo-close {
     position: relative;
     overflow: hidden;
@@ -309,7 +371,7 @@
   <img
     class="seo-zo-hero-bg"
     src="{{ url_for('static', filename='images/dra-shirley-hero-bg.webp') }}?v=8"
-    alt="Dra. Shirley Ramírez, médica ginecóloga y obstetra en Zona Oriental, Santo Domingo Este"
+    alt="Dra. Shirley Ramírez, ginecóloga y obstetra en Zona Oriental, Santo Domingo Este"
     width="1200"
     height="1800"
     fetchpriority="high"
@@ -318,9 +380,10 @@
   <div class="seo-zo-hero-inner">
     <div class="container">
       <p class="seo-zo-brand">Dra. Shirley Ramírez</p>
-      <h1 class="seo-zo-headline">Médica ginecóloga en Zona Oriental</h1>
+      <h1 class="seo-zo-headline">Ginecóloga en Zona Oriental, Santo Domingo Este</h1>
       <p class="seo-zo-lead">
-        Consulta ginecológica y obstétrica en Santo Domingo Este, con atención clara y cercana.
+        Atención ginecológica y obstétrica en consultorio de la Zona Oriental, con explicaciones claras y agenda por
+        cita en línea o WhatsApp.
       </p>
       <div class="seo-zo-ctas">
         <a class="seo-zo-btn seo-zo-btn--solid" href="{{ url_for('request_appointment') }}">
@@ -341,25 +404,30 @@
     <div class="seo-zo-trust seo-zo-reveal">
       <div>
         <div class="seo-zo-kicker">Zona Oriental</div>
-        <h2 class="seo-zo-h2">Atención ginecológica cerca de ti en Zona Oriental</h2>
+        <h2 class="seo-zo-h2">Consulta ginecológica en la Zona Oriental</h2>
         <p class="seo-zo-copy">
-          Soy la <strong>Dra. Shirley Ramírez</strong>, <strong>ginecóloga y obstetra</strong>.
-          Si buscas un <strong>médico ginecólogo</strong>, <strong>ginecólogo Zona Oriental</strong>
-          o <a href="{{ url_for('seo_ginecologa_santo_domingo') }}">Ginecóloga en Santo Domingo Este</a>, aquí encuentras
-          una consulta calmada, clara y profesional.
+          Soy la <strong>Dra. Shirley Ramírez</strong>, <strong>ginecóloga y obstetra</strong> con consultorio en
+          <strong>Santo Domingo Este</strong>. Esta página está pensada para quienes buscan
+          <strong>atención ginecológica en la Zona Oriental</strong>: una visita ordenada, con tiempo para tus preguntas
+          y orientación sobre el siguiente paso en tu cuidado.
+        </p>
+        <p class="seo-zo-copy mt-3">
+          Si también te interesa el contexto general de la práctica en la ciudad, puedes leer la página de
+          <a href="{{ url_for('seo_ginecologa_santo_domingo') }}">ginecología y obstetricia en Santo Domingo Este</a>;
+          aquí el foco es la atención local en la parte oriental.
         </p>
         <ul class="seo-zo-trust-list">
           <li>
-            Ubicación accesible
-            <span>Consultorio en Santo Domingo Este, Zona Oriental.</span>
+            Consultorio en Zona Oriental
+            <span>{{ site_address }}</span>
           </li>
           <li>
-            Atención femenina integral
-            <span>Chequeo, control prenatal y orientación anticonceptiva.</span>
+            Servicios ginecológicos
+            <span>Chequeo, salud femenina, anticonceptivos y control prenatal.</span>
           </li>
           <li>
-            Agenda sin fricción
-            <span>Cita en línea o por WhatsApp, según te resulte más fácil.</span>
+            Solicitar cita
+            <span>Formulario en línea o WhatsApp al 829-740-5073.</span>
           </li>
         </ul>
       </div>
@@ -380,28 +448,42 @@
 
 <section class="seo-zo-section seo-zo-page">
   <div class="container seo-zo-reveal">
-    <div class="seo-zo-kicker">Servicios más solicitados</div>
-    <h2 class="seo-zo-h2">Cuidado ginecológico y obstétrico</h2>
+    <div class="seo-zo-kicker">Servicios</div>
+    <h2 class="seo-zo-h2">Servicios ginecológicos en Zona Oriental</h2>
     <p class="seo-zo-copy">
-      Si llegaste buscando <strong>médico ginecólogo cerca de mí</strong> o
-      <strong>médica ginecóloga</strong> en la Zona Oriental, te oriento según tu motivo de consulta.
+      Cada consulta se adapta a tu motivo de visita: prevención, seguimiento o dudas puntuales. Si buscas una
+      <strong>ginecóloga cerca de ti</strong> en <strong>Santo Domingo Este</strong>, estas son las áreas que con mayor
+      frecuencia se coordinan en el consultorio:
     </p>
     <div class="seo-zo-services">
       <article class="seo-zo-service">
         <h3>Chequeo ginecológico</h3>
-        <p>Evaluación preventiva y orientación clara para tu salud femenina.</p>
+        <p>
+          Evaluación preventiva y revisión de síntomas con orientación sobre estudios y seguimiento.
+          Más detalle en la página de
+          <a href="{{ url_for('seo_chequeo_ginecologico') }}">chequeo ginecológico</a>.
+        </p>
       </article>
       <article class="seo-zo-service">
         <h3>Control de embarazo</h3>
-        <p>Control prenatal y seguimiento con un enfoque humano y ordenado.</p>
+        <p>
+          Control prenatal y seguimiento obstétrico en consultorio, con explicación de cada etapa según tu embarazo.
+          Información ampliada en
+          <a href="{{ url_for('seo_control_embarazo') }}">control de embarazo</a>.
+        </p>
       </article>
       <article class="seo-zo-service">
         <h3>Anticonceptivos</h3>
-        <p>Consejería para elegir el método más adecuado según tu caso.</p>
+        <p>
+          Conversación sobre métodos disponibles, cambios de etapa y dudas frecuentes, para decidir con información
+          clara.
+        </p>
       </article>
       <article class="seo-zo-service">
         <h3>Salud femenina</h3>
-        <p>Atención integral para distintas etapas de la vida.</p>
+        <p>
+          Consulta integral en distintas etapas de la vida, con enfoque respetuoso y profesional en la Zona Oriental.
+        </p>
       </article>
     </div>
   </div>
@@ -412,16 +494,23 @@
     <div class="seo-zo-place seo-zo-reveal">
       <div>
         <div class="seo-zo-kicker">Ubicación</div>
-        <h2 class="seo-zo-h2">Consultorio en Santo Domingo Este</h2>
+        <h2 class="seo-zo-h2">Cómo llegar al consultorio en Santo Domingo Este</h2>
         <div class="seo-zo-place-line" aria-hidden="true"></div>
         <p class="seo-zo-copy">
-          <strong>{{ site_address }}</strong>.
-          Accesible para pacientes de sectores cercanos de la Zona Oriental.
+          El consultorio está en <strong>{{ site_address }}</strong>, en la <strong>Zona Oriental</strong>
+          de Santo Domingo Este. La dirección corresponde a Av. Sabana Larga; es práctica para quienes viven en el este
+          de la capital o se desplazan desde <strong>Santo Domingo</strong> y <strong>municipios cercanos</strong>.
+        </p>
+        <p class="seo-zo-copy mt-3">
+          Antes de la visita puedes calcular tiempo y ruta en Google Maps, revisar el acceso en automóvil o transporte
+          público y escribir por WhatsApp si necesitas confirmar el tipo de cita (chequeo, control prenatal u otra
+          consulta ginecológica).
         </p>
       </div>
       <div>
         <p class="seo-zo-copy mb-3">
-          La mejor orientación empieza con una consulta. Te ayudo a elegir el tipo de atención.
+          Abrir la ubicación en el mapa te ayuda a planificar el trayecto desde tu sector en Santo Domingo Este o zonas
+          colindantes.
         </p>
         <a href="{{ site_maps_url }}" target="_blank" rel="noopener noreferrer">
           <i class="fas fa-map-marker-alt me-2" aria-hidden="true"></i>Ver en Google Maps
@@ -431,11 +520,95 @@
   </div>
 </section>
 
+<section class="seo-zo-section seo-zo-page">
+  <div class="container seo-zo-reveal" style="max-width: 760px;">
+    <div class="seo-zo-kicker">Preguntas frecuentes</div>
+    <h2 class="seo-zo-h2">Preguntas sobre la consulta en Zona Oriental</h2>
+    <p class="seo-zo-copy mb-4">
+      Respuestas claras sobre ubicación, servicios y citas en Santo Domingo Este (Zona Oriental).
+    </p>
+    <div class="accordion seo-zo-faq mt-4" id="faqSeoZo">
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="zo-q1">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#zo-a1" aria-expanded="true" aria-controls="zo-a1">
+            ¿Dónde queda el consultorio ginecológico en la Zona Oriental?
+          </button>
+        </h3>
+        <div id="zo-a1" class="accordion-collapse collapse show" aria-labelledby="zo-q1" data-bs-parent="#faqSeoZo">
+          <div class="accordion-body">
+            El consultorio de la Dra. Shirley Ramírez está en {{ site_address }}, en la Zona Oriental de Santo Domingo Este. Puedes confirmar la ruta en Google Maps desde el enlace del sitio.
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="zo-q2">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#zo-a2" aria-expanded="false" aria-controls="zo-a2">
+            ¿Qué servicios ginecológicos se ofrecen en Santo Domingo Este (Zona Oriental)?
+          </button>
+        </h3>
+        <div id="zo-a2" class="accordion-collapse collapse" aria-labelledby="zo-q2" data-bs-parent="#faqSeoZo">
+          <div class="accordion-body">
+            Chequeo ginecológico, control de embarazo y orientación en anticonceptivos, además de consulta integral de salud femenina según cada caso.
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="zo-q3">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#zo-a3" aria-expanded="false" aria-controls="zo-a3">
+            ¿Cómo puedo solicitar una cita en la Zona Oriental?
+          </button>
+        </h3>
+        <div id="zo-a3" class="accordion-collapse collapse" aria-labelledby="zo-q3" data-bs-parent="#faqSeoZo">
+          <div class="accordion-body">
+            Puedes usar el formulario Solicitar cita del sitio o escribir por WhatsApp al 829-740-5073. Te indicaré el tipo de consulta que conviene según tu motivo.
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="zo-q4">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#zo-a4" aria-expanded="false" aria-controls="zo-a4">
+            ¿Atiende consultas obstétricas y control de embarazo en la Zona Oriental?
+          </button>
+        </h3>
+        <div id="zo-a4" class="accordion-collapse collapse" aria-labelledby="zo-q4" data-bs-parent="#faqSeoZo">
+          <div class="accordion-body">
+            Sí. La Dra. Shirley Ramírez es ginecóloga y obstetra; ofrece control prenatal y seguimiento de embarazo en consultorio, según las necesidades de cada paciente.
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="zo-q5">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#zo-a5" aria-expanded="false" aria-controls="zo-a5">
+            ¿Reciben pacientes de Santo Domingo y zonas cercanas a la Zona Oriental?
+          </button>
+        </h3>
+        <div id="zo-a5" class="accordion-collapse collapse" aria-labelledby="zo-q5" data-bs-parent="#faqSeoZo">
+          <div class="accordion-body">
+            Sí. El consultorio recibe pacientes de Santo Domingo Este, de Santo Domingo y de municipios cercanos que prefieren atención en la parte oriental de la capital.
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="zo-q6">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#zo-a6" aria-expanded="false" aria-controls="zo-a6">
+            ¿Puedo agendar una consulta si busco una ginecóloga cerca de mí en Santo Domingo Este?
+          </button>
+        </h3>
+        <div id="zo-a6" class="accordion-collapse collapse" aria-labelledby="zo-q6" data-bs-parent="#faqSeoZo">
+          <div class="accordion-body">
+            Sí. Si te encuentras en Santo Domingo Este o en sectores próximos a la Zona Oriental, puedes coordinar tu cita en línea o por WhatsApp al 829-740-5073.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="seo-zo-close seo-zo-page">
   <div class="container seo-zo-reveal">
     <h2>Agenda tu cita en Zona Oriental</h2>
     <p>
-      Si buscas una médica ginecóloga cerca de ti, escríbeme y coordinamos tu consulta.
+      Cuando quieras coordinar una consulta ginecológica en Santo Domingo Este, usa el formulario en línea o WhatsApp.
     </p>
     <div class="seo-zo-ctas" style="justify-content:center;">
       <a class="seo-zo-btn seo-zo-btn--solid" href="{{ url_for('request_appointment') }}">

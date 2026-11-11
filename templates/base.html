@@ -190,7 +190,8 @@
       "hasMap": "{{ site_maps_url }}",
       "areaServed": [
         "Santo Domingo Este",
-        "Santo Domingo"
+        "Santo Domingo"{% if physician_area_served_extra is defined and physician_area_served_extra %}{% for area in physician_area_served_extra %},
+        "{{ area }}"{% endfor %}{% endif %}
       ],
       "geo": {
         "@type": "GeoCoordinates",
