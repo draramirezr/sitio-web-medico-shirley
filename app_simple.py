@@ -1492,6 +1492,56 @@ def _alinear_ncf_ecf_con_ars(conn) -> None:
     print(f"✅ NCF e-CF alineados: E31 id={fiscal_id}, E45 id={gov_id}; ARS relacionadas actualizadas")
 
 
+def _ensure_ncf_notas_credito(conn) -> None:
+    """Secuencias B04 (papel) y E34 (e-CF) para notas de crédito; idempotente."""
+
+    def _upsert(*, prefijo, tipo, fuente_prefijos):
+        existing = conn.execute(
+            'SELECT * FROM ncf WHERE UPPER(prefijo) = %s ORDER BY activo DESC, id LIMIT 1',
+            (prefijo.upper(),),
+        ).fetchone()
+        tam = 10
+        fecha_fin = None
+        ultimo = int(existing['ultimo_numero'] or 0) if existing else 0
+        placeholders = ','.join(['%s'] * len(fuente_prefijos))
+        fuente = conn.execute(
+            f'''SELECT * FROM ncf
+                WHERE activo = 1 AND UPPER(prefijo) IN ({placeholders})
+                ORDER BY id LIMIT 1''',
+            tuple(p.upper() for p in fuente_prefijos),
+        ).fetchone()
+        if fuente:
+            tam = int(fuente.get('tamaño') or fuente.get('tamano') or 10)
+            if fuente.get('fecha_fin'):
+                fecha_fin = fuente['fecha_fin']
+        if existing:
+            conn.execute(
+                '''UPDATE ncf SET tipo = %s, prefijo = %s, tamaño = %s,
+                          fecha_fin = COALESCE(fecha_fin, %s), activo = 1
+                   WHERE id = %s''',
+                (tipo, prefijo, tam, fecha_fin, existing['id']),
+            )
+            return existing['id']
+        conn.execute(
+            '''INSERT INTO ncf (tipo, prefijo, tamaño, ultimo_numero, fecha_fin, activo)
+               VALUES (%s, %s, %s, %s, %s, 1)''',
+            (tipo, prefijo, tam, ultimo, fecha_fin),
+        )
+        return conn.lastrowid
+
+    b04 = _upsert(
+        prefijo='B04',
+        tipo='NOTAS DE CREDITO PAPEL',
+        fuente_prefijos=('E31', 'B01'),
+    )
+    e34 = _upsert(
+        prefijo='E34',
+        tipo='NOTAS DE CREDITO ELECTRONICA',
+        fuente_prefijos=('E31', 'E34'),
+    )
+    print(f"✅ NCF notas de crédito listos: B04 id={b04}, E34 id={e34}")
+
+
 def _ensure_facturacion_schema() -> None:
     global _FACTURACION_SCHEMA_READY
     if _FACTURACION_SCHEMA_READY:
@@ -1601,6 +1651,7 @@ def _ensure_facturacion_schema() -> None:
                 pass
             try:
                 _alinear_ncf_ecf_con_ars(conn)
+                _ensure_ncf_notas_credito(conn)
                 conn.commit()
             except Exception as e_ncf:
                 print(f"⚠️ No se pudieron alinear NCF e-CF / ARS: {e_ncf}")
@@ -10366,6 +10417,12 @@ def facturacion_nota_credito(factura_id):
         ''',
         (factura_id,),
     ).fetchall()
+
+    try:
+        _ensure_ncf_notas_credito(conn)
+        conn.commit()
+    except Exception as e_nc:
+        print(f"⚠️ No se pudo asegurar NCF B04/E34: {e_nc}")
 
     ncf_nc = _ncf_maestra_nota_credito(conn, modo_nc)
     if not ncf_nc:
