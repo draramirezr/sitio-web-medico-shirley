@@ -88,17 +88,39 @@
         background-color: rgba(172, 172, 173, 0.05);
     }
     
+    .historico-acciones {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        min-width: 10.5rem;
+    }
+
+    .historico-acciones form {
+        display: inline-flex;
+        margin: 0;
+        padding: 0;
+        flex-shrink: 0;
+    }
+
     .btn-ver-factura {
         background: white;
         border: 2px solid #CEB0B7;
         color: #CEB0B7;
-        padding: 0.5rem 1.2rem;
+        padding: 0.45rem 0.7rem;
         border-radius: 10px;
         font-weight: 600;
         transition: all 0.3s ease;
         text-decoration: none;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         font-size: 0.9rem;
+        margin: 0;
+        flex-shrink: 0;
+        line-height: 1;
     }
     
     .btn-ver-factura:hover {
@@ -111,14 +133,18 @@
         background: white;
         border: 2px solid #CEB0B7;
         color: #CEB0B7;
-        padding: 0.5rem 1.2rem;
+        padding: 0.45rem 0.7rem;
         border-radius: 10px;
         font-weight: 600;
         transition: all 0.3s ease;
         text-decoration: none;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         font-size: 0.9rem;
-        margin: 0.2rem;
+        margin: 0;
+        flex-shrink: 0;
+        line-height: 1;
     }
     
     .btn-editar-factura:hover {
@@ -141,14 +167,18 @@
         background: white;
         border: 2px solid #c0392b;
         color: #c0392b;
-        padding: 0.5rem 1.2rem;
+        padding: 0.45rem 0.7rem;
         border-radius: 10px;
         font-weight: 600;
         transition: all 0.3s ease;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         font-size: 0.9rem;
-        margin: 0.2rem;
+        margin: 0;
         cursor: pointer;
+        flex-shrink: 0;
+        line-height: 1;
     }
 
     .btn-eliminar-factura:hover {
@@ -338,7 +368,7 @@
                         <th style="width: 20%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">ARS</th>
                         <th style="width: 18%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;">Médico</th>
                         <th style="width: 12%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Monto</th>
-                        <th style="width: 10%; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Acciones</th>
+                        <th style="width: 14%; min-width: 11rem; background: #AB9B9F !important; background-color: #AB9B9F !important; color: white !important;" class="text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -364,41 +394,43 @@
                     <td><small>{{ factura['medico_nombre'] }}</small></td>
                     <td class="text-center"><strong style="color: #B89BA3;"> {{ factura['total']|formato_moneda }}</strong></td>
                     <td class="text-center">
-                        <a href="{{ url_for('facturacion_ver_factura', factura_id=factura['id']) }}" 
-                           class="btn-ver-factura"
-                           title="Ver factura">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                        {% if facturas_nc_ok and facturas_nc_ok.get(factura['id']) %}
-                        <a href="{{ url_for('facturacion_nota_credito', factura_id=factura['id']) }}"
-                           class="btn-editar-factura"
-                           title="Nota de crédito (e-CF)">
-                            <i class="fas fa-undo-alt"></i>
-                        </a>
-                        {% endif %}
-                        {% if not es_anulada %}
-                        <a href="{{ url_for('facturacion_editar_factura', factura_id=factura['id']) }}" 
-                           class="btn-editar-factura"
-                           id="btnEditar{{ factura['id'] }}"
-                           data-fecha="{{ factura['fecha_factura'] }}"
-                           title="Editar factura">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <form method="POST"
-                              action="{{ url_for('facturacion_anular_factura', factura_id=factura['id']) }}"
-                              class="d-inline form-anular-factura"
-                              data-fecha="{{ factura['fecha_factura'] }}"
-                              data-id="{{ factura['id'] }}"
-                              data-ncf="{{ factura['ncf_numero'] if factura['ncf_numero'] else factura['ncf'] }}">
-                            <input type="hidden" name="justificacion" value="">
-                            <button type="submit"
-                                    class="btn-eliminar-factura"
-                                    id="btnAnular{{ factura['id'] }}"
-                                    title="Anular / cancelar factura">
-                                <i class="fas fa-ban"></i>
-                            </button>
-                        </form>
-                        {% endif %}
+                        <div class="historico-acciones">
+                            <a href="{{ url_for('facturacion_ver_factura', factura_id=factura['id']) }}"
+                               class="btn-ver-factura"
+                               title="Ver factura">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            {% if facturas_nc_ok and facturas_nc_ok.get(factura['id']) %}
+                            <a href="{{ url_for('facturacion_nota_credito', factura_id=factura['id']) }}"
+                               class="btn-editar-factura"
+                               title="Nota de crédito (e-CF)">
+                                <i class="fas fa-undo-alt"></i>
+                            </a>
+                            {% endif %}
+                            {% if not es_anulada %}
+                            <a href="{{ url_for('facturacion_editar_factura', factura_id=factura['id']) }}"
+                               class="btn-editar-factura"
+                               id="btnEditar{{ factura['id'] }}"
+                               data-fecha="{{ factura['fecha_factura'] }}"
+                               title="Editar factura">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form method="POST"
+                                  action="{{ url_for('facturacion_anular_factura', factura_id=factura['id']) }}"
+                                  class="form-anular-factura"
+                                  data-fecha="{{ factura['fecha_factura'] }}"
+                                  data-id="{{ factura['id'] }}"
+                                  data-ncf="{{ factura['ncf_numero'] if factura['ncf_numero'] else factura['ncf'] }}">
+                                <input type="hidden" name="justificacion" value="">
+                                <button type="submit"
+                                        class="btn-eliminar-factura"
+                                        id="btnAnular{{ factura['id'] }}"
+                                        title="Anular / cancelar factura">
+                                    <i class="fas fa-ban"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
                     </td>
                 </tr>
                 {% else %}
