@@ -1572,12 +1572,14 @@ def _ensure_facturacion_schema() -> None:
                     codigo_modificacion TINYINT NOT NULL DEFAULT 3,
                     razon_modificacion VARCHAR(250) NULL,
                     total DECIMAL(14,2) NOT NULL DEFAULT 0,
+                    emision_tipo VARCHAR(20) NOT NULL DEFAULT 'ECF',
                     activo TINYINT DEFAULT 1,
                     created_by VARCHAR(120) NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     INDEX idx_nc_factura (factura_id)
                 )
                 ''',
+                "ALTER TABLE notas_credito ADD COLUMN emision_tipo VARCHAR(20) NOT NULL DEFAULT 'ECF'",
                 '''
                 CREATE TABLE IF NOT EXISTS notas_credito_detalle (
                     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -5975,14 +5977,29 @@ def _ecf_estado_aceptable(estado: str) -> bool:
     return True
 
 
+def _ncf_factura_es_papel_fiscal(factura) -> bool:
+    """NCF de factura emitida en papel (sin obligación de e-CF previo)."""
+    ref = (factura.get('ncf_numero') or factura.get('ncf') or '').strip().upper()
+    return ref.startswith(('B01', 'B02', 'B14', 'B15'))
+
+
 def _factura_puede_nota_credito(conn, factura_id: int):
-    """Solo facturas activas con e-CF 31/45 enviado y saldo acreditable."""
+    """
+    Facturas activas con saldo acreditable.
+    - e-CF 31/45 aceptado/enviado → nota electrónica E34.
+    - NCF papel B01/B14/B15 sin e-CF válido → nota NCF B04 (registro local, sin envío DGII).
+    Sin límite de días (independiente de edición 30 días / anulación 59).
+    """
     factura = conn.execute(
         'SELECT * FROM facturas WHERE id = %s AND activo = 1',
         (factura_id,),
     ).fetchone()
     if not factura:
         return False, 'Factura no encontrada o anulada.'
+    pendiente = _monto_pendiente_acreditar_factura(conn, factura_id)
+    if pendiente <= 0:
+        return False, 'No queda saldo por acreditar en esta factura.'
+
     ecf = conn.execute(
         '''
         SELECT * FROM ecf_envios
@@ -5991,15 +6008,31 @@ def _factura_puede_nota_credito(conn, factura_id: int):
         ''',
         (factura_id,),
     ).fetchone()
-    if not ecf or not ecf.get('encf'):
-        return False, 'La factura no tiene e-CF fiscal aceptado por DGII.'
-    if not _ecf_estado_aceptable(ecf.get('estado') or ''):
-        if not ecf.get('track_id'):
-            return False, 'El e-CF no tiene acuse válido de DGII.'
-    pendiente = _monto_pendiente_acreditar_factura(conn, factura_id)
-    if pendiente <= 0:
-        return False, 'No queda saldo por acreditar en esta factura.'
-    return True, dict(ecf)
+    if ecf and ecf.get('encf'):
+        estado = (ecf.get('estado') or '').strip()
+        if _ecf_estado_aceptable(estado) or ecf.get('track_id'):
+            return True, {
+                'modo': 'ecf',
+                'ecf': dict(ecf),
+                'ncf_modificado': ecf.get('encf'),
+            }
+        return False, (
+            'El e-CF de esta factura está rechazado o sin acuse. '
+            'Actualiza el estado en DGII antes de emitir la nota de crédito.'
+        )
+
+    if _ncf_factura_es_papel_fiscal(factura):
+        ncf_orig = (factura.get('ncf_numero') or factura.get('ncf') or '').strip()
+        return True, {
+            'modo': 'papel',
+            'ecf': None,
+            'ncf_modificado': ncf_orig,
+        }
+
+    return False, (
+        'La factura no tiene e-CF fiscal (E31/E45) ni NCF en papel B01/B14/B15. '
+        'No se puede generar nota de crédito desde el sistema para este comprobante.'
+    )
 
 
 def _monto_acreditado_factura(conn, factura_id: int) -> float:
@@ -6040,20 +6073,33 @@ def _monto_acreditado_linea(conn, facturas_detalle_id: int) -> float:
         return 0.0
 
 
-def _ncf_maestra_nota_credito(conn):
-    """Primera secuencia activa E34 / nota de crédito."""
-    rows = conn.execute(
-        '''
-        SELECT * FROM ncf
-        WHERE activo = 1
-          AND (
-            UPPER(prefijo) LIKE 'E34%%'
-            OR UPPER(prefijo) LIKE 'B04%%'
-            OR (UPPER(tipo) LIKE '%%NOTA%%' AND UPPER(tipo) LIKE '%%CR%%')
-          )
-        ORDER BY id DESC
-        '''
-    ).fetchall()
+def _ncf_maestra_nota_credito(conn, modo='ecf'):
+    """Secuencia activa E34 (electrónico) o B04 (papel)."""
+    modo = (modo or 'ecf').strip().lower()
+    if modo == 'papel':
+        rows = conn.execute(
+            '''
+            SELECT * FROM ncf
+            WHERE activo = 1
+              AND (
+                UPPER(prefijo) LIKE 'B04%%'
+                OR (UPPER(tipo) LIKE '%%NOTA%%' AND UPPER(tipo) LIKE '%%CR%%' AND UPPER(prefijo) LIKE 'B04%%')
+              )
+            ORDER BY id DESC
+            '''
+        ).fetchall()
+    else:
+        rows = conn.execute(
+            '''
+            SELECT * FROM ncf
+            WHERE activo = 1
+              AND (
+                UPPER(prefijo) LIKE 'E34%%'
+                OR (UPPER(tipo) LIKE '%%NOTA%%' AND UPPER(tipo) LIKE '%%CR%%' AND UPPER(prefijo) LIKE 'E34%%')
+              )
+            ORDER BY id DESC
+            '''
+        ).fetchall()
     return rows[0] if rows else None
 
 
@@ -10286,11 +10332,14 @@ def facturacion_nota_credito(factura_id):
 
     _ensure_facturacion_schema()
     conn = get_db_connection()
-    puede, ecf_info = _factura_puede_nota_credito(conn, factura_id)
+    puede, nc_info = _factura_puede_nota_credito(conn, factura_id)
     if not puede:
-        flash(str(ecf_info), 'error')
+        flash(str(nc_info), 'error')
         conn.close()
         return redirect(url_for('facturacion_historico'))
+
+    nc_meta = nc_info if isinstance(nc_info, dict) else {}
+    modo_nc = nc_meta.get('modo') or 'ecf'
 
     factura = conn.execute(
         '''
@@ -10318,12 +10367,18 @@ def facturacion_nota_credito(factura_id):
         (factura_id,),
     ).fetchall()
 
-    ncf_nc = _ncf_maestra_nota_credito(conn)
+    ncf_nc = _ncf_maestra_nota_credito(conn, modo_nc)
     if not ncf_nc:
-        flash(
-            'No hay secuencia NCF para nota de crédito (E34). Crea un NCF activo con prefijo E34 en Maestra NCF.',
-            'error',
-        )
+        if modo_nc == 'papel':
+            flash(
+                'No hay secuencia NCF papel para nota de crédito (B04). Crea un NCF activo con prefijo B04 en Maestra NCF.',
+                'error',
+            )
+        else:
+            flash(
+                'No hay secuencia NCF para nota de crédito electrónica (E34). Crea un NCF activo con prefijo E34 en Maestra NCF.',
+                'error',
+            )
         conn.close()
         return redirect(url_for('facturacion_ver_factura', factura_id=factura_id))
 
@@ -10382,12 +10437,13 @@ def facturacion_nota_credito(factura_id):
             quien = getattr(current_user, 'nombre', str(current_user.id))
 
             cur = conn.cursor()
+            emision_tipo = 'PAPEL' if modo_nc == 'papel' else 'ECF'
             cur.execute(
                 '''
                 INSERT INTO notas_credito
                     (factura_id, ncf_id, ncf_numero, fecha_nota, codigo_modificacion,
-                     razon_modificacion, total, created_by)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                     razon_modificacion, total, emision_tipo, created_by)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ''',
                 (
                     factura_id,
@@ -10397,6 +10453,7 @@ def facturacion_nota_credito(factura_id):
                     codigo_mod,
                     razon,
                     total_nc,
+                    emision_tipo,
                     quien,
                 ),
             )
@@ -10415,60 +10472,68 @@ def facturacion_nota_credito(factura_id):
             )
             conn.commit()
 
-            from dgii.emitter_nota_credito import emitir_ecf_nota_credito
-            dgii_cfg = _dgii_get_config(conn) or {}
-            ars_row = conn.execute('SELECT * FROM ars WHERE id = %s', (factura['ars_id'],)).fetchone()
-            ecf_row = ecf_info if isinstance(ecf_info, dict) else {}
-            ecf_result = emitir_ecf_nota_credito(
-                cfg=dgii_cfg,
-                nota_credito_id=nota_id,
-                ncf_row=ncf_row,
-                ncf_completo=ncf_completo,
-                fecha_nota=fecha_nota,
-                fecha_factura_original=factura['fecha_factura'],
-                encf_factura_original=ecf_row.get('encf'),
-                ars_row=dict(ars_row) if ars_row else {},
-                items=items_nc,
-                monto_total=total_nc,
-                codigo_modificacion=codigo_mod,
-                razon_modificacion=razon,
-            )
-            try:
-                conn.execute(
-                    '''
-                    INSERT INTO ecf_envios
-                        (factura_id, nota_credito_id, tipoe_cf, encf, track_id, codigo_seguridad,
-                         ambiente, estado, error_text, respuesta_json, xml_firmado)
-                    VALUES (NULL, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                    ''',
-                    (
-                        nota_id,
-                        ecf_result.get('tipoe_cf'),
-                        ecf_result.get('encf'),
-                        ecf_result.get('track_id'),
-                        ecf_result.get('codigo_seguridad'),
-                        ecf_result.get('ambiente'),
-                        ecf_result.get('estado') or ('ERROR' if not ecf_result.get('ok') else 'ENVIADO'),
-                        ecf_result.get('error'),
-                        json.dumps(ecf_result.get('respuesta') or {}, ensure_ascii=False, default=str),
-                        ecf_result.get('xml_signed'),
-                    ),
-                )
-                conn.commit()
-            except Exception as e_save:
-                print(f"⚠️ ecf_envios nota credito: {e_save}")
-
-            if ecf_result.get('ok'):
+            if modo_nc == 'papel':
                 flash(
-                    f"Nota de crédito #{nota_id} registrada · e-NCF {ecf_result.get('encf')} · "
-                    f"TrackId {ecf_result.get('track_id')}",
+                    f'Nota de crédito #{nota_id} registrada · NCF {ncf_completo} · '
+                    f'Factura referencia {nc_meta.get("ncf_modificado")}. '
+                    f'Impresión / archivo fiscal en papel (sin envío e-CF).',
                     'success',
                 )
             else:
-                flash(
-                    f"Nota #{nota_id} guardada; e-CF DGII: {ecf_result.get('error') or 'revisar estado'}",
-                    'warning',
+                from dgii.emitter_nota_credito import emitir_ecf_nota_credito
+                dgii_cfg = _dgii_get_config(conn) or {}
+                ars_row = conn.execute('SELECT * FROM ars WHERE id = %s', (factura['ars_id'],)).fetchone()
+                ecf_row = nc_meta.get('ecf') or {}
+                ecf_result = emitir_ecf_nota_credito(
+                    cfg=dgii_cfg,
+                    nota_credito_id=nota_id,
+                    ncf_row=ncf_row,
+                    ncf_completo=ncf_completo,
+                    fecha_nota=fecha_nota,
+                    fecha_factura_original=factura['fecha_factura'],
+                    encf_factura_original=ecf_row.get('encf') or nc_meta.get('ncf_modificado'),
+                    ars_row=dict(ars_row) if ars_row else {},
+                    items=items_nc,
+                    monto_total=total_nc,
+                    codigo_modificacion=codigo_mod,
+                    razon_modificacion=razon,
                 )
+                try:
+                    conn.execute(
+                        '''
+                        INSERT INTO ecf_envios
+                            (factura_id, nota_credito_id, tipoe_cf, encf, track_id, codigo_seguridad,
+                             ambiente, estado, error_text, respuesta_json, xml_firmado)
+                        VALUES (NULL, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        ''',
+                        (
+                            nota_id,
+                            ecf_result.get('tipoe_cf'),
+                            ecf_result.get('encf'),
+                            ecf_result.get('track_id'),
+                            ecf_result.get('codigo_seguridad'),
+                            ecf_result.get('ambiente'),
+                            ecf_result.get('estado') or ('ERROR' if not ecf_result.get('ok') else 'ENVIADO'),
+                            ecf_result.get('error'),
+                            json.dumps(ecf_result.get('respuesta') or {}, ensure_ascii=False, default=str),
+                            ecf_result.get('xml_signed'),
+                        ),
+                    )
+                    conn.commit()
+                except Exception as e_save:
+                    print(f"⚠️ ecf_envios nota credito: {e_save}")
+
+                if ecf_result.get('ok'):
+                    flash(
+                        f"Nota de crédito #{nota_id} registrada · e-NCF {ecf_result.get('encf')} · "
+                        f"TrackId {ecf_result.get('track_id')}",
+                        'success',
+                    )
+                else:
+                    flash(
+                        f"Nota #{nota_id} guardada; e-CF DGII: {ecf_result.get('error') or 'revisar estado'}",
+                        'warning',
+                    )
             conn.close()
             return redirect(url_for('facturacion_nota_credito_ver', nota_id=nota_id))
         except Exception as e:
@@ -10482,12 +10547,13 @@ def facturacion_nota_credito(factura_id):
 
     pendiente = _monto_pendiente_acreditar_factura(conn, factura_id)
     conn.close()
-    ecf_encf = ecf_info.get('encf') if isinstance(ecf_info, dict) else ''
+    ncf_ref = nc_meta.get('ncf_modificado') or ''
     return render_template(
         'facturacion/nota_credito_form.html',
         factura=factura,
         lineas=lineas,
-        ecf_encf=ecf_encf,
+        ncf_referencia=ncf_ref,
+        modo_nc=modo_nc,
         pendiente=pendiente,
         ncf_nc=ncf_nc,
     )

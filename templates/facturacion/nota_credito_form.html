@@ -17,9 +17,19 @@
     <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px;">
         <div class="card-body">
             <p class="mb-1"><strong>Factura #{{ factura['id'] }}</strong> · NCF {{ factura['ncf_numero'] or factura['ncf'] }}</p>
-            <p class="mb-1 text-muted">e-NCF referencia: <strong>{{ ecf_encf }}</strong></p>
+            <p class="mb-1 text-muted">NCF / e-NCF de referencia: <strong>{{ ncf_referencia }}</strong></p>
+            <p class="mb-1">
+              {% if modo_nc == 'papel' %}
+              <span class="badge bg-secondary">Nota en papel (B04)</span> — sin envío electrónico DGII
+              {% else %}
+              <span class="badge" style="background:#6B3A4B;">Nota electrónica (E34)</span> — envío a DGII
+              {% endif %}
+            </p>
             <p class="mb-0">ARS: {{ factura['nombre_ars'] }} · Saldo acreditable: <strong>RD$ {{ "{:,.2f}".format(pendiente) }}</strong></p>
-            <p class="small text-muted mt-2 mb-0">Secuencia NC: {{ ncf_nc['prefijo'] }} ({{ ncf_nc['tipo'] }})</p>
+            <p class="small text-muted mt-2 mb-0">
+              Secuencia NC: {{ ncf_nc['prefijo'] }} ({{ ncf_nc['tipo'] }}).
+              La nota de crédito no depende del límite de 30 días para editar facturas.
+            </p>
         </div>
     </div>
 
@@ -60,7 +70,8 @@
             </div>
             <p class="small text-muted">Selecciona las líneas a incluir. DGII: código 3 si es parcial; código 1 si acredita todo el saldo pendiente.</p>
             <button type="submit" class="btn btn-primary mt-2" style="border-radius: 12px; font-weight: 600;">
-                <i class="fas fa-paper-plane me-2"></i>Emitir nota de crédito y enviar e-CF
+                <i class="fas fa-paper-plane me-2"></i>
+                {% if modo_nc == 'papel' %}Registrar nota de crédito (NCF papel){% else %}Emitir nota de crédito y enviar e-CF{% endif %}
             </button>
         </div>
     </form>

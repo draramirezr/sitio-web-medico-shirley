@@ -13,6 +13,9 @@
     <div class="card border-0 shadow-sm mb-3" style="border-radius: 16px;">
         <div class="card-body">
             <p><strong>NCF nota:</strong> {{ nota['ncf_numero'] }}</p>
+            <p><strong>Tipo emisión:</strong>
+              {% if nota.get('emision_tipo') == 'PAPEL' %}NCF en papel (B04){% else %}Electrónica (e-CF){% endif %}
+            </p>
             <p><strong>Fecha:</strong> {{ nota['fecha_nota']|fecha_es }}</p>
             <p><strong>Factura afectada:</strong>
                 <a href="{{ url_for('facturacion_ver_factura', factura_id=nota['factura_id']) }}">#{{ nota['factura_id'] }}</a>
