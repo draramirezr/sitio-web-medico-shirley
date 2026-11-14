@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Nota de crédito — Factura #{{ factura['id'] }}{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/facturacion-responsive.css') }}">
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <h1 style="color: var(--primary-color); font-weight: 800; font-size: 1.75rem;">
+            <i class="fas fa-file-invoice me-2"></i>Nota de crédito
+        </h1>
+        <a href="{{ url_for('facturacion_ver_factura', factura_id=factura['id']) }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Volver a factura
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px;">
+        <div class="card-body">
+            <p class="mb-1"><strong>Factura #{{ factura['id'] }}</strong> · NCF {{ factura['ncf_numero'] or factura['ncf'] }}</p>
+            <p class="mb-1 text-muted">e-NCF referencia: <strong>{{ ecf_encf }}</strong></p>
+            <p class="mb-0">ARS: {{ factura['nombre_ars'] }} · Saldo acreditable: <strong>RD$ {{ "{:,.2f}".format(pendiente) }}</strong></p>
+            <p class="small text-muted mt-2 mb-0">Secuencia NC: {{ ncf_nc['prefijo'] }} ({{ ncf_nc['tipo'] }})</p>
+        </div>
+    </div>
+
+    <form method="POST" class="card border-0 shadow-sm" style="border-radius: 16px;">
+        <div class="card-body">
+            <label class="form-label fw-bold" for="razon_modificacion">Motivo (obligatorio)</label>
+            <textarea class="form-control mb-4" id="razon_modificacion" name="razon_modificacion" rows="3" maxlength="250" required placeholder="Ej. Devolución parcial de servicios no prestados"></textarea>
+
+            <h2 class="h5 mb-3">Líneas a acreditar</h2>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th style="width:3rem;"></th>
+                            <th>Paciente</th>
+                            <th>Servicio</th>
+                            <th>Fecha</th>
+                            <th class="text-end">Pendiente</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ln in lineas %}
+                        {% set pend = (ln['monto_pendiente'] if ln['monto_pendiente'] is not none else ln['monto'])|float %}
+                        <tr>
+                            <td>
+                                {% if pend > 0 %}
+                                <input class="form-check-input" type="checkbox" name="linea_id" value="{{ ln['id'] }}">
+                                {% endif %}
+                            </td>
+                            <td>{{ ln['nombre_paciente'] }}</td>
+                            <td><small>{{ ln['descripcion_servicio'] }}</small></td>
+                            <td><small>{{ ln['fecha_servicio']|fecha_es if ln['fecha_servicio'] else '—' }}</small></td>
+                            <td class="text-end">RD$ {{ "{:,.2f}".format(pend) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p class="small text-muted">Selecciona las líneas a incluir. DGII: código 3 si es parcial; código 1 si acredita todo el saldo pendiente.</p>
+            <button type="submit" class="btn btn-primary mt-2" style="border-radius: 12px; font-weight: 600;">
+                <i class="fas fa-paper-plane me-2"></i>Emitir nota de crédito y enviar e-CF
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

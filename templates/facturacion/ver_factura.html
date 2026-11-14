@@ -587,6 +587,12 @@
             <i class="fas fa-envelope me-2"></i>
             Enviar por Email
         </button>
+        {% if puede_nota_credito %}
+        <a href="{{ url_for('facturacion_nota_credito', factura_id=factura['id']) }}" class="btn-accion no-print">
+            <i class="fas fa-undo-alt me-2"></i>
+            Nota de crédito
+        </a>
+        {% endif %}
     </div>
 
     {% if not factura['activo'] %}
@@ -783,6 +789,12 @@
             <i class="fas fa-envelope me-2"></i>
             Enviar por Email
         </button>
+        {% if puede_nota_credito %}
+        <a href="{{ url_for('facturacion_nota_credito', factura_id=factura['id']) }}" class="btn-accion no-print">
+            <i class="fas fa-undo-alt me-2"></i>
+            Nota de crédito
+        </a>
+        {% endif %}
     </div>
 </div>
 

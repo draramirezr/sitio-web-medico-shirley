@@ -369,6 +369,13 @@
                            title="Ver factura">
                             <i class="fas fa-eye"></i>
                         </a>
+                        {% if facturas_nc_ok and facturas_nc_ok.get(factura['id']) %}
+                        <a href="{{ url_for('facturacion_nota_credito', factura_id=factura['id']) }}"
+                           class="btn-editar-factura"
+                           title="Nota de crédito (e-CF)">
+                            <i class="fas fa-undo-alt"></i>
+                        </a>
+                        {% endif %}
                         {% if not es_anulada %}
                         <a href="{{ url_for('facturacion_editar_factura', factura_id=factura['id']) }}" 
                            class="btn-editar-factura"

@@ -20,6 +20,8 @@ _PREFIX_TO_TIPO = {
     "E32": 32,
     "E45": 45,
     "E44": 44,
+    "B04": 34,
+    "E34": 34,
 }
 
 
@@ -107,6 +109,8 @@ def map_tipoe_cf(ncf_prefijo: str, ncf_tipo: str = "") -> int:
         return 45
     if "CONSUMO" in t:
         return 32
+    if "NOTA" in t and "CR" in t:
+        return 34
     if "FISCAL" in t:
         return 31
     p = (ncf_prefijo or "").strip().upper()
@@ -148,14 +152,19 @@ def build_ecf_xml(
     fecha_vencimiento_secuencia: str,
     fecha_hora_firma: Optional[str] = None,
     ambiente: Optional[str] = None,
+    informacion_referencia: Optional[Dict[str, Any]] = None,
+    indicador_nota_credito: Optional[int] = None,
 ) -> bytes:
     """
     Construye XML ECF para servicios exentos (IndicadorFacturacion=4).
     fecha_vencimiento_secuencia must already be dd-MM-yyyy from resolve_fecha_vencimiento_secuencia.
     """
-    venc = normalize_fecha_vencimiento_secuencia(fecha_vencimiento_secuencia)
-    if not venc:
-        raise ValueError("FechaVencimientoSecuencia inválida (use dd-mm-yyyy autorizada por DGII).")
+    if int(tipoe_cf) == 34:
+        venc = ""
+    else:
+        venc = normalize_fecha_vencimiento_secuencia(fecha_vencimiento_secuencia)
+        if not venc:
+            raise ValueError("FechaVencimientoSecuencia inválida (use dd-mm-yyyy autorizada por DGII).")
     total = _money(monto_total)
     root = Element("ECF")
     encabezado = SubElement(root, "Encabezado")
@@ -164,7 +173,10 @@ def build_ecf_xml(
     id_doc = SubElement(encabezado, "IdDoc")
     SubElement(id_doc, "TipoeCF").text = str(int(tipoe_cf))
     SubElement(id_doc, "eNCF").text = encf
-    if tipoe_cf != 32:
+    if tipoe_cf == 34:
+        if indicador_nota_credito is not None:
+            SubElement(id_doc, "IndicadorNotaCredito").text = str(int(indicador_nota_credito))
+    elif tipoe_cf != 32:
         SubElement(id_doc, "FechaVencimientoSecuencia").text = venc
     amb = (ambiente or "").strip().upper()
     # TesteCF exige 1. En producción solo va si DGII autorizó envío diferido.
@@ -216,6 +228,21 @@ def build_ecf_xml(
         SubElement(item, "UnidadMedida").text = str(it.get("unidad_medida") or "43")
         SubElement(item, "PrecioUnitarioItem").text = _money(precio)
         SubElement(item, "MontoItem").text = _money(monto)
+
+    if informacion_referencia and tipoe_cf == 34:
+        ref = SubElement(root, "InformacionReferencia")
+        SubElement(ref, "NCFModificado").text = str(
+            informacion_referencia.get("ncf_modificado") or ""
+        ).strip()[:19]
+        SubElement(ref, "FechaNCFModificado").text = _fecha_dd_mm_yyyy(
+            informacion_referencia.get("fecha_ncf_modificado")
+        )
+        SubElement(ref, "CodigoModificacion").text = str(
+            int(informacion_referencia.get("codigo_modificacion") or 3)
+        )
+        razon = (informacion_referencia.get("razon_modificacion") or "").strip()[:250]
+        if razon:
+            SubElement(ref, "RazonModificacion").text = razon
 
     # Debe existir ANTES de la firma digital
     SubElement(root, "FechaHoraFirma").text = fecha_hora_firma or fecha_hora_firma_now()

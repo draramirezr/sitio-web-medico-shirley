@@ -1543,6 +1543,7 @@ def _ensure_facturacion_schema() -> None:
                 CREATE TABLE IF NOT EXISTS ecf_envios (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     factura_id INT NULL,
+                    nota_credito_id INT NULL,
                     tipoe_cf INT NULL,
                     encf VARCHAR(20) NULL,
                     track_id VARCHAR(100) NULL,
@@ -1555,9 +1556,43 @@ def _ensure_facturacion_schema() -> None:
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                     INDEX idx_ecf_factura (factura_id),
+                    INDEX idx_ecf_nota_credito (nota_credito_id),
                     INDEX idx_ecf_track (track_id)
                 )
             ''')
+            for col_sql in (
+                "ALTER TABLE ecf_envios ADD COLUMN nota_credito_id INT NULL",
+                '''
+                CREATE TABLE IF NOT EXISTS notas_credito (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    factura_id INT NOT NULL,
+                    ncf_id INT NOT NULL,
+                    ncf_numero VARCHAR(30) NOT NULL,
+                    fecha_nota DATE NOT NULL,
+                    codigo_modificacion TINYINT NOT NULL DEFAULT 3,
+                    razon_modificacion VARCHAR(250) NULL,
+                    total DECIMAL(14,2) NOT NULL DEFAULT 0,
+                    activo TINYINT DEFAULT 1,
+                    created_by VARCHAR(120) NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_nc_factura (factura_id)
+                )
+                ''',
+                '''
+                CREATE TABLE IF NOT EXISTS notas_credito_detalle (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    nota_credito_id INT NOT NULL,
+                    facturas_detalle_id INT NOT NULL,
+                    monto DECIMAL(14,2) NOT NULL,
+                    INDEX idx_ncd_nota (nota_credito_id),
+                    INDEX idx_ncd_linea (facturas_detalle_id)
+                )
+                ''',
+            ):
+                try:
+                    conn.execute(col_sql)
+                except Exception:
+                    pass
             try:
                 conn.commit()
             except Exception:
@@ -5908,6 +5943,14 @@ def _next_unused_ncf(conn, ncf_row):
             ''',
             (completo, completo),
         ).fetchone()
+        used_nc = None
+        try:
+            used_nc = conn.execute(
+                'SELECT id FROM notas_credito WHERE ncf_numero = %s LIMIT 1',
+                (completo,),
+            ).fetchone()
+        except Exception:
+            used_nc = None
         encf = build_encf(tipoe, candidato)
         used_ecf = None
         try:
@@ -5917,10 +5960,101 @@ def _next_unused_ncf(conn, ncf_row):
             ).fetchone()
         except Exception:
             used_ecf = None
-        if not used_factura and not used_ecf:
+        if not used_factura and not used_nc and not used_ecf:
             return candidato, completo, encf
         candidato += 1
     raise ValueError('No hay secuencia NCF/e-CF libre. Revisa el último número en Maestra NCF.')
+
+
+def _ecf_estado_aceptable(estado: str) -> bool:
+    e = (estado or '').lower()
+    if not e:
+        return False
+    if any(x in e for x in ('rechaz', 'rejected', 'error', 'fallid')):
+        return False
+    return True
+
+
+def _factura_puede_nota_credito(conn, factura_id: int):
+    """Solo facturas activas con e-CF 31/45 enviado y saldo acreditable."""
+    factura = conn.execute(
+        'SELECT * FROM facturas WHERE id = %s AND activo = 1',
+        (factura_id,),
+    ).fetchone()
+    if not factura:
+        return False, 'Factura no encontrada o anulada.'
+    ecf = conn.execute(
+        '''
+        SELECT * FROM ecf_envios
+        WHERE factura_id = %s AND tipoe_cf IN (31, 45)
+        ORDER BY id DESC LIMIT 1
+        ''',
+        (factura_id,),
+    ).fetchone()
+    if not ecf or not ecf.get('encf'):
+        return False, 'La factura no tiene e-CF fiscal aceptado por DGII.'
+    if not _ecf_estado_aceptable(ecf.get('estado') or ''):
+        if not ecf.get('track_id'):
+            return False, 'El e-CF no tiene acuse válido de DGII.'
+    pendiente = _monto_pendiente_acreditar_factura(conn, factura_id)
+    if pendiente <= 0:
+        return False, 'No queda saldo por acreditar en esta factura.'
+    return True, dict(ecf)
+
+
+def _monto_acreditado_factura(conn, factura_id: int) -> float:
+    try:
+        row = conn.execute(
+            '''
+            SELECT COALESCE(SUM(total), 0) AS t FROM notas_credito
+            WHERE factura_id = %s AND activo = 1
+            ''',
+            (factura_id,),
+        ).fetchone()
+        return float(row['t'] or 0) if row else 0.0
+    except Exception:
+        return 0.0
+
+
+def _monto_pendiente_acreditar_factura(conn, factura_id: int) -> float:
+    factura = conn.execute('SELECT total FROM facturas WHERE id = %s', (factura_id,)).fetchone()
+    if not factura:
+        return 0.0
+    total_f = float(factura['total'] or 0)
+    return max(0.0, round(total_f - _monto_acreditado_factura(conn, factura_id), 2))
+
+
+def _monto_acreditado_linea(conn, facturas_detalle_id: int) -> float:
+    try:
+        row = conn.execute(
+            '''
+            SELECT COALESCE(SUM(ncd.monto), 0) AS t
+            FROM notas_credito_detalle ncd
+            JOIN notas_credito nc ON nc.id = ncd.nota_credito_id AND nc.activo = 1
+            WHERE ncd.facturas_detalle_id = %s
+            ''',
+            (facturas_detalle_id,),
+        ).fetchone()
+        return float(row['t'] or 0) if row else 0.0
+    except Exception:
+        return 0.0
+
+
+def _ncf_maestra_nota_credito(conn):
+    """Primera secuencia activa E34 / nota de crédito."""
+    rows = conn.execute(
+        '''
+        SELECT * FROM ncf
+        WHERE activo = 1
+          AND (
+            UPPER(prefijo) LIKE 'E34%%'
+            OR UPPER(prefijo) LIKE 'B04%%'
+            OR (UPPER(tipo) LIKE '%%NOTA%%' AND UPPER(tipo) LIKE '%%CR%%')
+          )
+        ORDER BY id DESC
+        '''
+    ).fetchall()
+    return rows[0] if rows else None
 
 
 @app.route('/facturacion/dgii/certificado', methods=['GET', 'POST'])
@@ -10079,6 +10213,13 @@ def facturacion_historico():
         query += ' ORDER BY f.fecha_factura DESC, f.id DESC'
         
         facturas = conn.execute(query, params).fetchall()
+
+        facturas_nc_ok = {}
+        for fac in facturas:
+            fid = fac['id']
+            puede, _msg = _factura_puede_nota_credito(conn, fid)
+            if puede:
+                facturas_nc_ok[fid] = True
         
         # Obtener lista de ARS para el filtro
         ars_list = conn.execute('SELECT * FROM ars WHERE activo = 1 ORDER BY nombre_ars').fetchall()
@@ -10090,6 +10231,7 @@ def facturacion_historico():
         
         return render_template('facturacion/historico.html',
                              facturas=facturas,
+                             facturas_nc_ok=facturas_nc_ok,
                              ars_list=ars_list,
                              medicos_list=medicos_list,
                              ars_id_seleccionado=ars_id,
@@ -10105,6 +10247,295 @@ def facturacion_historico():
             conn.close()
         flash(f'Error al cargar el histórico de facturas: {str(e)}', 'error')
         return redirect(url_for('facturacion_menu'))
+
+
+@app.route('/facturacion/notas-credito')
+@login_required
+def facturacion_notas_credito_lista():
+    """Listado de notas de crédito emitidas."""
+    if current_user.perfil not in ('Administrador', 'Nivel 2', 'Registro de Facturas'):
+        flash('No tienes permiso para notas de crédito.', 'warning')
+        return redirect(url_for('facturacion_menu'))
+    _ensure_facturacion_schema()
+    conn = get_db_connection()
+    notas = conn.execute(
+        '''
+        SELECT nc.*, f.ncf_numero AS factura_ncf, a.nombre_ars,
+               e.encf AS encf_nc, e.estado AS ecf_estado
+        FROM notas_credito nc
+        JOIN facturas f ON f.id = nc.factura_id
+        JOIN ars a ON a.id = f.ars_id
+        LEFT JOIN ecf_envios e ON e.nota_credito_id = nc.id
+        ORDER BY nc.fecha_nota DESC, nc.id DESC
+        '''
+    ).fetchall()
+    conn.close()
+    return render_template('facturacion/notas_credito_lista.html', notas=notas)
+
+
+@app.route('/facturacion/nota-credito/<int:factura_id>', methods=['GET', 'POST'])
+@login_required
+def facturacion_nota_credito(factura_id):
+    """Crear nota de crédito (parcial o total) sobre factura con e-CF."""
+    import json
+    from datetime import date
+
+    if current_user.perfil not in ('Administrador', 'Nivel 2', 'Registro de Facturas'):
+        flash('No tienes permiso para notas de crédito.', 'warning')
+        return redirect(url_for('facturacion_historico'))
+
+    _ensure_facturacion_schema()
+    conn = get_db_connection()
+    puede, ecf_info = _factura_puede_nota_credito(conn, factura_id)
+    if not puede:
+        flash(str(ecf_info), 'error')
+        conn.close()
+        return redirect(url_for('facturacion_historico'))
+
+    factura = conn.execute(
+        '''
+        SELECT f.*, a.nombre_ars, a.rnc AS ars_rnc, m.nombre AS medico_nombre
+        FROM facturas f
+        JOIN ars a ON f.ars_id = a.id
+        JOIN medicos m ON f.medico_id = m.id
+        WHERE f.id = %s
+        ''',
+        (factura_id,),
+    ).fetchone()
+
+    lineas = conn.execute(
+        '''
+        SELECT fd.*,
+               (fd.monto - COALESCE((
+                   SELECT SUM(ncd.monto) FROM notas_credito_detalle ncd
+                   JOIN notas_credito nc ON nc.id = ncd.nota_credito_id AND nc.activo = 1
+                   WHERE ncd.facturas_detalle_id = fd.id
+               ), 0)) AS monto_pendiente
+        FROM facturas_detalle fd
+        WHERE fd.factura_id = %s AND fd.estado = 'facturado'
+        ORDER BY fd.id
+        ''',
+        (factura_id,),
+    ).fetchall()
+
+    ncf_nc = _ncf_maestra_nota_credito(conn)
+    if not ncf_nc:
+        flash(
+            'No hay secuencia NCF para nota de crédito (E34). Crea un NCF activo con prefijo E34 en Maestra NCF.',
+            'error',
+        )
+        conn.close()
+        return redirect(url_for('facturacion_ver_factura', factura_id=factura_id))
+
+    if request.method == 'POST':
+        razon = sanitize_input(request.form.get('razon_modificacion') or '', 250)
+        if len(razon.strip()) < 5:
+            flash('Escribe un motivo de al menos 5 caracteres.', 'error')
+            conn.close()
+            return redirect(url_for('facturacion_nota_credito', factura_id=factura_id))
+
+        sel = request.form.getlist('linea_id')
+        if not sel:
+            flash('Selecciona al menos una línea a acreditar.', 'error')
+            conn.close()
+            return redirect(url_for('facturacion_nota_credito', factura_id=factura_id))
+
+        items_nc = []
+        total_nc = 0.0
+        lineas_sel = []
+        for lid in sel:
+            lid = int(lid)
+            row = conn.execute(
+                'SELECT * FROM facturas_detalle WHERE id = %s AND factura_id = %s',
+                (lid, factura_id),
+            ).fetchone()
+            if not row:
+                continue
+            pend = float(row['monto']) - _monto_acreditado_linea(conn, lid)
+            pend = round(max(0.0, pend), 2)
+            if pend <= 0:
+                continue
+            total_nc += pend
+            lineas_sel.append((lid, pend, row))
+            items_nc.append({
+                'nombre': (row.get('descripcion_servicio') or row.get('nombre_paciente') or 'Servicio')[:80],
+                'monto': pend,
+            })
+
+        if total_nc <= 0 or not lineas_sel:
+            flash('No hay montos válidos para acreditar en las líneas seleccionadas.', 'error')
+            conn.close()
+            return redirect(url_for('facturacion_nota_credito', factura_id=factura_id))
+
+        pend_factura = _monto_pendiente_acreditar_factura(conn, factura_id)
+        if round(total_nc, 2) > round(pend_factura, 2) + 0.01:
+            flash('El monto seleccionado supera el saldo pendiente de la factura.', 'error')
+            conn.close()
+            return redirect(url_for('facturacion_nota_credito', factura_id=factura_id))
+
+        codigo_mod = 1 if abs(total_nc - pend_factura) < 0.02 else 3
+        fecha_nota = date.today().isoformat()
+
+        try:
+            ncf_row = dict(ncf_nc) if not isinstance(ncf_nc, dict) else ncf_nc
+            proximo, ncf_completo, _ = _next_unused_ncf(conn, ncf_row)
+            quien = getattr(current_user, 'nombre', str(current_user.id))
+
+            cur = conn.cursor()
+            cur.execute(
+                '''
+                INSERT INTO notas_credito
+                    (factura_id, ncf_id, ncf_numero, fecha_nota, codigo_modificacion,
+                     razon_modificacion, total, created_by)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                ''',
+                (
+                    factura_id,
+                    ncf_row['id'],
+                    ncf_completo,
+                    fecha_nota,
+                    codigo_mod,
+                    razon,
+                    total_nc,
+                    quien,
+                ),
+            )
+            nota_id = cur.lastrowid
+            for lid, monto, _row in lineas_sel:
+                cur.execute(
+                    '''
+                    INSERT INTO notas_credito_detalle (nota_credito_id, facturas_detalle_id, monto)
+                    VALUES (%s, %s, %s)
+                    ''',
+                    (nota_id, lid, monto),
+                )
+            cur.execute(
+                'UPDATE ncf SET ultimo_numero = %s WHERE id = %s',
+                (proximo, ncf_row['id']),
+            )
+            conn.commit()
+
+            from dgii.emitter_nota_credito import emitir_ecf_nota_credito
+            dgii_cfg = _dgii_get_config(conn) or {}
+            ars_row = conn.execute('SELECT * FROM ars WHERE id = %s', (factura['ars_id'],)).fetchone()
+            ecf_row = ecf_info if isinstance(ecf_info, dict) else {}
+            ecf_result = emitir_ecf_nota_credito(
+                cfg=dgii_cfg,
+                nota_credito_id=nota_id,
+                ncf_row=ncf_row,
+                ncf_completo=ncf_completo,
+                fecha_nota=fecha_nota,
+                fecha_factura_original=factura['fecha_factura'],
+                encf_factura_original=ecf_row.get('encf'),
+                ars_row=dict(ars_row) if ars_row else {},
+                items=items_nc,
+                monto_total=total_nc,
+                codigo_modificacion=codigo_mod,
+                razon_modificacion=razon,
+            )
+            try:
+                conn.execute(
+                    '''
+                    INSERT INTO ecf_envios
+                        (factura_id, nota_credito_id, tipoe_cf, encf, track_id, codigo_seguridad,
+                         ambiente, estado, error_text, respuesta_json, xml_firmado)
+                    VALUES (NULL, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ''',
+                    (
+                        nota_id,
+                        ecf_result.get('tipoe_cf'),
+                        ecf_result.get('encf'),
+                        ecf_result.get('track_id'),
+                        ecf_result.get('codigo_seguridad'),
+                        ecf_result.get('ambiente'),
+                        ecf_result.get('estado') or ('ERROR' if not ecf_result.get('ok') else 'ENVIADO'),
+                        ecf_result.get('error'),
+                        json.dumps(ecf_result.get('respuesta') or {}, ensure_ascii=False, default=str),
+                        ecf_result.get('xml_signed'),
+                    ),
+                )
+                conn.commit()
+            except Exception as e_save:
+                print(f"⚠️ ecf_envios nota credito: {e_save}")
+
+            if ecf_result.get('ok'):
+                flash(
+                    f"Nota de crédito #{nota_id} registrada · e-NCF {ecf_result.get('encf')} · "
+                    f"TrackId {ecf_result.get('track_id')}",
+                    'success',
+                )
+            else:
+                flash(
+                    f"Nota #{nota_id} guardada; e-CF DGII: {ecf_result.get('error') or 'revisar estado'}",
+                    'warning',
+                )
+            conn.close()
+            return redirect(url_for('facturacion_nota_credito_ver', nota_id=nota_id))
+        except Exception as e:
+            try:
+                conn.rollback()
+            except Exception:
+                pass
+            flash(f'Error al crear nota de crédito: {e}', 'danger')
+            conn.close()
+            return redirect(url_for('facturacion_nota_credito', factura_id=factura_id))
+
+    pendiente = _monto_pendiente_acreditar_factura(conn, factura_id)
+    conn.close()
+    ecf_encf = ecf_info.get('encf') if isinstance(ecf_info, dict) else ''
+    return render_template(
+        'facturacion/nota_credito_form.html',
+        factura=factura,
+        lineas=lineas,
+        ecf_encf=ecf_encf,
+        pendiente=pendiente,
+        ncf_nc=ncf_nc,
+    )
+
+
+@app.route('/facturacion/nota-credito/ver/<int:nota_id>')
+@login_required
+def facturacion_nota_credito_ver(nota_id):
+    if current_user.perfil not in ('Administrador', 'Nivel 2', 'Registro de Facturas'):
+        flash('No tienes permiso.', 'warning')
+        return redirect(url_for('facturacion_menu'))
+    _ensure_facturacion_schema()
+    conn = get_db_connection()
+    nota = conn.execute(
+        '''
+        SELECT nc.*, f.id AS factura_id, f.ncf_numero AS factura_ncf, f.fecha_factura,
+               a.nombre_ars
+        FROM notas_credito nc
+        JOIN facturas f ON f.id = nc.factura_id
+        JOIN ars a ON a.id = f.ars_id
+        WHERE nc.id = %s
+        ''',
+        (nota_id,),
+    ).fetchone()
+    if not nota:
+        conn.close()
+        flash('Nota de crédito no encontrada.', 'error')
+        return redirect(url_for('facturacion_notas_credito_lista'))
+    detalle = conn.execute(
+        '''
+        SELECT ncd.*, fd.nombre_paciente, fd.descripcion_servicio, fd.fecha_servicio
+        FROM notas_credito_detalle ncd
+        JOIN facturas_detalle fd ON fd.id = ncd.facturas_detalle_id
+        WHERE ncd.nota_credito_id = %s
+        ''',
+        (nota_id,),
+    ).fetchall()
+    ecf = conn.execute(
+        'SELECT * FROM ecf_envios WHERE nota_credito_id = %s ORDER BY id DESC LIMIT 1',
+        (nota_id,),
+    ).fetchone()
+    conn.close()
+    return render_template(
+        'facturacion/nota_credito_ver.html',
+        nota=nota,
+        detalle=detalle,
+        ecf_envio=ecf,
+    )
 
 
 @app.route('/facturacion/anular-factura/<int:factura_id>', methods=['POST'])
@@ -11148,6 +11579,12 @@ def facturacion_ver_factura(factura_id):
     except Exception:
         ecf_envio = None
         ecf_motivos = []
+
+    puede_nota_credito = False
+    try:
+        puede_nota_credito, _nc_msg = _factura_puede_nota_credito(conn, factura_id)
+    except Exception:
+        puede_nota_credito = False
     
     conn.close()
     
@@ -11168,7 +11605,8 @@ def facturacion_ver_factura(factura_id):
                          centro_medico=centro_medico,
                          ecf_envio=ecf_envio,
                          ecf_motivos=ecf_motivos,
-                         ecf_timbre=ecf_timbre)
+                         ecf_timbre=ecf_timbre,
+                         puede_nota_credito=puede_nota_credito)
 
 @app.route('/facturacion/enviar-email/<int:factura_id>', methods=['POST'])
 @login_required
