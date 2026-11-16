@@ -5950,6 +5950,60 @@ def _ecf_timbre_for_factura(conn, factura_id):
         return None
 
 
+def _ecf_timbre_for_nota_credito(conn, nota_id):
+    try:
+        envio = conn.execute(
+            'SELECT * FROM ecf_envios WHERE nota_credito_id = %s ORDER BY id DESC LIMIT 1',
+            (nota_id,),
+        ).fetchone()
+        if not envio:
+            return None
+        from dgii.qr import timbre_from_envio
+        return timbre_from_envio(dict(envio))
+    except Exception as e:
+        print(f"⚠️ Timbre e-CF nota de crédito {nota_id}: {e}")
+        return None
+
+
+def _centro_medico_por_medico(conn, medico_id):
+    centro = conn.execute(
+        '''
+        SELECT c.nombre, c.direccion
+        FROM medico_centro mc
+        JOIN centros_medicos c ON mc.centro_id = c.id
+        WHERE mc.medico_id = %s AND mc.es_defecto = 1 AND mc.activo = 1 AND c.activo = 1
+        LIMIT 1
+        ''',
+        (medico_id,),
+    ).fetchone()
+    if not centro:
+        centro = conn.execute(
+            '''
+            SELECT c.nombre, c.direccion
+            FROM medico_centro mc
+            JOIN centros_medicos c ON mc.centro_id = c.id
+            WHERE mc.medico_id = %s AND mc.activo = 1 AND c.activo = 1
+            LIMIT 1
+            ''',
+            (medico_id,),
+        ).fetchone()
+    if not centro:
+        return {
+            'nombre': 'Centro Oriental de Ginecología y Obstetricia',
+            'direccion': 'Zona Oriental, República Dominicana',
+        }
+    return dict(centro)
+
+
+def _codigo_modificacion_etiqueta(codigo) -> str:
+    c = int(codigo or 0)
+    if c == 1:
+        return '1 — Anula el NCF modificado (total)'
+    if c == 3:
+        return '3 — Corrige montos del NCF (parcial)'
+    return str(c)
+
+
 def _dgii_save_config(conn, fields: dict):
     existing = conn.execute('SELECT id FROM dgii_config WHERE id = 1').fetchone()
     cols = [
@@ -9917,6 +9971,248 @@ def generar_pdf_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None,
     buffer.seek(0)
     return buffer
 
+
+def generar_pdf_nota_credito(nota, lineas, total, ncf_data=None, centro_medico=None, ecf_timbre=None):
+    """PDF de nota de crédito con el mismo estilo que la factura."""
+    from io import BytesIO
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib import colors
+    from reportlab.lib.units import inch
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.enums import TA_CENTER, TA_RIGHT
+    from reportlab.platypus import Flowable
+
+    nota = dict(nota) if nota else {}
+    lineas = [dict(x) for x in (lineas or [])]
+    buffer = BytesIO()
+    bottom = 158 if ecf_timbre else 70
+    doc = SimpleDocTemplate(
+        buffer, pagesize=letter, rightMargin=30, leftMargin=30, topMargin=25, bottomMargin=bottom
+    )
+    elements = []
+    styles = getSampleStyleSheet()
+
+    medico_nombre = nota.get('medico_nombre') or 'Dra. Shirley Ramírez'
+    medico_esp = nota.get('medico_especialidad') or ''
+    medico_ced = nota.get('medico_cedula') or ''
+    medico_exe = nota.get('medico_exequatur') or ''
+    if centro_medico:
+        centro_nombre = centro_medico.get('nombre') or ''
+        centro_dir = centro_medico.get('direccion') or ''
+    else:
+        centro_nombre = 'Centro Oriental de Ginecología y Obstetricia'
+        centro_dir = 'Zona Oriental, República Dominicana'
+
+    def agregar_footer(canvas, doc_obj):
+        canvas.saveState()
+        firma_y = 110
+        if ecf_timbre:
+            try:
+                from reportlab.lib.utils import ImageReader
+                from dgii.qr import qr_png_bytes
+                qr_img = ImageReader(BytesIO(qr_png_bytes(ecf_timbre['url'], scale=4)))
+                qr_size = 78
+                qr_x, qr_y = 40, 32
+                canvas.drawImage(qr_img, qr_x, qr_y, width=qr_size, height=qr_size, mask='auto')
+                canvas.setFont('Helvetica', 7)
+                canvas.setFillColor(colors.black)
+                line_y = qr_y - 10
+                if ecf_timbre.get('codigo_seguridad'):
+                    canvas.drawString(qr_x, line_y, f"Código de seguridad: {ecf_timbre['codigo_seguridad']}")
+                    line_y -= 9
+                if ecf_timbre.get('fecha_firma'):
+                    canvas.drawString(qr_x, line_y, f"Firma digital: {ecf_timbre['fecha_firma']}")
+            except Exception as e_draw:
+                print(f"⚠️ No se pudo dibujar QR NC: {e_draw}")
+            firma_x_start = 340
+        else:
+            firma_x_start = 60
+        firma_ancho = 200
+        canvas.setStrokeColor(colors.black)
+        canvas.setLineWidth(0.5)
+        canvas.line(firma_x_start, firma_y, firma_x_start + firma_ancho, firma_y)
+        canvas.setFont('Helvetica', 9)
+        canvas.drawString(firma_x_start, firma_y - 15, 'Dra. Shirley Ramírez')
+        footer_y = 50
+        canvas.setFont('Helvetica-Bold', 8)
+        canvas.setFillColor(colors.HexColor('#CEB0B7'))
+        canvas.drawCentredString(letter[0] / 2, footer_y + 20, medico_nombre)
+        canvas.setFont('Helvetica', 8)
+        linea2 = medico_esp
+        if medico_ced:
+            linea2 += f' | Cédula: {medico_ced}'
+        if medico_exe:
+            linea2 += f' | EXEQUATUR: {medico_exe}'
+        canvas.drawCentredString(letter[0] / 2, footer_y + 10, linea2)
+        canvas.drawCentredString(letter[0] / 2, footer_y, f'{centro_nombre}, {centro_dir}')
+        canvas.restoreState()
+
+    def formato_moneda(valor):
+        return '{:,.2f}'.format(float(valor))
+
+    class _InfoCard(Flowable):
+        def __init__(self, html, width):
+            Flowable.__init__(self)
+            self.card_width = width
+            self.inner = Paragraph(html, styles['Normal'])
+            self.pad = 8
+            self._ih = 0
+
+        def wrap(self, aw, ah):
+            _w, h = self.inner.wrap(self.card_width - 2 * self.pad, ah)
+            self._ih = h
+            self.width = self.card_width
+            self.height = max(h + 2 * self.pad, 92)
+            return self.width, self.height
+
+        def draw(self):
+            c = self.canv
+            c.setStrokeColor(colors.HexColor('#CEB0B7'))
+            c.setFillColor(colors.HexColor('#F8F0F2'))
+            c.setLineWidth(1.5)
+            c.roundRect(0, 0, self.width, self.height, 8, fill=1, stroke=1)
+            self.inner.drawOn(c, self.pad, self.height - self.pad - self._ih)
+
+    ncf_numero = nota.get('ncf_numero') or '—'
+    ncf_tipo = (ncf_data.get('tipo') if ncf_data else '') or (
+        'NOTAS DE CREDITO ELECTRONICA' if nota.get('emision_tipo') == 'ECF' else 'NOTAS DE CREDITO PAPEL'
+    )
+    subtipo = 'NOTA DE CRÉDITO ELECTRÓNICA' if nota.get('emision_tipo') == 'ECF' else 'NOTA DE CRÉDITO'
+
+    logo_path = os.path.join('static', 'logos', 'logo-dra-shirley.png')
+    if os.path.exists(logo_path):
+        header_data = [[
+            Image(logo_path, width=1 * inch, height=1 * inch),
+            Paragraph(
+                f"<para align='center'><b><font size='18' color='#CEB0B7'>NOTA DE CRÉDITO</font></b>"
+                f"<br/><font size='8' color='#ACACAD'>{subtipo}</font></para>",
+                styles['Normal'],
+            ),
+            '',
+        ]]
+        header_table = Table(header_data, colWidths=[1.2 * inch, 5.7 * inch, 1.2 * inch])
+        header_table.setStyle(TableStyle([
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('ALIGN', (0, 0), (0, 0), 'LEFT'),
+            ('ALIGN', (1, 0), (1, 0), 'CENTER'),
+        ]))
+        elements.append(header_table)
+        elements.append(Spacer(1, 0.15 * inch))
+    else:
+        title_style = ParagraphStyle(
+            'NcTitle', parent=styles['Heading1'], fontSize=18,
+            textColor=colors.HexColor('#CEB0B7'), alignment=TA_CENTER, spaceAfter=8,
+        )
+        elements.append(Paragraph('NOTA DE CRÉDITO', title_style))
+        elements.append(Spacer(1, 0.2 * inch))
+
+    ars_nombre = nota.get('nombre_ars') or 'N/A'
+    ars_rnc = nota.get('ars_rnc') or 'N/A'
+    es_senasa = 'SENASA' in str(ars_nombre).upper()
+    regimen_line = '<br/><font size="9" color="#666666"><b>REGIMEN CONTRIBUTIVO</b></font>' if es_senasa else ''
+    ref_ncf = nota.get('factura_ncf') or '—'
+    motivo = (nota.get('razon_modificacion') or '—').replace('&', '&amp;').replace('<', '&lt;')
+    cod_mod = _codigo_modificacion_etiqueta(nota.get('codigo_modificacion'))
+
+    col1_text = (
+        f"<font color='#B89BA3' size='8'><b>INFORMACIÓN</b></font><br/>"
+        f"<font size='9'><b>Fecha:</b> {formato_fecha_pdf(nota.get('fecha_nota'))}<br/>"
+        f"<b>Cliente (ARS):</b> {ars_nombre}{regimen_line}<br/>"
+        f"<b>RNC:</b> {ars_rnc}<br/>"
+        f"<b>Cód. modificación:</b> {cod_mod}<br/>"
+        f"<b>Motivo:</b> {motivo}</font>"
+    )
+    col2_text = (
+        f"<font color='#B89BA3' size='8'><b>NCF NOTA</b></font><br/>"
+        f"<font size='11' color='#CEB0B7'><b>{ncf_numero}</b></font><br/>"
+        f"<font size='9'><b>Tipo:</b> {ncf_tipo}<br/>"
+        f"<b>Modifica NCF:</b> {ref_ncf}<br/>"
+        f"<b>Factura #:</b> {nota.get('factura_id') or '—'}"
+        f" · {formato_fecha_pdf(nota.get('fecha_factura'))}</font>"
+    )
+    if ncf_data and ncf_data.get('fecha_fin'):
+        col2_text += f"<br/><font size='9'><b>Válido hasta:</b> {formato_fecha_pdf(ncf_data.get('fecha_fin'))}</font>"
+
+    col3_text = (
+        f"<font color='#B89BA3' size='8'><b>INFORMACIÓN DEL MÉDICO</b></font><br/>"
+        f"<font size='9'><b>Médico:</b> {medico_nombre}<br/>"
+        f"<font color='#666666'>{medico_esp}</font><br/>"
+        f"<b>Cédula:</b> {medico_ced or '—'}"
+    )
+    if medico_exe:
+        col3_text += f"<br/><b>Exequátur:</b> {medico_exe}"
+    col3_text += '</font>'
+
+    ancho_tabla = 8.1 * inch
+    gap_cards = 0.12 * inch
+    ancho_card = (ancho_tabla - 2 * gap_cards) / 3.0
+    info_table = Table(
+        [[
+            _InfoCard(col1_text, ancho_card), '',
+            _InfoCard(col2_text, ancho_card), '',
+            _InfoCard(col3_text, ancho_card),
+        ]],
+        colWidths=[ancho_card, gap_cards, ancho_card, gap_cards, ancho_card],
+    )
+    info_table.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 0),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+        ('TOPPADDING', (0, 0), (-1, -1), 0),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+    ]))
+    elements.append(info_table)
+    elements.append(Spacer(1, 0.2 * inch))
+
+    data = [['No.', 'PACIENTE', 'FECHA SERV.', 'SERVICIO', 'MONTO ACREDITADO']]
+    for idx, row in enumerate(lineas, 1):
+        data.append([
+            str(idx),
+            row.get('nombre_paciente') or '—',
+            formato_fecha_pdf(row.get('fecha_servicio')),
+            row.get('descripcion_servicio') or '—',
+            formato_moneda(row.get('monto') or 0),
+        ])
+    table = Table(data, colWidths=[0.45 * inch, 2.1 * inch, 0.95 * inch, 2.6 * inch, 1.1 * inch])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#CEB0B7')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('ALIGN', (1, 1), (1, -1), 'LEFT'),
+        ('ALIGN', (3, 1), (3, -1), 'LEFT'),
+        ('ALIGN', (4, 1), (4, -1), 'RIGHT'),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+    ]))
+    elements.append(table)
+    elements.append(Spacer(1, 0.25 * inch))
+
+    tot_style = ParagraphStyle(
+        'TotLabel', parent=styles['Normal'], alignment=TA_RIGHT, fontSize=10, textColor=colors.HexColor('#666666')
+    )
+    tot_big = ParagraphStyle(
+        'TotBig', parent=styles['Normal'], alignment=TA_RIGHT, fontSize=14,
+        textColor=colors.HexColor('#CEB0B7'), fontName='Helvetica-Bold',
+    )
+    tot_data = [
+        [Paragraph('<b>ITBIS:</b>', tot_style), Paragraph('*E', tot_style)],
+        [Paragraph('<b>TOTAL ACREDITADO:</b>', tot_big), Paragraph(f'<b>{formato_moneda(total)}</b>', tot_big)],
+    ]
+    tot_table = Table(tot_data, colWidths=[6.1 * inch, 2.0 * inch])
+    tot_table.setStyle(TableStyle([
+        ('LINEABOVE', (0, 1), (-1, 1), 1.5, colors.HexColor('#CEB0B7')),
+        ('TOPPADDING', (0, 1), (-1, 1), 10),
+    ]))
+    elements.append(tot_table)
+
+    doc.build(elements, onFirstPage=agregar_footer, onLaterPages=agregar_footer)
+    buffer.seek(0)
+    return buffer
+
+
 def generar_excel_factura(factura_id, ncf, fecha, pacientes, total, ncf_data=None, centro_medico=None, factura=None):
     """Generar Excel de la factura con el mismo formato que el PDF"""
     from io import BytesIO
@@ -10626,11 +10922,16 @@ def facturacion_nota_credito_ver(nota_id):
     conn = get_db_connection()
     nota = conn.execute(
         '''
-        SELECT nc.*, f.id AS factura_id, f.ncf_numero AS factura_ncf, f.fecha_factura,
-               a.nombre_ars
+        SELECT nc.*, f.id AS factura_id, f.ncf_numero AS factura_ncf, f.fecha_factura, f.medico_id,
+               a.nombre_ars, a.rnc AS ars_rnc,
+               m.nombre AS medico_nombre, m.especialidad AS medico_especialidad,
+               m.cedula AS medico_cedula, m.exequatur AS medico_exequatur,
+               n.tipo AS ncf_tipo, n.prefijo AS ncf_prefijo, n.fecha_fin AS ncf_fecha_fin
         FROM notas_credito nc
         JOIN facturas f ON f.id = nc.factura_id
         JOIN ars a ON a.id = f.ars_id
+        JOIN medicos m ON f.medico_id = m.id
+        LEFT JOIN ncf n ON nc.ncf_id = n.id
         WHERE nc.id = %s
         ''',
         (nota_id,),
@@ -10641,10 +10942,11 @@ def facturacion_nota_credito_ver(nota_id):
         return redirect(url_for('facturacion_notas_credito_lista'))
     detalle = conn.execute(
         '''
-        SELECT ncd.*, fd.nombre_paciente, fd.descripcion_servicio, fd.fecha_servicio
+        SELECT ncd.monto, fd.nombre_paciente, fd.descripcion_servicio, fd.fecha_servicio
         FROM notas_credito_detalle ncd
         JOIN facturas_detalle fd ON fd.id = ncd.facturas_detalle_id
         WHERE ncd.nota_credito_id = %s
+        ORDER BY fd.id
         ''',
         (nota_id,),
     ).fetchall()
@@ -10652,13 +10954,105 @@ def facturacion_nota_credito_ver(nota_id):
         'SELECT * FROM ecf_envios WHERE nota_credito_id = %s ORDER BY id DESC LIMIT 1',
         (nota_id,),
     ).fetchone()
+    centro_medico = _centro_medico_por_medico(conn, nota['medico_id'])
+    ecf_timbre = _ecf_timbre_for_nota_credito(conn, nota_id)
+    total = float(nota['total'] or 0)
     conn.close()
     return render_template(
         'facturacion/nota_credito_ver.html',
         nota=nota,
         detalle=detalle,
         ecf_envio=ecf,
+        centro_medico=centro_medico,
+        ecf_timbre=ecf_timbre,
+        total=total,
+        codigo_modificacion_etiqueta=_codigo_modificacion_etiqueta(nota.get('codigo_modificacion')),
     )
+
+
+@app.route('/facturacion/nota-credito/pdf/<int:nota_id>')
+@login_required
+def facturacion_nota_credito_pdf(nota_id):
+    """Descargar / imprimir PDF de nota de crédito."""
+    if current_user.perfil not in ('Administrador', 'Nivel 2', 'Registro de Facturas'):
+        flash('No tienes permiso.', 'warning')
+        return redirect(url_for('facturacion_menu'))
+    if not REPORTLAB_AVAILABLE:
+        flash('No se puede generar el PDF. ReportLab no está disponible.', 'error')
+        return redirect(url_for('facturacion_nota_credito_ver', nota_id=nota_id))
+    conn = get_db_connection()
+    try:
+        nota = conn.execute(
+            '''
+            SELECT nc.*, f.id AS factura_id, f.ncf_numero AS factura_ncf, f.fecha_factura, f.medico_id,
+                   a.nombre_ars, a.rnc AS ars_rnc,
+                   m.nombre AS medico_nombre, m.especialidad AS medico_especialidad,
+                   m.cedula AS medico_cedula, m.exequatur AS medico_exequatur
+            FROM notas_credito nc
+            JOIN facturas f ON f.id = nc.factura_id
+            JOIN ars a ON a.id = f.ars_id
+            JOIN medicos m ON f.medico_id = m.id
+            WHERE nc.id = %s
+            ''',
+            (nota_id,),
+        ).fetchone()
+        if not nota:
+            flash('Nota de crédito no encontrada.', 'error')
+            return redirect(url_for('facturacion_notas_credito_lista'))
+        lineas = conn.execute(
+            '''
+            SELECT ncd.monto, fd.nombre_paciente, fd.descripcion_servicio, fd.fecha_servicio
+            FROM notas_credito_detalle ncd
+            JOIN facturas_detalle fd ON fd.id = ncd.facturas_detalle_id
+            WHERE ncd.nota_credito_id = %s
+            ORDER BY fd.id
+            ''',
+            (nota_id,),
+        ).fetchall()
+        ncf_data = conn.execute(
+            'SELECT tipo, fecha_fin FROM ncf WHERE id = %s',
+            (nota['ncf_id'],),
+        ).fetchone()
+        centro_medico = _centro_medico_por_medico(conn, nota['medico_id'])
+        ecf_timbre = _ecf_timbre_for_nota_credito(conn, nota_id)
+        pdf_buffer = generar_pdf_nota_credito(
+            nota,
+            lineas,
+            float(nota['total'] or 0),
+            ncf_data=dict(ncf_data) if ncf_data else None,
+            centro_medico=centro_medico,
+            ecf_timbre=ecf_timbre,
+        )
+        ncf_safe = (nota.get('ncf_numero') or 'NC').replace(' ', '_')
+        nombre_archivo = f'NotaCredito_{nota_id}_NCF_{ncf_safe}.pdf'
+        return send_file(
+            pdf_buffer,
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name=nombre_archivo,
+        )
+    except Exception as e:
+        print(f'❌ Error PDF nota de crédito: {e}')
+        flash(f'Error al generar PDF: {e}', 'error')
+        return redirect(url_for('facturacion_nota_credito_ver', nota_id=nota_id))
+    finally:
+        conn.close()
+
+
+@app.route('/facturacion/nota-credito/ecf-qr/<int:nota_id>.png')
+@login_required
+def facturacion_nota_credito_ecf_qr(nota_id):
+    """QR timbre DGII para nota de crédito electrónica."""
+    conn = get_db_connection()
+    try:
+        timbre = _ecf_timbre_for_nota_credito(conn, nota_id)
+    finally:
+        conn.close()
+    if not timbre or not timbre.get('url'):
+        return ('', 404)
+    from dgii.qr import qr_png_bytes
+    from flask import Response
+    return Response(qr_png_bytes(timbre['url'], scale=5), mimetype='image/png')
 
 
 @app.route('/facturacion/anular-factura/<int:factura_id>', methods=['POST'])

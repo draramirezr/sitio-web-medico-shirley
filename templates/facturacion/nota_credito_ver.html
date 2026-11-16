@@ -1,52 +1,230 @@
 {% extends "base.html" %}
+
 {% block title %}Nota de crédito #{{ nota['id'] }}{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/facturacion-responsive.css') }}">
-<div class="container py-4" style="max-width: 900px;">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <h1 style="color: var(--primary-color); font-weight: 800;">Nota de crédito #{{ nota['id'] }}</h1>
-        <a href="{{ url_for('facturacion_notas_credito_lista') }}" class="btn btn-outline-secondary btn-sm">Listado</a>
+<style>
+    @media print {
+        .no-print, nav, .navbar, footer, .btn, button, a.btn-accion, a.btn-volver { display: none !important; }
+        @page { size: letter; margin: 0.5in; }
+        body { background: white !important; margin: 0 !important; padding: 0 !important; }
+        .factura-container {
+            box-shadow: none !important; border: none !important; border-radius: 0 !important;
+            max-width: 100% !important; margin: 0 !important; padding: 0 !important;
+        }
+        .firma-section { display: block !important; margin-top: 3rem; }
+        * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    }
+    .factura-container {
+        background: white; max-width: 900px; margin: 2rem auto; padding: 2rem;
+        box-shadow: 0 10px 50px rgba(0, 0, 0, 0.1); border-radius: 10px;
+    }
+    .factura-header {
+        display: flex; align-items: flex-start; justify-content: space-between;
+        margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid #CEB0B7;
+    }
+    .factura-logo { max-width: 120px; height: auto; }
+    .factura-title-center { flex: 1; text-align: center; padding-top: 0.5rem; }
+    .factura-title {
+        color: #CEB0B7; font-weight: 800; font-size: 2rem; margin: 0; line-height: 1.1; letter-spacing: 1px;
+    }
+    .factura-title-small { color: #ACACAD; font-size: 0.75rem; margin-top: 0.35rem; }
+    .factura-info {
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1.25rem;
+    }
+    .info-box {
+        background: linear-gradient(135deg, rgba(206, 176, 183, 0.1) 0%, rgba(242, 226, 230, 0.2) 100%);
+        border: 2px solid #CEB0B7; border-radius: 10px; padding: 1rem;
+    }
+    .info-box h6 {
+        color: #B89BA3; font-weight: 700; margin: 0 0 0.5rem 0; font-size: 0.85rem; text-transform: uppercase;
+    }
+    .info-box p { margin: 0.25rem 0; color: #333; font-weight: 600; font-size: 0.9rem; }
+    .info-box .highlight { color: #CEB0B7; font-size: 1.1rem; font-weight: 800; word-break: break-all; }
+    .tabla-factura { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+    .tabla-factura thead { background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%); color: white; }
+    .tabla-factura th { padding: 0.75rem 0.5rem; text-align: left; font-size: 0.85rem; }
+    .tabla-factura td { padding: 0.75rem 0.5rem; border-bottom: 1px solid #eee; font-size: 0.85rem; }
+    .tabla-factura .text-right { text-align: right; }
+    .totales-section { margin-top: 1.5rem; border-top: 2px solid #CEB0B7; padding-top: 1rem; }
+    .total-row { display: flex; justify-content: flex-end; padding: 0.4rem 0; font-size: 1rem; }
+    .total-row.total {
+        font-size: 1.4rem; font-weight: 800; color: #CEB0B7;
+        border-top: 2px solid #CEB0B7; padding-top: 0.75rem; margin-top: 0.5rem;
+    }
+    .total-label { width: 200px; text-align: right; margin-right: 1.5rem; font-weight: 700; }
+    .total-value { width: 120px; text-align: right; }
+    .footer-factura {
+        text-align: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #eee;
+        color: #666; font-size: 0.85rem;
+    }
+  .ecf-qr-ri { margin: 1.25rem 0 0.5rem; }
+  .ecf-qr-ri-block { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 0.35rem; }
+  .ecf-qr-ri img { width: 110px; height: 110px; }
+    .btn-accion, .btn-volver {
+        padding: 0.5rem 0.85rem; border-radius: 8px; font-weight: 600; font-size: 0.8rem;
+        text-decoration: none; display: inline-block; margin: 0 0.2rem; white-space: nowrap; color: white !important;
+    }
+    .btn-accion { background: linear-gradient(135deg, #CEB0B7 0%, #B89BA3 100%); border: none; }
+    .btn-volver { background: #ACACAD; }
+    .botones-factura-container {
+        display: flex; flex-wrap: wrap; justify-content: center; gap: 0.35rem;
+        max-width: 900px; margin: 0 auto 1.5rem auto;
+    }
+    .badge-nc {
+        background: linear-gradient(135deg, #ACACAD 0%, #9A9A9B 100%);
+        color: white; padding: 0.5rem 1.25rem; border-radius: 20px; font-weight: 700; font-size: 0.85rem;
+    }
+    .firma-section { display: none; }
+    .firma-linea { width: 200px; border-top: 1px solid #000; margin-bottom: 0.3rem; }
+    .firma-nombre { font-size: 0.85rem; font-weight: 600; }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="no-print text-center mb-3">
+        <span class="badge-nc"><i class="fas fa-undo-alt me-1"></i> NOTA DE CRÉDITO #{{ nota['id'] }}</span>
     </div>
 
-    <div class="card border-0 shadow-sm mb-3" style="border-radius: 16px;">
-        <div class="card-body">
-            <p><strong>NCF nota:</strong> {{ nota['ncf_numero'] }}</p>
-            <p><strong>Tipo emisión:</strong>
-              {% if nota.get('emision_tipo') == 'PAPEL' %}NCF en papel (B04){% else %}Electrónica (e-CF){% endif %}
-            </p>
-            <p><strong>Fecha:</strong> {{ nota['fecha_nota']|fecha_es }}</p>
-            <p><strong>Factura afectada:</strong>
-                <a href="{{ url_for('facturacion_ver_factura', factura_id=nota['factura_id']) }}">#{{ nota['factura_id'] }}</a>
-                ({{ nota['factura_ncf'] }})
-            </p>
-            <p><strong>ARS:</strong> {{ nota['nombre_ars'] }}</p>
-            <p><strong>Total acreditado:</strong> RD$ {{ nota['total']|formato_moneda }}</p>
-            <p><strong>Código modificación DGII:</strong> {{ nota['codigo_modificacion'] }}</p>
-            <p class="mb-0"><strong>Motivo:</strong> {{ nota['razon_modificacion'] }}</p>
-        </div>
+    <div class="no-print botones-factura-container">
+        <a href="{{ url_for('facturacion_notas_credito_lista') }}" class="btn-volver">
+            <i class="fas fa-arrow-left me-1"></i> Listado NC
+        </a>
+        <a href="{{ url_for('facturacion_ver_factura', factura_id=nota['factura_id']) }}" class="btn-volver">
+            <i class="fas fa-file-invoice me-1"></i> Ver factura
+        </a>
+        <a href="{{ url_for('facturacion_nota_credito_pdf', nota_id=nota['id']) }}" target="_blank" class="btn-accion">
+            <i class="fas fa-print me-1"></i> Imprimir
+        </a>
+        <a href="{{ url_for('facturacion_nota_credito_pdf', nota_id=nota['id']) }}" target="_blank" class="btn-accion">
+            <i class="fas fa-file-pdf me-1"></i> Descargar PDF
+        </a>
     </div>
 
     {% if ecf_envio %}
-    <div class="alert alert-light border">
-        <strong>e-CF</strong> {{ ecf_envio['encf'] or '—' }} · TrackId {{ ecf_envio['track_id'] or '—' }} · Estado {{ ecf_envio['estado'] or '—' }}
-        {% if ecf_envio['error_text'] %}<div class="text-danger small mt-1">{{ ecf_envio['error_text'] }}</div>{% endif %}
+    <div class="no-print alert alert-light border mb-3" style="max-width: 920px; margin: 0 auto 1rem;">
+        <strong><i class="fas fa-certificate me-1"></i> e-CF DGII</strong>
+        <div class="small text-muted mt-1">
+            eNCF: {{ ecf_envio.encf or '—' }} · TrackId: {{ ecf_envio.track_id or '—' }} · Estado: <strong>{{ ecf_envio.estado or '—' }}</strong>
+        </div>
+        {% if ecf_envio.error_text %}
+        <div class="small text-danger mt-1">{{ ecf_envio.error_text }}</div>
+        {% endif %}
+    </div>
+    {% elif nota.get('emision_tipo') == 'PAPEL' %}
+    <div class="no-print alert alert-secondary border mb-3" style="max-width: 920px; margin: 0 auto 1rem;">
+        Comprobante en <strong>papel (B04)</strong> — sin envío electrónico a DGII. Use imprimir / PDF para archivo físico.
     </div>
     {% endif %}
 
-    <h2 class="h6 text-muted text-uppercase">Detalle</h2>
-    <table class="table table-sm">
-        <thead><tr><th>Paciente</th><th>Servicio</th><th class="text-end">Monto</th></tr></thead>
-        <tbody>
-            {% for d in detalle %}
-            <tr>
-                <td>{{ d['nombre_paciente'] }}</td>
-                <td>{{ d['descripcion_servicio'] }}</td>
-                <td class="text-end">RD$ {{ d['monto']|formato_moneda }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="factura-container">
+        <div class="factura-header">
+            <img src="{{ url_for('static', filename='logos/logo-dra-shirley.png') }}" alt="Logo" class="factura-logo">
+            <div class="factura-title-center">
+                <h1 class="factura-title">NOTA DE CRÉDITO</h1>
+                <div class="factura-title-small">
+                    {% if nota.get('emision_tipo') == 'PAPEL' %}NCF PAPEL (B04){% else %}e-CF TIPO 34{% endif %}
+                    · #{{ nota['id'] }}
+                </div>
+            </div>
+            <div style="width: 120px;"></div>
+        </div>
+
+        <div class="factura-info">
+            <div class="info-box">
+                <h6>Información</h6>
+                <p><strong>Fecha:</strong> {{ nota['fecha_nota']|fecha_es }}</p>
+                <p><strong>Cliente (ARS):</strong> {{ nota['nombre_ars'] }}</p>
+                {% if nota['nombre_ars'] and ('SENASA' in (nota['nombre_ars']|upper)) %}
+                <p style="color:#666;font-weight:800;">REGIMEN CONTRIBUTIVO</p>
+                {% endif %}
+                {% if nota['ars_rnc'] %}<p><strong>RNC:</strong> {{ nota['ars_rnc'] }}</p>{% endif %}
+                <p><strong>Cód. modificación:</strong> {{ codigo_modificacion_etiqueta }}</p>
+                <p><strong>Motivo:</strong> {{ nota['razon_modificacion'] }}</p>
+            </div>
+            <div class="info-box">
+                <h6>NCF nota</h6>
+                <p class="highlight">{{ nota['ncf_numero'] }}</p>
+                {% if nota['ncf_tipo'] %}<p><strong>Tipo:</strong> {{ nota['ncf_tipo'] }}</p>{% endif %}
+                <p><strong>Modifica NCF:</strong> {{ nota['factura_ncf'] }}</p>
+                <p><strong>Factura #{{ nota['factura_id'] }}</strong> · {{ nota['fecha_factura']|fecha_es }}</p>
+                {% if nota['ncf_fecha_fin'] %}
+                <p><strong>Válido hasta:</strong> {{ nota['ncf_fecha_fin']|fecha_es }}</p>
+                {% endif %}
+            </div>
+            <div class="info-box">
+                <h6>Médico</h6>
+                <p><strong>{{ nota['medico_nombre'] }}</strong></p>
+                <p style="color:#666;font-weight:500;">{{ nota['medico_especialidad'] }}</p>
+                {% if nota['medico_cedula'] %}<p><strong>Cédula:</strong> {{ nota['medico_cedula'] }}</p>{% endif %}
+                {% if nota['medico_exequatur'] %}<p><strong>Exequátur:</strong> {{ nota['medico_exequatur'] }}</p>{% endif %}
+            </div>
+        </div>
+
+        <table class="tabla-factura">
+            <thead>
+                <tr>
+                    <th style="width:5%;">No.</th>
+                    <th style="width:28%;">Paciente</th>
+                    <th style="width:12%;">Fecha</th>
+                    <th style="width:40%;">Servicio</th>
+                    <th class="text-right" style="width:15%;">Monto acreditado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in detalle %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td><strong>{{ d['nombre_paciente'] }}</strong></td>
+                    <td>{{ d['fecha_servicio']|fecha_es }}</td>
+                    <td>{{ d['descripcion_servicio'] }}</td>
+                    <td class="text-right"><strong>{{ d['monto']|formato_moneda }}</strong></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="totales-section">
+            <div class="total-row" style="color:#666;">
+                <div class="total-label">ITBIS:</div>
+                <div class="total-value">*E</div>
+            </div>
+            <div class="total-row total">
+                <div class="total-label">TOTAL ACREDITADO:</div>
+                <div class="total-value">{{ total|formato_moneda }}</div>
+            </div>
+        </div>
+
+        <div class="firma-section">
+            <div class="firma-linea"></div>
+            <div class="firma-nombre">Dra. Shirley Ramírez</div>
+        </div>
+
+        {% if ecf_timbre %}
+        <div class="ecf-qr-ri">
+            <div class="ecf-qr-ri-block">
+                <img src="{{ url_for('facturacion_nota_credito_ecf_qr', nota_id=nota['id']) }}" alt="QR e-CF" width="110" height="110">
+                {% if ecf_timbre.codigo_seguridad %}
+                <p class="small mb-0"><strong>Código de seguridad:</strong> {{ ecf_timbre.codigo_seguridad }}</p>
+                {% endif %}
+                {% if ecf_timbre.fecha_firma %}
+                <p class="small mb-0"><strong>Firma digital:</strong> {{ ecf_timbre.fecha_firma }}</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="footer-factura">
+            <p><strong>{{ nota['medico_nombre'] }}</strong></p>
+            <p>{{ nota['medico_especialidad'] }}{% if nota['medico_cedula'] %} | Cédula: {{ nota['medico_cedula'] }}{% endif %}{% if nota['medico_exequatur'] %} | EXEQUATUR: {{ nota['medico_exequatur'] }}{% endif %}</p>
+            <p>{{ centro_medico['nombre'] }}, {{ centro_medico['direccion'] }}</p>
+        </div>
+    </div>
+
+    <div class="no-print botones-factura-container" style="margin-top: 1.5rem;">
+        <a href="{{ url_for('facturacion_nota_credito_pdf', nota_id=nota['id']) }}" target="_blank" class="btn-accion">
+            <i class="fas fa-file-pdf me-1"></i> Descargar PDF
+        </a>
+    </div>
 </div>
 {% endblock %}

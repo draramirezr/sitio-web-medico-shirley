@@ -37,8 +37,9 @@
                     <td>{{ n['nombre_ars'] }}</td>
                     <td class="text-end">{{ n['total']|formato_moneda }}</td>
                     <td><small>{{ n['encf_nc'] or '—' }}<br>{{ n['ecf_estado'] or '' }}</small></td>
-                    <td>
+                    <td class="text-nowrap">
                         <a href="{{ url_for('facturacion_nota_credito_ver', nota_id=n['id']) }}" class="btn btn-sm btn-outline-primary">Ver</a>
+                        <a href="{{ url_for('facturacion_nota_credito_pdf', nota_id=n['id']) }}" class="btn btn-sm btn-outline-secondary" title="PDF" target="_blank"><i class="fas fa-file-pdf"></i></a>
                     </td>
                 </tr>
                 {% else %}
