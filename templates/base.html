@@ -1841,7 +1841,7 @@
     {% set SHOW_SITE_FOOTER = request.endpoint in [
         'index', 'services', 'about', 'contact', 'request_appointment', 'aesthetic_treatments',
         'seo_ginecologa_santo_domingo', 'seo_ginecologo_zona_oriental', 'seo_control_embarazo',
-        'seo_chequeo_ginecologico', 'seo_jinekolojis_santo_domingo'
+        'seo_chequeo_ginecologico', 'seo_ginecologa_ars', 'seo_jinekolojis_santo_domingo'
     ] %}
     {% if SHOW_SITE_FOOTER %}
     <footer class="site-footer-cta" role="contentinfo">
@@ -1883,6 +1883,7 @@
                         <li><a href="{{ url_for('seo_ginecologa_santo_domingo') }}">Ginecóloga en Santo Domingo Este</a></li>
                         <li><a href="{{ url_for('seo_control_embarazo') }}">Control de embarazo</a></li>
                         <li><a href="{{ url_for('seo_chequeo_ginecologico') }}">Chequeo ginecológico</a></li>
+                        <li><a href="{{ url_for('seo_ginecologa_ars') }}">Ginecóloga que acepta ARS</a></li>
                         <li><a href="{{ url_for('seo_jinekolojis_santo_domingo') }}">Jinekològ (Kreyòl)</a></li>
                         <li><a href="{{ google_review_url }}" target="_blank" rel="noopener noreferrer">Reseña en Google</a></li>
                     </ul>

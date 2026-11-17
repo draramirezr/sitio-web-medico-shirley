@@ -105,4 +105,12 @@
             <image:loc>https://www.draramirez.com/static/images/dra-shirley-profesional.jpg</image:loc>
         </image:image>
     </url>
+    <url>
+        <loc>https://www.draramirez.com/ginecologa-ars-santo-domingo</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.9</priority>
+        <image:image>
+            <image:loc>https://www.draramirez.com/static/images/dra-shirley-profesional.jpg</image:loc>
+        </image:image>
+    </url>
 </urlset>

@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}Ginecóloga que acepta ARS en Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
+{% block description %}Consulta ginecológica y control prenatal con tu ARS en Santo Domingo Este: SENASA, Humano, Mapfre, Universal, Palic, Asemap, Reservas y Monumental. WhatsApp 829-740-5073.{% endblock %}
+{% block og_title %}Ginecóloga que acepta ARS en Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
+{% block og_description %}Ginecología y obstetricia con tu seguro ARS en Santo Domingo Este. Agenda en línea o por WhatsApp 829-740-5073.{% endblock %}
+{% block twitter_title %}Ginecóloga que acepta ARS en Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
+{% block twitter_description %}Ginecología y obstetricia con tu seguro ARS en Santo Domingo Este. Agenda en línea o por WhatsApp 829-740-5073.{% endblock %}
+{% block schema_page_name %}Ginecóloga que acepta ARS en Santo Domingo Este | Dra. Shirley Ramírez{% endblock %}
+{% block schema_page_description %}Ginecología y obstetricia con tu seguro ARS en Santo Domingo Este. Agenda en línea o por WhatsApp 829-740-5073.{% endblock %}
+
+{% block extra_meta %}
+<link rel="preload" as="image"
+      href="{{ url_for('static', filename='images/servicios-ginecologia-general.webp') }}"
+      fetchpriority="high"
+      type="image/webp">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "¿Puedo usar mi ARS en la consulta ginecológica?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sí. Trabajamos con SENASA, Humano, Mapfre, Universal, Palic, Asemap, Reservas y Monumental, entre otras. Confirma tu cobertura al agendar."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Mi ARS cubre el control de embarazo?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "La mayoría de los planes incluyen control prenatal, pero la cobertura varía según tu ARS y tu plan. Te ayudamos a confirmarlo al agendar."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Tengo que pagar alguna diferencia?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Depende de tu plan. Algunas coberturas pueden tener una diferencia o copago; te lo informamos antes de la consulta."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Qué hago si mi ARS no está en la lista?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Escríbenos por WhatsApp al 829-740-5073 y te confirmamos si podemos atenderte con tu seguro o las opciones disponibles."
+      }
+    }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+{% include 'partials/seo_sd_landing_styles.html' %}
+
+<section class="seo-sd-hero seo-sd-page">
+  <img
+    class="seo-sd-hero-bg"
+    src="{{ url_for('static', filename='images/servicios-ginecologia-general.webp') }}"
+    alt="Ginecóloga en Santo Domingo Este que acepta ARS — Dra. Shirley Ramírez"
+    width="1200"
+    height="800"
+    fetchpriority="high"
+    decoding="async"
+  >
+  <div class="seo-sd-hero-inner">
+    <div class="container">
+      <p class="seo-sd-lang">
+        <a href="{{ url_for('seo_ginecologa_santo_domingo') }}">← Ginecóloga en Santo Domingo</a>
+      </p>
+      <p class="seo-sd-kicker">Seguros médicos aceptados</p>
+      <p class="seo-sd-brand">Dra. Shirley Ramírez</p>
+      <h1 class="seo-sd-headline">Ginecóloga en Santo Domingo Este que acepta tu ARS</h1>
+      <p class="seo-sd-lead">
+        Puedes usar tu seguro médico en tu consulta ginecológica, chequeo preventivo o control de embarazo con la
+        Dra. Shirley Ramírez, en la Zona Oriental de Santo Domingo Este.
+      </p>
+      <div class="seo-sd-ctas">
+        <a class="seo-sd-btn seo-sd-btn--solid" href="{{ url_for('request_appointment') }}">
+          <i class="fas fa-calendar-plus" aria-hidden="true"></i> Solicitar cita
+        </a>
+        <a class="seo-sd-btn seo-sd-btn--ghost"
+           href="https://wa.me/18297405073?text=Hola,%20quiero%20agendar%20una%20cita%20de%20ginecolog%C3%ADa"
+           target="_blank" rel="noopener noreferrer">
+          <i class="fab fa-whatsapp" aria-hidden="true"></i> Consultar por WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="seo-sd-section seo-sd-page seo-sd-section--soft">
+  <div class="container seo-sd-reveal">
+    <h2 class="seo-sd-h2">ARS con las que trabajamos</h2>
+    <p class="seo-sd-copy">
+      Recibimos pacientes con las principales ARS de República Dominicana:
+    </p>
+    <ul class="seo-sd-copy">
+      <li>ARS SENASA</li>
+      <li>ARS Humano</li>
+      <li>ARS Mapfre Salud</li>
+      <li>ARS Universal</li>
+      <li>ARS Palic</li>
+      <li>ARS Asemap</li>
+      <li>ARS Reservas</li>
+      <li>ARS Monumental</li>
+    </ul>
+    <p class="seo-sd-copy mt-3">
+      Si tu ARS no aparece en la lista, escríbenos antes de agendar y te confirmamos si podemos atenderte con tu plan.
+    </p>
+  </div>
+</section>
+
+<section class="seo-sd-section seo-sd-page">
+  <div class="container seo-sd-reveal">
+    <h2 class="seo-sd-h2">¿Qué puedes atender con tu seguro?</h2>
+    <p class="seo-sd-copy">
+      La cobertura depende de tu ARS y de tu plan. En general, los seguros incluyen servicios como:
+    </p>
+    <ul class="seo-sd-copy">
+      <li>Consulta ginecológica</li>
+      <li><a href="{{ url_for('seo_chequeo_ginecologico') }}">Chequeo ginecológico preventivo</a> y Papanicolaou</li>
+      <li><a href="{{ url_for('seo_control_embarazo') }}">Control prenatal</a></li>
+      <li>Sonografías y estudios indicados en consulta</li>
+    </ul>
+    <p class="seo-sd-copy mt-3">
+      Al agendar te ayudamos a confirmar qué cubre tu plan para que no tengas sorpresas.
+    </p>
+  </div>
+</section>
+
+<section class="seo-sd-section seo-sd-page seo-sd-section--soft">
+  <div class="container seo-sd-reveal">
+    <h2 class="seo-sd-h2">Qué llevar a tu consulta</h2>
+    <ul class="seo-sd-copy">
+      <li>Tu carnet de la ARS</li>
+      <li>Tu cédula de identidad</li>
+      <li>La autorización de tu ARS, si tu plan la requiere</li>
+      <li>Estudios o resultados anteriores, si los tienes</li>
+    </ul>
+  </div>
+</section>
+
+<section class="seo-sd-section seo-sd-page">
+  <div class="container seo-sd-reveal" style="max-width: 760px;">
+    <div class="seo-sd-kicker">Preguntas frecuentes</div>
+    <h2 class="seo-sd-h2">Preguntas frecuentes sobre ARS</h2>
+    <div class="accordion seo-sd-faq mt-4" id="faqSeoArs">
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="ars1">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#arsa1" aria-expanded="true" aria-controls="arsa1">
+            ¿Puedo usar mi ARS en la consulta ginecológica?
+          </button>
+        </h3>
+        <div id="arsa1" class="accordion-collapse collapse show" aria-labelledby="ars1" data-bs-parent="#faqSeoArs">
+          <div class="accordion-body">
+            Sí. Trabajamos con SENASA, Humano, Mapfre, Universal, Palic, Asemap, Reservas y Monumental, entre otras. Confirma tu cobertura al agendar.
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="ars2">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#arsa2" aria-expanded="false" aria-controls="arsa2">
+            ¿Mi ARS cubre el control de embarazo?
+          </button>
+        </h3>
+        <div id="arsa2" class="accordion-collapse collapse" aria-labelledby="ars2" data-bs-parent="#faqSeoArs">
+          <div class="accordion-body">
+            La mayoría de los planes incluyen control prenatal, pero la cobertura varía según tu ARS y tu plan. Te ayudamos a confirmarlo al agendar.
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="ars3">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#arsa3" aria-expanded="false" aria-controls="arsa3">
+            ¿Tengo que pagar alguna diferencia?
+          </button>
+        </h3>
+        <div id="arsa3" class="accordion-collapse collapse" aria-labelledby="ars3" data-bs-parent="#faqSeoArs">
+          <div class="accordion-body">
+            Depende de tu plan. Algunas coberturas pueden tener una diferencia o copago; te lo informamos antes de la consulta.
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="ars4">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#arsa4" aria-expanded="false" aria-controls="arsa4">
+            ¿Qué hago si mi ARS no está en la lista?
+          </button>
+        </h3>
+        <div id="arsa4" class="accordion-collapse collapse" aria-labelledby="ars4" data-bs-parent="#faqSeoArs">
+          <div class="accordion-body">
+            Escríbenos por WhatsApp al 829-740-5073 y te confirmamos si podemos atenderte con tu seguro o las opciones disponibles.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="seo-sd-close seo-sd-page">
+  <div class="container seo-sd-reveal">
+    <h2>Agenda tu consulta con tu ARS</h2>
+    <p>
+      Solicita tu cita en línea o escríbenos por WhatsApp para confirmar tu cobertura.
+    </p>
+    <div class="seo-sd-ctas" style="justify-content:center;">
+      <a class="seo-sd-btn seo-sd-btn--solid" href="{{ url_for('request_appointment') }}">
+        <i class="fas fa-calendar-plus" aria-hidden="true"></i> Solicitar cita
+      </a>
+      <a class="seo-sd-btn seo-sd-btn--ghost"
+         href="https://wa.me/18297405073?text=Hola,%20quiero%20agendar%20una%20cita%20de%20ginecolog%C3%ADa"
+         target="_blank" rel="noopener noreferrer">
+        <i class="fab fa-whatsapp" aria-hidden="true"></i> Consultar por WhatsApp
+      </a>
+    </div>
+  </div>
+</section>
+
+{% include 'partials/seo_sd_reveal_script.html' %}
+{% endblock %}
