@@ -282,10 +282,36 @@
     
     <!-- Estilos Críticos Inline - Prevenir FOUC (Flash of Unstyled Content) -->
     <style>
+        /* Métricas ajustadas vía @capsizecss/metrics@4.0.0 (misma lógica que next/font) */
+        @font-face {
+            font-family: 'Playfair Display Fallback';
+            src: local('Times New Roman');
+            size-adjust: 107.023%;
+            ascent-override: 101.0997%;
+            descent-override: 23.4529%;
+            line-gap-override: 0%;
+        }
+        @font-face {
+            font-family: 'Montserrat Fallback';
+            src: local('Arial');
+            size-adjust: 118.8872%;
+            ascent-override: 81.4217%;
+            descent-override: 21.1125%;
+            line-gap-override: 0%;
+        }
+        @font-face {
+            font-family: 'Be Vietnam Pro Fallback';
+            src: local('Arial');
+            size-adjust: 110.3632%;
+            ascent-override: 90.6099%;
+            descent-override: 24.0116%;
+            line-gap-override: 0%;
+        }
+
         /* Contenido visible de inmediato (opacity:0 + loader mataban FCP/LCP en PageSpeed) */
         body {
             opacity: 1;
-            font-family: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+            font-family: "Be Vietnam Pro", "Be Vietnam Pro Fallback", system-ui, -apple-system, "Segoe UI", sans-serif;
             line-height: 1.5;
             margin: 0;
             color: #282828;
@@ -423,11 +449,6 @@
             font-family: 'Poppins';
             font-display: swap;
             src: local('Poppins');
-        }
-        @font-face {
-            font-family: 'Playfair Display';
-            font-display: swap;
-            src: local('Playfair Display');
         }
     </style>
     <style>
@@ -1277,7 +1298,7 @@
         }
 
         .site-footer-cta h2 {
-            font-family: "Playfair Display", serif !important;
+            font-family: "Playfair Display", "Playfair Display Fallback", serif !important;
             font-weight: 700 !important;
             color: #fff !important;
             font-size: clamp(1.9rem, 2.5vw, 2.2rem) !important;
@@ -1440,7 +1461,7 @@
 
         .site-footer-insurance-title {
             color: #fff !important;
-            font-family: "Playfair Display", serif !important;
+            font-family: "Playfair Display", "Playfair Display Fallback", serif !important;
             font-weight: 700 !important;
             font-size: clamp(1.15rem, 2vw, 1.45rem) !important;
             margin: 0 0 8px;

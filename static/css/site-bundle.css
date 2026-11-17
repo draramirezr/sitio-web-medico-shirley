@@ -41,11 +41,11 @@
 /* Variables de tipografía */
 :root {
     /* Tipografía para títulos - BLANKERS (alternativa: Montserrat) */
-    --font-titles: 'Montserrat', 'Blankers Regular', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    --font-titles-light: 'Montserrat', 'Blankers Light', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-titles: 'Montserrat', 'Montserrat Fallback', 'Blankers Regular', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-titles-light: 'Montserrat', 'Montserrat Fallback', 'Blankers Light', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     
     /* Tipografía para cuerpo de texto - BE VIETNAM */
-    --font-body: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-body: 'Be Vietnam Pro', 'Be Vietnam Pro Fallback', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     
     /* Pesos de fuente */
     --font-weight-light: 300;
@@ -1722,11 +1722,11 @@ h6 {
 /* Variables de tipografía */
 :root {
     /* Tipografía para títulos - BLANKERS (alternativa: Montserrat) */
-    --font-titles: 'Montserrat', 'Blankers Regular', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    --font-titles-light: 'Montserrat', 'Blankers Light', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-titles: 'Montserrat', 'Montserrat Fallback', 'Blankers Regular', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-titles-light: 'Montserrat', 'Montserrat Fallback', 'Blankers Light', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     
     /* Tipografía para cuerpo de texto - BE VIETNAM */
-    --font-body: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-body: 'Be Vietnam Pro', 'Be Vietnam Pro Fallback', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     
     /* Pesos de fuente */
     --font-weight-light: 300;
