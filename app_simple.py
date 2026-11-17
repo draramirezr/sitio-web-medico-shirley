@@ -2781,12 +2781,7 @@ def seo_ginecologa_santo_domingo():
 @app.route('/ginecologo-zona-oriental')
 def seo_ginecologo_zona_oriental():
     """Landing SEO para Zona Oriental (Santo Domingo Este)"""
-    _, physician_opening_hours_spec = preparar_horario_landing_seo()
-    return render_template(
-        'seo_ginecologo_zona_oriental.html',
-        physician_opening_hours_spec=physician_opening_hours_spec,
-        physician_area_served_extra=['Zona Oriental'],
-    )
+    return redirect(url_for('seo_ginecologa_santo_domingo'), code=301)
 
 @app.route('/control-embarazo')
 def seo_control_embarazo():
@@ -12639,7 +12634,6 @@ def api_buscar_servicio():
 @app.route('/sitemap.xml')
 def sitemap():
     """Genera sitemap.xml dinámico para SEO"""
-    from datetime import datetime
     from flask import make_response
     
     # Páginas principales (optimizadas para SEO)
@@ -12653,13 +12647,10 @@ def sitemap():
         {'path': url_for('contact'), 'priority': '0.9', 'changefreq': 'monthly'},
         {'path': url_for('request_appointment'), 'priority': '1.0', 'changefreq': 'daily'},
         {'path': url_for('seo_ginecologa_santo_domingo'), 'priority': '0.85', 'changefreq': 'weekly'},
-        {'path': url_for('seo_ginecologo_zona_oriental'), 'priority': '0.9', 'changefreq': 'weekly'},
         {'path': url_for('seo_control_embarazo'), 'priority': '0.9', 'changefreq': 'weekly'},
         {'path': url_for('seo_chequeo_ginecologico'), 'priority': '0.9', 'changefreq': 'weekly'},
         {'path': url_for('seo_jinekolojis_santo_domingo'), 'priority': '0.85', 'changefreq': 'weekly'},
     ]
-    
-    today = datetime.now().strftime('%Y-%m-%d')
     
     # XML válido (esto impacta directamente a Google Search Console)
     sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -12671,7 +12662,6 @@ def sitemap():
         loc = f"{base_url}{_canonicalize_path(url.get('path', '/'))}"
         sitemap_xml += '  <url>\n'
         sitemap_xml += f'    <loc>{loc}</loc>\n'
-        sitemap_xml += f'    <lastmod>{today}</lastmod>\n'
         sitemap_xml += f'    <changefreq>{url["changefreq"]}</changefreq>\n'
         sitemap_xml += f'    <priority>{url["priority"]}</priority>\n'
         sitemap_xml += '    <image:image>\n'
