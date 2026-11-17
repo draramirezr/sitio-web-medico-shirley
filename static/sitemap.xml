@@ -113,4 +113,12 @@
             <image:loc>https://www.draramirez.com/static/images/dra-shirley-profesional.jpg</image:loc>
         </image:image>
     </url>
+    <url>
+        <loc>https://www.draramirez.com/primera-consulta-ginecologica</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+        <image:image>
+            <image:loc>https://www.draramirez.com/static/images/dra-shirley-profesional.jpg</image:loc>
+        </image:image>
+    </url>
 </urlset>

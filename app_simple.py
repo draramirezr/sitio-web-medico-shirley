@@ -2798,6 +2798,11 @@ def seo_ginecologa_ars():
     """Landing SEO: ARS / seguros médicos aceptados"""
     return render_template('seo_ginecologa_ars.html')
 
+@app.route('/primera-consulta-ginecologica')
+def seo_primera_consulta():
+    """Landing SEO: primera consulta ginecológica"""
+    return render_template('seo_primera_consulta.html')
+
 @app.route('/jinekolojis-santo-domingo')
 def seo_jinekolojis_santo_domingo():
     """Landing en kreyòl ayisyen (público haitiano en RD)"""
@@ -12655,6 +12660,7 @@ def sitemap():
         {'path': url_for('seo_control_embarazo'), 'priority': '0.9', 'changefreq': 'weekly'},
         {'path': url_for('seo_chequeo_ginecologico'), 'priority': '0.9', 'changefreq': 'weekly'},
         {'path': url_for('seo_ginecologa_ars'), 'priority': '0.9', 'changefreq': 'monthly'},
+        {'path': url_for('seo_primera_consulta'), 'priority': '0.8', 'changefreq': 'monthly'},
         {'path': url_for('seo_jinekolojis_santo_domingo'), 'priority': '0.85', 'changefreq': 'weekly'},
     ]
     

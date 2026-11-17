@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}Primera Consulta Ginecológica: Qué Esperar | Dra. Shirley Ramírez{% endblock %}
+{% block description %}Qué pasa en tu primera consulta con la ginecóloga, cómo prepararte y qué llevar. Atención cercana en Santo Domingo Este. Agenda por WhatsApp 829-740-5073.{% endblock %}
+{% block og_title %}Primera Consulta Ginecológica: Qué Esperar | Dra. Shirley Ramírez{% endblock %}
+{% block og_description %}Qué pasa en tu primera consulta con la ginecóloga, cómo prepararte y qué llevar. Atención cercana en Santo Domingo Este. Agenda por WhatsApp 829-740-5073.{% endblock %}
+{% block twitter_title %}Primera Consulta Ginecológica: Qué Esperar | Dra. Shirley Ramírez{% endblock %}
+{% block twitter_description %}Qué pasa en tu primera consulta con la ginecóloga, cómo prepararte y qué llevar. Atención cercana en Santo Domingo Este. Agenda por WhatsApp 829-740-5073.{% endblock %}
+{% block schema_page_name %}Primera Consulta Ginecológica: Qué Esperar | Dra. Shirley Ramírez{% endblock %}
+{% block schema_page_description %}Qué pasa en tu primera consulta con la ginecóloga, cómo prepararte y qué llevar. Atención cercana en Santo Domingo Este. Agenda por WhatsApp 829-740-5073.{% endblock %}
+
+{% block extra_meta %}
+<link rel="preload" as="image"
+      href="{{ url_for('static', filename='images/servicios-ginecologia-general.webp') }}"
+      fetchpriority="high"
+      type="image/webp">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "¿La primera consulta ginecológica duele?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. La mayor parte de la consulta es una conversación. Si se necesita un examen, se hace con cuidado y explicándote cada paso. Puedes pedir que se detenga en cualquier momento."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Puedo ir acompañada?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sí. Puedes venir con tu mamá, pareja o una persona de confianza."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Siempre hacen examen interno en la primera visita?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No siempre. Depende de tu edad, del motivo de la consulta y de si ya iniciaste tu vida sexual. La doctora te lo explicará antes."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Puedo usar mi ARS en la primera consulta?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sí. Trabajamos con SENASA, Humano, Mapfre, Universal, Palic, Asemap, Reservas y Monumental. Confirma tu cobertura al agendar."
+      }
+    }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+{% include 'partials/seo_sd_landing_styles.html' %}
+
+<section class="seo-sd-hero seo-sd-page">
+  <img
+    class="seo-sd-hero-bg"
+    src="{{ url_for('static', filename='images/servicios-ginecologia-general.webp') }}"
+    alt="Primera consulta ginecológica con Dra. Shirley Ramírez en Santo Domingo Este"
+    width="1200"
+    height="800"
+    fetchpriority="high"
+    decoding="async"
+  >
+  <div class="seo-sd-hero-inner">
+    <div class="container">
+      <p class="seo-sd-lang">
+        <a href="{{ url_for('seo_ginecologa_santo_domingo') }}">← Ginecóloga en Santo Domingo</a>
+      </p>
+      <p class="seo-sd-kicker">Guía para pacientes</p>
+      <p class="seo-sd-brand">Dra. Shirley Ramírez</p>
+      <h1 class="seo-sd-headline">Tu primera consulta ginecológica: qué esperar</h1>
+      <p class="seo-sd-lead">
+        Es normal sentir nervios antes de ir a la ginecóloga por primera vez. Aquí te explicamos paso a paso qué pasa
+        en la consulta, cómo prepararte y qué llevar, para que llegues tranquila.
+      </p>
+      <div class="seo-sd-ctas">
+        <a class="seo-sd-btn seo-sd-btn--solid" href="{{ url_for('request_appointment') }}">
+          <i class="fas fa-calendar-plus" aria-hidden="true"></i> Solicitar cita
+        </a>
+        <a class="seo-sd-btn seo-sd-btn--ghost"
+           href="https://wa.me/18297405073?text=Hola,%20quiero%20agendar%20una%20cita%20de%20ginecolog%C3%ADa"
+           target="_blank" rel="noopener noreferrer">
+          <i class="fab fa-whatsapp" aria-hidden="true"></i> Consultar por WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="seo-sd-section seo-sd-page seo-sd-section--soft">
+  <div class="container seo-sd-reveal">
+    <h2 class="seo-sd-h2">¿Qué pasa en la primera consulta?</h2>
+    <ul class="seo-sd-copy">
+      <li><strong>Conversación:</strong> la doctora te pregunta por tu salud general, tu menstruación, métodos anticonceptivos, embarazos anteriores y antecedentes familiares.</li>
+      <li><strong>Tus dudas:</strong> es el momento de preguntar todo lo que te preocupe, sin vergüenza.</li>
+      <li><strong>Examen físico:</strong> según tu edad y el motivo de la consulta, puede incluir revisión de mamas y un examen ginecológico. Siempre se te explica antes y puedes pedir que se detenga.</li>
+      <li><strong>Estudios:</strong> si corresponde por tu edad o antecedentes, la doctora te indicará un Papanicolaou, sonografía u otros estudios.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="seo-sd-section seo-sd-page">
+  <div class="container seo-sd-reveal">
+    <h2 class="seo-sd-h2">¿A qué edad ir por primera vez?</h2>
+    <p class="seo-sd-copy">
+      Se recomienda una primera visita en la adolescencia, entre los 13 y 15 años. En esa edad suele ser una consulta de
+      conversación y orientación, sin examen interno. También debes ir antes si tienes dolor, menstruaciones irregulares,
+      flujo anormal o si ya iniciaste tu vida sexual.
+    </p>
+  </div>
+</section>
+
+<section class="seo-sd-section seo-sd-page seo-sd-section--soft">
+  <div class="container seo-sd-reveal">
+    <h2 class="seo-sd-h2">Cómo prepararte</h2>
+    <ul class="seo-sd-copy">
+      <li>Anota la fecha de tu última menstruación.</li>
+      <li>Haz una lista de medicamentos que tomas y de tus dudas.</li>
+      <li>Si te van a hacer Papanicolaou, evita relaciones sexuales, duchas vaginales y óvulos 48 horas antes.</li>
+      <li>Si estás con la menstruación el día de la cita, escríbenos por WhatsApp para confirmar si conviene reprogramar.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="seo-sd-section seo-sd-page">
+  <div class="container seo-sd-reveal">
+    <h2 class="seo-sd-h2">Qué llevar</h2>
+    <ul class="seo-sd-copy">
+      <li>Tu cédula de identidad</li>
+      <li>Tu carnet de ARS, si tienes seguro</li>
+      <li>Estudios o resultados anteriores, si los tienes</li>
+    </ul>
+    <p class="seo-sd-copy mt-3">
+      Trabajamos con las principales ARS. <a href="{{ url_for('seo_ginecologa_ars') }}">Consulta las ARS aceptadas</a>.
+    </p>
+  </div>
+</section>
+
+<section class="seo-sd-section seo-sd-page seo-sd-section--soft">
+  <div class="container seo-sd-reveal" style="max-width: 760px;">
+    <div class="seo-sd-kicker">Preguntas frecuentes</div>
+    <h2 class="seo-sd-h2">Preguntas frecuentes</h2>
+    <div class="accordion seo-sd-faq mt-4" id="faqSeoPrimeraConsulta">
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="pc1">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#pca1" aria-expanded="true" aria-controls="pca1">
+            ¿La primera consulta ginecológica duele?
+          </button>
+        </h3>
+        <div id="pca1" class="accordion-collapse collapse show" aria-labelledby="pc1" data-bs-parent="#faqSeoPrimeraConsulta">
+          <div class="accordion-body">
+            No. La mayor parte de la consulta es una conversación. Si se necesita un examen, se hace con cuidado y explicándote cada paso. Puedes pedir que se detenga en cualquier momento.
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="pc2">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#pca2" aria-expanded="false" aria-controls="pca2">
+            ¿Puedo ir acompañada?
+          </button>
+        </h3>
+        <div id="pca2" class="accordion-collapse collapse" aria-labelledby="pc2" data-bs-parent="#faqSeoPrimeraConsulta">
+          <div class="accordion-body">
+            Sí. Puedes venir con tu mamá, pareja o una persona de confianza.
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="pc3">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#pca3" aria-expanded="false" aria-controls="pca3">
+            ¿Siempre hacen examen interno en la primera visita?
+          </button>
+        </h3>
+        <div id="pca3" class="accordion-collapse collapse" aria-labelledby="pc3" data-bs-parent="#faqSeoPrimeraConsulta">
+          <div class="accordion-body">
+            No siempre. Depende de tu edad, del motivo de la consulta y de si ya iniciaste tu vida sexual. La doctora te lo explicará antes.
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="pc4">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#pca4" aria-expanded="false" aria-controls="pca4">
+            ¿Puedo usar mi ARS en la primera consulta?
+          </button>
+        </h3>
+        <div id="pca4" class="accordion-collapse collapse" aria-labelledby="pc4" data-bs-parent="#faqSeoPrimeraConsulta">
+          <div class="accordion-body">
+            Sí. Trabajamos con SENASA, Humano, Mapfre, Universal, Palic, Asemap, Reservas y Monumental. Confirma tu cobertura al agendar.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="seo-sd-close seo-sd-page">
+  <div class="container seo-sd-reveal">
+    <h2>Agenda tu primera consulta</h2>
+    <p>
+      Solicita tu cita en línea o escríbenos por WhatsApp. Te atendemos con calma y sin prisas.
+    </p>
+    <div class="seo-sd-ctas" style="justify-content:center;">
+      <a class="seo-sd-btn seo-sd-btn--solid" href="{{ url_for('request_appointment') }}">
+        <i class="fas fa-calendar-plus" aria-hidden="true"></i> Solicitar cita
+      </a>
+      <a class="seo-sd-btn seo-sd-btn--ghost"
+         href="https://wa.me/18297405073?text=Hola,%20quiero%20agendar%20una%20cita%20de%20ginecolog%C3%ADa"
+         target="_blank" rel="noopener noreferrer">
+        <i class="fab fa-whatsapp" aria-hidden="true"></i> Consultar por WhatsApp
+      </a>
+    </div>
+  </div>
+</section>
+
+{% include 'partials/seo_sd_reveal_script.html' %}
+{% endblock %}
