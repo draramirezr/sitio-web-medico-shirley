@@ -267,15 +267,15 @@
     {% if current_user.is_authenticated %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}?v=5.3.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/site-bundle.css') }}?v=4.3">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/site-bundle.css') }}?v=4.4">
     {% else %}
     {# Público: no bloquear FCP/LCP con Bootstrap (casi todo unused) ni bundle #}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}?v=5.3.0" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/site-bundle.css') }}?v=4.3" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/site-bundle.css') }}?v=4.4" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome-minimal.min.css') }}?v=3" media="print" onload="this.media='all'">
     <noscript>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}?v=5.3.0">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/site-bundle.css') }}?v=4.3">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/site-bundle.css') }}?v=4.4">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome-minimal.min.css') }}?v=3">
     </noscript>
     {% endif %}
